@@ -1,3 +1,17 @@
 <resources>
     <string name="app_name">MaiPlan</string>
+
+    <string name="welcome_login">Welcome To MaiPlan!</string>
+    <string name="no_account">Don\'t have an account? Sign up</string>
+    <string name="have_account">Already have an account? Log in</string>
+
+    <string name="email">Email</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+
+    <!-- content descriptions -->
+    <string name="email_icon">Email Icon</string>
+    <string name="password_icon">Password Icon</string>
 </resources>

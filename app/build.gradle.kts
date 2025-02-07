@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.compose.activity)
     implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.accompanist.systemuicontroller)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

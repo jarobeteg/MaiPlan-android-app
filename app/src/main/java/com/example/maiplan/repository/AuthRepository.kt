@@ -2,12 +2,13 @@ package com.example.maiplan.repository
 
 import com.example.maiplan.network.ApiService
 import com.example.maiplan.network.Token
-import com.example.maiplan.network.UserAuth
+import com.example.maiplan.network.UserRegister
+import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserResponse
 
 class AuthRepository(private val apiService: ApiService) {
 
-    suspend fun register(user: UserAuth): Result<UserResponse> {
+    suspend fun register(user: UserRegister): Result<UserResponse> {
         return try {
             val response = apiService.register(user)
             if (response.isSuccessful) {
@@ -20,7 +21,7 @@ class AuthRepository(private val apiService: ApiService) {
         }
     }
 
-    suspend fun login(user: UserAuth): Result<Token> {
+    suspend fun login(user: UserLogin): Result<Token> {
         return try {
             val response = apiService.login(user)
             if (response.isSuccessful) {
