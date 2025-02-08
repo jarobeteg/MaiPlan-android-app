@@ -1,8 +1,10 @@
 package com.example.maiplan.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,7 +36,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 @Composable
 fun LoginScreen(
     onLoginClick: (String, String) -> Unit,
-    toRegisterClick: () -> Unit
+    toRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit
 ) {
     val systemUiController = rememberSystemUiController()
 
@@ -44,6 +47,7 @@ fun LoginScreen(
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -72,9 +76,23 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            PasswordTextComponent(password, onPasswordChange = { password = it })
+            PasswordTextComponent(
+                password,
+                onPasswordChange = { password = it },
+                passwordVisible,
+                onTogglePasswordVisibility = { passwordVisible = !passwordVisible }
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                ClickableTextComponent(stringResource(R.string.forgot_password), onForgotPasswordClick)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             SubmitButtonComponent(stringResource(R.string.login), onButtonClicked = { onLoginClick(email, password) })
 
@@ -88,5 +106,5 @@ fun LoginScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewLogicScreen() {
-    LoginScreen(onLoginClick = { _, _ ->}, toRegisterClick = {})
+    LoginScreen(onLoginClick = { _, _ ->}, toRegisterClick = {}, onForgotPasswordClick = {})
 }

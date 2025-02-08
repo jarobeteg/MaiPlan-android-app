@@ -66,7 +66,8 @@ class MainActivity : AppCompatActivity() {
                         val user = UserLogin(email, password)
                         viewModel.login(user)
                     },
-                    toRegisterClick = { isRegisterScreen.value = true }
+                    toRegisterClick = { isRegisterScreen.value = true },
+                    onForgotPasswordClick = { /* navigate to change password screen */}
                 )
             }
         }
