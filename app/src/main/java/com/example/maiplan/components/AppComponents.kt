@@ -78,6 +78,7 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
 @Composable
 fun PasswordTextComponent(
     password: String,
+    label: String,
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit
@@ -85,7 +86,7 @@ fun PasswordTextComponent(
     OutlinedTextField(
         value = password,
         onValueChange = onPasswordChange,
-        label = { Text(stringResource(R.string.password)) },
+        label = { Text(label) },
         leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.password_icon)) },
         trailingIcon = { IconButton(onClick = onTogglePasswordVisibility) {
           Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,

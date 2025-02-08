@@ -78,6 +78,7 @@ fun LoginScreen(
 
             PasswordTextComponent(
                 password,
+                stringResource(R.string.password),
                 onPasswordChange = { password = it },
                 passwordVisible,
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible }

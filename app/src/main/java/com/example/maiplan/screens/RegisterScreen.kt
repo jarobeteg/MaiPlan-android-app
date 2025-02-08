@@ -83,6 +83,7 @@ fun RegisterScreen(
 
             PasswordTextComponent(
                 password,
+                stringResource(R.string.password),
                 onPasswordChange = { password = it },
                 passwordVisible,
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible }
@@ -92,6 +93,7 @@ fun RegisterScreen(
 
             PasswordTextComponent(
                 passwordAgain,
+                stringResource(R.string.password_again),
                 onPasswordChange = { passwordAgain = it },
                 passwordAgainVisible,
                 onTogglePasswordVisibility = { passwordAgainVisible = !passwordAgainVisible }
