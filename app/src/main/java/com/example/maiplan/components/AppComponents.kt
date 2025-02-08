@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -34,7 +35,7 @@ fun HeadingTextComponent(text: String) {
         text = text,
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0xFFFC887A)
+        color = Color(0xFF4A6583)
     )
 }
 
@@ -47,7 +48,7 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
             interactionSource = interactionSource,
             indication = null
         ) { onTextClicked() },
-        color = Color(0xFFFC887A),
+        color = Color(0xFF4A6583),
         fontWeight = FontWeight.Medium
     )
 }
@@ -59,6 +60,17 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
         onValueChange = onEmailChange,
         label = { Text(stringResource(R.string.email)) },
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
+        modifier = Modifier.fillMaxWidth()
+    )
+}
+
+@Composable
+fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = username,
+        onValueChange = onUsernameChange,
+        label = { Text(stringResource(R.string.username)) },
+        leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -91,7 +103,7 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50.dp)),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFC887A))
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A6583))
     ) {
         Text(value, fontSize = 18.sp)
     }

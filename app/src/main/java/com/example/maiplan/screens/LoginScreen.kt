@@ -54,7 +54,7 @@ fun LoginScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFFFFD89B), Color(0xFFFC887A))
+                    colors = listOf(Color(0xFF8A9DB2), Color(0xFF4A6583))
                 )
             ),
         contentAlignment = Alignment.Center
