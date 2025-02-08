@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -60,7 +61,14 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
         onValueChange = onEmailChange,
         label = { Text(stringResource(R.string.email)) },
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color(0xFFFFFFFF),
+            focusedContainerColor = Color(0xFFFFFFFF),
+            focusedIndicatorColor = Color(0xFF4A6583),
+            focusedLabelColor = Color(0xFF4A6583),
+            cursorColor = Color(0xFF4A6583),
+        )
     )
 }
 
@@ -71,7 +79,14 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
         onValueChange = onUsernameChange,
         label = { Text(stringResource(R.string.username)) },
         leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color(0xFFFFFFFF),
+            focusedContainerColor = Color(0xFFFFFFFF),
+            focusedIndicatorColor = Color(0xFF4A6583),
+            focusedLabelColor = Color(0xFF4A6583),
+            cursorColor = Color(0xFF4A6583)
+        )
     )
 }
 
@@ -93,7 +108,14 @@ fun PasswordTextComponent(
               contentDescription = stringResource(R.string.toggle_password_visibility))
         } },
         visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = Color(0xFFFFFFFF),
+            focusedContainerColor = Color(0xFFFFFFFF),
+            focusedIndicatorColor = Color(0xFF4A6583),
+            focusedLabelColor = Color(0xFF4A6583),
+            cursorColor = Color(0xFF4A6583)
+        )
     )
 }
 
