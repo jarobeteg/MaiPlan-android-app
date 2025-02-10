@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Email
@@ -24,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -58,7 +60,9 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
 fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
     OutlinedTextField(
         value = email,
-        onValueChange = onEmailChange,
+        onValueChange = { newEmail ->
+            onEmailChange(newEmail.filter { !it.isWhitespace() })
+        },
         label = { Text(stringResource(R.string.email)) },
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
         modifier = Modifier.fillMaxWidth(),
@@ -68,6 +72,10 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
             focusedIndicatorColor = Color(0xFF4A6583),
             focusedLabelColor = Color(0xFF4A6583),
             cursorColor = Color(0xFF4A6583),
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Email,
+            autoCorrectEnabled = false
         )
     )
 }
@@ -76,7 +84,9 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
 fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
     OutlinedTextField(
         value = username,
-        onValueChange = onUsernameChange,
+        onValueChange = { newUsername ->
+            onUsernameChange(newUsername.filter { !it.isWhitespace() })
+        },
         label = { Text(stringResource(R.string.username)) },
         leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
         modifier = Modifier.fillMaxWidth(),
@@ -86,6 +96,10 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
             focusedIndicatorColor = Color(0xFF4A6583),
             focusedLabelColor = Color(0xFF4A6583),
             cursorColor = Color(0xFF4A6583)
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Text,
+            autoCorrectEnabled = false
         )
     )
 }
@@ -100,7 +114,9 @@ fun PasswordTextComponent(
 ) {
     OutlinedTextField(
         value = password,
-        onValueChange = onPasswordChange,
+        onValueChange = { newPassword ->
+            onPasswordChange(newPassword.filter { !it.isWhitespace() })
+        },
         label = { Text(label) },
         leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.password_icon)) },
         trailingIcon = { IconButton(onClick = onTogglePasswordVisibility) {
@@ -115,6 +131,10 @@ fun PasswordTextComponent(
             focusedIndicatorColor = Color(0xFF4A6583),
             focusedLabelColor = Color(0xFF4A6583),
             cursorColor = Color(0xFF4A6583)
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Password,
+            autoCorrectEnabled = false
         )
     )
 }
