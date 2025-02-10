@@ -51,6 +51,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             BackHandler(enabled = isRegisterScreen.value) {
                 isRegisterScreen.value = false // on back pressed switches to login screen
+                viewModel.clearErrors()
             }
 
             if (isRegisterScreen.value) {
@@ -60,7 +61,9 @@ class MainActivity : AppCompatActivity() {
                         val user = UserRegister(email, username, password, passwordAgain)
                         viewModel.register(user)
                     },
-                    onBackToLogin = { isRegisterScreen.value = false }
+                    onBackToLogin = {
+                        isRegisterScreen.value = false
+                        viewModel.clearErrors() }
                 )
             } else {
                 LoginScreen(
@@ -69,7 +72,9 @@ class MainActivity : AppCompatActivity() {
                         val user = UserLogin(email, password)
                         viewModel.login(user)
                     },
-                    toRegisterClick = { isRegisterScreen.value = true },
+                    toRegisterClick = {
+                        isRegisterScreen.value = true
+                        viewModel.clearErrors() },
                     onForgotPasswordClick = { /* navigate to change password screen */},
                 )
             }
@@ -88,6 +93,7 @@ class MainActivity : AppCompatActivity() {
                 is AuthRepository.Result.Error -> {
                     Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
+                is AuthRepository.Result.Idle -> {}
             }
         })
 
@@ -101,6 +107,7 @@ class MainActivity : AppCompatActivity() {
                 is AuthRepository.Result.Error -> {
                     Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
+                is AuthRepository.Result.Idle -> {}
             }
         })
     }
