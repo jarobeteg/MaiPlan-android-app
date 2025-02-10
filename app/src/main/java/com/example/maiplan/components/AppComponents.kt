@@ -61,7 +61,9 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
     OutlinedTextField(
         value = email,
         onValueChange = { newEmail ->
-            onEmailChange(newEmail.filter { !it.isWhitespace() })
+            if (newEmail.length <= 64) {
+                onEmailChange(newEmail.filter { !it.isWhitespace() })
+            }
         },
         label = { Text(stringResource(R.string.email)) },
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
@@ -85,7 +87,9 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
     OutlinedTextField(
         value = username,
         onValueChange = { newUsername ->
-            onUsernameChange(newUsername.filter { !it.isWhitespace() })
+            if (newUsername.length <= 32) {
+                onUsernameChange(newUsername.filter { !it.isWhitespace() })
+            }
         },
         label = { Text(stringResource(R.string.username)) },
         leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
@@ -115,7 +119,9 @@ fun PasswordTextComponent(
     OutlinedTextField(
         value = password,
         onValueChange = { newPassword ->
-            onPasswordChange(newPassword.filter { !it.isWhitespace() })
+            if (newPassword.length <= 64) {
+                onPasswordChange(newPassword.filter { !it.isWhitespace() })
+            }
         },
         label = { Text(label) },
         leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.password_icon)) },
