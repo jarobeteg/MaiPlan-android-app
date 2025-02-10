@@ -8,7 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.GET
 
 data class Token(@SerializedName("access_token") val accessToken: String, @SerializedName("token_type") val tokenType: String)
-data class UserRegister(val email: String, val username: String, val password: String, val passwordAgain: String)
+data class UserRegister(val email: String, val username: String, val password: String, @SerializedName("password_again") val passwordAgain: String)
 data class UserLogin(val email: String, val password: String)
 data class UserResponse(@SerializedName("user_id") val id: Int, val email: String, val username: String)
 
