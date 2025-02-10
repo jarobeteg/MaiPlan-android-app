@@ -131,3 +131,13 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
         Text(value, fontSize = 18.sp)
     }
 }
+
+@Composable
+fun ErrorMessageComponent(value: String) {
+    Text(
+        text = value,
+        color = Color.Red,
+        fontSize = 14.sp,
+        fontWeight = FontWeight.Bold
+    )
+}

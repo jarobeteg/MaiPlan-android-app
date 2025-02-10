@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.retrofit.gson)
     implementation(libs.gson)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.runtime.livedata)
     testImplementation(libs.junit)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)

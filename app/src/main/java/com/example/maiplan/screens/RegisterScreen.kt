@@ -105,7 +105,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClickableTextComponent(stringResource(R.string.no_account), onBackToLogin)
+            ClickableTextComponent(stringResource(R.string.have_account), onBackToLogin)
         }
     }
 }

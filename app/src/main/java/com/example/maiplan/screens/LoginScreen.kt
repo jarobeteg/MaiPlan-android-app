@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -28,13 +29,17 @@ import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.ClickableTextComponent
 import com.example.maiplan.components.EmailTextComponent
+import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
+import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.viewmodel.AuthViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun LoginScreen(
+    viewModel: AuthViewModel? = null,
     onLoginClick: (String, String) -> Unit,
     toRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit
@@ -45,6 +50,7 @@ fun LoginScreen(
         systemUiController.setStatusBarColor(color = Color.Transparent, darkIcons = false)
     }
 
+    val loginResult by viewModel!!.loginResult.observeAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -96,6 +102,24 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             SubmitButtonComponent(stringResource(R.string.login), onButtonClicked = { onLoginClick(email, password) })
+
+            if (loginResult is AuthRepository.Result.Failure) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val error = loginResult as AuthRepository.Result.Failure
+                val code = error.errorCode
+
+                val errorMessageId = when (code) {
+                    1 -> R.string.login_error_1
+                    2 -> R.string.login_error_2
+                    3 -> R.string.login_error_3
+                    4 -> R.string.login_error_4
+                    5 -> R.string.login_error_5
+                    else -> R.string.login_error_default
+                }
+
+                val errorMessage = stringResource(errorMessageId)
+                ErrorMessageComponent(errorMessage)
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 

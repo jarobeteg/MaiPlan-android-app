@@ -7,6 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.home.HomeActivity
@@ -62,12 +63,13 @@ class MainActivity : AppCompatActivity() {
                 )
             } else {
                 LoginScreen(
+                    viewModel = viewModel,
                     onLoginClick = { email, password ->
                         val user = UserLogin(email, password)
                         viewModel.login(user)
                     },
                     toRegisterClick = { isRegisterScreen.value = true },
-                    onForgotPasswordClick = { /* navigate to change password screen */}
+                    onForgotPasswordClick = { /* navigate to change password screen */},
                 )
             }
         }
@@ -81,8 +83,9 @@ class MainActivity : AppCompatActivity() {
                     startActivity(Intent(this, HomeActivity::class.java))
                     finish()
                 }
+                is AuthRepository.Result.Failure -> {}
                 is AuthRepository.Result.Error -> {
-                    println("Login failed: ${result.exception.message}")
+                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -92,10 +95,10 @@ class MainActivity : AppCompatActivity() {
                 is AuthRepository.Result.Success -> {
                     Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
                     isRegisterScreen.value = false
-
                 }
+                is AuthRepository.Result.Failure -> {}
                 is AuthRepository.Result.Error -> {
-                    println("Registration failed: ${result.exception.message}")
+                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
             }
         })

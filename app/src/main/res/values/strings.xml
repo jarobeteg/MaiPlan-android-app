@@ -19,4 +19,19 @@
     <string name="password_icon">Password Icon</string>
     <string name="username_icon">Username Icon</string>
     <string name="toggle_password_visibility">Toggle Password Visibility</string>
+    
+    <!-- login error messages -->
+    <string name="login_error_1">Email field cannot be empty!</string>
+    <string name="login_error_2">Invalid email format!</string>
+    <string name="login_error_3">Password field cannot be empty!</string>
+    <string name="login_error_4">Email is not yet registered!</string>
+    <string name="login_error_5">Incorrect password!</string>
+    <string name="login_error_default">Incorrect credentials! Please try again.</string>
+
+    <!-- register error messages -->
+    <string name="register_error_1">Email is already taken!</string>
+    <string name="register_error_2">Username is already taken!</string>
+    <string name="register_error_default">Registration failed! Please try again.</string>
+
+    <string name="unknown_error">Unknown error! Please try again.</string>
 </resources>

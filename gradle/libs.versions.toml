@@ -19,6 +19,7 @@ material3 = "1.3.1"
 materialIcons = "1.7.7"
 lifecycleRuntimeCompose = "2.8.7"
 accompanist = "0.31.1-alpha"
+runtimeLivedata = "1.7.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -40,6 +41,7 @@ compose-activity = { module = "androidx.activity:activity-compose", version.ref 
 material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIcons" }
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
