@@ -55,8 +55,9 @@ class MainActivity : AppCompatActivity() {
 
             if (isRegisterScreen.value) {
                 RegisterScreen(
-                    onRegisterClick = { email, username, password ->
-                        val user = UserRegister(email, username, password)
+                    viewModel = viewModel,
+                    onRegisterClick = { email, username, password, passwordAgain ->
+                        val user = UserRegister(email, username, password, passwordAgain)
                         viewModel.register(user)
                     },
                     onBackToLogin = { isRegisterScreen.value = false }
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity() {
         viewModel.registerResult.observe(this, Observer { result ->
             when (result) {
                 is AuthRepository.Result.Success -> {
-                    Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
                     isRegisterScreen.value = false
                 }
                 is AuthRepository.Result.Failure -> {}

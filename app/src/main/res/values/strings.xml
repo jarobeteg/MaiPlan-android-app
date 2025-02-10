@@ -14,6 +14,8 @@
     <string name="login">Login</string>
     <string name="register">Register</string>
 
+    <string name="register_success">Registration successful!</string>
+
     <!-- content descriptions -->
     <string name="email_icon">Email Icon</string>
     <string name="password_icon">Password Icon</string>
@@ -29,8 +31,15 @@
     <string name="login_error_default">Incorrect credentials! Please try again.</string>
 
     <!-- register error messages -->
-    <string name="register_error_1">Email is already taken!</string>
-    <string name="register_error_2">Username is already taken!</string>
+    <string name="register_error_1">Email field cannot be empty!</string>
+    <string name="register_error_2">Invalid email format!</string>
+    <string name="register_error_3">Email is already taken!</string>
+    <string name="register_error_4">Username field cannot be empty!</string>
+    <string name="register_error_5">Username is already taken!</string>
+    <string name="register_error_6">Password field cannot be empty!</string>
+    <string name="register_error_7">Password is not strong enough!</string>
+    <string name="register_error_8">Password again field cannot be empty!</string>
+    <string name="register_error_9">Passwords do not match!</string>
     <string name="register_error_default">Registration failed! Please try again.</string>
 
     <string name="unknown_error">Unknown error! Please try again.</string>
