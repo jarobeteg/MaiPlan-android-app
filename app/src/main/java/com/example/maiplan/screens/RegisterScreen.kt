@@ -92,7 +92,8 @@ fun RegisterScreen(
                 stringResource(R.string.password),
                 onPasswordChange = { password = it },
                 passwordVisible,
-                onTogglePasswordVisibility = { passwordVisible = !passwordVisible }
+                onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
+                shouldIndicatorBeVisible = true
             )
 
             Spacer(modifier = Modifier.height(8.dp))

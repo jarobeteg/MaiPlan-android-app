@@ -1,8 +1,13 @@
 package com.example.maiplan.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,7 +24,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -114,35 +121,114 @@ fun PasswordTextComponent(
     label: String,
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
-    onTogglePasswordVisibility: () -> Unit
+    onTogglePasswordVisibility: () -> Unit,
+    shouldIndicatorBeVisible: Boolean = false
 ) {
-    OutlinedTextField(
-        value = password,
-        onValueChange = { newPassword ->
-            if (newPassword.length <= 64) {
-                onPasswordChange(newPassword.filter { !it.isWhitespace() })
-            }
-        },
-        label = { Text(label) },
-        leadingIcon = { Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.password_icon)) },
-        trailingIcon = { IconButton(onClick = onTogglePasswordVisibility) {
-          Icon(imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
-              contentDescription = stringResource(R.string.toggle_password_visibility))
-        } },
-        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-        modifier = Modifier.fillMaxWidth(),
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFFFFFFF),
-            focusedContainerColor = Color(0xFFFFFFFF),
-            focusedIndicatorColor = Color(0xFF4A6583),
-            focusedLabelColor = Color(0xFF4A6583),
-            cursorColor = Color(0xFF4A6583)
-        ),
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password,
-            autoCorrectEnabled = false
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Column {
+        OutlinedTextField(
+            value = password,
+            onValueChange = { newPassword ->
+                if (newPassword.length <= 64) {
+                    onPasswordChange(newPassword.filter { !it.isWhitespace() })
+                }
+            },
+            label = { Text(label) },
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.password_icon)
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = onTogglePasswordVisibility) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = stringResource(R.string.toggle_password_visibility)
+                    )
+                }
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            interactionSource = interactionSource,
+            colors = TextFieldDefaults.colors(
+                unfocusedContainerColor = Color(0xFFFFFFFF),
+                focusedContainerColor = Color(0xFFFFFFFF),
+                focusedIndicatorColor = Color(0xFF4A6583),
+                focusedLabelColor = Color(0xFF4A6583),
+                cursorColor = Color(0xFF4A6583)
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password,
+                autoCorrectEnabled = false
+            )
         )
-    )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (shouldIndicatorBeVisible) {
+            PasswordStrengthBar(password, isFocused)
+        } else {
+            PasswordStrengthBar(password, false)
+        }
+    }
+}
+
+@Composable
+fun PasswordStrengthBar(password: String, isFocused: Boolean) {
+    if (isFocused) {
+        val score = listOf(
+            password.length >= 8,
+            password.any { it.isLowerCase() },
+            password.any { it.isUpperCase() },
+            password.any { it.isDigit() },
+            password.any { it in "!_@#$?" }
+        ).count { it }
+
+        val strengthColors = listOf(
+            Color(0xFFD32F2F),
+            Color(0xFFF57C00),
+            Color(0xFFFBC02D),
+            Color(0xFF388E3C),
+            Color(0xFF1976D2)
+        )
+
+        val strengthLabels = listOf(
+            stringResource(R.string.very_weak),
+            stringResource(R.string.weak),
+            stringResource(R.string.medium),
+            stringResource(R.string.strong),
+            stringResource(R.string.very_strong)
+        )
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+            ) {
+                val progress = (size.width * (score / 5f)).coerceIn(0f, size.width)
+                drawRect(
+                    color = Color(0xFFB0BEC5),
+                    size = size
+                )
+                drawRect(
+                    color = strengthColors[score.coerceIn(0, 4)],
+                    size = androidx.compose.ui.geometry.Size(progress, size.height)
+                )
+            }
+            Text(
+                text = strengthLabels[score.coerceIn(0, 4)],
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = strengthColors[score.coerceIn(0, 4)],
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
 }
 
 @Composable
