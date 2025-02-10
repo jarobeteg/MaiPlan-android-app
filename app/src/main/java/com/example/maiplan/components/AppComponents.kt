@@ -166,8 +166,6 @@ fun PasswordTextComponent(
             )
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         if (shouldIndicatorBeVisible) {
             PasswordStrengthBar(password, isFocused)
         } else {
@@ -179,6 +177,7 @@ fun PasswordTextComponent(
 @Composable
 fun PasswordStrengthBar(password: String, isFocused: Boolean) {
     if (isFocused) {
+        Spacer(modifier = Modifier.height(8.dp))
         val score = listOf(
             password.length >= 8,
             password.any { it.isLowerCase() },
@@ -210,7 +209,7 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
             ) {
-                val progress = (size.width * (score / 5f)).coerceIn(0f, size.width)
+                val progress = (size.width * ((score + 1) / 5f)).coerceIn(0f, size.width)
                 drawRect(
                     color = Color(0xFFB0BEC5),
                     size = size
