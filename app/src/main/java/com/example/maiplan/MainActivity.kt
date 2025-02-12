@@ -14,7 +14,9 @@ import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserRegister
+import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.screens.ForgotPasswordScreen
 import com.example.maiplan.screens.LoginScreen
 import com.example.maiplan.screens.RegisterScreen
 import com.example.maiplan.utils.SessionManager
@@ -26,6 +28,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
     private var isRegisterScreen = mutableStateOf(false)
+    private var isForgotPasswordScreen = mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +57,11 @@ class MainActivity : AppCompatActivity() {
                 viewModel.clearErrors()
             }
 
+            BackHandler (enabled = isForgotPasswordScreen.value) {
+                isForgotPasswordScreen.value = false // on back pressed switches to login screen
+                viewModel.clearErrors()
+            }
+
             if (isRegisterScreen.value) {
                 RegisterScreen(
                     viewModel = viewModel,
@@ -65,6 +73,18 @@ class MainActivity : AppCompatActivity() {
                         isRegisterScreen.value = false
                         viewModel.clearErrors() }
                 )
+            } else if (isForgotPasswordScreen.value) {
+                ForgotPasswordScreen(
+                    viewModel = viewModel,
+                    onResetClick = { email, password, passwordAgain ->
+                        val user = UserResetPassword(email, password, passwordAgain)
+                        viewModel.resetPassword(user)
+                    },
+                    onBackToLogin = {
+                        isForgotPasswordScreen.value = false
+                        viewModel.clearErrors()
+                    }
+                )
             } else {
                 LoginScreen(
                     viewModel = viewModel,
@@ -74,8 +94,12 @@ class MainActivity : AppCompatActivity() {
                     },
                     toRegisterClick = {
                         isRegisterScreen.value = true
-                        viewModel.clearErrors() },
-                    onForgotPasswordClick = { /* navigate to change password screen */},
+                        viewModel.clearErrors()
+                    },
+                    onForgotPasswordClick = {
+                        isForgotPasswordScreen.value = true
+                        viewModel.clearErrors()
+                    }
                 )
             }
         }
@@ -87,6 +111,7 @@ class MainActivity : AppCompatActivity() {
                 is AuthRepository.Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
                     startActivity(Intent(this, HomeActivity::class.java))
+                    Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 is AuthRepository.Result.Failure -> {}
@@ -100,8 +125,26 @@ class MainActivity : AppCompatActivity() {
         viewModel.registerResult.observe(this, Observer { result ->
             when (result) {
                 is AuthRepository.Result.Success -> {
+                    sessionManager.saveAuthToken(result.data.accessToken)
+                    startActivity(Intent(this, HomeActivity::class.java))
                     Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
-                    isRegisterScreen.value = false
+                    finish()
+                }
+                is AuthRepository.Result.Failure -> {}
+                is AuthRepository.Result.Error -> {
+                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
+                }
+                is AuthRepository.Result.Idle -> {}
+            }
+        })
+
+        viewModel.resetPasswordResult.observe(this, Observer { result ->
+            when (result) {
+                is AuthRepository.Result.Success -> {
+                    sessionManager.saveAuthToken(result.data.accessToken)
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    Toast.makeText(this, getString(R.string.reset_password_success), Toast.LENGTH_SHORT).show()
+                    finish()
                 }
                 is AuthRepository.Result.Failure -> {}
                 is AuthRepository.Result.Error -> {

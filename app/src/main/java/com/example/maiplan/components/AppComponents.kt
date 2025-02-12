@@ -178,13 +178,23 @@ fun PasswordTextComponent(
 fun PasswordStrengthBar(password: String, isFocused: Boolean) {
     if (isFocused) {
         Spacer(modifier = Modifier.height(8.dp))
-        val score = listOf(
-            password.length >= 8,
-            password.any { it.isLowerCase() },
-            password.any { it.isUpperCase() },
-            password.any { it.isDigit() },
-            password.any { it in "!_@#$?" }
+
+        val hasMinLength = password.length >= 8
+        val hasLowerCase = password.any { it.isLowerCase() }
+        val hasUpperCase = password.any { it.isUpperCase() }
+        val hasDigit = password.any { it.isDigit() }
+        val hasSpecialChar = password.any { it in "!_@#$?" }
+
+        val rawScore = listOf(
+            hasMinLength,
+            hasLowerCase,
+            hasUpperCase,
+            hasDigit,
+            hasSpecialChar
         ).count { it }
+
+        val score = (rawScore - 1).coerceAtLeast(0)
+
 
         val strengthColors = listOf(
             Color(0xFFD32F2F),
@@ -209,7 +219,7 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
             ) {
-                val progress = (size.width * ((score + 1) / 5f)).coerceIn(0f, size.width)
+                val progress = (size.width * (score / 4f)).coerceIn(0f, size.width)
                 drawRect(
                     color = Color(0xFFB0BEC5),
                     size = size

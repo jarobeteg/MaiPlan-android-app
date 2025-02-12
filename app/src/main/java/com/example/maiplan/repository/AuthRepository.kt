@@ -4,13 +4,14 @@ import com.example.maiplan.network.ApiService
 import com.example.maiplan.network.Token
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserLogin
+import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.network.UserResponse
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 
 class AuthRepository(private val apiService: ApiService) {
 
-    suspend fun register(user: UserRegister): Result<UserResponse> {
+    suspend fun register(user: UserRegister): Result<Token> {
         return try {
             val response = apiService.register(user)
             if (response.isSuccessful) {
@@ -40,6 +41,23 @@ class AuthRepository(private val apiService: ApiService) {
                 Result.Failure(errorCode)
             }
         } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun resetPassword(user: UserResetPassword): Result<Token> {
+        return try {
+            val response = apiService.resetPassword(user)
+            if (response.isSuccessful) {
+                Result.Success(response.body()!!)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val json = Gson().fromJson(errorBody, JsonObject::class.java)
+                val errorDetail = json.getAsJsonObject("detail")
+                val errorCode = errorDetail.get("code").asInt
+                Result.Failure(errorCode)
+            }
+        } catch (e: Exception){
             Result.Error(e)
         }
     }
