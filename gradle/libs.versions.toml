@@ -20,6 +20,7 @@ materialIcons = "1.7.7"
 lifecycleRuntimeCompose = "2.8.7"
 accompanist = "0.31.1-alpha"
 runtimeLivedata = "1.7.7"
+androidx-navigation-compose = "2.8.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation-compose" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
