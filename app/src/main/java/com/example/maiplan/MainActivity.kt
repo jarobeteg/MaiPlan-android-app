@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.network.RetrofitClient
+import com.example.maiplan.network.Token
 import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserResetPassword
@@ -52,45 +53,39 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupComposeUI() {
         setContent {
-            BackHandler(enabled = isRegisterScreen.value) {
+            BackHandler(enabled = isRegisterScreen.value || isForgotPasswordScreen.value) {
                 isRegisterScreen.value = false // on back pressed switches to login screen
-                viewModel.clearErrors()
-            }
-
-            BackHandler (enabled = isForgotPasswordScreen.value) {
                 isForgotPasswordScreen.value = false // on back pressed switches to login screen
                 viewModel.clearErrors()
             }
 
-            if (isRegisterScreen.value) {
-                RegisterScreen(
+            when {
+                isRegisterScreen.value -> RegisterScreen(
                     viewModel = viewModel,
                     onRegisterClick = { email, username, password, passwordAgain ->
-                        val user = UserRegister(email, username, password, passwordAgain)
-                        viewModel.register(user)
+                        viewModel.register(UserRegister(email, username, password, passwordAgain))
                     },
                     onBackToLogin = {
                         isRegisterScreen.value = false
-                        viewModel.clearErrors() }
+                        viewModel.clearErrors()
+                    }
                 )
-            } else if (isForgotPasswordScreen.value) {
-                ForgotPasswordScreen(
+
+                isForgotPasswordScreen.value -> ForgotPasswordScreen(
                     viewModel = viewModel,
                     onResetClick = { email, password, passwordAgain ->
-                        val user = UserResetPassword(email, password, passwordAgain)
-                        viewModel.resetPassword(user)
+                        viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
                     },
                     onBackToLogin = {
                         isForgotPasswordScreen.value = false
                         viewModel.clearErrors()
                     }
                 )
-            } else {
-                LoginScreen(
+
+                else -> LoginScreen(
                     viewModel = viewModel,
                     onLoginClick = { email, password ->
-                        val user = UserLogin(email, password)
-                        viewModel.login(user)
+                        viewModel.login(UserLogin(email, password))
                     },
                     toRegisterClick = {
                         isRegisterScreen.value = true
@@ -106,12 +101,12 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.loginResult.observe(this, Observer { result ->
+        fun handleResult(result: AuthRepository.Result<Token>, successMessage: Int) {
             when (result) {
                 is AuthRepository.Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
                     startActivity(Intent(this, HomeActivity::class.java))
-                    Toast.makeText(this, getString(R.string.login_success), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
                 }
                 is AuthRepository.Result.Failure -> {}
@@ -120,38 +115,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 is AuthRepository.Result.Idle -> {}
             }
-        })
+        }
 
-        viewModel.registerResult.observe(this, Observer { result ->
-            when (result) {
-                is AuthRepository.Result.Success -> {
-                    sessionManager.saveAuthToken(result.data.accessToken)
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    Toast.makeText(this, getString(R.string.register_success), Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-                is AuthRepository.Result.Failure -> {}
-                is AuthRepository.Result.Error -> {
-                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-                }
-                is AuthRepository.Result.Idle -> {}
-            }
-        })
-
-        viewModel.resetPasswordResult.observe(this, Observer { result ->
-            when (result) {
-                is AuthRepository.Result.Success -> {
-                    sessionManager.saveAuthToken(result.data.accessToken)
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    Toast.makeText(this, getString(R.string.reset_password_success), Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-                is AuthRepository.Result.Failure -> {}
-                is AuthRepository.Result.Error -> {
-                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-                }
-                is AuthRepository.Result.Idle -> {}
-            }
-        })
+        viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
+        viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success) })
+        viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
     }
 }
