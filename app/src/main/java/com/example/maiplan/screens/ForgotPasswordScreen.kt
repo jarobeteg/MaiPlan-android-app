@@ -110,13 +110,13 @@ fun ForgotPasswordScreen(
                 val code = error.errorCode
 
                 val errorMessageId = when (code) {
-                    1 -> R.string.reset_password_error_1
-                    2 -> R.string.reset_password_error_2
-                    3 -> R.string.reset_password_error_3
-                    4 -> R.string.reset_password_error_4
-                    5 -> R.string.reset_password_error_5
-                    6 -> R.string.reset_password_error_6
-                    7 -> R.string.reset_password_error_7
+                    1 -> R.string.general_error_1
+                    2 -> R.string.general_error_2
+                    3 -> R.string.general_error_3
+                    4 -> R.string.general_error_4
+                    5 -> R.string.general_error_5
+                    6 -> R.string.general_error_6
+                    7 -> R.string.general_error_7
                     else -> R.string.reset_password_error_default
                 }
 

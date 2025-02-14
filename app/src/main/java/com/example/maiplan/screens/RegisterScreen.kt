@@ -116,15 +116,15 @@ fun RegisterScreen(
                 val code = error.errorCode
 
                 val errorMessageId = when (code) {
-                    1 -> R.string.register_error_1
-                    2 -> R.string.register_error_2
-                    3 -> R.string.register_error_3
-                    4 -> R.string.register_error_4
-                    5 -> R.string.register_error_5
-                    6 -> R.string.register_error_6
-                    7 -> R.string.register_error_7
+                    1 -> R.string.general_error_1
+                    2 -> R.string.general_error_2
+                    4 -> R.string.general_error_4
+                    5 -> R.string.general_error_5
+                    6 -> R.string.general_error_6
+                    7 -> R.string.general_error_7
                     8 -> R.string.register_error_8
                     9 -> R.string.register_error_9
+                    10 -> R.string.register_error_10
                     else -> R.string.register_error_default
                 }
 

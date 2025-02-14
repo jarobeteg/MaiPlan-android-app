@@ -109,11 +109,11 @@ fun LoginScreen(
                 val code = error.errorCode
 
                 val errorMessageId = when (code) {
-                    1 -> R.string.login_error_1
-                    2 -> R.string.login_error_2
-                    3 -> R.string.login_error_3
-                    4 -> R.string.login_error_4
-                    5 -> R.string.login_error_5
+                    1 -> R.string.general_error_1
+                    2 -> R.string.general_error_2
+                    3 -> R.string.general_error_3
+                    4 -> R.string.general_error_4
+                    8 -> R.string.login_error_8
                     else -> R.string.login_error_default
                 }
 

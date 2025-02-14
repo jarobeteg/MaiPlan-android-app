@@ -26,35 +26,27 @@
     <string name="password_icon">Password Icon</string>
     <string name="username_icon">Username Icon</string>
     <string name="toggle_password_visibility">Toggle Password Visibility</string>
-    
+
+    <!-- general error messages -->
+    <string name="general_error_1">Email field cannot be empty!</string>
+    <string name="general_error_2">Invalid email format!</string>
+    <string name="general_error_3">Email is not yet registered!</string>
+    <string name="general_error_4">Password field cannot be empty!</string>
+    <string name="general_error_5">Password is not strong enough!</string>
+    <string name="general_error_6">Password again field cannot be empty!</string>
+    <string name="general_error_7">Passwords do not match!</string>
+
     <!-- login error messages -->
-    <string name="login_error_1">Email field cannot be empty!</string>
-    <string name="login_error_2">Invalid email format!</string>
-    <string name="login_error_3">Password field cannot be empty!</string>
-    <string name="login_error_4">Email is not yet registered!</string>
-    <string name="login_error_5">Incorrect password!</string>
+    <string name="login_error_8">Incorrect password!</string>
     <string name="login_error_default">Incorrect credentials! Please try again.</string>
 
     <!-- register error messages -->
-    <string name="register_error_1">Email field cannot be empty!</string>
-    <string name="register_error_2">Invalid email format!</string>
-    <string name="register_error_3">Email is already taken!</string>
-    <string name="register_error_4">Username field cannot be empty!</string>
-    <string name="register_error_5">Username is already taken!</string>
-    <string name="register_error_6">Password field cannot be empty!</string>
-    <string name="register_error_7">Password is not strong enough!</string>
-    <string name="register_error_8">Password again field cannot be empty!</string>
-    <string name="register_error_9">Passwords do not match!</string>
+    <string name="register_error_8">Email is already taken!</string>
+    <string name="register_error_9">Username field cannot be empty!</string>
+    <string name="register_error_10">Username is already taken!</string>
     <string name="register_error_default">Registration failed! Please try again.</string>
 
     <!-- reset password error messages -->
-    <string name="reset_password_error_1">Email field cannot be empty!</string>
-    <string name="reset_password_error_2">Invalid email format!</string>
-    <string name="reset_password_error_3">Email is not yet registered!</string>
-    <string name="reset_password_error_4">Password field cannot be empty!</string>
-    <string name="reset_password_error_5">Password is not strong enough!</string>
-    <string name="reset_password_error_6">Password again field cannot be empty!</string>
-    <string name="reset_password_error_7">Passwords do not match!</string>
     <string name="reset_password_error_default">Password reset failed! Please try again.</string>
 
     <!-- password strength level -->
