@@ -21,6 +21,7 @@ lifecycleRuntimeCompose = "2.8.7"
 accompanist = "0.31.1-alpha"
 runtimeLivedata = "1.7.7"
 androidx-navigation-compose = "2.8.7"
+auth0-jwt = "4.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -44,6 +45,7 @@ lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-com
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation-compose" }
+auth0-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "auth0-jwt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
