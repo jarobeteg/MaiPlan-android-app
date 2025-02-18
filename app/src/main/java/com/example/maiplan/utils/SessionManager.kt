@@ -18,7 +18,7 @@ class SessionManager(context: Context) {
             clearAuthToken()
             return null
         }
-        return token
+        return "Bearer $token"
     }
 
     private fun clearAuthToken() {

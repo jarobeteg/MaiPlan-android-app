@@ -7,7 +7,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.home.HomeActivity
@@ -41,9 +40,16 @@ class MainActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
-        if (sessionManager.getAuthToken() != null) {
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
+        val token = sessionManager.getAuthToken()
+        if (token != null) {
+            viewModel.tokenRefresh(token)
+            viewModel.tokenRefreshResult.observe(this, Observer { result ->
+                if (result is AuthRepository.Result.Success) {
+                    sessionManager.saveAuthToken(result.data.accessToken)
+                    startActivity(Intent(this, HomeActivity::class.java))
+                    finish()
+                }
+            })
         } else {
             setupComposeUI()
         }

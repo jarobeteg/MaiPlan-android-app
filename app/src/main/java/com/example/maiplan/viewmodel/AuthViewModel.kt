@@ -23,6 +23,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _resetPasswordResult = MutableLiveData<AuthRepository.Result<Token>>()
     val resetPasswordResult: LiveData<AuthRepository.Result<Token>> get() = _resetPasswordResult
 
+    private val _tokenRefreshResult = MutableLiveData<AuthRepository.Result<Token>>()
+    val tokenRefreshResult: LiveData<AuthRepository.Result<Token>> get() = _tokenRefreshResult
+
     private val _profileResult = MutableLiveData<AuthRepository.Result<UserResponse>> ()
     val profileResult: LiveData<AuthRepository.Result<UserResponse>> get() = _profileResult
 
@@ -46,6 +49,12 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun resetPassword(user: UserResetPassword) {
         viewModelScope.launch {
             _resetPasswordResult.value = authRepository.resetPassword(user)
+        }
+    }
+
+    fun tokenRefresh(token: String) {
+        viewModelScope.launch {
+            _tokenRefreshResult.value = authRepository.tokenRefresh(token)
         }
     }
 

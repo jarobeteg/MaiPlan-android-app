@@ -62,6 +62,23 @@ class AuthRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun tokenRefresh(token: String): Result<Token> {
+        return try {
+            val response = apiService.tokenRefresh(token)
+            if (response.isSuccessful) {
+                Result.Success(response.body()!!)
+            } else {
+                val errorBody = response.errorBody()?.string()
+                val json = Gson().fromJson(errorBody, JsonObject::class.java)
+                val errorDetail = json.getAsJsonObject("detail")
+                val errorCode = errorDetail.get("code").asInt
+                Result.Failure(errorCode)
+            }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     suspend fun getProfile(token: String): Result<UserResponse> {
         return try {
             val response = apiService.getProfile(token)
