@@ -17,6 +17,7 @@ import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.screens.ForgotPasswordScreen
+import com.example.maiplan.screens.LoadingScreen
 import com.example.maiplan.screens.LoginScreen
 import com.example.maiplan.screens.RegisterScreen
 import com.example.maiplan.utils.SessionManager
@@ -33,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        setContent { LoadingScreen() }
+
         val apiService = RetrofitClient.instance
         val authRepository = AuthRepository(apiService)
         val factory = AuthViewModelFactory(authRepository)
@@ -46,9 +49,9 @@ class MainActivity : AppCompatActivity() {
             viewModel.tokenRefreshResult.observe(this, Observer { result ->
                 if (result is AuthRepository.Result.Success) {
                     sessionManager.saveAuthToken(result.data.accessToken)
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    finish()
                 }
+                startActivity(Intent(this, HomeActivity::class.java))
+                finish()
             })
         } else {
             setupComposeUI()
