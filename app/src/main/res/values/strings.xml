@@ -57,4 +57,11 @@
     <string name="very_strong">Very Strong</string>
 
     <string name="unknown_error">Unknown error! Please try again.</string>
+
+    <!-- bottom nav label -->
+    <string name="activity">Activity</string>
+    <string name="finance">Finance</string>
+    <string name="notes">Notes</string>
+    <string name="lists">Lists</string>
+    <string name="more">More</string>
 </resources>

@@ -7,6 +7,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.maiplan.utils.BottomNavItem
@@ -15,6 +16,8 @@ import com.example.maiplan.utils.BottomNavItem
 fun BottomNavigationBar(
     navController: NavHostController
 ) {
+    val context = LocalContext.current
+
     val items = listOf(
         BottomNavItem.Activity,
         BottomNavItem.Finance,
@@ -31,8 +34,8 @@ fun BottomNavigationBar(
 
         items.forEach { item ->
             NavigationBarItem(
-                icon = { Icon(imageVector = item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
+                icon = { Icon(imageVector = item.icon, contentDescription = context.getString(item.labelResId)) },
+                label = { Text(context.getString(item.labelResId)) },
                 selected = currentRoute == item.route,
                 onClick = {
                     navController.navigate(item.route) {
@@ -49,7 +52,8 @@ fun BottomNavigationBar(
                     unselectedIconColor = Color.White.copy(alpha = 0.7f),
                     unselectedTextColor = Color.White.copy(alpha = 0.7f),
                     indicatorColor = Color.Transparent
-                )
+                ),
+                alwaysShowLabel = false
             )
         }
     }
