@@ -1,11 +1,10 @@
 package com.example.maiplan.utils
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Ballot
-import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.Hail
-import androidx.compose.material.icons.filled.Payments
-import androidx.compose.material.icons.filled.Reorder
+import androidx.compose.material.icons.filled.Event
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Task
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.maiplan.R
 
@@ -14,9 +13,8 @@ sealed class BottomNavItem(
     val icon: ImageVector,
     val route: String
 ) {
-    data object Activity : BottomNavItem(R.string.activity, Icons.Filled.Hail, "activity")
-    data object Finance : BottomNavItem(R.string.finance, Icons.Filled.Payments, "finance")
-    data object Notes : BottomNavItem(R.string.notes, Icons.Filled.Description, "notes")
-    data object Lists : BottomNavItem(R.string.lists, Icons.Filled.Ballot, "lists")
-    data object More : BottomNavItem(R.string.more, Icons.Filled.Reorder, "more")
+    data object Events : BottomNavItem(R.string.event, Icons.Filled.Event, "event")
+    data object Tasks : BottomNavItem(R.string.task, Icons.Filled.Task, "task")
+    data object Files : BottomNavItem(R.string.file, Icons.Filled.Folder, "file")
+    data object More : BottomNavItem(R.string.more, Icons.Filled.Menu, "more")
 }

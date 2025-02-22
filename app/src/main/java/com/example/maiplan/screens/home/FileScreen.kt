@@ -11,11 +11,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun FinanceScreen() {
+fun FileScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Text("Finance", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+        Text("List", fontSize = 24.sp, color = Color.Black, fontWeight = FontWeight.Bold)
     }
 }

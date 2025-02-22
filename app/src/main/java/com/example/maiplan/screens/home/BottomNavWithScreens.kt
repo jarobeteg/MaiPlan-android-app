@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.utils.BottomNavItem
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -22,19 +23,20 @@ fun BottomNavWithScreens() {
     }
 
     val navController = rememberNavController()
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = BottomNavItem.Activity.route,
+            startDestination = BottomNavItem.Events.route,
             Modifier.padding(innerPadding)
         ) {
-            composable(BottomNavItem.Activity.route) { ActivityScreen() }
-            composable(BottomNavItem.Finance.route) { FinanceScreen() }
-            composable(BottomNavItem.Notes.route) { NoteScreen() }
-            composable(BottomNavItem.Lists.route) { ListScreen() }
+            composable(BottomNavItem.Events.route) { EventScreen() }
+            composable(BottomNavItem.Tasks.route) { TaskScreen() }
+            composable(BottomNavItem.Files.route) { FileScreen() }
             composable(BottomNavItem.More.route) { MoreScreen() }
         }
     }
@@ -45,4 +47,3 @@ fun BottomNavWithScreens() {
 fun PreviewBottomNavWithScreens() {
     BottomNavWithScreens()
 }
-

@@ -19,10 +19,9 @@ fun BottomNavigationBar(
     val context = LocalContext.current
 
     val items = listOf(
-        BottomNavItem.Activity,
-        BottomNavItem.Finance,
-        BottomNavItem.Notes,
-        BottomNavItem.Lists,
+        BottomNavItem.Events,
+        BottomNavItem.Tasks,
+        BottomNavItem.Files,
         BottomNavItem.More
     )
 
@@ -49,11 +48,10 @@ fun BottomNavigationBar(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = Color(0xFF8A9DB2),
                     selectedTextColor = Color(0xFF8A9DB2),
-                    unselectedIconColor = Color.White.copy(alpha = 0.7f),
-                    unselectedTextColor = Color.White.copy(alpha = 0.7f),
+                    unselectedIconColor = Color.White.copy(alpha = 0.9f),
+                    unselectedTextColor = Color.White.copy(alpha = 0.9f),
                     indicatorColor = Color.Transparent
-                ),
-                alwaysShowLabel = false
+                )
             )
         }
     }
