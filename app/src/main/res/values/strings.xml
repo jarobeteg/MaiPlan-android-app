@@ -64,4 +64,9 @@
     <string name="notes">Notes</string>
     <string name="file">Files</string>
     <string name="more">More</string>
+
+    <string name="week">Week</string>
+    <string name="monthly">Monthly</string>
+    <string name="weekly">Weekly</string>
+    <string name="daily">Daily</string>
 </resources>
