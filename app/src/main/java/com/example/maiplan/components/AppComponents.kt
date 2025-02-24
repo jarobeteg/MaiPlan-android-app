@@ -18,11 +18,17 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,6 +44,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun HeadingTextComponent(text: String) {
@@ -261,4 +270,65 @@ fun ErrorMessageComponent(value: String) {
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DatePickerDialogComponent(
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                val selectedDateMillis = datePickerState.selectedDateMillis
+                if (selectedDateMillis != null) {
+                    val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
+                        .atZone(ZoneId.systemDefault())
+                        .toLocalDate()
+                    onDateSelected(selectedDate)
+                }
+                onDismiss()
+            },
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss,
+                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+            ) {
+                Text("Cancel")
+            }
+        },
+        colors = DatePickerDefaults.colors(
+            containerColor = Color(0xFF4A6583)
+        )
+    ) {
+        DatePicker(
+            state = datePickerState,
+            colors = DatePickerDefaults.colors(
+                containerColor = Color(0xFF4A6583),
+                titleContentColor = Color.White,
+                headlineContentColor = Color.White,
+                weekdayContentColor = Color(0xFFB0BEC5),
+                subheadContentColor = Color.White,
+                yearContentColor = Color.White,
+                selectedDayContentColor = Color(0xFF4A6583),
+                selectedDayContainerColor = Color(0xFFB0BEC5),
+                selectedYearContentColor = Color(0xFF4A6583),
+                selectedYearContainerColor = Color(0xFFB0BEC5),
+                todayDateBorderColor = Color(0xFF2D3E50),
+                todayContentColor = Color(0xFFB0BEC5),
+                currentYearContentColor = Color(0xFFB0BEC5),
+                dayContentColor = Color.White,
+                dayInSelectionRangeContentColor = Color(0xFFB0BEC5)
+            )
+        )
+    }
 }
