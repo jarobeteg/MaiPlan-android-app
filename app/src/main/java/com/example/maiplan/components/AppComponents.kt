@@ -86,8 +86,9 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
+            unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
             focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
-            focusedIndicatorColor = MaterialTheme.colorScheme.onPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
             focusedLabelColor = MaterialTheme.colorScheme.primary,
             cursorColor = MaterialTheme.colorScheme.primary,
         ),
