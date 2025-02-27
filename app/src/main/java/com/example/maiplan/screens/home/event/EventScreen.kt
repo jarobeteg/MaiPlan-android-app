@@ -68,7 +68,7 @@ fun EventScreen() {
     )
 
     Scaffold(
-        topBar = { EventTopBar(formattedTitle, rotationAngle, expanded, { expanded = !expanded }, views, { selectedView = it }, { showDatePicker = true }) }
+        topBar = { EventTopBar(formattedTitle, rotationAngle, expanded, { expanded = !expanded }, views, selectedView, { selectedView = it }, { showDatePicker = true }) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {
@@ -108,6 +108,7 @@ fun EventTopBar(
     expanded: Boolean,
     onToggleExpand: () -> Unit,
     views: List<String>,
+    selectedView: Int,
     onViewSelected: (Int) -> Unit,
     onDatePickerClick: () -> Unit
 ) {
@@ -145,7 +146,7 @@ fun EventTopBar(
                     )
                 }
 
-                EventDropdownMenu(expanded, views, buttonWidth) { index ->
+                EventDropdownMenu(expanded, views, buttonWidth, selectedView) { index ->
                     onViewSelected(index)
                     onToggleExpand()
                 }
@@ -168,11 +169,12 @@ fun EventDropdownMenu(
     expanded: Boolean,
     views: List<String>,
     buttonWidth: Int,
+    selectedView: Int,
     onItemSelected: (Int) -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
-        onDismissRequest = { onItemSelected(-1) },
+        onDismissRequest = { onItemSelected(selectedView) },
         modifier = Modifier
             .width(with(LocalDensity.current) { buttonWidth.toDp() })
             .background(MaterialTheme.colorScheme.primary)
