@@ -18,7 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,8 +71,8 @@ fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, he
             ) {
                 Text(
                     text = day,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
-                    color = Color.Gray
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiary
                 )
             }
         }
@@ -105,8 +104,8 @@ fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     ) {
         Text(
             text = weekNumber.toString(),
-            style = MaterialTheme.typography.bodyMedium.copy(fontSize = 10.sp),
-            color = Color.Gray
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+            color = MaterialTheme.colorScheme.onTertiary
         )
     }
 }
@@ -118,7 +117,7 @@ fun DaysRow(weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp
         if (dayNumber in 1..daysInMonth) {
             DayCell(dayNumber, cellSize, rowHeight)
         } else {
-            Spacer(modifier = Modifier.width(cellSize)) // Empty cell for alignment
+            Spacer(modifier = Modifier.width(cellSize))
         }
     }
 }
@@ -138,7 +137,7 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
         ) {
             Text(
                 text = "$dayNumber",
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

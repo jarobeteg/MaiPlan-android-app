@@ -1,6 +1,7 @@
 package com.example.maiplan.screens.home
 
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -26,8 +27,8 @@ fun BottomNavigationBar(
     )
 
     NavigationBar(
-        containerColor = Color(0xFF4A6583),
-        contentColor = Color.White
+        containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
         val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
@@ -46,10 +47,10 @@ fun BottomNavigationBar(
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF8A9DB2),
-                    selectedTextColor = Color(0xFF8A9DB2),
-                    unselectedIconColor = Color.White.copy(alpha = 0.9f),
-                    unselectedTextColor = Color.White.copy(alpha = 0.9f),
+                    selectedIconColor = MaterialTheme.colorScheme.surfaceContainer,
+                    selectedTextColor = MaterialTheme.colorScheme.surfaceContainer,
+                    unselectedIconColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
+                    unselectedTextColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f),
                     indicatorColor = Color.Transparent
                 )
             )

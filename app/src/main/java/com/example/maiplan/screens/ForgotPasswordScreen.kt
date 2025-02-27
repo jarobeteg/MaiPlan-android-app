@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
@@ -59,7 +59,7 @@ fun ForgotPasswordScreen(
             .fillMaxSize()
             .background(
                 Brush.verticalGradient(
-                    colors = listOf(Color(0xFF8A9DB2), Color(0xFF4A6583))
+                    colors = listOf(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.colorScheme.primary)
                 )
             ),
         contentAlignment = Alignment.Center
@@ -68,8 +68,8 @@ fun ForgotPasswordScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.95f))
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f))
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

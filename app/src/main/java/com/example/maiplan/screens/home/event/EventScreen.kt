@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -35,7 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -118,9 +116,9 @@ fun EventTopBar(
         title = {
             Box(
                 modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF4A6583))
-                    .border(2.dp, Color(0xFF2D3E50), RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
             ) {
                 OutlinedButton(
                     onClick = onToggleExpand,
@@ -130,18 +128,18 @@ fun EventTopBar(
                             buttonWidth = coordinates.size.width
                         },
                     border = null,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
                 ) {
                     Text(
                         text = formattedTitle,
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.padding(end = 4.dp)
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Dropdown Arrow",
-                        tint = Color.White,
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.rotate(rotationAngle)
                     )
                 }
@@ -153,12 +151,12 @@ fun EventTopBar(
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color(0xFF4A6583),
-            titleContentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            titleContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         actions = {
             IconButton(onClick = onToggleExpand) {
-                Icon(Icons.Default.CalendarMonth, contentDescription = "Select Date", tint = Color.White)
+                Icon(Icons.Default.CalendarMonth, contentDescription = "Select Date", tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )
@@ -176,16 +174,16 @@ fun EventDropdownMenu(
         onDismissRequest = { onItemSelected(-1) },
         modifier = Modifier
             .width(with(LocalDensity.current) { buttonWidth.toDp() })
-            .background(Color(0xFF4A6583))
-            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary)
+            .clip(MaterialTheme.shapes.medium)
     ) {
         views.forEachIndexed { index, view ->
             DropdownMenuItem(
-                text = { Text(view, color = Color.White) },
+                text = { Text(view, color = MaterialTheme.colorScheme.onPrimary) },
                 onClick = { onItemSelected(index) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFF4A6583))
+                    .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }

@@ -24,6 +24,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -54,7 +55,7 @@ fun HeadingTextComponent(text: String) {
         text = text,
         fontSize = 24.sp,
         fontWeight = FontWeight.Bold,
-        color = Color(0xFF4A6583)
+        color = MaterialTheme.colorScheme.primary
     )
 }
 
@@ -67,7 +68,7 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
             interactionSource = interactionSource,
             indication = null
         ) { onTextClicked() },
-        color = Color(0xFF4A6583),
+        color = MaterialTheme.colorScheme.primary,
         fontWeight = FontWeight.Medium
     )
 }
@@ -85,11 +86,10 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
         leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFFFFFFF),
-            focusedContainerColor = Color(0xFFFFFFFF),
-            focusedIndicatorColor = Color(0xFF4A6583),
-            focusedLabelColor = Color(0xFF4A6583),
-            cursorColor = Color(0xFF4A6583),
+            focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.onPrimary,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Email,
@@ -111,11 +111,11 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
         leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = Color(0xFFFFFFFF),
-            focusedContainerColor = Color(0xFFFFFFFF),
-            focusedIndicatorColor = Color(0xFF4A6583),
-            focusedLabelColor = Color(0xFF4A6583),
-            cursorColor = Color(0xFF4A6583)
+            unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Text,
@@ -163,11 +163,11 @@ fun PasswordTextComponent(
             modifier = Modifier.fillMaxWidth(),
             interactionSource = interactionSource,
             colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = Color(0xFFFFFFFF),
-                focusedContainerColor = Color(0xFFFFFFFF),
-                focusedIndicatorColor = Color(0xFF4A6583),
-                focusedLabelColor = Color(0xFF4A6583),
-                cursorColor = Color(0xFF4A6583)
+                unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
             ),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Password,
@@ -226,7 +226,7 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    .clip(MaterialTheme.shapes.extraSmall)
             ) {
                 val progress = (size.width * (score / 4f)).coerceIn(0f, size.width)
                 drawRect(
@@ -256,7 +256,7 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(50.dp)),
-        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A6583))
+        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
         Text(value, fontSize = 18.sp)
     }
@@ -266,7 +266,7 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
 fun ErrorMessageComponent(value: String) {
     Text(
         text = value,
-        color = Color.Red,
+        color = MaterialTheme.colorScheme.onError,
         fontSize = 14.sp,
         fontWeight = FontWeight.Bold
     )
@@ -293,7 +293,7 @@ fun DatePickerDialogComponent(
                 }
                 onDismiss()
             },
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
                 Text("OK")
             }
@@ -301,33 +301,33 @@ fun DatePickerDialogComponent(
         dismissButton = {
             TextButton(
                 onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
                 Text("Cancel")
             }
         },
         colors = DatePickerDefaults.colors(
-            containerColor = Color(0xFF4A6583)
+            containerColor = MaterialTheme.colorScheme.primary
         )
     ) {
         DatePicker(
             state = datePickerState,
             colors = DatePickerDefaults.colors(
-                containerColor = Color(0xFF4A6583),
-                titleContentColor = Color.White,
-                headlineContentColor = Color.White,
-                weekdayContentColor = Color(0xFFB0BEC5),
-                subheadContentColor = Color.White,
-                yearContentColor = Color.White,
-                selectedDayContentColor = Color(0xFF4A6583),
-                selectedDayContainerColor = Color(0xFFB0BEC5),
-                selectedYearContentColor = Color(0xFF4A6583),
-                selectedYearContainerColor = Color(0xFFB0BEC5),
-                todayDateBorderColor = Color(0xFF2D3E50),
-                todayContentColor = Color(0xFFB0BEC5),
-                currentYearContentColor = Color(0xFFB0BEC5),
-                dayContentColor = Color.White,
-                dayInSelectionRangeContentColor = Color(0xFFB0BEC5)
+                containerColor = MaterialTheme.colorScheme.primary,
+                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                headlineContentColor = MaterialTheme.colorScheme.onPrimary,
+                weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                subheadContentColor = MaterialTheme.colorScheme.onPrimary,
+                yearContentColor = MaterialTheme.colorScheme.onPrimary,
+                selectedDayContentColor = MaterialTheme.colorScheme.primary,
+                selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                selectedYearContentColor = MaterialTheme.colorScheme.primary,
+                selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                todayDateBorderColor = MaterialTheme.colorScheme.secondary,
+                todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                dayContentColor = MaterialTheme.colorScheme.onPrimary,
+                dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
             )
         )
     }

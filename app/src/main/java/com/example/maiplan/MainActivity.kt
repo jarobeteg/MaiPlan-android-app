@@ -20,6 +20,7 @@ import com.example.maiplan.screens.ForgotPasswordScreen
 import com.example.maiplan.screens.LoadingScreen
 import com.example.maiplan.screens.LoginScreen
 import com.example.maiplan.screens.RegisterScreen
+import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.viewmodel.AuthViewModel
 import com.example.maiplan.viewmodel.AuthViewModelFactory
@@ -34,7 +35,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent { LoadingScreen() }
+        setContent { AppTheme { LoadingScreen() } }
 
         val apiService = RetrofitClient.instance
         val authRepository = AuthRepository(apiService)
