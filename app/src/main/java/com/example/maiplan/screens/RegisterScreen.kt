@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -34,7 +33,6 @@ import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.viewmodel.AuthViewModel
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun RegisterScreen(
@@ -42,12 +40,6 @@ fun RegisterScreen(
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-
-    SideEffect {
-        systemUiController.setStatusBarColor(color = Color.Transparent, darkIcons = false)
-    }
-
     val registerResult by viewModel!!.registerResult.observeAsState()
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
