@@ -68,7 +68,7 @@ fun EventScreen() {
     )
 
     Scaffold(
-        topBar = { EventTopBar(formattedTitle, rotationAngle, expanded, { expanded = !expanded }, views) { selectedView = it } }
+        topBar = { EventTopBar(formattedTitle, rotationAngle, expanded, { expanded = !expanded }, views, { selectedView = it }, { showDatePicker = true }) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {
@@ -108,7 +108,8 @@ fun EventTopBar(
     expanded: Boolean,
     onToggleExpand: () -> Unit,
     views: List<String>,
-    onViewSelected: (Int) -> Unit
+    onViewSelected: (Int) -> Unit,
+    onDatePickerClick: () -> Unit
 ) {
     var buttonWidth by remember { mutableIntStateOf(0) }
 
@@ -155,7 +156,7 @@ fun EventTopBar(
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         actions = {
-            IconButton(onClick = onToggleExpand) {
+            IconButton(onClick = onDatePickerClick) {
                 Icon(Icons.Default.CalendarMonth, contentDescription = "Select Date", tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
