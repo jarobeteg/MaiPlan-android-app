@@ -9,8 +9,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.maiplan.screens.home.event.EventScreen
 import com.example.maiplan.utils.BottomNavItem
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -23,8 +23,6 @@ fun BottomNavWithScreens() {
     }
 
     val navController = rememberNavController()
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
 
     Scaffold(
         bottomBar = { BottomNavigationBar(navController) }
