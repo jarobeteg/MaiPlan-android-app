@@ -63,49 +63,51 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupComposeUI() {
         setContent {
-            BackHandler(enabled = isRegisterScreen.value || isForgotPasswordScreen.value) {
-                isRegisterScreen.value = false // on back pressed switches to login screen
-                isForgotPasswordScreen.value = false // on back pressed switches to login screen
-                viewModel.clearErrors()
-            }
+            AppTheme {
+                BackHandler(enabled = isRegisterScreen.value || isForgotPasswordScreen.value) {
+                    isRegisterScreen.value = false // on back pressed switches to login screen
+                    isForgotPasswordScreen.value = false // on back pressed switches to login screen
+                    viewModel.clearErrors()
+                }
 
-            when {
-                isRegisterScreen.value -> RegisterScreen(
-                    viewModel = viewModel,
-                    onRegisterClick = { email, username, password, passwordAgain ->
-                        viewModel.register(UserRegister(email, username, password, passwordAgain))
-                    },
-                    onBackToLogin = {
-                        isRegisterScreen.value = false
-                        viewModel.clearErrors()
-                    }
-                )
+                when {
+                    isRegisterScreen.value -> RegisterScreen(
+                        viewModel = viewModel,
+                        onRegisterClick = { email, username, password, passwordAgain ->
+                            viewModel.register(UserRegister(email, username, password, passwordAgain))
+                        },
+                        onBackToLogin = {
+                            isRegisterScreen.value = false
+                            viewModel.clearErrors()
+                        }
+                    )
 
-                isForgotPasswordScreen.value -> ForgotPasswordScreen(
-                    viewModel = viewModel,
-                    onResetClick = { email, password, passwordAgain ->
-                        viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
-                    },
-                    onBackToLogin = {
-                        isForgotPasswordScreen.value = false
-                        viewModel.clearErrors()
-                    }
-                )
+                    isForgotPasswordScreen.value -> ForgotPasswordScreen(
+                        viewModel = viewModel,
+                        onResetClick = { email, password, passwordAgain ->
+                            viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
+                        },
+                        onBackToLogin = {
+                            isForgotPasswordScreen.value = false
+                            viewModel.clearErrors()
+                        }
+                    )
 
-                else -> LoginScreen(
-                    viewModel = viewModel,
-                    onLoginClick = { email, password ->
-                        viewModel.login(UserLogin(email, password))
-                    },
-                    toRegisterClick = {
-                        isRegisterScreen.value = true
-                        viewModel.clearErrors()
-                    },
-                    onForgotPasswordClick = {
-                        isForgotPasswordScreen.value = true
-                        viewModel.clearErrors()
-                    }
-                )
+                    else -> LoginScreen(
+                        viewModel = viewModel,
+                        onLoginClick = { email, password ->
+                            viewModel.login(UserLogin(email, password))
+                        },
+                        toRegisterClick = {
+                            isRegisterScreen.value = true
+                            viewModel.clearErrors()
+                        },
+                        onForgotPasswordClick = {
+                            isForgotPasswordScreen.value = true
+                            viewModel.clearErrors()
+                        }
+                    )
+                }
             }
         }
     }
