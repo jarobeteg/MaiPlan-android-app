@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,9 +51,9 @@ fun MonthlyView(selectedDate: LocalDate, context: Context) {
     )
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val weekNumberWidth = 16.dp
+        val weekNumberWidth = 12.dp
         val cellSize = (maxWidth - weekNumberWidth) / 7
-        val headerHeight = 24.dp
+        val headerHeight = 18.dp
         val rowHeight = (maxHeight - headerHeight) / weekNumbers.size
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -130,6 +133,12 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
             .height(rowHeight)
             .padding(0.5.dp),
         shape = RoundedCornerShape(2.dp),
+        colors = CardColors(
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiary,
+            disabledContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onTertiary
+        )
     ) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -137,7 +146,7 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
         ) {
             Text(
                 text = "$dayNumber",
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
