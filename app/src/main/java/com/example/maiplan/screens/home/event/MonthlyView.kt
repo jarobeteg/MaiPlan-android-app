@@ -19,8 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -35,11 +33,7 @@ fun MonthlyView(selectedDate: LocalDate, context: Context) {
     val daysInMonth = selectedDate.lengthOfMonth()
     val firstDayOfMonth = selectedDate.withDayOfMonth(1).dayOfWeek.value % 7
 
-    val weekFields = WeekFields.of(Locale.getDefault())
-    val startWeek = selectedDate.withDayOfMonth(1).get(weekFields.weekOfWeekBasedYear())
-    val endWeek = selectedDate.withDayOfMonth(daysInMonth).get(weekFields.weekOfWeekBasedYear())
-
-    val weekNumbers = (startWeek..endWeek).toList()
+    val weekNumbers = getWeekNumbersForMonth(selectedDate)
     val weekdays = listOf(
         getString(context, R.string.mon),
         getString(context, R.string.tue),
@@ -149,5 +143,20 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
                 style = MaterialTheme.typography.bodySmall
             )
         }
+    }
+}
+
+fun getWeekNumbersForMonth(selectedDate: LocalDate): List<Int> {
+    val daysInMonth = selectedDate.lengthOfMonth()
+    val weekFields = WeekFields.of(Locale.getDefault())
+
+    val startWeek = selectedDate.withDayOfMonth(1).get(weekFields.weekOfYear())
+    val endWeek = selectedDate.withDayOfMonth(daysInMonth).get(weekFields.weekOfYear())
+
+    return if (endWeek < startWeek) {
+        val yearEnd = selectedDate.withDayOfMonth(1).plusWeeks(4).get(weekFields.weekOfYear())
+        (startWeek..yearEnd).toList()
+    } else {
+        (startWeek..endWeek).toList()
     }
 }
