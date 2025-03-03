@@ -14,18 +14,18 @@ data class UserLogin(val email: String, val password: String)
 data class UserResponse(@SerializedName("user_id") val id: Int, val email: String, val username: String)
 
 interface ApiService {
-    @POST("register")
+    @POST("auth/register")
     suspend fun register(@Body auth: UserRegister): Response<Token>
 
-    @POST("login")
+    @POST("auth/login")
     suspend fun login(@Body auth: UserLogin): Response<Token>
 
-    @POST("reset-password")
+    @POST("auth/reset-password")
     suspend fun resetPassword(@Body auth: UserResetPassword): Response<Token>
 
-    @POST("token-refresh")
+    @POST("auth/token-refresh")
     suspend fun tokenRefresh(@Header("Authorization") token: String): Response<Token>
 
-    @GET("me")
+    @GET("auth/me")
     suspend fun getProfile(@Header("Authorization") token: String): Response<UserResponse>
 }
