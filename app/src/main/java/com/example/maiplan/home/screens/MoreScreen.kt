@@ -3,13 +3,23 @@ package com.example.maiplan.home.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowRight
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -35,9 +46,9 @@ fun MoreScreen() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            MoreScreenButton("Category Management") { println("Category Management button clicked") }
-            MoreScreenButton("Settings") { println("Settings button clicked") }
-            MoreScreenButton("Help") { println("Help button clicked") }
+            MoreScreenButton(text = "Category Management", onClick =  { println("category") }, leadingIcon = Icons.Filled.Category, true)
+            MoreScreenButton(text = "Settings", onClick = { println("settings") }, leadingIcon = Icons.Filled.Settings, true)
+            MoreScreenButton(text = "Help", onClick = { println("help") }, leadingIcon = Icons.AutoMirrored.Filled.Help, false)
         }
     }
 }
@@ -50,7 +61,7 @@ fun MoreTopBar() {
             Text(
                 text = stringResource(R.string.more),
                 style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onPrimary
             )
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -60,24 +71,59 @@ fun MoreTopBar() {
 }
 
 @Composable
-fun MoreScreenButton(text: String, onClick: () -> Unit) {
+fun MoreScreenButton(
+    text: String,
+    onClick: () -> Unit,
+    leadingIcon: ImageVector,
+    showDivider: Boolean
+) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                )
+                .padding(vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = leadingIcon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiary,
+                modifier = Modifier.size(24.dp)
             )
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = text,
-            color = MaterialTheme.colorScheme.onBackground,
-            fontSize = 16.sp,
-            textAlign = TextAlign.Start
-        )
+
+            Spacer(modifier = Modifier.width(4.dp))
+
+            Text(
+                text = text,
+                color = MaterialTheme.colorScheme.onTertiary,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1f)
+            )
+
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiary,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        if (showDivider) {
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+            )
+        }
     }
 }
