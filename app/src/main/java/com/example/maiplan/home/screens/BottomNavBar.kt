@@ -1,4 +1,4 @@
-package com.example.maiplan.screens.home
+package com.example.maiplan.home.screens
 
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme

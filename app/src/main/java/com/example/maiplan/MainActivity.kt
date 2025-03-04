@@ -16,10 +16,10 @@ import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.repository.AuthRepository
-import com.example.maiplan.screens.ForgotPasswordScreen
-import com.example.maiplan.screens.LoadingScreen
-import com.example.maiplan.screens.LoginScreen
-import com.example.maiplan.screens.RegisterScreen
+import com.example.maiplan.main_screens.ForgotPasswordScreen
+import com.example.maiplan.main_screens.LoadingScreen
+import com.example.maiplan.main_screens.LoginScreen
+import com.example.maiplan.main_screens.RegisterScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.viewmodel.AuthViewModel

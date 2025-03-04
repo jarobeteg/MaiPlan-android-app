@@ -1,4 +1,4 @@
-package com.example.maiplan.screens.home
+package com.example.maiplan.home.screens
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -8,7 +8,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.maiplan.screens.home.event.EventScreen
+import com.example.maiplan.home.screens.event.EventScreen
 import com.example.maiplan.utils.BottomNavItem
 
 @Composable

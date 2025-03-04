@@ -1,4 +1,4 @@
-package com.example.maiplan.screens
+package com.example.maiplan.main_screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

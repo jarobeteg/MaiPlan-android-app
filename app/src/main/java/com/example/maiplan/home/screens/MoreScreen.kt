@@ -1,4 +1,4 @@
-package com.example.maiplan.screens.home
+package com.example.maiplan.home.screens
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
