@@ -2,13 +2,14 @@ package com.example.maiplan.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.maiplan.repository.AuthRepository
 
-class AuthViewModelFactory(private val authRepository: AuthRepository) : ViewModelProvider.Factory {
+class GenericViewModelFactory<T : ViewModel>(
+    private val creator: () -> T
+) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(AuthViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(creator()::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AuthViewModel(authRepository) as T
+            return creator() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

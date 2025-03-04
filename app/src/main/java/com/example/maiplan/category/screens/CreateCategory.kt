@@ -1,12 +1,10 @@
 package com.example.maiplan.category.screens
 
-import android.app.Activity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -24,15 +22,15 @@ import com.example.maiplan.R
 import com.example.maiplan.viewmodel.CategoryViewModel
 
 @Composable
-fun CategoryManagementScreen(
-    viewModel: CategoryViewModel
+fun CreateCategoryScreen(
+    viewModel: CategoryViewModel,
+    onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
 
-    Scaffold ( topBar = { CategoryTopBar(
-        text = stringResource(R.string.categories),
-        onBackClick = { (context as? Activity)?.finish() },
-        onAddCategoryClick = { viewModel.handleAddCategoryClicked() }
+    Scaffold ( topBar = { CreateCategoryTopBar(
+        text = stringResource(R.string.new_category),
+        onBackClick = onBackClick
     ) }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -41,15 +39,13 @@ fun CategoryManagementScreen(
                 .padding(16.dp)
         ) {}
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryTopBar(
+fun CreateCategoryTopBar(
     text: String,
-    onBackClick: () -> Unit,
-    onAddCategoryClick: () -> Unit
+    onBackClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -63,15 +59,6 @@ fun CategoryTopBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        },
-        actions = {
-            IconButton(onClick = onAddCategoryClick) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimary
                 )

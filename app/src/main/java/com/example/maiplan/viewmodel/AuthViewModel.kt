@@ -13,7 +13,6 @@ import com.example.maiplan.repository.AuthRepository
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
-
     private val _registerResult = MutableLiveData<AuthRepository.Result<Token>>()
     val registerResult: LiveData<AuthRepository.Result<Token>> get() = _registerResult
 

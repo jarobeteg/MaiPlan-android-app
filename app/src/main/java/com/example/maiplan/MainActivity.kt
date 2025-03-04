@@ -23,7 +23,7 @@ import com.example.maiplan.main_screens.RegisterScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.viewmodel.AuthViewModel
-import com.example.maiplan.viewmodel.AuthViewModelFactory
+import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         val apiService = RetrofitClient.instance
         val authRepository = AuthRepository(apiService)
-        val factory = AuthViewModelFactory(authRepository)
+        val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
 
         sessionManager = SessionManager(this)
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]

@@ -86,4 +86,5 @@
 
     <!-- category management screen -->
     <string name="categories">Categories</string>
+    <string name="new_category">New Category</string>
 </resources>
