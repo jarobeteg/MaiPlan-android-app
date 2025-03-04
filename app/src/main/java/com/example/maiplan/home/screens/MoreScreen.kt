@@ -1,5 +1,8 @@
 package com.example.maiplan.home.screens
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -29,14 +32,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.category.CategoryActivity
 
 @Composable
 fun MoreScreen() {
+    val context = LocalContext.current
+
     Scaffold(topBar = { MoreTopBar() }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -46,9 +53,9 @@ fun MoreScreen() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            MoreScreenButton(text = "Category Management", onClick =  { println("category") }, leadingIcon = Icons.Filled.Category, true)
-            MoreScreenButton(text = "Settings", onClick = { println("settings") }, leadingIcon = Icons.Filled.Settings, true)
-            MoreScreenButton(text = "Help", onClick = { println("help") }, leadingIcon = Icons.AutoMirrored.Filled.Help, false)
+            MoreScreenButton(stringResource(R.string.category_management), { openActivity(context, CategoryActivity::class.java) }, Icons.Filled.Category, true)
+            MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
+            MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, false)
         }
     }
 }
@@ -122,8 +129,12 @@ fun MoreScreenButton(
                 modifier = Modifier
                     .fillMaxWidth(),
                 thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.2f)
             )
         }
     }
+}
+
+fun openActivity(context: Context, activity: Class<out Activity>) {
+    context.startActivity(Intent(context, activity))
 }
