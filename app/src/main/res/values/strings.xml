@@ -25,6 +25,8 @@
     <string name="password_icon">Password Icon</string>
     <string name="username_icon">Username Icon</string>
     <string name="toggle_password_visibility">Toggle Password Visibility</string>
+    <string name="cancel">Cancel</string>
+    <string name="select">Select</string>
 
     <!-- general error messages -->
     <string name="general_error_1">Email field cannot be empty!</string>
@@ -90,4 +92,9 @@
     <string name="category_name">Name</string>
     <string name="category_description">Description</string>
     <string name="category_save">Save Category</string>
+    <string name="category_color">Select a Color</string>
+    <string name="category_icon">Select an Icon</string>
+    <string name="hue">Hue</string>
+    <string name="saturation">Saturation</string>
+    <string name="brightness">Brightness</string>
 </resources>

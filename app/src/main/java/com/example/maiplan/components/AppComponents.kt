@@ -271,7 +271,7 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, length: Int
             unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
             focusedTextColor = MaterialTheme.colorScheme.onBackground,
             unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
             cursorColor = MaterialTheme.colorScheme.primary
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
@@ -335,7 +335,7 @@ fun DatePickerDialogComponent(
                 onClick = onDismiss,
                 colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
         colors = DatePickerDefaults.colors(
