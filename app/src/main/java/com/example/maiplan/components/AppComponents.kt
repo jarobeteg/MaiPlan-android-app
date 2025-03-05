@@ -254,15 +254,43 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
 }
 
 @Composable
+fun AdjustableTextFieldLengthComponent(value: String, label: String, length: Int, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { newValue ->
+            if (newValue.length <= length) {
+                onValueChange(newValue)
+            }
+        },
+        label = { Text(label) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Text,
+            autoCorrectEnabled = false
+        )
+    )
+}
+
+@Composable
 fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
     Button(
         onClick = onButtonClicked,
         modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(50.dp)),
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
     ) {
-        Text(value, fontSize = 18.sp)
+        Text(value, fontSize = 16.sp)
     }
 }
 
