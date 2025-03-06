@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -251,12 +252,11 @@ fun CustomSlider(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .height(24.dp),
+            .height(64.dp),
         thumb = {
             Box(
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(24.dp)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
             )
         },
@@ -264,7 +264,7 @@ fun CustomSlider(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
+                    .height(12.dp)
                     .background(trackBrush, MaterialTheme.shapes.extraSmall)
             )
         }
@@ -300,7 +300,7 @@ fun ColorPickerDialog(
                     modifier = Modifier
                         .size(100.dp)
                         .background(color, CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.onBackground, CircleShape)
+                        .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
