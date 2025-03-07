@@ -57,6 +57,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -67,6 +68,7 @@ import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.utils.IconData.allIcons
 import com.example.maiplan.viewmodel.CategoryViewModel
+import android.graphics.Color as AndroidColor
 
 @Composable
 fun CreateCategoryScreen(
@@ -80,6 +82,7 @@ fun CreateCategoryScreen(
     var selectedType by remember { mutableIntStateOf(1) }
     var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
     var selectedIcon by remember { mutableStateOf(Icons.Filled.Search) }
+    var selectedIconString by remember { mutableStateOf("search") }
 
     Scaffold ( topBar = { CreateCategoryTopBar(
         text = stringResource(R.string.category_new),
@@ -103,14 +106,15 @@ fun CreateCategoryScreen(
 
             IconPickerRow(
                 selectedIcon = selectedIcon,
-                onIconSelected = { selectedIcon = it }
+                onIconSelected = { selectedIcon = it },
+                onIconSelectedString = { selectedIconString = it }
             )
 
             TypeDropdown(selectedType) { selectedType = it }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_save)) { println("category saved") }
+            SubmitButtonComponent(stringResource(R.string.category_save)) { println("category saved: ${selectedColor.value}, $selectedIconString") }
         }
     }
 }
@@ -272,10 +276,13 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val hsv = FloatArray(3)
+    AndroidColor.colorToHSV(initialColor.toArgb(), hsv)
+
+    var hue by remember { mutableFloatStateOf(hsv[0]) }
+    var saturation by remember { mutableFloatStateOf(hsv[1]) }
+    var value by remember { mutableFloatStateOf(hsv[2]) }
     var color by remember { mutableStateOf(initialColor) }
-    var hue by remember { mutableFloatStateOf(0f) }
-    var saturation by remember { mutableFloatStateOf(1f) }
-    var value by remember { mutableFloatStateOf(1f) }
 
     LaunchedEffect(hue, saturation, value) {
         color = Color.hsv(hue, saturation, value)
@@ -344,7 +351,8 @@ fun ColorPickerDialog(
 @Composable
 fun IconPickerRow(
     selectedIcon: ImageVector?,
-    onIconSelected: (ImageVector) -> Unit
+    onIconSelected: (ImageVector) -> Unit,
+    onIconSelectedString: (String) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     var showIconPicker by remember { mutableStateOf(false) }
@@ -398,6 +406,10 @@ fun IconPickerRow(
                 onIconSelected(it)
                 showIconPicker = false
             },
+            onIconSelectedString = {
+                onIconSelectedString(it)
+                showIconPicker = false
+            },
             onDismiss = { showIconPicker = false }
         )
     }
@@ -406,6 +418,7 @@ fun IconPickerRow(
 @Composable
 fun IconPickerDialog(
     onIconSelected: (ImageVector) -> Unit,
+    onIconSelectedString: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
     val scrollState = rememberLazyGridState()
@@ -438,7 +451,7 @@ fun IconPickerDialog(
                                 tint = MaterialTheme.colorScheme.onBackground,
                                 modifier = Modifier
                                     .size(48.dp)
-                                    .clickable { onIconSelected(icon); onDismiss() }
+                                    .clickable { onIconSelected(icon); onIconSelectedString(key); onDismiss() }
                             )
                         }
                     }
