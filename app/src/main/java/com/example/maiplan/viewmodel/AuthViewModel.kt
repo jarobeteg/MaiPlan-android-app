@@ -33,38 +33,37 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     val userId: LiveData<Int?> get() = _userId
 
     init {
-        _registerResult.value = Result.Idle
-        _loginResult.value = Result.Idle
+        clearErrors()
     }
 
     fun register(user: UserRegister) {
         viewModelScope.launch {
-            _registerResult.value = authRepository.register(user)
+            _registerResult.postValue(authRepository.register(user))
         }
     }
 
     fun login(user: UserLogin) {
         viewModelScope.launch {
-            _loginResult.value = authRepository.login(user)
+            _loginResult.postValue(authRepository.login(user))
         }
     }
 
     fun resetPassword(user: UserResetPassword) {
         viewModelScope.launch {
-            _resetPasswordResult.value = authRepository.resetPassword(user)
+            _resetPasswordResult.postValue(authRepository.resetPassword(user))
         }
     }
 
     fun tokenRefresh(token: String) {
         viewModelScope.launch {
-            _tokenRefreshResult.value = authRepository.tokenRefresh(token)
+            _tokenRefreshResult.postValue(authRepository.tokenRefresh(token))
         }
     }
 
     fun getProfile(token: String) {
         viewModelScope.launch {
             val result = authRepository.getProfile(token)
-            _profileResult.value = result
+            _profileResult.postValue(result)
 
             if (result is Result.Success) {
                 _userId.postValue(result.data.id)
@@ -73,7 +72,7 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     fun clearErrors() {
-        _loginResult.value = Result.Idle
-        _registerResult.value = Result.Idle
+        _loginResult.postValue(Result.Idle)
+        _registerResult.postValue(Result.Idle)
     }
 }

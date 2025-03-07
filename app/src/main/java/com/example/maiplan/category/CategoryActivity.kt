@@ -45,6 +45,12 @@ class CategoryActivity : AppCompatActivity() {
         val token = sessionManager.getAuthToken()
         authViewModel.getProfile(token!!)
 
+        authViewModel.userId.observe(this) { userId ->
+            if (userId != null) {
+                categoryViewModel.getAllCategories(userId)
+            }
+        }
+
         setupComposeUI()
         observeCategoryViewModel()
     }

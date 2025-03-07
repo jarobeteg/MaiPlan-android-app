@@ -94,8 +94,13 @@
     <string name="category_save">Save Category</string>
     <string name="category_color">Select a Color</string>
     <string name="category_icon">Select an Icon</string>
+    <string name="category_success">Category added successfully.</string>
+    <string name="category_search">Search categories…</string>
+    <string name="category_select_type">Select type</string>
+    <string name="category_type_event">Event</string>
+    <string name="category_type_finance">Finance</string>
+    <string name="category_type_other">Other</string>
     <string name="hue">Hue</string>
     <string name="saturation">Saturation</string>
     <string name="brightness">Brightness</string>
-    <string name="category_success">Category added successfully.</string>
 </resources>

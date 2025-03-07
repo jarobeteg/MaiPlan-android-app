@@ -59,7 +59,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -67,7 +66,6 @@ import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.utils.IconData.allIcons
-import com.example.maiplan.viewmodel.CategoryViewModel
 import android.graphics.Color as AndroidColor
 
 @Composable
@@ -122,7 +120,11 @@ fun CreateCategoryScreen(
 fun TypeDropdown(selectedType: Int, onTypeSelected: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val rotationAngle by animateFloatAsState(targetValue = if (expanded) 90f else 0f)
-    val categoryTypes = listOf("Event", "Task", "Other")
+    val categoryTypes = listOf(
+        stringResource(R.string.category_type_event),
+        stringResource(R.string.category_type_finance),
+        stringResource(R.string.category_type_other)
+    )
 
     Box(modifier = Modifier.fillMaxWidth()) {
         ExposedDropdownMenuBox(
@@ -133,7 +135,7 @@ fun TypeDropdown(selectedType: Int, onTypeSelected: (Int) -> Unit) {
                 value = categoryTypes[selectedType - 1],
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Select Type") },
+                label = { Text(stringResource(R.string.category_select_type)) },
                 trailingIcon = { Icon(
                     Icons.Filled.ArrowDropDown,
                     contentDescription = null,
