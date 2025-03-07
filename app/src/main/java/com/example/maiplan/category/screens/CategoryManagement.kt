@@ -1,6 +1,8 @@
 package com.example.maiplan.category.screens
 
 import android.app.Activity
+import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +17,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -23,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,11 +32,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
+import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.network.CategoryResponse
 import com.example.maiplan.utils.IconData
 import com.example.maiplan.viewmodel.CategoryViewModel
@@ -62,13 +64,7 @@ fun CategoryManagementScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text(stringResource(R.string.category_search)) },
-                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) }
-            )
+            SearchFieldComponent(searchQuery, 32) { searchQuery = it }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -127,27 +123,41 @@ fun CategoryTopBar(
 
 @Composable
 fun CategoryCard(category: CategoryResponse) {
+    val backgroundColor = Color(category.color.toULong())
+    val isDarkTheme = isSystemInDarkTheme()
+
+    val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
+    val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
+        Color.LightGray
+    } else if (!isDarkTheme && backgroundColor.luminance() > 0.5f) {
+        Color.DarkGray
+    } else {
+        MaterialTheme.colorScheme.tertiaryContainer
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(category.color.toULong()))
+            .padding(top = 4.dp, bottom = 4.dp)
+            .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = IconData.getIconByKey(category.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(40.dp),
-                    tint = MaterialTheme.colorScheme.onSurface
+                    modifier = Modifier.size(42.dp),
+                    tint = textColor
                 )
+
                 Spacer(modifier = Modifier.width(8.dp))
+
                 Text(
                     text = category.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = textColor
                 )
             }
 
@@ -156,7 +166,7 @@ fun CategoryCard(category: CategoryResponse) {
             Text(
                 text = category.description,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = textColor.copy(alpha = 0.8f)
             )
         }
     }
