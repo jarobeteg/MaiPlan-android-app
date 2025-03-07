@@ -6,49 +6,67 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.category.screens.CategoryManagementScreen
 import com.example.maiplan.category.screens.CreateCategoryScreen
+import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.RetrofitClient
+import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.CategoryRepository
 import com.example.maiplan.theme.AppTheme
+import com.example.maiplan.utils.SessionManager
+import com.example.maiplan.viewmodel.AuthViewModel
 import com.example.maiplan.viewmodel.CategoryViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 class CategoryActivity : AppCompatActivity() {
-    private lateinit var viewModel: CategoryViewModel
+    private lateinit var sessionManager: SessionManager
+    private lateinit var categoryViewModel: CategoryViewModel
+    private lateinit var authViewModel: AuthViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         val apiService = RetrofitClient.instance
         val categoryRepository = CategoryRepository(apiService)
-        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
+        val authRepository = AuthRepository(apiService)
+        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
+        val authFactory = GenericViewModelFactory { AuthViewModel(authRepository) }
 
-        viewModel = ViewModelProvider(this, factory)[CategoryViewModel::class.java]
+        sessionManager = SessionManager(this)
+        categoryViewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
+        authViewModel = ViewModelProvider(this, authFactory)[AuthViewModel::class.java]
+
+        val token = sessionManager.getAuthToken()
+        authViewModel.getProfile(token!!)
 
         setupComposeUI()
-        observeViewModel()
+        observeCategoryViewModel()
     }
 
     private fun setupComposeUI() {
         setContent {
             AppTheme {
-                val isCreateCategoryScreen by viewModel.isCreateCategoryScreen.collectAsState()
+                val isCreateCategoryScreen by categoryViewModel.isCreateCategoryScreen.collectAsState()
+                val userId by authViewModel.userId.observeAsState()
+
                 BackHandler(enabled = isCreateCategoryScreen) {
-                    viewModel.resetCreateCategoryScreen()
+                    categoryViewModel.resetCreateCategoryScreen()
                 }
 
                 when {
                     isCreateCategoryScreen -> CreateCategoryScreen(
-                        viewModel = viewModel,
-                        onBackClick = { viewModel.resetCreateCategoryScreen() }
+                        onSaveClick = { selectedType, name, description, color, icon ->
+                            categoryViewModel.createCategory(CategoryCreate(userId!!, selectedType, name, description, color, icon))
+                        },
+                        onBackClick = { categoryViewModel.resetCreateCategoryScreen() }
                     )
-                    else -> CategoryManagementScreen(viewModel)
+                    else -> CategoryManagementScreen(categoryViewModel)
                 }
             }
         }
     }
 
-    private fun observeViewModel() {}
+    private fun observeCategoryViewModel() {}
 }

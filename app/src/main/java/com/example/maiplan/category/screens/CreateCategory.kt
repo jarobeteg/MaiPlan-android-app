@@ -72,11 +72,9 @@ import android.graphics.Color as AndroidColor
 
 @Composable
 fun CreateCategoryScreen(
-    viewModel: CategoryViewModel,
+    onSaveClick: (Int, String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val context = LocalContext.current
-
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedType by remember { mutableIntStateOf(1) }
@@ -114,7 +112,7 @@ fun CreateCategoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_save)) { println("category saved: ${selectedColor.value}, $selectedIconString") }
+            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(selectedType, name, description, selectedColor.value.toString(), selectedIconString) }
         }
     }
 }

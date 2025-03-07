@@ -6,14 +6,35 @@ import retrofit2.http.Header
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.GET
+import retrofit2.http.Query
 
+// user auth data classes
 data class Token(@SerializedName("access_token") val accessToken: String, @SerializedName("token_type") val tokenType: String)
 data class UserRegister(val email: String, val username: String, val password: String, @SerializedName("password_again") val passwordAgain: String)
 data class UserResetPassword(val email: String, val password: String, @SerializedName("password_again") val passwordAgain: String)
 data class UserLogin(val email: String, val password: String)
 data class UserResponse(@SerializedName("user_id") val id: Int, val email: String, val username: String)
 
+// category data classes
+data class CategoryCreate(
+    @SerializedName("user_id") val userId: Int,
+    @SerializedName("entity_type") val entityType: Int,
+    val name: String,
+    val description: String,
+    val color: String,
+    val icon: String
+    )
+data class CategoryResponse(
+    @SerializedName("category_id") val categoryId: Int,
+    @SerializedName("entity_type") val entityType: Int,
+    val name: String,
+    val description: String,
+    val color: String,
+    val icon: String
+)
+
 interface ApiService {
+    // user auth api
     @POST("auth/register")
     suspend fun register(@Body auth: UserRegister): Response<Token>
 
@@ -28,4 +49,11 @@ interface ApiService {
 
     @GET("auth/me")
     suspend fun getProfile(@Header("Authorization") token: String): Response<UserResponse>
+
+    // category api
+    @POST("categories/create-category")
+    suspend fun createCategory(@Body categoryCreate: CategoryCreate): Response<Unit>
+
+    @GET("categories/get-all-category")
+    suspend fun getAllCategories(@Query("user_id") userId: Int): Response<List<CategoryResponse>>
 }

@@ -16,6 +16,7 @@ import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.repository.Result
 import com.example.maiplan.main_screens.ForgotPasswordScreen
 import com.example.maiplan.main_screens.LoadingScreen
 import com.example.maiplan.main_screens.LoginScreen
@@ -48,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         if (token != null) {
             viewModel.tokenRefresh(token)
             viewModel.tokenRefreshResult.observe(this, Observer { result ->
-                if (result is AuthRepository.Result.Success) {
+                if (result is Result.Success) {
                     sessionManager.saveAuthToken(result.data.accessToken)
                 }
                 startActivity(Intent(this, HomeActivity::class.java))
@@ -113,19 +114,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        fun handleResult(result: AuthRepository.Result<Token>, successMessage: Int) {
+        fun handleResult(result: Result<Token>, successMessage: Int) {
             when (result) {
-                is AuthRepository.Result.Success -> {
+                is Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
                     startActivity(Intent(this, HomeActivity::class.java))
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
                 }
-                is AuthRepository.Result.Failure -> {}
-                is AuthRepository.Result.Error -> {
+                is Result.Failure -> {}
+                is Result.Error -> {
                     Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
-                is AuthRepository.Result.Idle -> {}
+                is Result.Idle -> {}
             }
         }
 

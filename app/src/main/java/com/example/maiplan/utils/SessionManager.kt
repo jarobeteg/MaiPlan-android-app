@@ -4,12 +4,13 @@ import android.content.Context
 import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
 import java.util.Date
+import androidx.core.content.edit
 
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
 
     fun saveAuthToken(token: String) {
-        sharedPreferences.edit().putString("access_token", token).apply()
+        sharedPreferences.edit { putString("access_token", token) }
     }
 
     fun getAuthToken(): String? {
@@ -22,7 +23,7 @@ class SessionManager(context: Context) {
     }
 
     private fun clearAuthToken() {
-        sharedPreferences.edit().remove("access_token").apply()
+        sharedPreferences.edit { remove("access_token") }
     }
 
     private fun isTokenExpired(token: String?): Boolean {

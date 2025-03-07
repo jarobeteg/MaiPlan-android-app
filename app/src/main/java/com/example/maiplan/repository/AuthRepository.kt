@@ -8,21 +8,13 @@ import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.network.UserResponse
 import com.google.gson.Gson
 import com.google.gson.JsonObject
+import retrofit2.Response
 
 class AuthRepository(private val apiService: ApiService) {
 
     suspend fun register(user: UserRegister): Result<Token> {
         return try {
-            val response = apiService.register(user)
-            if (response.isSuccessful) {
-                Result.Success(response.body()!!)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val json = Gson().fromJson(errorBody, JsonObject::class.java)
-                val errorDetail = json.getAsJsonObject("detail")
-                val errorCode = errorDetail.get("code").asInt
-                Result.Failure(errorCode)
-            }
+            handleResponse(apiService.register(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -30,16 +22,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun login(user: UserLogin): Result<Token> {
         return try {
-            val response = apiService.login(user)
-            if (response.isSuccessful) {
-                Result.Success(response.body()!!)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val json = Gson().fromJson(errorBody, JsonObject::class.java)
-                val errorDetail = json.getAsJsonObject("detail")
-                val errorCode = errorDetail.get("code").asInt
-                Result.Failure(errorCode)
-            }
+            handleResponse(apiService.login(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -47,16 +30,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun resetPassword(user: UserResetPassword): Result<Token> {
         return try {
-            val response = apiService.resetPassword(user)
-            if (response.isSuccessful) {
-                Result.Success(response.body()!!)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val json = Gson().fromJson(errorBody, JsonObject::class.java)
-                val errorDetail = json.getAsJsonObject("detail")
-                val errorCode = errorDetail.get("code").asInt
-                Result.Failure(errorCode)
-            }
+            handleResponse(apiService.resetPassword(user))
         } catch (e: Exception){
             Result.Error(e)
         }
@@ -64,16 +38,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun tokenRefresh(token: String): Result<Token> {
         return try {
-            val response = apiService.tokenRefresh(token)
-            if (response.isSuccessful) {
-                Result.Success(response.body()!!)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val json = Gson().fromJson(errorBody, JsonObject::class.java)
-                val errorDetail = json.getAsJsonObject("detail")
-                val errorCode = errorDetail.get("code").asInt
-                Result.Failure(errorCode)
-            }
+            handleResponse(apiService.tokenRefresh(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -81,25 +46,23 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun getProfile(token: String): Result<UserResponse> {
         return try {
-            val response = apiService.getProfile(token)
-            if (response.isSuccessful) {
-                Result.Success(response.body()!!)
-            } else {
-                val errorBody = response.errorBody()?.string()
-                val json = Gson().fromJson(errorBody, JsonObject::class.java)
-                val errorDetail = json.getAsJsonObject("detail")
-                val errorCode = errorDetail.get("code").asInt
-                Result.Failure(errorCode)
-            }
+            handleResponse(apiService.getProfile(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
-    sealed class Result<out T> {
-        data object Idle : Result<Nothing>()
-        data class Success<out T>(val data: T) : Result<T>()
-        data class Failure(val errorCode: Int) : Result<Nothing>()
-        data class Error(val exception: Exception) : Result<Nothing>()
+    private fun <T> handleResponse(response: Response<T>): Result<T> {
+        return if (response.isSuccessful) {
+            response.body()?.let {
+                Result.Success(it)
+            } ?: Result.Failure(-1)
+        } else {
+            val errorBody = response.errorBody()?.string()
+            val json = Gson().fromJson(errorBody, JsonObject::class.java)
+            val errorDetail = json.getAsJsonObject("detail")
+            val errorCode = errorDetail?.get("code")?.asInt ?: -1
+            Result.Failure(errorCode)
+        }
     }
 }

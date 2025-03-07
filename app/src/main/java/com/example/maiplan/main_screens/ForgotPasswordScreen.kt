@@ -29,7 +29,7 @@ import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.AuthViewModel
 
 @Composable
@@ -95,9 +95,9 @@ fun ForgotPasswordScreen(
 
             SubmitButtonComponent(stringResource(R.string.reset), onButtonClicked = { onResetClick(email, password, passwordAgain) })
 
-            if (resetPasswordResult is AuthRepository.Result.Failure) {
+            if (resetPasswordResult is Result.Failure) {
                 Spacer(modifier = Modifier.height(8.dp))
-                val error = resetPasswordResult as AuthRepository.Result.Failure
+                val error = resetPasswordResult as Result.Failure
                 val code = error.errorCode
 
                 val errorMessageId = when (code) {

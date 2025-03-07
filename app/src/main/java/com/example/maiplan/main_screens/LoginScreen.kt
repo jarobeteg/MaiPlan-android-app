@@ -31,7 +31,7 @@ import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.AuthViewModel
 
 @Composable
@@ -94,9 +94,9 @@ fun LoginScreen(
 
             SubmitButtonComponent(stringResource(R.string.login), onButtonClicked = { onLoginClick(email, password) })
 
-            if (loginResult is AuthRepository.Result.Failure) {
+            if (loginResult is Result.Failure) {
                 Spacer(modifier = Modifier.height(8.dp))
-                val error = loginResult as AuthRepository.Result.Failure
+                val error = loginResult as Result.Failure
                 val code = error.errorCode
 
                 val errorMessageId = when (code) {
