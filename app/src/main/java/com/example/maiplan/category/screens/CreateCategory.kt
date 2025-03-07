@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -20,18 +19,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +45,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -71,6 +65,7 @@ import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.SubmitButtonComponent
+import com.example.maiplan.utils.IconData.allIcons
 import com.example.maiplan.viewmodel.CategoryViewModel
 
 @Composable
@@ -84,7 +79,7 @@ fun CreateCategoryScreen(
     var description by remember { mutableStateOf("") }
     var selectedType by remember { mutableIntStateOf(1) }
     var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
-    var selectedIcon by remember { mutableStateOf(Icons.Default.Star) }
+    var selectedIcon by remember { mutableStateOf(Icons.Filled.Search) }
 
     Scaffold ( topBar = { CreateCategoryTopBar(
         text = stringResource(R.string.category_new),
@@ -138,7 +133,7 @@ fun TypeDropdown(selectedType: Int, onTypeSelected: (Int) -> Unit) {
                 readOnly = true,
                 label = { Text("Select Type") },
                 trailingIcon = { Icon(
-                    Icons.Default.ArrowDropDown,
+                    Icons.Filled.ArrowDropDown,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onBackground,
                     modifier = Modifier.rotate(rotationAngle)
@@ -214,7 +209,7 @@ fun ColorPickerRow(
 
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .background(selectedColor, CircleShape)
                     .border(1.dp, Color.Gray, CircleShape)
             )
@@ -337,7 +332,7 @@ fun ColorPickerDialog(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                     TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onBackground) }
                     TextButton(onClick = { onColorSelected(color); onDismiss() }) { Text(stringResource(R.string.select), color = MaterialTheme.colorScheme.onBackground) }
                 }
@@ -389,7 +384,7 @@ fun IconPickerRow(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(42.dp),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -413,10 +408,7 @@ fun IconPickerDialog(
     onIconSelected: (ImageVector) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val allIcons = listOf(
-        Icons.Default.Star, Icons.Default.Favorite, Icons.Default.Home, Icons.Default.Person,
-        Icons.Default.Email, Icons.Default.Call, Icons.Default.ShoppingCart, Icons.Default.Settings
-    )
+    val scrollState = rememberLazyGridState()
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -424,20 +416,50 @@ fun IconPickerDialog(
             color = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier.padding(16.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(4),
-                    contentPadding = PaddingValues(8.dp),
-                    modifier = Modifier.height(300.dp)
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+                    modifier = Modifier
+                        .height(300.dp)
+                        .fillMaxWidth()
                 ) {
-                    items(allIcons) { icon ->
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onBackground,
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(4),
+                        contentPadding = PaddingValues(8.dp),
+                        state = scrollState,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        items(allIcons.entries.toList()) { (key, icon) ->
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clickable { onIconSelected(icon); onDismiss() }
+                            )
+                        }
+                    }
+
+                    val showScrollIndicator by remember {
+                        derivedStateOf { scrollState.canScrollForward }
+                    }
+                    if (showScrollIndicator) {
+                        Box(
                             modifier = Modifier
-                                .size(48.dp)
-                                .clickable { onIconSelected(icon); onDismiss() }
+                                .align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .height(24.dp)
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(
+                                            Color.Transparent,
+                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
+                                        )
+                                    )
+                                )
                         )
                     }
                 }
