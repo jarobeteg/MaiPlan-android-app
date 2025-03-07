@@ -1,19 +1,23 @@
 package com.example.maiplan.category
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.maiplan.R
 import com.example.maiplan.category.screens.CategoryManagementScreen
 import com.example.maiplan.category.screens.CreateCategoryScreen
 import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.CategoryRepository
+import com.example.maiplan.repository.Result
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.viewmodel.AuthViewModel
@@ -68,5 +72,19 @@ class CategoryActivity : AppCompatActivity() {
         }
     }
 
-    private fun observeCategoryViewModel() {}
+    private fun observeCategoryViewModel() {
+        fun handleResult(result: Result<Unit>, successMessage: Int) {
+            when (result) {
+                is Result.Success -> {
+                    Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
+                    categoryViewModel.resetCreateCategoryScreen()
+                }
+                is Result.Error -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
+                is Result.Failure -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
+                is Result.Idle -> {}
+            }
+        }
+
+        categoryViewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_success) })
+    }
 }
