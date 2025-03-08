@@ -8,12 +8,17 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
 import com.example.maiplan.category.screens.CategoryManagementScreen
 import com.example.maiplan.category.screens.CreateCategoryScreen
+import com.example.maiplan.category.screens.UpdateCategoryScreen
 import com.example.maiplan.network.CategoryCreate
+import com.example.maiplan.network.CategoryResponse
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.CategoryRepository
@@ -59,6 +64,8 @@ class CategoryActivity : AppCompatActivity() {
         setContent {
             AppTheme {
                 val isCreateCategoryScreen by categoryViewModel.isCreateCategoryScreen.collectAsState()
+                val isUpdateCategoryScreen by categoryViewModel.isUpdateCategoryScreen.collectAsState()
+                var selectedCategory by remember { mutableStateOf<CategoryResponse?>(null) }
                 val userId by authViewModel.userId.observeAsState()
 
                 BackHandler(enabled = isCreateCategoryScreen) {
@@ -77,7 +84,24 @@ class CategoryActivity : AppCompatActivity() {
                             categoryViewModel.clearErrors()
                         }
                     )
-                    else -> CategoryManagementScreen(categoryViewModel)
+                    isUpdateCategoryScreen -> UpdateCategoryScreen(
+                        viewModel = categoryViewModel,
+                        category = selectedCategory!!,
+                        onSaveClick = { name, description, color, icon ->
+                            categoryViewModel.updateCategory(CategoryResponse(selectedCategory!!.categoryId, name, description, color, icon), userId!!)
+                        },
+                        onBackClick = {
+                            categoryViewModel.resetUpdateCategoryScreen()
+                            categoryViewModel.clearErrors()
+                        }
+                    )
+                    else -> CategoryManagementScreen(
+                        viewModel = categoryViewModel,
+                        onCardClicked = { category ->
+                            categoryViewModel.handleUpdateCategoryClicked()
+                            selectedCategory = category
+                        }
+                    )
                 }
             }
         }
@@ -89,6 +113,7 @@ class CategoryActivity : AppCompatActivity() {
                 is Result.Success -> {
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     categoryViewModel.resetCreateCategoryScreen()
+                    categoryViewModel.resetUpdateCategoryScreen()
                 }
                 is Result.Error -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
                 is Result.Failure -> {}
@@ -96,6 +121,7 @@ class CategoryActivity : AppCompatActivity() {
             }
         }
 
-        categoryViewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_success) })
+        categoryViewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_created_success) })
+        categoryViewModel.updateCategoryResult.observe(this, Observer { handleResult(it, R.string.category_updated_success) })
     }
 }

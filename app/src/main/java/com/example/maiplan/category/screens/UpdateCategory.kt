@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,24 +27,27 @@ import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.network.CategoryResponse
 import com.example.maiplan.repository.Result
+import com.example.maiplan.utils.IconData
+import com.example.maiplan.viewmodel.CategoryViewModel
 
 @Composable
-fun CreateCategoryScreen(
+fun UpdateCategoryScreen(
     viewModel: CategoryViewModel,
+    category: CategoryResponse,
     onSaveClick: (String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val saveResult by viewModel.createCategoryResult.observeAsState()
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
-    var selectedIcon by remember { mutableStateOf(Icons.Filled.Search) }
-    var selectedIconString by remember { mutableStateOf("search") }
+    val saveResult by viewModel.updateCategoryResult.observeAsState()
+    var name by remember { mutableStateOf(category.name) }
+    var description by remember { mutableStateOf(category.description) }
+    var selectedColor by remember { mutableStateOf(Color(category.color.toULong())) }
+    var selectedIcon by remember { mutableStateOf(IconData.getIconByKey(category.icon)) }
+    var selectedIconString by remember { mutableStateOf(category.icon) }
 
     Scaffold ( topBar = { CategoryTopBar(
-        text = stringResource(R.string.category_new),
+        text = stringResource(R.string.category_modify),
         onBackClick = onBackClick
     ) }) { innerPadding ->
         Column(
@@ -93,7 +94,7 @@ fun CreateCategoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
+            SubmitButtonComponent(stringResource(R.string.category_update)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
         }
     }
 }

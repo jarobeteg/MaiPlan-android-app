@@ -89,12 +89,15 @@
     <!-- category management screen -->
     <string name="categories">Categories</string>
     <string name="category_new">New Category</string>
+    <string name="category_modify">Modify Category</string>
     <string name="category_name">Name</string>
     <string name="category_description">Description</string>
     <string name="category_save">Save Category</string>
+    <string name="category_update">Update Category</string>
     <string name="category_color">Select a Color</string>
     <string name="category_icon">Select an Icon</string>
-    <string name="category_success">Category added successfully.</string>
+    <string name="category_created_success">Category added successfully.</string>
+    <string name="category_updated_success">Category updated successfully.</string>
     <string name="category_search">Search categories…</string>
     <string name="category_type_event">Event</string>
     <string name="category_type_finance">Finance</string>

@@ -45,7 +45,8 @@ import com.example.maiplan.viewmodel.CategoryViewModel
 
 @Composable
 fun CategoryManagementScreen(
-    viewModel: CategoryViewModel
+    viewModel: CategoryViewModel,
+    onCardClicked: (CategoryResponse) -> Unit
 ) {
     val context = LocalContext.current
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
@@ -53,7 +54,7 @@ fun CategoryManagementScreen(
 
     Scaffold (
         topBar =
-            { CategoryTopBar(
+            { CategoryManagementTopBar(
                 text = stringResource(R.string.categories),
                 onBackClick = { (context as? Activity)?.finish() },
                 onAddCategoryClick = { viewModel.handleAddCategoryClicked() }
@@ -74,7 +75,7 @@ fun CategoryManagementScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(filteredCategories) { category ->
-                    CategoryCard(category = category)
+                    CategoryCard(category = category, onCardClicked = { onCardClicked(category) })
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
@@ -84,7 +85,7 @@ fun CategoryManagementScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryTopBar(
+fun CategoryManagementTopBar(
     text: String,
     onBackClick: () -> Unit,
     onAddCategoryClick: () -> Unit
@@ -122,7 +123,7 @@ fun CategoryTopBar(
 }
 
 @Composable
-fun CategoryCard(category: CategoryResponse) {
+fun CategoryCard(category: CategoryResponse, onCardClicked: (CategoryResponse) -> Unit) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
 
@@ -140,7 +141,8 @@ fun CategoryCard(category: CategoryResponse) {
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 4.dp)
             .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
+        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        onClick = { onCardClicked(category) }
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {

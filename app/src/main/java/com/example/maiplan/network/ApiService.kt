@@ -4,8 +4,10 @@ import com.google.gson.annotations.SerializedName
 import retrofit2.Response
 import retrofit2.http.Header
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.POST
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 // user auth data classes
@@ -54,4 +56,10 @@ interface ApiService {
 
     @GET("categories/get-all-category")
     suspend fun getAllCategories(@Query("user_id") userId: Int): Response<List<CategoryResponse>>
+
+    @POST("categories/update-category")
+    suspend fun updateCategory(@Body category: CategoryResponse): Response<Unit>
+
+    @DELETE("categories/{category_id}")
+    suspend fun deleteCategory(@Path("category_id") categoryId: Int): Response<Unit>
 }

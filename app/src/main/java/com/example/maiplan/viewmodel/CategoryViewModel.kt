@@ -20,8 +20,17 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     private var _categoryList = MutableLiveData<List<CategoryResponse>>()
     val categoryList: LiveData<List<CategoryResponse>> get() = _categoryList
 
-    private var _isCreateCategoryScreen = MutableStateFlow(false)
+    private val _updateCategoryResult = MutableLiveData<Result<Unit>>()
+    val updateCategoryResult: LiveData<Result<Unit>> get() = _updateCategoryResult
+
+    private val _deleteCategoryResult = MutableLiveData<Result<Unit>>()
+    val deleteCategoryResult: LiveData<Result<Unit>> get() = _deleteCategoryResult
+
+    private val _isCreateCategoryScreen = MutableStateFlow(false)
     val isCreateCategoryScreen: StateFlow<Boolean> = _isCreateCategoryScreen.asStateFlow()
+
+    private var _isUpdateCategoryScreen = MutableStateFlow(false)
+    val isUpdateCategoryScreen: StateFlow<Boolean> = _isUpdateCategoryScreen.asStateFlow()
 
     init {
         clearErrors()
@@ -43,6 +52,19 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
+    fun updateCategory(category: CategoryResponse, userId: Int) {
+        viewModelScope.launch {
+            _updateCategoryResult.postValue(categoryRepository.updateCategory(category))
+            getAllCategories(userId)
+        }
+    }
+
+    fun deleteCategory(categoryId: Int) {
+        viewModelScope.launch {
+            _deleteCategoryResult.postValue(categoryRepository.deleteCategory(categoryId))
+        }
+    }
+
     fun handleAddCategoryClicked() {
         _isCreateCategoryScreen.value = true
     }
@@ -51,7 +73,16 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         _isCreateCategoryScreen.value = false
     }
 
+    fun handleUpdateCategoryClicked() {
+        _isUpdateCategoryScreen.value = true
+    }
+
+    fun resetUpdateCategoryScreen() {
+        _isUpdateCategoryScreen.value = false
+    }
+
     fun clearErrors() {
         _createCategoryResult.postValue(Result.Idle)
+        _updateCategoryResult.postValue(Result.Idle)
     }
 }

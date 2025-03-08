@@ -24,6 +24,22 @@ class CategoryRepository(private val apiService: ApiService) {
         }
     }
 
+    suspend fun updateCategory(category: CategoryResponse): Result<Unit> {
+        return try {
+            handleResponse(apiService.updateCategory(category))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun deleteCategory(categoryId: Int): Result<Unit> {
+        return try {
+            handleResponse(apiService.deleteCategory(categoryId))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
     private fun <T> handleResponse(response: Response<T>): Result<T> {
         return if (response.isSuccessful) {
             response.body()?.let {
