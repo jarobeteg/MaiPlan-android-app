@@ -96,7 +96,6 @@
     <string name="category_icon">Select an Icon</string>
     <string name="category_success">Category added successfully.</string>
     <string name="category_search">Search categories…</string>
-    <string name="category_select_type">Select type</string>
     <string name="category_type_event">Event</string>
     <string name="category_type_finance">Finance</string>
     <string name="category_type_other">Other</string>

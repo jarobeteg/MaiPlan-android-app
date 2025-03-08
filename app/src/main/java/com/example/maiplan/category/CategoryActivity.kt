@@ -67,8 +67,8 @@ class CategoryActivity : AppCompatActivity() {
 
                 when {
                     isCreateCategoryScreen -> CreateCategoryScreen(
-                        onSaveClick = { selectedType, name, description, color, icon ->
-                            categoryViewModel.createCategory(CategoryCreate(userId!!, selectedType, name, description, color, icon))
+                        onSaveClick = { name, description, color, icon ->
+                            categoryViewModel.createCategory(CategoryCreate(userId!!, name, description, color, icon))
                         },
                         onBackClick = { categoryViewModel.resetCreateCategoryScreen() }
                     )

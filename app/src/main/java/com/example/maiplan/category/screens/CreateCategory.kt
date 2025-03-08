@@ -70,12 +70,11 @@ import android.graphics.Color as AndroidColor
 
 @Composable
 fun CreateCategoryScreen(
-    onSaveClick: (Int, String, String, String, String) -> Unit,
+    onSaveClick: (String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var selectedType by remember { mutableIntStateOf(1) }
     var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
     var selectedIcon by remember { mutableStateOf(Icons.Filled.Search) }
     var selectedIconString by remember { mutableStateOf("search") }
@@ -106,73 +105,9 @@ fun CreateCategoryScreen(
                 onIconSelectedString = { selectedIconString = it }
             )
 
-            TypeDropdown(selectedType) { selectedType = it }
-
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(selectedType, name, description, selectedColor.value.toString(), selectedIconString) }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TypeDropdown(selectedType: Int, onTypeSelected: (Int) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
-    val rotationAngle by animateFloatAsState(targetValue = if (expanded) 90f else 0f)
-    val categoryTypes = listOf(
-        stringResource(R.string.category_type_event),
-        stringResource(R.string.category_type_finance),
-        stringResource(R.string.category_type_other)
-    )
-
-    Box(modifier = Modifier.fillMaxWidth()) {
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
-            OutlinedTextField(
-                value = categoryTypes[selectedType - 1],
-                onValueChange = {},
-                readOnly = true,
-                label = { Text(stringResource(R.string.category_select_type)) },
-                trailingIcon = { Icon(
-                    Icons.Filled.ArrowDropDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.rotate(rotationAngle)
-                ) },
-                modifier = Modifier
-                    .menuAnchor(type = MenuAnchorType.PrimaryNotEditable, enabled = true)
-                    .fillMaxWidth(),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.background,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                )
-            )
-
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.primary)
-            ) {
-                categoryTypes.forEachIndexed { index, _ ->
-                    DropdownMenuItem(
-                        text = { Text(categoryTypes[index], color = MaterialTheme.colorScheme.onBackground) },
-                        onClick = {
-                            onTypeSelected(index + 1)
-                            expanded = false
-                        }
-                    )
-                }
-            }
+            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
         }
     }
 }

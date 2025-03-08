@@ -18,7 +18,6 @@ data class UserResponse(@SerializedName("user_id") val id: Int, val email: Strin
 // category data classes
 data class CategoryCreate(
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("entity_type") val entityType: Int,
     val name: String,
     val description: String,
     val color: String,
@@ -26,7 +25,6 @@ data class CategoryCreate(
     )
 data class CategoryResponse(
     @SerializedName("category_id") val categoryId: Int,
-    @SerializedName("entity_type") val entityType: Int,
     val name: String,
     val description: String,
     val color: String,
