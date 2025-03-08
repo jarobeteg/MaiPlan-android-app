@@ -63,14 +63,19 @@ class CategoryActivity : AppCompatActivity() {
 
                 BackHandler(enabled = isCreateCategoryScreen) {
                     categoryViewModel.resetCreateCategoryScreen()
+                    categoryViewModel.clearErrors()
                 }
 
                 when {
                     isCreateCategoryScreen -> CreateCategoryScreen(
+                        viewModel = categoryViewModel,
                         onSaveClick = { name, description, color, icon ->
                             categoryViewModel.createCategory(CategoryCreate(userId!!, name, description, color, icon))
                         },
-                        onBackClick = { categoryViewModel.resetCreateCategoryScreen() }
+                        onBackClick = {
+                            categoryViewModel.resetCreateCategoryScreen()
+                            categoryViewModel.clearErrors()
+                        }
                     )
                     else -> CategoryManagementScreen(categoryViewModel)
                 }
@@ -86,7 +91,7 @@ class CategoryActivity : AppCompatActivity() {
                     categoryViewModel.resetCreateCategoryScreen()
                 }
                 is Result.Error -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
-                is Result.Failure -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
+                is Result.Failure -> {}
                 is Result.Idle -> {}
             }
         }

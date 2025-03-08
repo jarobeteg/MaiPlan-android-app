@@ -99,6 +99,8 @@
     <string name="category_type_event">Event</string>
     <string name="category_type_finance">Finance</string>
     <string name="category_type_other">Other</string>
+    <string name="category_error_1">Name field cannot be empty!</string>
+    <string name="category_error_2">Description field cannot be empty!</string>
     <string name="hue">Hue</string>
     <string name="saturation">Saturation</string>
     <string name="brightness">Brightness</string>

@@ -3,6 +3,8 @@ package com.example.maiplan.repository
 import com.example.maiplan.network.ApiService
 import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.CategoryResponse
+import com.google.gson.Gson
+import com.google.gson.JsonObject
 import retrofit2.Response
 
 class CategoryRepository(private val apiService: ApiService) {
@@ -28,7 +30,11 @@ class CategoryRepository(private val apiService: ApiService) {
                 Result.Success(it)
             } ?: Result.Failure(-1)
         } else {
-            Result.Failure(-1)
+            val errorBody = response.errorBody()?.string()
+            val json = Gson().fromJson(errorBody, JsonObject::class.java)
+            val errorDetail = json.getAsJsonObject("detail")
+            val errorCode = errorDetail?.get("code")?.asInt ?: -1
+            Result.Failure(errorCode)
         }
     }
 }

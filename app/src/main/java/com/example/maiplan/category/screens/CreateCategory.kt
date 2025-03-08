@@ -40,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,15 +56,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
+import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.utils.IconData.allIcons
+import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.repository.Result
 import android.graphics.Color as AndroidColor
 
 @Composable
 fun CreateCategoryScreen(
+    viewModel: CategoryViewModel,
     onSaveClick: (String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val saveResult by viewModel.createCategoryResult.observeAsState()
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
@@ -95,6 +101,26 @@ fun CreateCategoryScreen(
                 onIconSelected = { selectedIcon = it },
                 onIconSelectedString = { selectedIconString = it }
             )
+
+            if (saveResult is Result.Failure) {
+                val error = saveResult as Result.Failure
+                val code = error.errorCode
+
+                val errorMessageId = when (code) {
+                    1 -> R.string.category_error_1
+                    2 -> R.string.category_error_2
+                    else -> R.string.unknown_error
+                }
+
+                val errorMessage = stringResource(errorMessageId)
+
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorMessageComponent(errorMessage)
+                }
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 

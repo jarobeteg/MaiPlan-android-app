@@ -23,6 +23,10 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     private var _isCreateCategoryScreen = MutableStateFlow(false)
     val isCreateCategoryScreen: StateFlow<Boolean> = _isCreateCategoryScreen.asStateFlow()
 
+    init {
+        clearErrors()
+    }
+
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {
             _createCategoryResult.postValue(categoryRepository.createCategory(category))
@@ -45,5 +49,9 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
 
     fun resetCreateCategoryScreen() {
         _isCreateCategoryScreen.value = false
+    }
+
+    fun clearErrors() {
+        _createCategoryResult.postValue(Result.Idle)
     }
 }
