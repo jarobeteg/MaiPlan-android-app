@@ -70,7 +70,7 @@ fun CategoryManagementScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             val filteredCategories = categoryList.filter {
-                it.name.contains(searchQuery, ignoreCase = true)
+                it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true)
             }
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
