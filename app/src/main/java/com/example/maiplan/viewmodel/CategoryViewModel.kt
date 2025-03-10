@@ -59,9 +59,10 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
-    fun deleteCategory(categoryId: Int) {
+    fun deleteCategory(categoryId: Int, userId: Int) {
         viewModelScope.launch {
             _deleteCategoryResult.postValue(categoryRepository.deleteCategory(categoryId))
+            getAllCategories(userId)
         }
     }
 

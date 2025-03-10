@@ -97,7 +97,10 @@ class CategoryActivity : AppCompatActivity() {
                     )
                     else -> CategoryManagementScreen(
                         viewModel = categoryViewModel,
-                        onCardClicked = { category ->
+                        onCardSwipeDelete = { categoryId->
+                            categoryViewModel.deleteCategory(categoryId, userId!!)
+                        },
+                        onCardSwipeEdit = { category ->
                             categoryViewModel.handleUpdateCategoryClicked()
                             selectedCategory = category
                         }
@@ -123,5 +126,6 @@ class CategoryActivity : AppCompatActivity() {
 
         categoryViewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_created_success) })
         categoryViewModel.updateCategoryResult.observe(this, Observer { handleResult(it, R.string.category_updated_success) })
+        categoryViewModel.deleteCategoryResult.observe(this, Observer { handleResult(it, R.string.category_deleted) })
     }
 }

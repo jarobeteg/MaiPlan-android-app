@@ -1,8 +1,10 @@
 package com.example.maiplan.category.screens
 
 import android.app.Activity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,6 +19,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -25,12 +29,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -46,7 +55,8 @@ import com.example.maiplan.viewmodel.CategoryViewModel
 @Composable
 fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
-    onCardClicked: (CategoryResponse) -> Unit
+    onCardSwipeDelete: (Int) -> Unit,
+    onCardSwipeEdit: (CategoryResponse) -> Unit
 ) {
     val context = LocalContext.current
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
@@ -75,7 +85,30 @@ fun CategoryManagementScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(filteredCategories) { category ->
-                    CategoryCard(category = category, onCardClicked = { onCardClicked(category) })
+                    val dismissState = rememberSwipeToDismissBoxState(
+                        confirmValueChange = {
+                            when (it) {
+                                SwipeToDismissBoxValue.StartToEnd -> {
+                                    onCardSwipeDelete(category.categoryId)
+                                }
+                                SwipeToDismissBoxValue.EndToStart -> {
+                                    onCardSwipeEdit(category)
+                                }
+                                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
+                            }
+                            return@rememberSwipeToDismissBoxState true
+                        },
+                        positionalThreshold = { it * 0.9f }
+                    )
+
+                    SwipeToDismissBox(
+                        state = dismissState,
+                        backgroundContent = { DismissBackground(dismissState) },
+                        content = {
+                            CategoryCard(category = category)
+                        }
+                    )
+
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
@@ -123,7 +156,7 @@ fun CategoryManagementTopBar(
 }
 
 @Composable
-fun CategoryCard(category: CategoryResponse, onCardClicked: (CategoryResponse) -> Unit) {
+fun CategoryCard(category: CategoryResponse) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
 
@@ -141,8 +174,7 @@ fun CategoryCard(category: CategoryResponse, onCardClicked: (CategoryResponse) -
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 4.dp)
             .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        onClick = { onCardClicked(category) }
+        colors = CardDefaults.cardColors(containerColor = backgroundColor)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -169,6 +201,45 @@ fun CategoryCard(category: CategoryResponse, onCardClicked: (CategoryResponse) -
                 text = category.description,
                 style = MaterialTheme.typography.bodyMedium,
                 color = textColor.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
+
+@Composable
+fun DismissBackground(dismissState: SwipeToDismissBoxState) {
+    val color = when (dismissState.dismissDirection) {
+        SwipeToDismissBoxValue.StartToEnd -> Color(0xFFFF1744)
+        SwipeToDismissBoxValue.EndToStart -> Color(0xFF1DE9B6)
+        SwipeToDismissBoxValue.Settled -> Color.Transparent
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.medium)
+            .background(color)
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+            Arrangement.Start
+        } else {
+            Arrangement.End
+        }
+    ) {
+        if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(32.dp)
+            )
+        } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(32.dp)
             )
         }
     }
