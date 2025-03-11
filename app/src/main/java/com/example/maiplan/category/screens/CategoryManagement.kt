@@ -84,7 +84,7 @@ fun CategoryManagementScreen(
             }
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(filteredCategories) { category ->
+                items(filteredCategories, key = { it.categoryId }) { category ->
                     val dismissState = rememberSwipeToDismissBoxState(
                         confirmValueChange = {
                             when (it) {
