@@ -1,4 +1,4 @@
-package com.example.maiplan.utils
+package com.example.maiplan.home
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event

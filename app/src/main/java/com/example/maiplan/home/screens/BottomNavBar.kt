@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.maiplan.utils.BottomNavItem
+import com.example.maiplan.home.BottomNavItem
 
 @Composable
 fun BottomNavigationBar(

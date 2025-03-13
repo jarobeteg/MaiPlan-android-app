@@ -9,7 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.screens.event.EventScreen
-import com.example.maiplan.utils.BottomNavItem
+import com.example.maiplan.home.BottomNavItem
 
 @Composable
 fun BottomNavWithScreens() {
