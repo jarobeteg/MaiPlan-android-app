@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
 
         setContent { AppTheme { LoadingScreen() } }
 
-        val apiService = RetrofitClient.instance
-        val authRepository = AuthRepository(apiService)
+        val authApi = RetrofitClient.authApi
+        val authRepository = AuthRepository(authApi)
         val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
 
         sessionManager = SessionManager(this)

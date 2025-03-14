@@ -1,16 +1,16 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.ApiService
+import com.example.maiplan.network.CategoryApi
 import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.CategoryResponse
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-class CategoryRepository(private val apiService: ApiService) {
+class CategoryRepository(private val categoryApi: CategoryApi) {
     suspend fun createCategory(category: CategoryCreate): Result<Unit> {
         return try {
-            handleResponse(apiService.createCategory(category))
+            handleResponse(categoryApi.createCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -18,7 +18,7 @@ class CategoryRepository(private val apiService: ApiService) {
 
     suspend fun getAllCategories(userId: Int): Result<List<CategoryResponse>> {
         return try {
-            handleResponse(apiService.getAllCategories(userId))
+            handleResponse(categoryApi.getAllCategories(userId))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -26,7 +26,7 @@ class CategoryRepository(private val apiService: ApiService) {
 
     suspend fun updateCategory(category: CategoryResponse): Result<Unit> {
         return try {
-            handleResponse(apiService.updateCategory(category))
+            handleResponse(categoryApi.updateCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -34,7 +34,7 @@ class CategoryRepository(private val apiService: ApiService) {
 
     suspend fun deleteCategory(categoryId: Int): Result<Unit> {
         return try {
-            handleResponse(apiService.deleteCategory(categoryId))
+            handleResponse(categoryApi.deleteCategory(categoryId))
         } catch (e: Exception) {
             Result.Error(e)
         }

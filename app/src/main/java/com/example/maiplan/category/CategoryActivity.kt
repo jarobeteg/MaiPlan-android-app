@@ -37,9 +37,10 @@ class CategoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val apiService = RetrofitClient.instance
-        val categoryRepository = CategoryRepository(apiService)
-        val authRepository = AuthRepository(apiService)
+        val categoryApi = RetrofitClient.categoryApi
+        val authApi = RetrofitClient.authApi
+        val categoryRepository = CategoryRepository(categoryApi)
+        val authRepository = AuthRepository(authApi)
         val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
         val authFactory = GenericViewModelFactory { AuthViewModel(authRepository) }
 

@@ -1,6 +1,6 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.ApiService
+import com.example.maiplan.network.AuthApi
 import com.example.maiplan.network.Token
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserLogin
@@ -10,11 +10,11 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-class AuthRepository(private val apiService: ApiService) {
+class AuthRepository(private val authApi: AuthApi) {
 
     suspend fun register(user: UserRegister): Result<Token> {
         return try {
-            handleResponse(apiService.register(user))
+            handleResponse(authApi.register(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -22,7 +22,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun login(user: UserLogin): Result<Token> {
         return try {
-            handleResponse(apiService.login(user))
+            handleResponse(authApi.login(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -30,7 +30,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun resetPassword(user: UserResetPassword): Result<Token> {
         return try {
-            handleResponse(apiService.resetPassword(user))
+            handleResponse(authApi.resetPassword(user))
         } catch (e: Exception){
             Result.Error(e)
         }
@@ -38,7 +38,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun tokenRefresh(token: String): Result<Token> {
         return try {
-            handleResponse(apiService.tokenRefresh(token))
+            handleResponse(authApi.tokenRefresh(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -46,7 +46,7 @@ class AuthRepository(private val apiService: ApiService) {
 
     suspend fun getProfile(token: String): Result<UserResponse> {
         return try {
-            handleResponse(apiService.getProfile(token))
+            handleResponse(authApi.getProfile(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
