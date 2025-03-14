@@ -158,7 +158,7 @@ fun EventTopBar(
         ),
         actions = {
             IconButton(onClick = onDatePickerClick) {
-                Icon(Icons.Default.CalendarMonth, contentDescription = "Select Date", tint = MaterialTheme.colorScheme.onPrimary)
+                Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )
