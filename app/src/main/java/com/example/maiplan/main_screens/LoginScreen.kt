@@ -39,7 +39,7 @@ fun LoginScreen(
     viewModel: AuthViewModel? = null,
     onLoginClick: (String, String) -> Unit,
     toRegisterClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit
+    toForgotPasswordClick: () -> Unit
 ) {
     val loginResult by viewModel!!.loginResult.observeAsState()
     var email by remember { mutableStateOf("") }
@@ -87,7 +87,7 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                ClickableTextComponent(stringResource(R.string.forgot_password), onForgotPasswordClick)
+                ClickableTextComponent(stringResource(R.string.forgot_password), toForgotPasswordClick)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -122,5 +122,5 @@ fun LoginScreen(
 @Preview(showBackground = true)
 @Composable
 fun PreviewLogicScreen() {
-    LoginScreen(onLoginClick = { _, _ ->}, toRegisterClick = {}, onForgotPasswordClick = {})
+    LoginScreen(onLoginClick = { _, _ ->}, toRegisterClick = {}, toForgotPasswordClick = {})
 }

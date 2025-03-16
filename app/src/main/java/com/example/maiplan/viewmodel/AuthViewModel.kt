@@ -74,5 +74,6 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     fun clearErrors() {
         _loginResult.postValue(Result.Idle)
         _registerResult.postValue(Result.Idle)
+        _resetPasswordResult.postValue(Result.Idle)
     }
 }

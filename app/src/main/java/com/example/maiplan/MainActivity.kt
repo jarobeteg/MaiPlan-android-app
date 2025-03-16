@@ -7,22 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.HomeActivity
+import com.example.maiplan.main_screens.AuthNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.Token
-import com.example.maiplan.network.UserLogin
-import com.example.maiplan.network.UserRegister
-import com.example.maiplan.network.UserResetPassword
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.Result
-import com.example.maiplan.main_screens.ForgotPasswordScreen
 import com.example.maiplan.main_screens.LoadingScreen
-import com.example.maiplan.main_screens.LoginScreen
-import com.example.maiplan.main_screens.MainRoutes
-import com.example.maiplan.main_screens.RegisterScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.viewmodel.AuthViewModel
@@ -65,55 +56,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupComposeUI() {
         setContent {
             AppTheme {
-                val navController = rememberNavController()
-
-                NavHost(
-                    navController = navController,
-                    startDestination = MainRoutes.Login.route
-                ) {
-                    composable(MainRoutes.Login.route) {
-                        LoginScreen(
-                            viewModel = viewModel,
-                            onLoginClick = { email, password ->
-                                viewModel.login(UserLogin(email, password))
-                            },
-                            toRegisterClick = {
-                                viewModel.clearErrors()
-                                navController.navigate(MainRoutes.Register.route)
-                            },
-                            onForgotPasswordClick = {
-                                viewModel.clearErrors()
-                                navController.navigate(MainRoutes.ForgotPassword.route)
-                            }
-                        )
-                    }
-
-                    composable(MainRoutes.Register.route) {
-                        RegisterScreen(
-                            viewModel = viewModel,
-                            onRegisterClick = { email, username, password, passwordAgain ->
-                                viewModel.register(UserRegister(email, username, password, passwordAgain))
-                            },
-                            onBackToLogin = {
-                                viewModel.clearErrors()
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-
-                    composable(MainRoutes.ForgotPassword.route) {
-                        ForgotPasswordScreen(
-                            viewModel = viewModel,
-                            onResetClick = { email, password, passwordAgain ->
-                                viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
-                            },
-                            onBackToLogin = {
-                                viewModel.clearErrors()
-                                navController.popBackStack()
-                            }
-                        )
-                    }
-                }
+                AuthNavHost(viewModel)
             }
         }
     }
