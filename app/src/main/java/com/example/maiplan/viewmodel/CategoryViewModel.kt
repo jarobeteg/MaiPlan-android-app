@@ -8,9 +8,7 @@ import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.CategoryResponse
 import com.example.maiplan.repository.CategoryRepository
 import com.example.maiplan.repository.Result
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
@@ -26,11 +24,8 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     private val _deleteCategoryResult = MutableLiveData<Result<Unit>>()
     val deleteCategoryResult: LiveData<Result<Unit>> get() = _deleteCategoryResult
 
-    private val _isCreateCategoryScreen = MutableStateFlow(false)
-    val isCreateCategoryScreen: StateFlow<Boolean> = _isCreateCategoryScreen.asStateFlow()
-
-    private var _isUpdateCategoryScreen = MutableStateFlow(false)
-    val isUpdateCategoryScreen: StateFlow<Boolean> = _isUpdateCategoryScreen.asStateFlow()
+    private val _isNavigating = MutableLiveData(false)
+    val isNavigating: LiveData<Boolean> get() = _isNavigating
 
     init {
         clearErrors()
@@ -52,6 +47,10 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
+    fun getCategoryById(categoryId: Int): CategoryResponse {
+        return _categoryList.value!!.find { it.categoryId == categoryId }!!
+    }
+
     fun updateCategory(category: CategoryResponse, userId: Int) {
         viewModelScope.launch {
             _updateCategoryResult.postValue(categoryRepository.updateCategory(category))
@@ -66,20 +65,20 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
         }
     }
 
-    fun handleAddCategoryClicked() {
-        _isCreateCategoryScreen.value = true
+    /*
+    navigating functions are important for the swipe to edit functionality in category management
+    otherwise something causes the UpdateCategoryScreen to open twice and the UI would flicker
+    this is a temporary solution until I can't find something better, hopefully
+    */
+    fun startNavigation() {
+        _isNavigating.value = true
     }
 
-    fun resetCreateCategoryScreen() {
-        _isCreateCategoryScreen.value = false
-    }
-
-    fun handleUpdateCategoryClicked() {
-        _isUpdateCategoryScreen.value = true
-    }
-
-    fun resetUpdateCategoryScreen() {
-        _isUpdateCategoryScreen.value = false
+    fun resetNavigation() {
+        viewModelScope.launch {
+            delay(500)
+            _isNavigating.value = false
+        }
     }
 
     fun clearErrors() {

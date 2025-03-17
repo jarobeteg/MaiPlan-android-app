@@ -34,7 +34,6 @@ import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -43,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -56,7 +56,8 @@ import com.example.maiplan.viewmodel.CategoryViewModel
 fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
     onCardSwipeDelete: (Int) -> Unit,
-    onCardSwipeEdit: (CategoryResponse) -> Unit
+    onCardSwipeEdit: (CategoryResponse) -> Unit,
+    onCreateCategoryClick: () -> Unit
 ) {
     val context = LocalContext.current
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
@@ -67,7 +68,7 @@ fun CategoryManagementScreen(
             { CategoryManagementTopBar(
                 text = stringResource(R.string.categories),
                 onBackClick = { (context as? Activity)?.finish() },
-                onAddCategoryClick = { viewModel.handleAddCategoryClicked() }
+                onCreateCategoryClick = onCreateCategoryClick
             ) }) { innerPadding ->
         Column(
             modifier = Modifier
@@ -85,21 +86,26 @@ fun CategoryManagementScreen(
 
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(filteredCategories, key = { it.categoryId }) { category ->
-                    val dismissState = rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            when (it) {
-                                SwipeToDismissBoxValue.StartToEnd -> {
-                                    onCardSwipeDelete(category.categoryId)
+                    val density = LocalDensity.current
+                    val dismissState = remember(categoryList) {
+                        SwipeToDismissBoxState(
+                            initialValue = SwipeToDismissBoxValue.Settled,
+                            confirmValueChange = {
+                                when (it) {
+                                    SwipeToDismissBoxValue.StartToEnd -> {
+                                        onCardSwipeDelete(category.categoryId)
+                                    }
+                                    SwipeToDismissBoxValue.EndToStart -> {
+                                        onCardSwipeEdit(category)
+                                    }
+                                    SwipeToDismissBoxValue.Settled -> return@SwipeToDismissBoxState false
                                 }
-                                SwipeToDismissBoxValue.EndToStart -> {
-                                    onCardSwipeEdit(category)
-                                }
-                                SwipeToDismissBoxValue.Settled -> return@rememberSwipeToDismissBoxState false
-                            }
-                            return@rememberSwipeToDismissBoxState true
-                        },
-                        positionalThreshold = { it * 0.9f }
-                    )
+                                return@SwipeToDismissBoxState true
+                            },
+                            density = density,
+                            positionalThreshold = { it * 0.9f }
+                        )
+                    }
 
                     SwipeToDismissBox(
                         state = dismissState,
@@ -121,7 +127,7 @@ fun CategoryManagementScreen(
 fun CategoryManagementTopBar(
     text: String,
     onBackClick: () -> Unit,
-    onAddCategoryClick: () -> Unit
+    onCreateCategoryClick: () -> Unit
 ) {
     CenterAlignedTopAppBar(
         title = {
@@ -141,7 +147,7 @@ fun CategoryManagementTopBar(
             }
         },
         actions = {
-            IconButton(onClick = onAddCategoryClick) {
+            IconButton(onClick = onCreateCategoryClick) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,

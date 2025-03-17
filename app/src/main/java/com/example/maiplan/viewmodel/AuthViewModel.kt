@@ -29,9 +29,6 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _profileResult = MutableLiveData<Result<UserResponse>> ()
     val profileResult: LiveData<Result<UserResponse>> get() = _profileResult
 
-    private val _userId = MutableLiveData<Int?>()
-    val userId: LiveData<Int?> get() = _userId
-
     init {
         clearErrors()
     }
@@ -64,10 +61,6 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             val result = authRepository.getProfile(token)
             _profileResult.postValue(result)
-
-            if (result is Result.Success) {
-                _userId.postValue(result.data.id)
-            }
         }
     }
 

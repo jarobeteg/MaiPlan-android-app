@@ -16,6 +16,7 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.main_screens.LoadingScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
+import com.example.maiplan.utils.UserSession
 import com.example.maiplan.viewmodel.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
@@ -38,7 +39,15 @@ class MainActivity : AppCompatActivity() {
 
         val token = sessionManager.getAuthToken()
         if (token != null) {
+            viewModel.getProfile(token)
             viewModel.tokenRefresh(token)
+
+            viewModel.profileResult.observe(this, Observer { result ->
+                if (result is Result.Success) {
+                    UserSession.init(result.data)
+                }
+            })
+
             viewModel.tokenRefreshResult.observe(this, Observer { result ->
                 if (result is Result.Success) {
                     sessionManager.saveAuthToken(result.data.accessToken)
