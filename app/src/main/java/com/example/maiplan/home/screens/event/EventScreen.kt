@@ -1,7 +1,6 @@
 package com.example.maiplan.home.screens.event
 
 import android.content.Context
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -30,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
 import java.time.LocalDate
@@ -50,15 +51,10 @@ import java.util.Locale
 @Composable
 fun EventScreen() {
     val context = LocalContext.current
-    var selectedView by remember { mutableIntStateOf(0) }
-    var expanded by remember { mutableStateOf(false) }
+    val navController = rememberNavController()
+    var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
-
-    val rotationAngle by animateFloatAsState(
-        targetValue = if (expanded) 90f else 0f,
-        label = "Dropdown Arrow Rotation"
-    )
 
     val formattedTitle = getFormattedTitle(context, selectedView, selectedDate)
     val views = listOf(
@@ -68,14 +64,27 @@ fun EventScreen() {
     )
 
     Scaffold(
-        topBar = { EventTopBar(formattedTitle, rotationAngle, expanded, { expanded = !expanded }, views, selectedView, { selectedView = it }, { showDatePicker = true }) }
+        topBar = {
+            EventTopBar(
+                formattedTitle,
+                views,
+                onViewSelected = { index ->
+                    selectedView = index
+                    val route = when (index) {
+                        0 -> EventRoutes.Monthly.route
+                        1 -> EventRoutes.Weekly.route
+                        2 -> EventRoutes.Daily.route
+                        else -> EventRoutes.Monthly.route
+                    }
+                    navController.navigate(route) {
+                        popUpTo(navController.graph.id) { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
+                onDatePickerClick = { showDatePicker = true }) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            when (selectedView) {
-                0 -> MonthlyView(selectedDate, context)
-                1 -> WeeklyView(selectedDate)
-                2 -> DailyView(selectedDate)
-            }
+            EventNavHost(navController, selectedDate, context)
         }
     }
 
@@ -104,14 +113,11 @@ fun getFormattedTitle(context: Context, selectedView: Int, selectedDate: LocalDa
 @Composable
 fun EventTopBar(
     formattedTitle: String,
-    rotationAngle: Float,
-    expanded: Boolean,
-    onToggleExpand: () -> Unit,
     views: List<String>,
-    selectedView: Int,
     onViewSelected: (Int) -> Unit,
     onDatePickerClick: () -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
     var buttonWidth by remember { mutableIntStateOf(0) }
 
     TopAppBar(
@@ -123,7 +129,7 @@ fun EventTopBar(
                     .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
             ) {
                 OutlinedButton(
-                    onClick = onToggleExpand,
+                    onClick = { expanded = !expanded },
                     modifier = Modifier
                         .height(40.dp)
                         .onGloballyPositioned { coordinates ->
@@ -142,14 +148,20 @@ fun EventTopBar(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Dropdown Arrow",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.rotate(rotationAngle)
+                        modifier = Modifier.rotate(if (expanded) 90f else 0f)
                     )
                 }
 
-                EventDropdownMenu(expanded, views, buttonWidth, selectedView) { index ->
-                    onViewSelected(index)
-                    onToggleExpand()
-                }
+                EventDropdownMenu(
+                    expanded = expanded,
+                    views = views,
+                    buttonWidth = buttonWidth,
+                    onItemSelected = { index ->
+                        onViewSelected(index)
+                        expanded = false
+                    },
+                    onDismiss = { expanded = false }
+                )
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -169,12 +181,14 @@ fun EventDropdownMenu(
     expanded: Boolean,
     views: List<String>,
     buttonWidth: Int,
-    selectedView: Int,
-    onItemSelected: (Int) -> Unit
+    onItemSelected: (Int) -> Unit,
+    onDismiss: () -> Unit
 ) {
     DropdownMenu(
         expanded = expanded,
-        onDismissRequest = { onItemSelected(selectedView) },
+        onDismissRequest = {
+            onDismiss()
+        },
         modifier = Modifier
             .width(with(LocalDensity.current) { buttonWidth.toDp() })
             .background(MaterialTheme.colorScheme.primary)
@@ -183,7 +197,10 @@ fun EventDropdownMenu(
         views.forEachIndexed { index, view ->
             DropdownMenuItem(
                 text = { Text(view, color = MaterialTheme.colorScheme.onPrimary) },
-                onClick = { onItemSelected(index) },
+                onClick = {
+                    onItemSelected(index)
+                    onDismiss()
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.primary)
