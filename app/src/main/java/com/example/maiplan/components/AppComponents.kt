@@ -732,7 +732,7 @@ fun IconPickerDialog(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryTopBar(
+fun SimpleTopBar(
     text: String,
     onBackClick: () -> Unit
 ) {
