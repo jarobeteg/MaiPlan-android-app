@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">MaiPlan</string>
 
+    <!-- general -->
+    <string name="title">Title</string>
+    <string name="name">Name</string>
+    <string name="description">Description</string>
+
     <!-- main screens -->
     <string name="welcome_login">Welcome To MaiPlan!</string>
     <string name="create_an_account">Create an account</string>
@@ -66,11 +71,13 @@
     <string name="file">Files</string>
     <string name="more">More</string>
 
-    <!-- event views -->
+    <!-- event screen-->
     <string name="week">Week</string>
     <string name="monthly">Monthly</string>
     <string name="weekly">Weekly</string>
     <string name="daily">Daily</string>
+    <string name="event_new">New Event</string>
+    <string name="event_save">Save Event</string>
 
     <!-- days -->
     <string name="mon">Mon</string>
@@ -90,8 +97,6 @@
     <string name="categories">Categories</string>
     <string name="category_new">New Category</string>
     <string name="category_modify">Modify Category</string>
-    <string name="category_name">Name</string>
-    <string name="category_description">Description</string>
     <string name="category_save">Save Category</string>
     <string name="category_update">Update Category</string>
     <string name="category_color">Select a Color</string>
@@ -99,9 +104,6 @@
     <string name="category_created_success">Category added successfully.</string>
     <string name="category_updated_success">Category updated successfully.</string>
     <string name="category_search">Search categories…</string>
-    <string name="category_type_event">Event</string>
-    <string name="category_type_finance">Finance</string>
-    <string name="category_type_other">Other</string>
     <string name="category_deleted">Category deleted</string>
     <string name="category_error_1">Name field cannot be empty!</string>
     <string name="category_error_2">Description field cannot be empty!</string>

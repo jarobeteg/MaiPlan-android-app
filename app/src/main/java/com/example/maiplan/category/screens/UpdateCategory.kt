@@ -22,7 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
-import com.example.maiplan.components.CategoryTopBar
+import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
@@ -46,7 +46,7 @@ fun UpdateCategoryScreen(
     var selectedIcon by remember { mutableStateOf(IconData.getIconByKey(category.icon)) }
     var selectedIconString by remember { mutableStateOf(category.icon) }
 
-    Scaffold ( topBar = { CategoryTopBar(
+    Scaffold ( topBar = { SimpleTopBar(
         text = stringResource(R.string.category_modify),
         onBackClick = onBackClick
     ) }) { innerPadding ->
@@ -57,9 +57,9 @@ fun UpdateCategoryScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            AdjustableTextFieldLengthComponent(name, stringResource(R.string.category_name), 255) { name = it }
+            AdjustableTextFieldLengthComponent(name, stringResource(R.string.name), 255) { name = it }
 
-            AdjustableTextFieldLengthComponent(description, stringResource(R.string.category_description), 512) { description = it }
+            AdjustableTextFieldLengthComponent(description, stringResource(R.string.description), 512) { description = it }
 
             ColorPickerRow(
                 selectedColor = selectedColor,
