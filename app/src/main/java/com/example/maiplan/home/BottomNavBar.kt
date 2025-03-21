@@ -1,5 +1,9 @@
-package com.example.maiplan.home.screens
+package com.example.maiplan.home
 
+import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Context
+import android.content.Intent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -8,42 +12,39 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.maiplan.home.BottomNavItem
+import com.example.maiplan.home.event.EventActivity
+import com.example.maiplan.home.file.FileActivity
+import com.example.maiplan.home.more.MoreActivity
+import com.example.maiplan.home.task.TaskActivity
 
 @Composable
-fun BottomNavigationBar(
-    navController: NavHostController
-) {
-    val context = LocalContext.current
-
+fun BottomNavigationBar(context: Context) {
     val items = listOf(
-        BottomNavItem.Events,
-        BottomNavItem.Tasks,
-        BottomNavItem.Files,
-        BottomNavItem.More
+        BottomNavRoutes.Events to EventActivity::class.java,
+        BottomNavRoutes.Tasks to TaskActivity::class.java,
+        BottomNavRoutes.Files to FileActivity::class.java,
+        BottomNavRoutes.More to MoreActivity::class.java
     )
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
-        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        val currentActivity = (context as? Activity)
 
-        items.forEach { item ->
+        items.forEach { (item, activityClass) ->
             NavigationBarItem(
                 icon = { Icon(imageVector = item.icon, contentDescription = context.getString(item.labelResId)) },
                 label = { Text(context.getString(item.labelResId)) },
-                selected = currentRoute == item.route,
+                selected = currentActivity?.javaClass == activityClass,
                 onClick = {
-                    navController.navigate(item.route) {
-                        popUpTo(navController.graph.startDestinationId) {
-                            saveState = true
+                    if (currentActivity?.javaClass != activityClass) {
+                        val intent = Intent(context, activityClass).apply {
+                            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         }
-                        launchSingleTop = true
-                        restoreState = true
+                        val options = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
+                        context.startActivity(intent, options)
+                        currentActivity?.finish()
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(

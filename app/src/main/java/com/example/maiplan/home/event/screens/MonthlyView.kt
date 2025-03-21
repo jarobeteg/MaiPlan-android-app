@@ -1,4 +1,4 @@
-package com.example.maiplan.home.screens.event
+package com.example.maiplan.home.event.screens
 
 import android.content.Context
 import androidx.compose.foundation.layout.Box

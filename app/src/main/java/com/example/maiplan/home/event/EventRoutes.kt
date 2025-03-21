@@ -1,4 +1,4 @@
-package com.example.maiplan.home.screens.event
+package com.example.maiplan.home.event
 
 sealed class EventRoutes(val route: String) {
     data object Monthly : EventRoutes("event-monthly-view")

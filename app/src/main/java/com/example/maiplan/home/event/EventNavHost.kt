@@ -1,4 +1,4 @@
-package com.example.maiplan.home.screens.event
+package com.example.maiplan.home.event
 
 import android.content.Context
 import androidx.compose.runtime.Composable
@@ -7,6 +7,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import com.example.maiplan.home.event.screens.DailyView
+import com.example.maiplan.home.event.screens.MonthlyView
+import com.example.maiplan.home.event.screens.WeeklyView
 import java.time.LocalDate
 
 @Composable

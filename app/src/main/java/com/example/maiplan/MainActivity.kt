@@ -7,7 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import com.example.maiplan.home.HomeActivity
+import com.example.maiplan.home.event.EventActivity
 import com.example.maiplan.main_screens.AuthNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.Token
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                 if (result is Result.Success) {
                     sessionManager.saveAuthToken(result.data.accessToken)
                 }
-                startActivity(Intent(this, HomeActivity::class.java))
+                startActivity(Intent(this, EventActivity::class.java))
                 finish()
             })
         } else {
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
             when (result) {
                 is Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
-                    startActivity(Intent(this, HomeActivity::class.java))
+                    startActivity(Intent(this, EventActivity::class.java))
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
                 }

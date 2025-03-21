@@ -1,4 +1,4 @@
-package com.example.maiplan.home.screens.event
+package com.example.maiplan.home.event.screens
 
 import android.content.Context
 import androidx.compose.foundation.background
@@ -35,22 +35,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
+import com.example.maiplan.home.BottomNavigationBar
+import com.example.maiplan.home.event.EventNavHost
+import com.example.maiplan.home.event.EventRoutes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 
 @Composable
-fun EventScreen() {
-    val context = LocalContext.current
+fun EventScreenWithNav(context: Context) {
     val navController = rememberNavController()
     var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
@@ -81,7 +81,8 @@ fun EventScreen() {
                         launchSingleTop = true
                     }
                 },
-                onDatePickerClick = { showDatePicker = true }) }
+                onDatePickerClick = { showDatePicker = true }) },
+        bottomBar = { BottomNavigationBar(context) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             EventNavHost(navController, selectedDate, context)
@@ -208,10 +209,4 @@ fun EventDropdownMenu(
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewActivityScreen() {
-    EventScreen()
 }

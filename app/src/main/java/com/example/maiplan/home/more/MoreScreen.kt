@@ -1,4 +1,4 @@
-package com.example.maiplan.home.screens
+package com.example.maiplan.home.more
 
 import android.app.Activity
 import android.content.Context
@@ -32,19 +32,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
+import com.example.maiplan.home.BottomNavigationBar
 
 @Composable
-fun MoreScreen() {
-    val context = LocalContext.current
-
-    Scaffold(topBar = { MoreTopBar() }) { innerPadding ->
+fun MoreScreenWithNav(context: Context) {
+    Scaffold(
+        topBar = { MoreTopBar() },
+        bottomBar = { BottomNavigationBar(context) }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
