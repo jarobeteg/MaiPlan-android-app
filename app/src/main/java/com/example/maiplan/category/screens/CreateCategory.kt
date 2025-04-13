@@ -32,6 +32,29 @@ import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.viewmodel.CategoryViewModel
 import com.example.maiplan.repository.Result
 
+/**
+ * Composable screen for creating a new category.
+ *
+ * This screen includes input fields for a category's name and description,
+ * a color picker, and an icon picker. When the user submits the form, the
+ * [onSaveClick] callback is triggered with the entered values.
+ *
+ * The screen also observes [viewmodel.createCategoryResult] to display
+ * any error messages if category creation fails.
+ *
+ * @param viewModel Provides category creation logic and category result state.
+ * @param onSaveClick Callback invoked when the user submits the creation form.
+ * @param onBackClick Callback invoked when the back button in the top app bar is clicked.
+ *
+ * @see AdjustableTextFieldLengthComponent
+ * @see SimpleTopBar
+ * @see ColorPickerRow
+ * @see ErrorMessageComponent
+ * @see IconPickerRow
+ * @see SubmitButtonComponent
+ * @see CategoryViewModel
+ * @see Result
+ */
 @Composable
 fun CreateCategoryScreen(
     viewModel: CategoryViewModel,
