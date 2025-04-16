@@ -25,7 +25,8 @@ class CategoryActivity : AppCompatActivity() {
     /** ViewModel instance to handle Category related logic. */
     private lateinit var categoryViewModel: CategoryViewModel
 
-    /** Lifecycle method onCreate is called when the activity created.
+    /**
+     * Lifecycle method onCreate is called when the activity created.
      *
      * - Initializes the ViewModel using a repository and generic factory.
      * -- The repository needs to be initialized by the retrofit client's category API
