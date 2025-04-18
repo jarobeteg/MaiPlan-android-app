@@ -16,7 +16,6 @@ import com.example.maiplan.network.CategoryResponse
 import com.example.maiplan.utils.UserSession
 import com.example.maiplan.viewmodel.CategoryViewModel
 
-
 /**
  * Composable that sets up the navigation host for the Category screens.
  *

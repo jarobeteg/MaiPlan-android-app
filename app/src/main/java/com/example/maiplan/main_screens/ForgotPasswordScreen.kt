@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.ClickableTextComponent
@@ -32,13 +31,39 @@ import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.AuthViewModel
 
+
+/**
+ * A composable screen for resetting the user's password.
+ *
+ * This screen allows the user to:
+ * - Enter their email address.
+ * - Enter a new password and confirm it.
+ * - Submit a password reset request.
+ * - Navigate back to the login screen.
+ *
+ * It also observes the password reset result from the [AuthViewModel]
+ * and displays an error message based on error codes (from the backend server) if the reset fails.
+ *
+ * @param viewModel The [AuthViewModel] used to observe the password reset result.
+ * @param onResetClick A lambda invoked when the user clicks the reset button. Provides email, new password, and confirmation password as parameters.
+ * @param onBackToLogin A lambda invoked when the user clicks the "Return to Login" text.
+ *
+ * @see AuthViewModel
+ * @see Result
+ * @see ClickableTextComponent
+ * @see EmailTextComponent
+ * @see ErrorMessageComponent
+ * @see HeadingTextComponent
+ * @see PasswordTextComponent
+ * @see SubmitButtonComponent
+ */
 @Composable
 fun ForgotPasswordScreen(
-    viewModel: AuthViewModel? = null,
+    viewModel: AuthViewModel,
     onResetClick: (String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
-    val resetPasswordResult by viewModel!!.resetPasswordResult.observeAsState()
+    val resetPasswordResult by viewModel.resetPasswordResult.observeAsState()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordAgain by remember { mutableStateOf("") }
@@ -120,10 +145,4 @@ fun ForgotPasswordScreen(
             ClickableTextComponent(stringResource(R.string.return_to_login), onBackToLogin)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewForgotPasswordScreen() {
-    ForgotPasswordScreen(onResetClick = {_, _, _ ->}, onBackToLogin = {})
 }

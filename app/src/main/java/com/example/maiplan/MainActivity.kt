@@ -20,16 +20,47 @@ import com.example.maiplan.utils.UserSession
 import com.example.maiplan.viewmodel.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
+/**
+ * This activity is responsible for managing and displaying Authentication screens.
+ *
+ * This activity initializes the Auth ViewModel, checks if a user is already authenticated,
+ * and either navigates to the main Event screen or shows the authentication flow.
+ * It also observes authentication-related operations and provides user feedback.
+ */
 class MainActivity : AppCompatActivity() {
 
+    /** Manager for handling session-related actions such as saving and retrieving tokens. */
     private lateinit var sessionManager: SessionManager
+
+    /** ViewModel instance to handle Authentication related logic. */
     private lateinit var viewModel: AuthViewModel
 
+    /**
+     * Lifecycle method onCreate is called when the activity is created.
+     *
+     * - Initializes the ViewModel using a repository and generic factory.
+     * -- The repository interacts with the authentication API via Retrofit.
+     * -- The factory injects the repository dependency into the ViewModel.
+     * - Checks if a user is already authenticated based on the stored token.
+     * -- If a token exists, it refreshes the token and fetches the user's profile.
+     * -- If no token exists, it displays the authentication screens.
+     * - Observes authentication operation results and provides feedback to the user.
+     *
+     * @param savedInstanceState Saved state of this activity if previously existed.
+     *
+     * @see RetrofitClient
+     * @see AuthRepository
+     * @see UserSession
+     * @see AuthViewModel
+     * @see GenericViewModelFactory
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Show a loading screen while checking authentication state
         setContent { AppTheme { LoadingScreen() } }
 
+        // Initialize repository, ViewModel, and session manager
         val authApi = RetrofitClient.authApi
         val authRepository = AuthRepository(authApi)
         val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
@@ -37,8 +68,10 @@ class MainActivity : AppCompatActivity() {
         sessionManager = SessionManager(this)
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
+        // Check if there is an existing authentication token
         val token = sessionManager.getAuthToken()
         if (token != null) {
+            // If a token exists, fetch user profile and refresh the token
             viewModel.getProfile(token)
             viewModel.tokenRefresh(token)
 
@@ -56,12 +89,21 @@ class MainActivity : AppCompatActivity() {
                 finish()
             })
         } else {
+            // No token: show authentication screens
             setupComposeUI()
         }
 
         observeViewModel()
     }
 
+    /**
+     * Sets up the UI content using Jetpack Compose and applies the app theme.
+     *
+     * Displays the Authentication navigation flow.
+     *
+     * @see AppTheme
+     * @see AuthNavHost
+     */
     private fun setupComposeUI() {
         setContent {
             AppTheme {
@@ -70,7 +112,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Observes LiveData from the ViewModel to handle authentication operation results.
+     *
+     * Displays Toast messages based on the result of login, register, and reset password operations.
+     */
     private fun observeViewModel() {
+        /**
+         * Handles a result from an authentication operation and displays feedback.
+         *
+         * @param result The result of the operation.
+         * @param successMessage The string resource Id to display when the operation succeeds.
+         *
+         * @see Result
+         * @see AuthViewModel
+         */
         fun handleResult(result: Result<Token>, successMessage: Int) {
             when (result) {
                 is Result.Success -> {
@@ -79,14 +135,17 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
                 }
-                is Result.Failure -> {}
+                is Result.Failure -> {} // No feedback for Failure
                 is Result.Error -> {
                     Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
                 }
-                is Result.Idle -> {}
+                is Result.Idle -> {} // No action needed for Idle state
             }
         }
 
+        /**
+         * Sets up the Observers for authentication operations (login, register, reset password).
+         */
         viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
         viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success) })
         viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })

@@ -21,7 +21,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.ClickableTextComponent
@@ -34,13 +33,40 @@ import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.AuthViewModel
 
+/**
+ * Composable function for the Register screen UI.
+ *
+ * This screen allows users to create a new account by providing an email, username,
+ * password, and confirming the password. It also handles displaying registration errors
+ * and provides a navigation link to return to the login screen.
+ *
+ * - Includes input fields for email, username, password, and password confirmation.
+ * - Provides password visibility toggles.
+ * - Displays error messages based on specific error codes from registration attempt.
+ * - Uses the app's Material theme and a gradient background.
+ *
+ * @param viewModel The [AuthViewModel] instance used to observe the registration result.
+ * @param onRegisterClick Callback invoked when the register button is clicked,
+ * passing email, username, password, and password confirmation.
+ * @param onBackToLogin Callback invoked when the user wants to navigate back to the login screen.
+ *
+ * @see AuthViewModel
+ * @see Result
+ * @see ClickableTextComponent
+ * @see EmailTextComponent
+ * @see ErrorMessageComponent
+ * @see UsernameTextComponent
+ * @see HeadingTextComponent
+ * @see PasswordTextComponent
+ * @see SubmitButtonComponent
+ */
 @Composable
 fun RegisterScreen(
-    viewModel: AuthViewModel? = null,
+    viewModel: AuthViewModel,
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
-    val registerResult by viewModel!!.registerResult.observeAsState()
+    val registerResult by viewModel.registerResult.observeAsState()
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -129,10 +155,4 @@ fun RegisterScreen(
             ClickableTextComponent(stringResource(R.string.have_account), onBackToLogin)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewRegisterScreen() {
-    RegisterScreen(onRegisterClick = { _, _, _, _ ->}, onBackToLogin = {})
 }
