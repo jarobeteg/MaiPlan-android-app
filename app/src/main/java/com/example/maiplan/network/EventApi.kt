@@ -12,10 +12,10 @@ import java.time.LocalTime
 /**
  * Data model for creating a new event.
  *
- * @property eventId The unique ID for the event.
- * @property userId The ID of the user creating the event.
- * @property categoryId The ID of the category the event belongs to.
- * @property reminderId The ID of an associated reminder.
+ * @property eventId The unique Id for the event.
+ * @property userId The Id of the user creating the event.
+ * @property categoryId The Id of the category the event belongs to.
+ * @property reminderId The Id of an associated reminder.
  * @property title The title of the event.
  * @property description A description of the event.
  * @property date The date of the event.

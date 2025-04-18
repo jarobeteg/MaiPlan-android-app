@@ -13,7 +13,7 @@ import com.example.maiplan.network.UserResponse
  * Wraps API calls and returns a [Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @param authApi An instance of [AuthApi] for making authentication network requests.
+ * @property authApi An instance of [AuthApi] for making authentication network requests.
  *
  * @see AuthApi
  * @see Result

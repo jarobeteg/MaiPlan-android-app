@@ -19,7 +19,7 @@ import androidx.core.content.edit
  * The token is a JWT (JSON Web Token) and extracts the exp field
  * to determine expiration.
  *
- * @param context The application [Context] used to access [SharedPreferences].
+ * @property context The application [Context] used to access [SharedPreferences].
  */
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)

@@ -15,7 +15,7 @@ import com.example.maiplan.network.UserResponse
  * @see UserResponse
  */
 object UserSession {
-    /** The unique user ID. */
+    /** The unique user Id. */
     var userId: Int? = null
 
     /** The user's email address. */

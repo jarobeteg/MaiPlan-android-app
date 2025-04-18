@@ -13,8 +13,8 @@ import com.example.maiplan.R
  *
  * Each object corresponds to a specific Home component Activity screen.
  *
- * @param labelResId Every object holds an Id value for localized string resource to differentiate route endpoints.
- * @param icon Every object holds an [ImageVector] to show an icon with the label.
+ * @property labelResId Every object holds an Id value for localized string resource to differentiate route endpoints.
+ * @property icon Every object holds an [ImageVector] to show an icon with the label.
  */
 sealed class BottomNavRoutes(
     val labelResId: Int,

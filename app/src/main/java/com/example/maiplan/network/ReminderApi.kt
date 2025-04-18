@@ -11,8 +11,8 @@ import java.time.LocalDateTime
 /**
  * Data model for creating a new reminder.
  *
- * @property reminderId The unique ID for the reminder.
- * @property userId The ID of the user setting the reminder.
+ * @property reminderId The unique Id for the reminder.
+ * @property userId The Id of the user setting the reminder.
  * @property reminderTime The exact date and time the reminder should trigger.
  * @property frequency How often the reminder repeats (0 - one-time, 1 - daily, etc.).
  * @property status The status of the reminder (0 - inactive, 1 - active).
@@ -30,7 +30,7 @@ data class ReminderCreate(
 /**
  * Data model representing a reminder fetched from the server.
  *
- * @property reminderId The unique ID of the reminder.
+ * @property reminderId The unique Id of the reminder.
  * @property reminderTime The exact date and time the reminder is scheduled for.
  * @property frequency The frequency setting of the reminder.
  * @property status The current status of the reminder.

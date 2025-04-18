@@ -5,7 +5,7 @@ package com.example.maiplan.category
  *
  * Each object corresponds to a specific Category screen.
  *
- * @param route Every object holds a route string value to differentiate route endpoints.
+ * @property route Every object holds a route string value to differentiate route endpoints.
  */
 sealed class CategoryRoutes(val route: String) {
     /**

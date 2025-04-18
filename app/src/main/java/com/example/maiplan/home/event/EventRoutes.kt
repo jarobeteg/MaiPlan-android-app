@@ -5,7 +5,7 @@ package com.example.maiplan.home.event
  *
  * Each object corresponds to a specific Event view or screen.
  *
- * @param route Every object holds a route string value to differentiate route endpoints.
+ * @property route Every object holds a route string value to differentiate route endpoints.
  */
 sealed class EventRoutes(val route: String) {
     /**

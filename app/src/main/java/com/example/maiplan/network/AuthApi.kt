@@ -45,7 +45,7 @@ data class UserLogin(val email: String, val password: String)
 /**
  * Represents the user's profile information returned by the server.
  *
- * @property id The user's unique ID.
+ * @property id The user's unique Id.
  * @property email The user's email address.
  * @property username The user's username.
  */

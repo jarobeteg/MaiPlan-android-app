@@ -10,7 +10,7 @@ import com.example.maiplan.network.CategoryResponse
  * Wraps API calls and returns a [Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @param categoryApi An instance of [CategoryApi] for making category network requests.
+ * @property categoryApi An instance of [CategoryApi] for making category network requests.
  *
  * @see CategoryApi
  * @see Result
@@ -38,7 +38,7 @@ class CategoryRepository(private val categoryApi: CategoryApi) {
     /**
      * Fetches all categories associated with a specific user.
      *
-     * @param userId The ID of the user.
+     * @param userId The Id of the user.
      * @return A [Result] containing a list of [CategoryResponse] or an error.
      *
      * @see Result
@@ -72,9 +72,9 @@ class CategoryRepository(private val categoryApi: CategoryApi) {
     }
 
     /**
-     * Deletes a category by its ID.
+     * Deletes a category by its Id.
      *
-     * @param categoryId The ID of the category to delete.
+     * @param categoryId The Id of the category to delete.
      * @return A [Result] indicating success or failure.
      *
      * @see Result

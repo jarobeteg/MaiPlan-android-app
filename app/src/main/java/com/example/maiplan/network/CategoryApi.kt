@@ -12,7 +12,7 @@ import retrofit2.http.Query
 /**
  * Data model for creating a new category.
  *
- * @property userId The ID of the user creating the category.
+ * @property userId The Id of the user creating the category.
  * @property name The name of the category.
  * @property description A description of the category.
  * @property color The color associated with the category (HEX string).
@@ -29,7 +29,7 @@ data class CategoryCreate(
 /**
  * Data model representing a category fetched from the server.
  *
- * @property categoryId The unique ID of the category.
+ * @property categoryId The unique Id of the category.
  * @property name The name of the category.
  * @property description A description of the category.
  * @property color The color associated with the category (HEX string).
@@ -60,7 +60,7 @@ interface CategoryApi {
     /**
      * Fetches all categories for a specific user.
      *
-     * @param userId The ID of the user whose categories to fetch.
+     * @param userId The Id of the user whose categories to fetch.
      * @return A [Response] containing a list of [CategoryResponse] items.
      */
     @GET("categories/get-all-category")

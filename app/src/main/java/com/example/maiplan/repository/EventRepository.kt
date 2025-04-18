@@ -10,7 +10,7 @@ import com.example.maiplan.network.EventResponse
  * Wraps API calls and returns a [Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @param eventApi An instance of [EventApi] for making event network requests.
+ * @property eventApi An instance of [EventApi] for making event network requests.
  *
  * @see EventApi
  * @see Result
@@ -36,9 +36,9 @@ class EventRepository(private val eventApi: EventApi) {
     }
 
     /**
-     * Retrieves a specific event by its ID.
+     * Retrieves a specific event by its Id.
      *
-     * @param eventId The ID of the event.
+     * @param eventId The Id of the event.
      * @return A [Result] containing an [EventResponse] or an error.
      *
      * @see Result

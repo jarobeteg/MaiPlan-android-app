@@ -10,7 +10,7 @@ import com.example.maiplan.network.ReminderResponse
  * Wraps API calls and returns a [Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @param reminderApi An instance of [ReminderApi] for making reminder network requests.
+ * @property reminderApi An instance of [ReminderApi] for making reminder network requests.
  *
  * @see ReminderApi
  * @see Result
