@@ -1,5 +1,6 @@
 package com.example.maiplan.home.event.screens
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -28,6 +29,22 @@ import java.time.LocalDate
 import java.time.temporal.WeekFields
 import java.util.Locale
 
+/**
+ * Displays a monthly calendar view showing the days of the selected month.
+ *
+ * Layout includes:
+ * - Weekday localized headers (Mon, Tue, etc.)
+ * - Week numbers on the left.
+ * - Calendar cells for each day of the month.
+ *
+ * @param selectedDate The [LocalDate] representing the month to display.
+ * @param context The [Context] for retrieving localized weekday names.
+ *
+ * @see getWeekNumbersForMonth
+ * @see WeekdayHeaders
+ * @see CalendarGrid
+ */
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MonthlyView(selectedDate: LocalDate, context: Context) {
     val daysInMonth = selectedDate.lengthOfMonth()
@@ -57,6 +74,14 @@ fun MonthlyView(selectedDate: LocalDate, context: Context) {
     }
 }
 
+/**
+ * Displays the weekday localized headers (Mon, Tue, etc.) above the calendar grid.
+ *
+ * @param weekdays A list of localized weekday names.
+ * @param weekNumberWidth The width reserved for the week number column.
+ * @param cellSize The width of each day cell.
+ * @param headerHeight The height of the header row.
+ */
 @Composable
 fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, headerHeight: Dp) {
     Row(modifier = Modifier.height(headerHeight)) {
@@ -76,6 +101,19 @@ fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, he
     }
 }
 
+/**
+ * Displays the grid of week rows, each containing the week number and day cells.
+ *
+ * @param weekNumbers A list of week numbers to display on the side.
+ * @param daysInMonth The number of days in the selected month.
+ * @param firstDayOfMonth The index of the first weekday of the month (0 = Sunday).
+ * @param weekNumberWidth The width reserved for the week number column.
+ * @param cellSize The width of each day cell.
+ * @param rowHeight The height of each week row (day cell height).
+ *
+ * @see WeekNumberColumn
+ * @see DaysRow
+ */
 @Composable
 fun CalendarGrid(
     weekNumbers: List<Int>,
@@ -93,6 +131,12 @@ fun CalendarGrid(
     }
 }
 
+/**
+ * Displays the week number for a single row.
+ *
+ * @param weekNumber The week number to display.
+ * @param width The width reserved for the week number column.
+ */
 @Composable
 fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     Box(
@@ -107,6 +151,15 @@ fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     }
 }
 
+/**
+ * Displays a single row of day cells for a given week.
+ *
+ * @param weekIndex The index of the current week row (starting from 0).
+ * @param daysInMonth The total number of days in the month.
+ * @param firstDayOfMonth The index of the first day of the month (0 = Sunday).
+ * @param cellSize The width of each day cell.
+ * @param rowHeight The height of each week row (day cell height).
+ */
 @Composable
 fun DaysRow(weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp, rowHeight: Dp) {
     for (dayIndex in 0 until 7) {
@@ -119,6 +172,13 @@ fun DaysRow(weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp
     }
 }
 
+/**
+ * Displays a single day cell in the calendar.
+ *
+ * @param dayNumber The day of the month to display (1–31).
+ * @param cellSize The width of the cell.
+ * @param rowHeight The height of the cell.
+ */
 @Composable
 fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
     Card(
@@ -146,6 +206,14 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
     }
 }
 
+/**
+ * Calculates the week numbers that appear within a given month on the side.
+ *
+ * Handles cases where the month spans the end of one year into the next.
+ *
+ * @param selectedDate A [LocalDate] representing the month to calculate for.
+ * @return A list of week numbers appearing in the month.
+ */
 fun getWeekNumbersForMonth(selectedDate: LocalDate): List<Int> {
     val daysInMonth = selectedDate.lengthOfMonth()
     val weekFields = WeekFields.of(Locale.getDefault())

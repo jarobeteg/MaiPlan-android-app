@@ -14,6 +14,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.home.BottomNavigationBar
 
+/**
+ * Still under work.
+ *
+ * Placeholder UI elements found inside the code block.
+ */
 @Composable
 fun FileScreenWithNav(context: Context) {
     Scaffold(

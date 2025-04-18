@@ -18,6 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import java.time.LocalDate
 
+/**
+ * Displays a vertical list of 24 hour time card slots for the selected day.
+ *
+ * Each hour is represented by a [DailyViewHourCard], allowing users to view events for that hour.
+ *
+ * @param selectedDate The [LocalDate] representing the currently selected day.
+ *
+ * @see DailyViewHourCard
+ */
 @Composable
 fun DailyView(selectedDate: LocalDate) {
     LazyColumn(
@@ -30,6 +39,15 @@ fun DailyView(selectedDate: LocalDate) {
     }
 }
 
+/**
+ * Displays a card representing a single hour card within a day.
+ *
+ * The card shows the time range (for example, "Monday, January 1 - 8.00 to 9:00")
+ * based on the given [selectedDate] and [hour].
+ *
+ * @param selectedDate The [LocalDate] for which this hour card belongs.
+ * @param hour The starting hour (0-23) for this card.
+ */
 @Composable
 fun DailyViewHourCard(selectedDate: LocalDate, hour: Int) {
     Card(

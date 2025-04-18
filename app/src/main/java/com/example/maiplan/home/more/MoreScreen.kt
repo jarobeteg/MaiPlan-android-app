@@ -40,6 +40,16 @@ import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.BottomNavigationBar
 
+/**
+ * Displays the More screen, structured with a top app bar,
+ * a bottom navigation bar, and a list of navigable options.
+ *
+ * @param context The [Context] used to open new activities.
+ *
+ * @see MoreTopBar
+ * @see BottomNavigationBar
+ * @see MoreScreenButton
+ */
 @Composable
 fun MoreScreenWithNav(context: Context) {
     Scaffold(
@@ -61,6 +71,9 @@ fun MoreScreenWithNav(context: Context) {
     }
 }
 
+/**
+ * A centered top app bar displaying localized title for the More screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreTopBar() {
@@ -78,6 +91,20 @@ fun MoreTopBar() {
     )
 }
 
+/**
+ * A reusable button row for the More screen options list.
+ *
+ * Each button includes:
+ * - A leading [Icon].
+ * - A [Text] label.
+ * - A trailing arrow icon indicating navigation.
+ * - An optional horizontal divider below the item.
+ *
+ * @param text The localized label to display.
+ * @param onClick Callback to invoke when the button is clicked.
+ * @param leadingIcon The leading [ImageVector] displayed at the start.
+ * @param showDivider Whether to show a divider under this button.
+ */
 @Composable
 fun MoreScreenButton(
     text: String,
@@ -136,6 +163,12 @@ fun MoreScreenButton(
     }
 }
 
+/**
+ * Launches a new [Activity] from the given [context].
+ *
+ * @param context The [Context] from which to start the activity.
+ * @param activity The class of the [Activity] to launch.
+ */
 fun openActivity(context: Context, activity: Class<out Activity>) {
     context.startActivity(Intent(context, activity))
 }

@@ -21,6 +21,15 @@ import androidx.compose.ui.unit.dp
 import java.time.DayOfWeek
 import java.time.LocalDate
 
+/**
+ * Displays a weekly view as a horizontal list of card days, starting from Monday.
+ *
+ * Each day of the week is represented as a [WeeklyViewCard].
+ *
+ * @param selectedDate A [LocalDate] representing the currently selected week.
+ *
+ * @see WeeklyViewCard
+ */
 @Composable
 fun WeeklyView(selectedDate: LocalDate) {
     val startOfWeek = selectedDate.with(DayOfWeek.MONDAY)
@@ -36,6 +45,15 @@ fun WeeklyView(selectedDate: LocalDate) {
     }
 }
 
+/**
+ * Displays a card for a single day within the weekly view.
+ *
+ * The card shows localized:
+ * - Day of the week (for example, Monday)
+ * - Month and day number (for example, April 8)
+ *
+ * @param day A [LocalDate] representing the day to display.
+ */
 @Composable
 fun WeeklyViewCard(day: LocalDate) {
     Card(

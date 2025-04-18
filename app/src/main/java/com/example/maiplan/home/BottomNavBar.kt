@@ -17,6 +17,27 @@ import com.example.maiplan.home.file.FileActivity
 import com.example.maiplan.home.more.MoreActivity
 import com.example.maiplan.home.task.TaskActivity
 
+/**
+ * Displays the bottom navigation bar for the Home component Activity screens.
+ *
+ * Each navigation item:
+ * - Shows an icon and label.
+ * - Highlights the currently active screen.
+ * - Navigates to the corresponding [Activity] when clicked.
+ *
+ * When a different item is clicked:
+ * - Starts the corresponding [Activity] with no animation.
+ * - Reuses existing activities if possible (via [Intent.FLAG_ACTIVITY_REORDER_TO_FRONT]).
+ * - Finishes the current [Activity] to avoid stacking duplicates.
+ *
+ * @param context The [Context] used to start new activities and determine the current one.
+ *
+ * @see BottomNavRoutes
+ * @see EventActivity
+ * @see TaskActivity
+ * @see FileActivity
+ * @see MoreActivity
+ */
 @Composable
 fun BottomNavigationBar(context: Context) {
     val items = listOf(
