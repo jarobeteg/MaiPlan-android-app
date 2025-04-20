@@ -72,28 +72,39 @@ class MainActivity : AppCompatActivity() {
         val token = sessionManager.getAuthToken()
         if (token != null) {
             // If a token exists, fetch user profile and refresh the token
-            viewModel.getProfile(token)
-            viewModel.tokenRefresh(token)
-
-            viewModel.profileResult.observe(this, Observer { result ->
-                if (result is Result.Success) {
-                    UserSession.init(result.data)
-                }
-            })
-
-            viewModel.tokenRefreshResult.observe(this, Observer { result ->
-                if (result is Result.Success) {
-                    sessionManager.saveAuthToken(result.data.accessToken)
-                }
-                startActivity(Intent(this, EventActivity::class.java))
-                finish()
-            })
+            initUserSession(token)
         } else {
             // No token: show authentication screens
             setupComposeUI()
         }
 
         observeViewModel()
+    }
+
+    /**
+     * Initializes the User Session singleton object, and refreshes the JWT token and saves it in the Shared Preferences.
+     *
+     * @param token The JWT token string.
+     *
+     * @see UserSession
+     */
+    private fun initUserSession(token: String) {
+        viewModel.getProfile(token)
+        viewModel.tokenRefresh(token)
+
+        viewModel.profileResult.observe(this, Observer { result ->
+            if (result is Result.Success) {
+                UserSession.init(result.data)
+            }
+        })
+
+        viewModel.tokenRefreshResult.observe(this, Observer { result ->
+            if (result is Result.Success) {
+                sessionManager.saveAuthToken(result.data.accessToken)
+            }
+            startActivity(Intent(this, EventActivity::class.java))
+            finish()
+        })
     }
 
     /**
