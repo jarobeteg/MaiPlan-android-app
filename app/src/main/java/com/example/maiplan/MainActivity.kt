@@ -85,12 +85,12 @@ class MainActivity : AppCompatActivity() {
      * Initializes the User Session singleton object, and refreshes the JWT token and saves it in the Shared Preferences.
      *
      * @param token The JWT token string.
+     * @param flag Is a boolean data that is only false on login, register or password reset since then we don't need to refresh the token.
      *
      * @see UserSession
      */
-    private fun initUserSession(token: String) {
+    private fun initUserSession(token: String, flag: Boolean = true) {
         viewModel.getProfile(token)
-        viewModel.tokenRefresh(token)
 
         viewModel.profileResult.observe(this, Observer { result ->
             if (result is Result.Success) {
@@ -98,13 +98,17 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        viewModel.tokenRefreshResult.observe(this, Observer { result ->
-            if (result is Result.Success) {
-                sessionManager.saveAuthToken(result.data.accessToken)
-            }
-            startActivity(Intent(this, EventActivity::class.java))
-            finish()
-        })
+        if (flag) {
+            viewModel.tokenRefresh(token)
+
+            viewModel.tokenRefreshResult.observe(this, Observer { result ->
+                if (result is Result.Success) {
+                    sessionManager.saveAuthToken(result.data.accessToken)
+                }
+                startActivity(Intent(this, EventActivity::class.java))
+                finish()
+            })
+        }
     }
 
     /**
@@ -142,6 +146,7 @@ class MainActivity : AppCompatActivity() {
             when (result) {
                 is Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
+                    initUserSession(sessionManager.getAuthToken()!!, false)
                     startActivity(Intent(this, EventActivity::class.java))
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
