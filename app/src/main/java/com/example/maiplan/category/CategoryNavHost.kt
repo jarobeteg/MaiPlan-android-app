@@ -23,7 +23,7 @@ import com.example.maiplan.viewmodel.CategoryViewModel
  * viewing, creating, and updating categories.
  *
  * @param categoryViewModel The ViewModel shared across category-related screens,
- * user for performing CRUD operations on categories.
+ * used for performing CRUD operations on categories.
  *
  * @see CategoryViewModel
  * @see CategoryRoutes
@@ -45,7 +45,7 @@ fun CategoryNavHost(categoryViewModel: CategoryViewModel) {
  *
  * This graph includes:
  * - Category Management Screen: Displays all categories with options to edit or delete.
- * - Create Category Screen: Allows user to create a new category
+ * - Create Category Screen: Allows user to create a new category.
  * - Update Category Screen: Enables editing of an existing category by its Id.
  *
  * Navigation between screens is handled by [navController]
@@ -71,7 +71,7 @@ fun NavGraphBuilder.categoryNavGraph(
     // --- Category Management Screen ---
     composable(CategoryRoutes.Management.route) {
         /**
-         * Displays a list of categories
+         * Displays a list of categories.
          *
          * @param viewModel Used to fetch and manage category data.
          * @param onCardSwipeDelete Triggered when a category card is swiped to delete.
@@ -100,7 +100,7 @@ fun NavGraphBuilder.categoryNavGraph(
     // --- Create Category Screen ---
     composable(CategoryRoutes.Create.route) {
         /**
-         * Screen for creating a new category
+         * Screen for creating a new category.
          *
          * @param viewModel Supplies the creation logic.
          * @param onSaveClick Called when the user submits the category creation form.

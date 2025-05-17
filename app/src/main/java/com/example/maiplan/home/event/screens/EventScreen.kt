@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ButtonDefaults
@@ -35,15 +36,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
-import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
 import com.example.maiplan.home.BottomNavigationBar
-import com.example.maiplan.home.event.EventNavHost
-import com.example.maiplan.home.event.EventRoutes
+import com.example.maiplan.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
@@ -51,23 +51,30 @@ import java.util.Locale
 
 /**
  * The Main Event screen that hosts navigation between Monthly, Weekly, and Daily views.
+ * Manages navigation between event screens.
  *
  * Includes:
  * - A top app bar with a dynamic title and view selection dropdown menu.
  * - A bottom navigation bar for navigating between other screen on the Home component.
  * - A date picker dialog for changing the selected date for the views.
+ * - An add icon to navigate to the Create Event screen.
  *
- * @param context The [Context] used to get localized string resources.
+ * @param viewModel The ViewModel providing the logic for managing events.
+ * @param onCreateEventClick Callback invoked when the add button is clicked.
  *
- * @see EventRoutes
- * @see EventNavHost
  * @see EventTopBar
  * @see BottomNavigationBar
  * @see DatePickerDialogComponent
+ * @see MonthlyView
+ * @see WeeklyView
+ * @see DailyView
  */
 @Composable
-fun EventScreenWithNav(context: Context) {
-    val navController = rememberNavController()
+fun EventScreenWithNav(
+    viewModel: EventViewModel,
+    onCreateEventClick: () -> Unit
+) {
+    val context = LocalContext.current
     var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -84,24 +91,19 @@ fun EventScreenWithNav(context: Context) {
             EventTopBar(
                 formattedTitle,
                 views,
-                onViewSelected = { index ->
-                    selectedView = index
-                    val route = when (index) {
-                        0 -> EventRoutes.Monthly.route
-                        1 -> EventRoutes.Weekly.route
-                        2 -> EventRoutes.Daily.route
-                        else -> EventRoutes.Monthly.route
-                    }
-                    navController.navigate(route) {
-                        popUpTo(navController.graph.id) { inclusive = true }
-                        launchSingleTop = true
-                    }
-                },
-                onDatePickerClick = { showDatePicker = true }) },
+                onViewSelected = { index -> selectedView = index },
+                onDatePickerClick = { showDatePicker = true },
+                onCreateEventClick = onCreateEventClick
+            )},
         bottomBar = { BottomNavigationBar(context) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
-            EventNavHost(navController, selectedDate, context)
+            when (selectedView) {
+                0 -> MonthlyView(selectedDate, context)
+                1 -> WeeklyView(selectedDate)
+                2 -> DailyView(selectedDate)
+                else -> MonthlyView(selectedDate, context)
+            }
         }
     }
 
@@ -141,12 +143,13 @@ fun getFormattedTitle(context: Context, selectedView: Int, selectedDate: LocalDa
 
 /**
  * Top app bar for the Event screen containing a dropdown to switch views and an action
- * button to open the date picker.
+ * button to open the date picker and add a new event.
  *
  * @param formattedTitle The formatted title from [getFormattedTitle] displayed in the top bar.
  * @param views A list of view localized names (Monthly, Weekly, Daily) for the dropdown.
  * @param onViewSelected Callback when a new view is selected from the dropdown.
  * @param onDatePickerClick Callback when the calendar icon is clicked to open the date picker.
+ * @param onCreateEventClick Callback when the add icon is clicked to navigate to the Create Event screen.
  *
  * @see EventDropdownMenu
  */
@@ -156,7 +159,8 @@ fun EventTopBar(
     formattedTitle: String,
     views: List<String>,
     onViewSelected: (Int) -> Unit,
-    onDatePickerClick: () -> Unit
+    onDatePickerClick: () -> Unit,
+    onCreateEventClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     var buttonWidth by remember { mutableIntStateOf(0) }
@@ -212,6 +216,9 @@ fun EventTopBar(
         actions = {
             IconButton(onClick = onDatePickerClick) {
                 Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
+            }
+            IconButton(onClick = onCreateEventClick) {
+                Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
             }
         }
     )
