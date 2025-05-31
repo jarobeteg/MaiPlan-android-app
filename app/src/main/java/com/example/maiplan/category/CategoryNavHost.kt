@@ -1,6 +1,8 @@
 package com.example.maiplan.category
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -13,6 +15,7 @@ import com.example.maiplan.category.screens.CreateCategoryScreen
 import com.example.maiplan.category.screens.UpdateCategoryScreen
 import com.example.maiplan.network.CategoryCreate
 import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.UserSession
 import com.example.maiplan.viewmodel.CategoryViewModel
 
@@ -110,12 +113,21 @@ fun NavGraphBuilder.categoryNavGraph(
             viewModel = categoryViewModel,
             onSaveClick = { name, description, color, icon ->
                 categoryViewModel.createCategory(CategoryCreate(userId, name, description, color, icon))
-                navController.popBackStack()
             },
             onBackClick = {
                 navController.popBackStack()
+                categoryViewModel.clearErrors()
             }
         )
+
+        val result = categoryViewModel.createCategoryResult.observeAsState().value
+        LaunchedEffect(result) {
+            if (result is Result.Success) {
+                navController.popBackStack()
+                categoryViewModel.clearErrors()
+                categoryViewModel.clearCreateResult()
+            }
+        }
     }
 
     // --- Update Category Screen ---
@@ -139,18 +151,25 @@ fun NavGraphBuilder.categoryNavGraph(
          * @param onSaveClick Called when user submits edit, updates the category and pops back.
          * @param onBackClick Cancels updating and pops back without saving.
          */
-        selectedCategory.let { category ->
-            UpdateCategoryScreen(
-                viewModel = categoryViewModel,
-                category = category,
-                onSaveClick = { name, description, color, icon ->
-                    categoryViewModel.updateCategory(CategoryResponse(category.categoryId, name, description, color, icon), userId)
-                    navController.popBackStack()
-                },
-                onBackClick = {
-                    navController.popBackStack()
-                }
-            )
+        UpdateCategoryScreen(
+            viewModel = categoryViewModel,
+            category = selectedCategory,
+            onSaveClick = { name, description, color, icon ->
+                categoryViewModel.updateCategory(CategoryResponse(selectedCategory.categoryId, name, description, color, icon), userId)
+            },
+            onBackClick = {
+                navController.popBackStack()
+                categoryViewModel.clearUpdateResult()
+            }
+        )
+
+        val result = categoryViewModel.updateCategoryResult.observeAsState().value
+        LaunchedEffect(result) {
+            if (result is Result.Success) {
+                navController.popBackStack()
+                categoryViewModel.clearErrors()
+                categoryViewModel.clearUpdateResult()
+            }
         }
     }
 }

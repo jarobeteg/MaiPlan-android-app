@@ -55,7 +55,7 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Creates a new category and refreshes the category list.
+     * Creates a new category and refreshes the category list on Success.
      *
      * @param category The [CategoryCreate] object containing the new category's data.
      *
@@ -63,8 +63,9 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
      */
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {
-            _createCategoryResult.postValue(categoryRepository.createCategory(category))
-            getAllCategories(category.userId)
+            val result = categoryRepository.createCategory(category)
+            _createCategoryResult.postValue(result)
+            if (result is Result.Success) getAllCategories(category.userId)
         }
     }
 
@@ -93,7 +94,7 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Updates an existing category and refreshes the category list.
+     * Updates an existing category and refreshes the category list on Success.
      *
      * @param category The updated [CategoryResponse] object.
      * @param userId The Id of the user owning the category.
@@ -102,22 +103,38 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
      */
     fun updateCategory(category: CategoryResponse, userId: Int) {
         viewModelScope.launch {
-            _updateCategoryResult.postValue(categoryRepository.updateCategory(category))
-            getAllCategories(userId)
+            val result = categoryRepository.updateCategory(category)
+            _updateCategoryResult.postValue(result)
+            if (result is Result.Success) getAllCategories(userId)
         }
     }
 
     /**
-     * Deletes a category by its Id and refreshes the category list.
+     * Deletes a category by its Id and refreshes the category list on Success.
      *
      * @param categoryId The Id of the category to delete.
      * @param userId The Id of the user owning the category.
      */
     fun deleteCategory(categoryId: Int, userId: Int) {
         viewModelScope.launch {
-            _deleteCategoryResult.postValue(categoryRepository.deleteCategory(categoryId))
-            getAllCategories(userId)
+            val result = categoryRepository.deleteCategory(categoryId)
+            _deleteCategoryResult.postValue(result)
+            if (result is Result.Success) getAllCategories(userId)
         }
+    }
+
+    /**
+     *
+     */
+    fun clearCreateResult() {
+        _createCategoryResult.postValue(Result.Idle)
+    }
+
+    /**
+     *
+     */
+    fun clearUpdateResult() {
+        _updateCategoryResult.postValue(Result.Idle)
     }
 
     /**

@@ -94,6 +94,10 @@ fun CreateCategoryScreen(
                 onIconSelectedString = { selectedIconString = it }
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
+
             if (saveResult is Result.Failure) {
                 val error = saveResult as Result.Failure
                 val code = error.errorCode
@@ -113,10 +117,6 @@ fun CreateCategoryScreen(
                     ErrorMessageComponent(errorMessage)
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SubmitButtonComponent(stringResource(R.string.category_save)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
         }
     }
 }
