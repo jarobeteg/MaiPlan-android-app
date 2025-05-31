@@ -124,14 +124,14 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     *
+     * Resets the create category result to idle.
      */
     fun clearCreateResult() {
         _createCategoryResult.postValue(Result.Idle)
     }
 
     /**
-     *
+     * Resets the update category result to idle.
      */
     fun clearUpdateResult() {
         _updateCategoryResult.postValue(Result.Idle)

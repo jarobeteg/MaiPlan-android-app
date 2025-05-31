@@ -120,6 +120,11 @@ fun NavGraphBuilder.categoryNavGraph(
             }
         )
 
+        /**
+         * On a successful category create:
+         * - Pops back to the previous screen.
+         * - Clears errors and create result state.
+         */
         val result = categoryViewModel.createCategoryResult.observeAsState().value
         LaunchedEffect(result) {
             if (result is Result.Success) {
@@ -163,6 +168,11 @@ fun NavGraphBuilder.categoryNavGraph(
             }
         )
 
+        /**
+         * On a successful category update:
+         * - Pops back to the previous screen.
+         * - Clears errors and update result state.
+         */
         val result = categoryViewModel.updateCategoryResult.observeAsState().value
         LaunchedEffect(result) {
             if (result is Result.Success) {
