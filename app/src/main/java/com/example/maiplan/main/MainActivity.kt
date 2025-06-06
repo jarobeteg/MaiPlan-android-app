@@ -1,4 +1,4 @@
-package com.example.maiplan
+package com.example.maiplan.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,13 +7,14 @@ import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.example.maiplan.R
 import com.example.maiplan.home.event.EventActivity
 import com.example.maiplan.main.navigation.AuthNavHost
+import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.Token
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.Result
-import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.UserSession
@@ -163,7 +164,9 @@ class MainActivity : AppCompatActivity() {
          * Sets up the Observers for authentication operations (login, register, reset password).
          */
         viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
-        viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success) })
-        viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
+        viewModel.registerResult.observe(this,
+            Observer { handleResult(it, R.string.register_success) })
+        viewModel.resetPasswordResult.observe(this,
+            Observer { handleResult(it, R.string.reset_password_success) })
     }
 }

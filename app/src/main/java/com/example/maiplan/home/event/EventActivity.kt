@@ -56,7 +56,7 @@ class EventActivity : AppCompatActivity() {
      * Sets up the navigation between Event screens.
      *
      * @see AppTheme
-     * @see com.example.maiplan.home.event.navigation.EventNavHost
+     * @see EventNavHost
      */
     private fun setupComposeUI() {
         setContent {

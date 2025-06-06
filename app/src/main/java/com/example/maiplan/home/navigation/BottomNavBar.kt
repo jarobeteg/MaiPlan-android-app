@@ -61,7 +61,7 @@ fun BottomNavigationBar(context: Context) {
                 onClick = {
                     if (currentActivity?.javaClass != activityClass) {
                         val intent = Intent(context, activityClass).apply {
-                            Intent.setFlags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         }
                         val options = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
                         context.startActivity(intent, options)

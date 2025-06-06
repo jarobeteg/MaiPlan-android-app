@@ -65,7 +65,7 @@ class CategoryActivity : AppCompatActivity() {
      * Sets up the navigation between Category screens.
      *
      * @see AppTheme
-     * @see com.example.maiplan.category.navigation.CategoryNavHost
+     * @see CategoryNavHost
      */
     private fun setupComposeUI() {
         setContent {
