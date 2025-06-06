@@ -1,4 +1,4 @@
-package com.example.maiplan.home.event
+package com.example.maiplan.home.event.navigation
 
 /**
  * Represents the different navigation routes for the Event views and screens.

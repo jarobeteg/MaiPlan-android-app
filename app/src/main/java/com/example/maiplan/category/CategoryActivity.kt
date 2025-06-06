@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
+import com.example.maiplan.category.navigation.CategoryNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.CategoryRepository
 import com.example.maiplan.repository.Result
@@ -64,7 +65,7 @@ class CategoryActivity : AppCompatActivity() {
      * Sets up the navigation between Category screens.
      *
      * @see AppTheme
-     * @see CategoryNavHost
+     * @see com.example.maiplan.category.navigation.CategoryNavHost
      */
     private fun setupComposeUI() {
         setContent {

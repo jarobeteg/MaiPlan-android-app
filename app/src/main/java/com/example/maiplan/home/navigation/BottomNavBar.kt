@@ -1,4 +1,4 @@
-package com.example.maiplan.home
+package com.example.maiplan.home.navigation
 
 import android.app.Activity
 import android.app.ActivityOptions
@@ -61,7 +61,7 @@ fun BottomNavigationBar(context: Context) {
                 onClick = {
                     if (currentActivity?.javaClass != activityClass) {
                         val intent = Intent(context, activityClass).apply {
-                            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                            Intent.setFlags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
                         }
                         val options = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
                         context.startActivity(intent, options)

@@ -1,4 +1,4 @@
-package com.example.maiplan.main_screens
+package com.example.maiplan.main.navigation
 
 /**
  * Represents the different navigation routes for the Main screens.

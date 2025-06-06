@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.example.maiplan.home.event.navigation.EventNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.EventRepository
 import com.example.maiplan.theme.AppTheme
@@ -55,7 +56,7 @@ class EventActivity : AppCompatActivity() {
      * Sets up the navigation between Event screens.
      *
      * @see AppTheme
-     * @see EventNavHost
+     * @see com.example.maiplan.home.event.navigation.EventNavHost
      */
     private fun setupComposeUI() {
         setContent {

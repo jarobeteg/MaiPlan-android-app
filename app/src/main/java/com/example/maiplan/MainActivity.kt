@@ -8,12 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.home.event.EventActivity
-import com.example.maiplan.main_screens.AuthNavHost
+import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.Token
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.Result
-import com.example.maiplan.main_screens.LoadingScreen
+import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.UserSession

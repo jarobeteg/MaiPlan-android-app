@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
-import com.example.maiplan.home.BottomNavigationBar
+import com.example.maiplan.home.navigation.BottomNavigationBar
 
 /**
  * Displays the More screen, structured with a top app bar,

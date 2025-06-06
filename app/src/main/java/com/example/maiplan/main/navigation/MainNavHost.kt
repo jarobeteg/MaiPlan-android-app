@@ -1,4 +1,4 @@
-package com.example.maiplan.main_screens
+package com.example.maiplan.main.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -6,6 +6,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.maiplan.main.screens.ForgotPasswordScreen
+import com.example.maiplan.main.screens.LoginScreen
+import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.UserLogin
 import com.example.maiplan.network.UserRegister
 import com.example.maiplan.network.UserResetPassword

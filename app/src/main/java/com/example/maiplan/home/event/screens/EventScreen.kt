@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
-import com.example.maiplan.home.BottomNavigationBar
+import com.example.maiplan.home.navigation.BottomNavigationBar
 import com.example.maiplan.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

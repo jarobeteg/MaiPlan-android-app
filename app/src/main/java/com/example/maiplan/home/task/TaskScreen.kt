@@ -12,7 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.maiplan.home.BottomNavigationBar
+import com.example.maiplan.home.navigation.BottomNavigationBar
 
 /**
  * Still under work.

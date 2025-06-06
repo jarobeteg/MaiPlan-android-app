@@ -1,4 +1,4 @@
-package com.example.maiplan.home.event
+package com.example.maiplan.home.event.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.composable

@@ -1,4 +1,4 @@
-package com.example.maiplan.category
+package com.example.maiplan.category.navigation
 
 /**
  * Represents the different navigation routes for the Category screens.
