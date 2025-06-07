@@ -1,4 +1,4 @@
-package com.example.maiplan.network
+package com.example.maiplan.network.api
 
 import com.google.gson.annotations.SerializedName
 import retrofit2.Response

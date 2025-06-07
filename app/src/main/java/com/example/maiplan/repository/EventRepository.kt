@@ -1,8 +1,8 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.EventApi
-import com.example.maiplan.network.EventCreate
-import com.example.maiplan.network.EventResponse
+import com.example.maiplan.network.api.EventApi
+import com.example.maiplan.network.api.EventCreate
+import com.example.maiplan.network.api.EventResponse
 
 /**
  * Repository responsible for handling event-related network operations.

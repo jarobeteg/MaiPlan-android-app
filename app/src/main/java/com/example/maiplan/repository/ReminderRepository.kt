@@ -1,8 +1,8 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.ReminderApi
-import com.example.maiplan.network.ReminderCreate
-import com.example.maiplan.network.ReminderResponse
+import com.example.maiplan.network.api.ReminderApi
+import com.example.maiplan.network.api.ReminderCreate
+import com.example.maiplan.network.api.ReminderResponse
 
 /**
  * Repository responsible for handling reminder-related network operations.

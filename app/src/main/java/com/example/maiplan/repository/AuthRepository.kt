@@ -1,11 +1,11 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.AuthApi
-import com.example.maiplan.network.Token
-import com.example.maiplan.network.UserRegister
-import com.example.maiplan.network.UserLogin
-import com.example.maiplan.network.UserResetPassword
-import com.example.maiplan.network.UserResponse
+import com.example.maiplan.network.api.AuthApi
+import com.example.maiplan.network.api.Token
+import com.example.maiplan.network.api.UserRegister
+import com.example.maiplan.network.api.UserLogin
+import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.network.api.UserResponse
 
 /**
  * Repository responsible for handling authentication-related network operations.

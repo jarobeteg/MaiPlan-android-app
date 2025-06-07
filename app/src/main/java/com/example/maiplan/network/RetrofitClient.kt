@@ -1,5 +1,9 @@
 package com.example.maiplan.network
 
+import com.example.maiplan.network.api.AuthApi
+import com.example.maiplan.network.api.CategoryApi
+import com.example.maiplan.network.api.EventApi
+import com.example.maiplan.network.api.ReminderApi
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 

@@ -1,6 +1,5 @@
-package com.example.maiplan.home.task
+package com.example.maiplan.home.task.screens
 
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,9 +9,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.example.maiplan.home.navigation.BottomNavigationBar
+import androidx.navigation.NavHostController
+import com.example.maiplan.home.navigation.HomeNavigationBar
 
 /**
  * Still under work.
@@ -20,9 +21,12 @@ import com.example.maiplan.home.navigation.BottomNavigationBar
  * Placeholder UI elements found inside the code block.
  */
 @Composable
-fun TaskScreenWithNav(context: Context) {
+fun TaskScreen(
+    rootNavController: NavHostController
+) {
+    val context = LocalContext.current
     Scaffold(
-        bottomBar = { BottomNavigationBar(context) }
+        bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
         Box(
             modifier = Modifier

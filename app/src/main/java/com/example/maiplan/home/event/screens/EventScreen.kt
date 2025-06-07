@@ -40,9 +40,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getString
+import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
-import com.example.maiplan.home.navigation.BottomNavigationBar
+import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -63,15 +64,16 @@ import java.util.Locale
  * @param onCreateEventClick Callback invoked when the add button is clicked.
  *
  * @see EventTopBar
- * @see BottomNavigationBar
+ * @see HomeNavigationBar
  * @see DatePickerDialogComponent
  * @see MonthlyView
  * @see WeeklyView
  * @see DailyView
  */
 @Composable
-fun EventScreenWithNav(
+fun EventScreen(
     viewModel: EventViewModel,
+    rootNavController: NavHostController,
     onCreateEventClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -95,7 +97,7 @@ fun EventScreenWithNav(
                 onDatePickerClick = { showDatePicker = true },
                 onCreateEventClick = onCreateEventClick
             )},
-        bottomBar = { BottomNavigationBar(context) }
+        bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {

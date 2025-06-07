@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.composable
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.event.screens.CreateEventScreen
-import com.example.maiplan.home.event.screens.EventScreenWithNav
+import com.example.maiplan.home.event.screens.EventScreen
 import com.example.maiplan.viewmodel.EventViewModel
 
 /**
@@ -23,14 +23,12 @@ import com.example.maiplan.viewmodel.EventViewModel
  * @see EventViewModel
  */
 @Composable
-fun EventNavHost(eventViewModel: EventViewModel) {
-    val navController = rememberNavController()
-
+fun EventNavHost(rootNavController: NavHostController, localNavController: NavHostController, eventViewModel: EventViewModel) {
     NavHost(
-        navController = navController,
+        navController = localNavController,
         startDestination = EventRoutes.EventMain.route
     ) {
-        eventNavGraph(navController, eventViewModel)
+        eventNavGraph(localNavController, rootNavController, eventViewModel)
     }
 }
 
@@ -49,11 +47,12 @@ fun EventNavHost(eventViewModel: EventViewModel) {
  *
  * @see EventViewModel
  * @see EventRoutes
- * @see EventScreenWithNav
+ * @see EventScreen
  * @see CreateEventScreen
  */
 fun NavGraphBuilder.eventNavGraph(
-    navController: NavController,
+    localNavController: NavController,
+    rootNavController: NavHostController,
     eventViewModel: EventViewModel
 ) {
     // --- Main Event Screen ---
@@ -64,9 +63,10 @@ fun NavGraphBuilder.eventNavGraph(
          * @param viewModel Used to fetch and manage event data.
          * @param onCreateEventClick Called when the user clicks the add new event button.
          */
-        EventScreenWithNav(
+        EventScreen(
             viewModel = eventViewModel,
-            onCreateEventClick = { navController.navigate(EventRoutes.Create.route) }
+            rootNavController = rootNavController,
+            onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) }
         )
     }
 
@@ -82,7 +82,7 @@ fun NavGraphBuilder.eventNavGraph(
         CreateEventScreen(
             viewModel = eventViewModel,
             onSaveClick = {},
-            onBackClick = { navController.popBackStack() }
+            onBackClick = { localNavController.popBackStack() }
         )
     }
 }

@@ -8,11 +8,11 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
-import com.example.maiplan.home.event.EventActivity
+import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
-import com.example.maiplan.network.Token
+import com.example.maiplan.network.api.Token
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.theme.AppTheme
@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                 if (result is Result.Success) {
                     sessionManager.saveAuthToken(result.data.accessToken)
                 }
-                startActivity(Intent(this, EventActivity::class.java))
+                startActivity(Intent(this, HomeActivity::class.java))
                 finish()
             })
         }
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                 is Result.Success -> {
                     sessionManager.saveAuthToken(result.data.accessToken)
                     initUserSession(sessionManager.getAuthToken()!!, false)
-                    startActivity(Intent(this, EventActivity::class.java))
+                    startActivity(Intent(this, HomeActivity::class.java))
                     Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
                     finish()
                 }

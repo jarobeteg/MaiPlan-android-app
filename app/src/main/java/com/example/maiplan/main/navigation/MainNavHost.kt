@@ -9,9 +9,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.main.screens.ForgotPasswordScreen
 import com.example.maiplan.main.screens.LoginScreen
 import com.example.maiplan.main.screens.RegisterScreen
-import com.example.maiplan.network.UserLogin
-import com.example.maiplan.network.UserRegister
-import com.example.maiplan.network.UserResetPassword
+import com.example.maiplan.network.api.UserLogin
+import com.example.maiplan.network.api.UserRegister
+import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.viewmodel.AuthViewModel
 
 /**

@@ -1,6 +1,6 @@
 package com.example.maiplan.utils
 
-import com.example.maiplan.network.UserResponse
+import com.example.maiplan.network.api.UserResponse
 
 /**
  * A singleton object that holds basic user information during an active session.

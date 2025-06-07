@@ -1,7 +1,6 @@
 package com.example.maiplan.home.navigation
 
 import android.app.Activity
-import android.app.ActivityOptions
 import android.content.Context
 import android.content.Intent
 import androidx.compose.material3.Icon
@@ -12,10 +11,9 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
-import com.example.maiplan.home.event.EventActivity
-import com.example.maiplan.home.file.FileActivity
-import com.example.maiplan.home.more.MoreActivity
-import com.example.maiplan.home.task.TaskActivity
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 /**
  * Displays the bottom navigation bar for the Home component Activity screens.
@@ -32,40 +30,40 @@ import com.example.maiplan.home.task.TaskActivity
  *
  * @param context The [Context] used to start new activities and determine the current one.
  *
- * @see BottomNavRoutes
+ * @see HomeNavRoutes
  * @see EventActivity
  * @see TaskActivity
  * @see FileActivity
  * @see MoreActivity
  */
 @Composable
-fun BottomNavigationBar(context: Context) {
+fun HomeNavigationBar(navController: NavHostController, context: Context) {
     val items = listOf(
-        BottomNavRoutes.Events to EventActivity::class.java,
-        BottomNavRoutes.Tasks to TaskActivity::class.java,
-        BottomNavRoutes.Files to FileActivity::class.java,
-        BottomNavRoutes.More to MoreActivity::class.java
+        HomeNavRoutes.Events,
+        HomeNavRoutes.Tasks,
+        HomeNavRoutes.Files,
+        HomeNavRoutes.More
     )
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route
+
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary
     ) {
-        val currentActivity = (context as? Activity)
-
-        items.forEach { (item, activityClass) ->
+        items.forEach { screen ->
             NavigationBarItem(
-                icon = { Icon(imageVector = item.icon, contentDescription = context.getString(item.labelResId)) },
-                label = { Text(context.getString(item.labelResId)) },
-                selected = currentActivity?.javaClass == activityClass,
+                icon = { Icon(imageVector = screen.icon, contentDescription = context.getString(screen.labelResId)) },
+                label = { Text(context.getString(screen.labelResId)) },
+                selected = currentRoute == screen.route,
                 onClick = {
-                    if (currentActivity?.javaClass != activityClass) {
-                        val intent = Intent(context, activityClass).apply {
-                            flags = Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+                    if (currentRoute != screen.route) {
+                        navController.navigate(screen.route) {
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        val options = ActivityOptions.makeCustomAnimation(context, 0, 0).toBundle()
-                        context.startActivity(intent, options)
-                        currentActivity?.finish()
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(

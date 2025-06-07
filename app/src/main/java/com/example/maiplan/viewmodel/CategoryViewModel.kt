@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maiplan.network.CategoryCreate
-import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.network.api.CategoryCreate
+import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.CategoryRepository
 import com.example.maiplan.repository.Result
 import kotlinx.coroutines.delay

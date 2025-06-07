@@ -48,7 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.SearchFieldComponent
-import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.IconData
 import com.example.maiplan.viewmodel.CategoryViewModel
 

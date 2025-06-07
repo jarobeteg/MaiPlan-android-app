@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maiplan.network.EventCreate
-import com.example.maiplan.network.EventResponse
+import com.example.maiplan.network.api.EventCreate
+import com.example.maiplan.network.api.EventResponse
 import com.example.maiplan.repository.EventRepository
 import com.example.maiplan.repository.Result
 import kotlinx.coroutines.launch

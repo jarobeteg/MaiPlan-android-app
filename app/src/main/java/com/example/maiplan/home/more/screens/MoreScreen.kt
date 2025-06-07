@@ -1,4 +1,4 @@
-package com.example.maiplan.home.more
+package com.example.maiplan.home.more.screens
 
 import android.app.Activity
 import android.content.Context
@@ -32,13 +32,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
-import com.example.maiplan.home.navigation.BottomNavigationBar
+import com.example.maiplan.home.navigation.HomeNavigationBar
 
 /**
  * Displays the More screen, structured with a top app bar,
@@ -47,14 +49,17 @@ import com.example.maiplan.home.navigation.BottomNavigationBar
  * @param context The [Context] used to open new activities.
  *
  * @see MoreTopBar
- * @see BottomNavigationBar
+ * @see HomeNavigationBar
  * @see MoreScreenButton
  */
 @Composable
-fun MoreScreenWithNav(context: Context) {
+fun MoreScreen(
+    rootNavController: NavHostController
+) {
+    val context = LocalContext.current
     Scaffold(
         topBar = { MoreTopBar() },
-        bottomBar = { BottomNavigationBar(context) }
+        bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
         Column(
             modifier = Modifier

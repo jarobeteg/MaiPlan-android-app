@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maiplan.network.Token
-import com.example.maiplan.network.UserRegister
-import com.example.maiplan.network.UserLogin
-import com.example.maiplan.network.UserResetPassword
-import com.example.maiplan.network.UserResponse
+import com.example.maiplan.network.api.Token
+import com.example.maiplan.network.api.UserRegister
+import com.example.maiplan.network.api.UserLogin
+import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.AuthRepository
 import com.example.maiplan.repository.Result
 import kotlinx.coroutines.launch

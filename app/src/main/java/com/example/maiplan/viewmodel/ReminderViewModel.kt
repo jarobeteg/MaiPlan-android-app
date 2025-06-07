@@ -4,8 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maiplan.network.ReminderCreate
-import com.example.maiplan.network.ReminderResponse
+import com.example.maiplan.network.api.ReminderCreate
+import com.example.maiplan.network.api.ReminderResponse
 import com.example.maiplan.repository.ReminderRepository
 import com.example.maiplan.repository.Result
 import kotlinx.coroutines.launch

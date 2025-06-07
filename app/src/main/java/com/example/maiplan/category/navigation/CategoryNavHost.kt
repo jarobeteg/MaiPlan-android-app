@@ -13,8 +13,8 @@ import androidx.navigation.navArgument
 import com.example.maiplan.category.screens.CategoryManagementScreen
 import com.example.maiplan.category.screens.CreateCategoryScreen
 import com.example.maiplan.category.screens.UpdateCategoryScreen
-import com.example.maiplan.network.CategoryCreate
-import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.network.api.CategoryCreate
+import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.UserSession
 import com.example.maiplan.viewmodel.CategoryViewModel

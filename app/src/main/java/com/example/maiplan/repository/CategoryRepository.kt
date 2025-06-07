@@ -1,8 +1,8 @@
 package com.example.maiplan.repository
 
-import com.example.maiplan.network.CategoryApi
-import com.example.maiplan.network.CategoryCreate
-import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.network.api.CategoryApi
+import com.example.maiplan.network.api.CategoryCreate
+import com.example.maiplan.network.api.CategoryResponse
 
 /**
  * Repository responsible for handling category-related network operations.

@@ -27,7 +27,7 @@ import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.network.CategoryResponse
+import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.IconData
 import com.example.maiplan.viewmodel.CategoryViewModel

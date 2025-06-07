@@ -16,16 +16,7 @@
         android:theme="@style/Theme.MaiPlan"
         tools:targetApi="31">
         <activity
-            android:name=".home.task.TaskActivity"
-            android:exported="false" />
-        <activity
-            android:name=".home.more.MoreActivity"
-            android:exported="false" />
-        <activity
-            android:name=".home.file.FileActivity"
-            android:exported="false" />
-        <activity
-            android:name=".home.event.EventActivity"
+            android:name=".home.HomeActivity"
             android:exported="false" />
         <activity
             android:name=".category.CategoryActivity"
