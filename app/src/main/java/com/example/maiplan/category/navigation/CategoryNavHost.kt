@@ -1,5 +1,8 @@
 package com.example.maiplan.category.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,7 +40,11 @@ fun CategoryNavHost(categoryViewModel: CategoryViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = CategoryRoutes.Management.route
+        startDestination = CategoryRoutes.Management.route,
+        enterTransition = { fadeIn(animationSpec = tween(0)) },
+        exitTransition = { fadeOut(animationSpec = tween(0)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
+        popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         categoryNavGraph(navController, categoryViewModel)
     }

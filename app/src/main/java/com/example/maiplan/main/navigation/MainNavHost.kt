@@ -1,5 +1,8 @@
 package com.example.maiplan.main.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -32,7 +35,11 @@ fun AuthNavHost(viewModel: AuthViewModel) {
 
     NavHost(
         navController = navController,
-        startDestination = MainRoutes.Login.route
+        startDestination = MainRoutes.Login.route,
+        enterTransition = { fadeIn(animationSpec = tween(0)) },
+        exitTransition = { fadeOut(animationSpec = tween(0)) },
+        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
+        popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         authNavGraph(navController, viewModel)
     }
