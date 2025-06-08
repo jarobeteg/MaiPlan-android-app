@@ -75,7 +75,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
-import com.example.maiplan.utils.IconData.allIcons
+import com.example.maiplan.utils.model.IconData.allIcons
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId

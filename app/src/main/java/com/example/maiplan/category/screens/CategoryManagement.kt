@@ -49,8 +49,8 @@ import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.utils.IconData
-import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.utils.model.IconData
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 /**
  * Composable screen for managing categories.

@@ -1,4 +1,4 @@
-package com.example.maiplan.viewmodel
+package com.example.maiplan.viewmodel.reminder
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maiplan.network.api.ReminderCreate
 import com.example.maiplan.network.api.ReminderResponse
-import com.example.maiplan.repository.ReminderRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.reminder.ReminderRepository
 import kotlinx.coroutines.launch
 
 /**
@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
  *
  * @property reminderRepository The repository responsible for reminder-related API calls.
  *
- * @see ReminderRepository
- * @see Result
- * @see ReminderResponse
+ * @see com.example.maiplan.repository.reminder.ReminderRepository
+ * @see com.example.maiplan.repository.Result
+ * @see com.example.maiplan.network.api.ReminderResponse
  */
 class ReminderViewModel(private val reminderRepository: ReminderRepository) : ViewModel() {
     private val _createReminderResult = MutableLiveData<Result<Unit>>()
@@ -32,9 +32,9 @@ class ReminderViewModel(private val reminderRepository: ReminderRepository) : Vi
     /**
      * Creates a new reminder.
      *
-     * @param reminder The [ReminderCreate] object containing reminder details.
+     * @param reminder The [com.example.maiplan.network.api.ReminderCreate] object containing reminder details.
      *
-     * @see ReminderCreate
+     * @see com.example.maiplan.network.api.ReminderCreate
      */
     fun createReminder(reminder: ReminderCreate) {
         viewModelScope.launch {

@@ -13,12 +13,13 @@ import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.Token
-import com.example.maiplan.repository.AuthRepository
+import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.auth.AuthRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
-import com.example.maiplan.utils.UserSession
-import com.example.maiplan.viewmodel.AuthViewModel
+import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 /**
@@ -62,12 +63,8 @@ class MainActivity : AppCompatActivity() {
         setContent { AppTheme { LoadingScreen() } }
 
         // Initialize repository, ViewModel, and session manager
-        val authApi = RetrofitClient.authApi
-        val authRepository = AuthRepository(authApi)
-        val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
-
+        initViewModel()
         sessionManager = SessionManager(this)
-        viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
         // Check if there is an existing authentication token
         val token = sessionManager.getAuthToken()
@@ -80,6 +77,15 @@ class MainActivity : AppCompatActivity() {
         }
 
         observeViewModel()
+    }
+
+    private fun initViewModel() {
+        val authApi = RetrofitClient.authApi
+        val authRemoteDataSource = AuthRemoteDataSource(authApi)
+        val authRepository = AuthRepository(authRemoteDataSource)
+        val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
+
+        viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
     }
 
     /**

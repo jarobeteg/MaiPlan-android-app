@@ -44,7 +44,7 @@ import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
 import com.example.maiplan.home.navigation.HomeNavigationBar
-import com.example.maiplan.viewmodel.EventViewModel
+import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields

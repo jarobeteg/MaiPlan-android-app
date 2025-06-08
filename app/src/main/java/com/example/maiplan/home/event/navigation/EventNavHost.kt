@@ -8,7 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.example.maiplan.home.event.screens.CreateEventScreen
 import com.example.maiplan.home.event.screens.EventScreen
-import com.example.maiplan.viewmodel.EventViewModel
+import com.example.maiplan.viewmodel.event.EventViewModel
 
 /**
  * Composable that sets up the navigation host for the Event screens.

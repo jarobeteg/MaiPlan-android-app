@@ -9,11 +9,12 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
 import com.example.maiplan.category.navigation.CategoryNavHost
 import com.example.maiplan.network.RetrofitClient
-import com.example.maiplan.repository.CategoryRepository
+import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.theme.AppTheme
-import com.example.maiplan.utils.UserSession
-import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 /**
@@ -48,15 +49,19 @@ class CategoryActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        initViewModel()
+        setupComposeUI()
+        observeCategoryViewModel()
+    }
+
+    private fun initViewModel() {
         val categoryApi = RetrofitClient.categoryApi
-        val categoryRepository = CategoryRepository(categoryApi)
+        val categoryRemoteDataSource = CategoryRemoteDataSource(categoryApi)
+        val categoryRepository = CategoryRepository(categoryRemoteDataSource)
         val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
 
         categoryViewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
         categoryViewModel.getAllCategories(UserSession.userId!!)
-
-        setupComposeUI()
-        observeCategoryViewModel()
     }
 
     /**

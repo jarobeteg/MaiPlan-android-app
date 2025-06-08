@@ -1,39 +1,40 @@
-package com.example.maiplan.repository
+package com.example.maiplan.repository.auth
 
-import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.Token
-import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserLogin
+import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.network.api.UserResponse
+import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.handleResponse
 
 /**
  * Repository responsible for handling authentication-related network operations.
  *
- * Wraps API calls and returns a [Result] indicating success or failure,
+ * Wraps API calls and returns a [com.example.maiplan.repository.Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @property authApi An instance of [AuthApi] for making authentication network requests.
+ * @property authApi An instance of [com.example.maiplan.network.api.AuthApi] for making authentication network requests.
  *
- * @see AuthApi
- * @see Result
+ * @see com.example.maiplan.network.api.AuthApi
+ * @see com.example.maiplan.repository.Result
  */
-class AuthRepository(private val authApi: AuthApi) {
+class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
 
     /**
      * Registers a new user.
      *
-     * @param user The [UserRegister] object containing registration data.
-     * @return A [Result] containing a [Token] on success or an error on failure.
+     * @param user The [com.example.maiplan.network.api.UserRegister] object containing registration data.
+     * @return A [com.example.maiplan.repository.Result] containing a [com.example.maiplan.network.api.Token] on success or an error on failure.
      *
-     * @see Result
-     * @see UserRegister
-     * @see Token
-     * @see handleResponse
+     * @see com.example.maiplan.repository.Result
+     * @see com.example.maiplan.network.api.UserRegister
+     * @see com.example.maiplan.network.api.Token
+     * @see com.example.maiplan.repository.handleResponse
      */
     suspend fun register(user: UserRegister): Result<Token> {
         return try {
-            handleResponse(authApi.register(user))
+            handleResponse(remoteDataSource.register(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -42,17 +43,17 @@ class AuthRepository(private val authApi: AuthApi) {
     /**
      * Logs in an existing user.
      *
-     * @param user The [UserLogin] object containing login credentials.
+     * @param user The [com.example.maiplan.network.api.UserLogin] object containing login credentials.
      * @return A [Result] containing a [Token] on success or an error on failure.
      *
      * @see Result
-     * @see UserLogin
+     * @see com.example.maiplan.network.api.UserLogin
      * @see Token
      * @see handleResponse
      */
     suspend fun login(user: UserLogin): Result<Token> {
         return try {
-            handleResponse(authApi.login(user))
+            handleResponse(remoteDataSource.login(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -61,17 +62,17 @@ class AuthRepository(private val authApi: AuthApi) {
     /**
      * Requests a password reset for a user.
      *
-     * @param user The [UserResetPassword] object containing password reset info.
+     * @param user The [com.example.maiplan.network.api.UserResetPassword] object containing password reset info.
      * @return A [Result] containing a [Token] on success or an error on failure.
      *
      * @see Result
-     * @see UserResetPassword
+     * @see com.example.maiplan.network.api.UserResetPassword
      * @see Token
      * @see handleResponse
      */
     suspend fun resetPassword(user: UserResetPassword): Result<Token> {
         return try {
-            handleResponse(authApi.resetPassword(user))
+            handleResponse(remoteDataSource.resetPassword(user))
         } catch (e: Exception){
             Result.Error(e)
         }
@@ -89,7 +90,7 @@ class AuthRepository(private val authApi: AuthApi) {
      */
     suspend fun tokenRefresh(token: String): Result<Token> {
         return try {
-            handleResponse(authApi.tokenRefresh(token))
+            handleResponse(remoteDataSource.tokenRefresh(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -99,15 +100,15 @@ class AuthRepository(private val authApi: AuthApi) {
      * Fetches the user's profile data.
      *
      * @param token The authentication token.
-     * @return A [Result] containing [UserResponse] with user data or an error on failure.
+     * @return A [Result] containing [com.example.maiplan.network.api.UserResponse] with user data or an error on failure.
      *
      * @see Result
-     * @see UserResponse
+     * @see com.example.maiplan.network.api.UserResponse
      * @see handleResponse
      */
     suspend fun getProfile(token: String): Result<UserResponse> {
         return try {
-            handleResponse(authApi.getProfile(token))
+            handleResponse(remoteDataSource.getProfile(token))
         } catch (e: Exception) {
             Result.Error(e)
         }

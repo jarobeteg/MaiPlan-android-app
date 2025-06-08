@@ -1,4 +1,4 @@
-package com.example.maiplan.viewmodel
+package com.example.maiplan.viewmodel.category
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.repository.CategoryRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.category.CategoryRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -19,15 +19,15 @@ import kotlinx.coroutines.launch
  * needed for smooth category editing interactions.
  *
  * ## Responsibilities:
- * - Creating, fetching, updating, and deleting categories via [CategoryRepository].
- * - Exposing operation results through [LiveData] to update the UI.
+ * - Creating, fetching, updating, and deleting categories via [com.example.maiplan.repository.category.CategoryRepository].
+ * - Exposing operation results through [androidx.lifecycle.LiveData] to update the UI.
  * - Managing a temporary navigation flag to handle swipe-to-edit behaviors.
  *
  * @property categoryRepository The repository responsible for category-related API calls.
  *
- * @see CategoryRepository
- * @see Result
- * @see CategoryResponse
+ * @see com.example.maiplan.repository.category.CategoryRepository
+ * @see com.example.maiplan.repository.Result
+ * @see com.example.maiplan.network.api.CategoryResponse
  */
 class CategoryViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
@@ -57,9 +57,9 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     /**
      * Creates a new category and refreshes the category list on Success.
      *
-     * @param category The [CategoryCreate] object containing the new category's data.
+     * @param category The [com.example.maiplan.network.api.CategoryCreate] object containing the new category's data.
      *
-     * @see CategoryCreate
+     * @see com.example.maiplan.network.api.CategoryCreate
      */
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {

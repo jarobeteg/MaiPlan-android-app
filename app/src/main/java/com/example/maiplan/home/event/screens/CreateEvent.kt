@@ -6,7 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.R
-import com.example.maiplan.viewmodel.EventViewModel
+import com.example.maiplan.viewmodel.event.EventViewModel
 
 /**
  * Still under work.

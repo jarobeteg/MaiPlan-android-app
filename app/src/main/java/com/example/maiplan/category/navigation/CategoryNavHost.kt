@@ -19,8 +19,8 @@ import com.example.maiplan.category.screens.UpdateCategoryScreen
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.UserSession
-import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 /**
  * Composable that sets up the navigation host for the Category screens.

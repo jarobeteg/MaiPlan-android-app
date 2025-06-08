@@ -1,4 +1,4 @@
-package com.example.maiplan.utils
+package com.example.maiplan.utils.model
 
 import com.example.maiplan.network.api.UserResponse
 
@@ -6,13 +6,13 @@ import com.example.maiplan.network.api.UserResponse
  * A singleton object that holds basic user information during an active session.
  *
  * This object stores user data (Id, email, username) in memory after login,
- * fetched from a network [UserResponse].
+ * fetched from a network [com.example.maiplan.network.api.UserResponse].
  *
  * ## Responsibilities:
  * - Initializing user session data after successful authentication.
  * - Clearing session data when the user logs out.
  *
- * @see UserResponse
+ * @see com.example.maiplan.network.api.UserResponse
  */
 object UserSession {
     /** The unique user Id. */
@@ -27,9 +27,9 @@ object UserSession {
     /**
      * Initializes the user session with the provided [data] from the API.
      *
-     * @param data The [UserResponse] containing user information.
+     * @param data The [com.example.maiplan.network.api.UserResponse] containing user information.
      *
-     * @see UserResponse
+     * @see com.example.maiplan.network.api.UserResponse
      */
     fun init(data: UserResponse) {
         userId = data.id

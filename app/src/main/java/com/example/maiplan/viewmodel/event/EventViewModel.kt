@@ -1,4 +1,4 @@
-package com.example.maiplan.viewmodel
+package com.example.maiplan.viewmodel.event
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -6,8 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maiplan.network.api.EventCreate
 import com.example.maiplan.network.api.EventResponse
-import com.example.maiplan.repository.EventRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.event.EventRepository
 import kotlinx.coroutines.launch
 
 /**
@@ -16,9 +16,9 @@ import kotlinx.coroutines.launch
  *
  * @property eventRepository The repository responsible for event-related API calls.
  *
- * @see EventRepository
- * @see Result
- * @see EventResponse
+ * @see com.example.maiplan.repository.event.EventRepository
+ * @see com.example.maiplan.repository.Result
+ * @see com.example.maiplan.network.api.EventResponse
  */
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _createEventResult = MutableLiveData<Result<Unit>>()
@@ -32,9 +32,9 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     /**
      * Creates a new event.
      *
-     * @param event The [EventCreate] object containing event details.
+     * @param event The [com.example.maiplan.network.api.EventCreate] object containing event details.
      *
-     * @see EventCreate
+     * @see com.example.maiplan.network.api.EventCreate
      */
     fun createEvent(event: EventCreate) {
         viewModelScope.launch {

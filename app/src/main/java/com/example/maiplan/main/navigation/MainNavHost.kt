@@ -15,7 +15,7 @@ import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
-import com.example.maiplan.viewmodel.AuthViewModel
+import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 /**
  * Composable that sets up the navigation host for the Authentication screens.

@@ -29,7 +29,7 @@ import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.Result
-import com.example.maiplan.viewmodel.AuthViewModel
+import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 
 /**

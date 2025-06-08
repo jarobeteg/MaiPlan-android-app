@@ -11,8 +11,9 @@ import com.example.maiplan.home.event.navigation.EventNavHost
 import com.example.maiplan.home.event.navigation.EventRoutes
 import com.example.maiplan.home.event.screens.EventScreen
 import com.example.maiplan.network.RetrofitClient
-import com.example.maiplan.repository.EventRepository
-import com.example.maiplan.viewmodel.EventViewModel
+import com.example.maiplan.repository.event.EventRemoteDataSource
+import com.example.maiplan.repository.event.EventRepository
+import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 @Composable
@@ -21,7 +22,8 @@ fun EventScreenManager(rootNavController: NavHostController) {
     val context = LocalContext.current
     val eventViewModel = remember {
         val eventApi = RetrofitClient.eventApi
-        val eventRepository = EventRepository(eventApi)
+        val eventRemoteDataSource = EventRemoteDataSource(eventApi)
+        val eventRepository = EventRepository(eventRemoteDataSource)
         val factory = GenericViewModelFactory { EventViewModel(eventRepository) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
     }

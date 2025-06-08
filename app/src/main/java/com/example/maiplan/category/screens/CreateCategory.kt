@@ -29,7 +29,7 @@ import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.viewmodel.CategoryViewModel
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.repository.Result
 
 /**
