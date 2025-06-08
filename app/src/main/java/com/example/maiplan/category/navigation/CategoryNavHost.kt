@@ -13,9 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.maiplan.category.screens.CategoryManagementScreen
-import com.example.maiplan.category.screens.CreateCategoryScreen
-import com.example.maiplan.category.screens.UpdateCategoryScreen
+import com.example.maiplan.category.screens.*
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
@@ -23,13 +21,18 @@ import com.example.maiplan.utils.model.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 /**
- * Composable that sets up the navigation host for the Category screens.
+ * [Composable] that sets up the navigation host for the `Category` screens.
  *
- * It defines the entry point and connects the navigation graph for managing categories,
- * viewing, creating, and updating categories.
+ * It defines the entry point and connects the navigation graph for viewing, managing
+ * ([CategoryManagementScreen]), creating ([CreateCategoryScreen]),
+ * and updating ([UpdateCategoryScreen]) `Categories`.
  *
- * @param categoryViewModel The ViewModel shared across category-related screens,
- * used for performing CRUD operations on categories.
+ * Navigation transitions are set to instantly fade between screens for a seamless and subtle effect:
+ * - `enterTransition`, `popEnterTransition`: Fade in with no delay.
+ * - `exitTransition`, `popExitTransition`: Fade out with no delay.
+ *
+ * @param categoryViewModel The `ViewModel` shared across `Category`-related screens,
+ * used for performing `CRUD` operations on `Categories`.
  *
  * @see CategoryViewModel
  * @see CategoryRoutes
@@ -51,18 +54,18 @@ fun CategoryNavHost(categoryViewModel: CategoryViewModel) {
 }
 
 /**
- * Defines the navigation graph for the Category screens.
+ * Defines the navigation graph for the `Category` screens.
  *
  * This graph includes:
- * - Category Management Screen: Displays all categories with options to edit or delete.
- * - Create Category Screen: Allows user to create a new category.
- * - Update Category Screen: Enables editing of an existing category by its Id.
+ * - [CategoryManagementScreen]: Displays all `Categories` with options to edit or delete.
+ * - [CreateCategoryScreen]: Allows `User` to create a new `Category`.
+ * - [UpdateCategoryScreen]: Enables editing of an existing `Category` by its Id.
  *
  * Navigation between screens is handled by [navController]
  * The [categoryViewModel] is passed to all screens to ensure shared state.
  *
- * @param navController The controller that handles navigation between screens.
- * @param categoryViewModel The ViewModel providing data and logic for the Category screens.
+ * @param navController The `NavController` that handles navigation between screens.
+ * @param categoryViewModel The `ViewModel` providing data and logic for the `Category` screens.
  *
  * @see CategoryManagementScreen
  * @see CreateCategoryScreen
@@ -80,21 +83,13 @@ fun NavGraphBuilder.categoryNavGraph(
 
     // --- Category Management Screen ---
     composable(CategoryRoutes.Management.route) {
-        /**
-         * Displays a list of categories.
-         *
-         * @param viewModel Used to fetch and manage category data.
-         * @param onCardSwipeDelete Triggered when a category card is swiped to delete.
-         * @param onCardSwipeEdit Triggered when a category card is swiped to edit.
-         * @param onCreateCategoryClick Called when the user clicks the add new category button.
-         */
         CategoryManagementScreen(
             viewModel = categoryViewModel,
             onCardSwipeDelete = { categoryId ->
                 categoryViewModel.deleteCategory(categoryId, userId)
             },
             onCardSwipeEdit = { category ->
-                /** Prevent double navigation using [isNavigating] flag */
+                // Prevent double navigation using isNavigating flag
                 if (categoryViewModel.isNavigating.value == false) {
                     categoryViewModel.startNavigation()
                     navController.navigate(CategoryRoutes.Update.withArgs(category.categoryId))
@@ -109,13 +104,6 @@ fun NavGraphBuilder.categoryNavGraph(
 
     // --- Create Category Screen ---
     composable(CategoryRoutes.Create.route) {
-        /**
-         * Screen for creating a new category.
-         *
-         * @param viewModel Supplies the creation logic.
-         * @param onSaveClick Called when the user submits the category creation form.
-         * @param onBackClick Cancels creating and pops back without saving.
-         */
         CreateCategoryScreen(
             viewModel = categoryViewModel,
             onSaveClick = { name, description, color, icon ->
@@ -127,8 +115,8 @@ fun NavGraphBuilder.categoryNavGraph(
             }
         )
 
-        /**
-         * On a successful category create:
+        /*
+         * On a successful Category create:
          * - Pops back to the previous screen.
          * - Clears errors and create result state.
          */
@@ -147,22 +135,14 @@ fun NavGraphBuilder.categoryNavGraph(
         route = CategoryRoutes.Update.route,
         arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
     ) { backStackEntry ->
-        /**
-         * Retrieves the category Id from the formatted route.
+        /*
+         * Retrieves the categoryId from the formatted route.
          *
-         * Retrieves selected category using the retrieved category Id.
+         * Retrieves selected Category using the retrieved categoryId.
          */
         val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: return@composable
         val selectedCategory = categoryViewModel.getCategoryById(categoryId)
 
-        /**
-         * Screen for updating an existing category.
-         *
-         * @param viewModel Supplies the update logic.
-         * @param category Pre-filled category data to display in the form.
-         * @param onSaveClick Called when user submits edit, updates the category and pops back.
-         * @param onBackClick Cancels updating and pops back without saving.
-         */
         UpdateCategoryScreen(
             viewModel = categoryViewModel,
             category = selectedCategory,
@@ -175,8 +155,8 @@ fun NavGraphBuilder.categoryNavGraph(
             }
         )
 
-        /**
-         * On a successful category update:
+        /*
+         * On a successful Category update:
          * - Pops back to the previous screen.
          * - Clears errors and update result state.
          */

@@ -81,7 +81,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Reusable composable that displays a heading style text.
+ * Reusable [Composable] that displays a heading style text.
  *
  * @param text The string to be displayed as the heading.
  */
@@ -96,7 +96,7 @@ fun HeadingTextComponent(text: String) {
 }
 
 /**
- * Reusable composable that displays clickable text without ripple effect.
+ * Reusable [Composable] that displays clickable text without ripple effect.
  *
  * @param text The clickable string to be displayed.
  * @param onTextClicked Callback function that is invoked when the text is clicked.
@@ -116,11 +116,12 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
 }
 
 /**
- * Reusable composable that displays an email input field.
+ * Reusable [Composable] that displays an email input field.
+ *
+ * Only non whitespace characters are allowed and the email string is limited to 64 characters.
  *
  * @param email The current text value of the email input field.
  * @param onEmailChange Callback invoked when the email input changes.
- * Only non whitespace characters are allowed and the email string is limited to 64 characters.
  */
 @Composable
 fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
@@ -150,11 +151,12 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
 }
 
 /**
- * Reusable composable that displays username input field.
+ * Reusable [Composable] that displays username input field.
+ *
+ * Only non whitespace characters are allowed and the username input string is limited to 32 characters
  *
  * @param username The current text value of the username input field.
  * @param onUsernameChange Callback invoked when the username input changes.
- * Only non whitespace characters are allowed and the username input string is limited to 32 characters.
  */
 @Composable
 fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
@@ -184,7 +186,9 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
 }
 
 /**
- * Reusable composable that displays password input field with optional visibility toggle and strength indicator.
+ * Reusable [Composable] that displays password input field with optional visibility toggle and strength indicator.
+ *
+ * Only non whitespace characters are allowed and the password input string is limited to 64 characters.
  *
  * @param password The current text value of the password input field.
  * @param label Localized label for the password input field.
@@ -192,7 +196,6 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
  * @param passwordVisible Whether the password should be shown in plain text.
  * @param onTogglePasswordVisibility Called when the visibility icon is clicked.
  * @param shouldIndicatorBeVisible Controls if the strength indicator should be shown.
- * Only non whitespace characters are allowed and the password input string is limited to 64 characters.
  */
 @Composable
 fun PasswordTextComponent(
@@ -255,18 +258,18 @@ fun PasswordTextComponent(
 }
 
 /**
- * Reusable composable that displays a visual password strength indicator based on password rules.
+ * Reusable [Composable] that displays a visual password strength indicator based on password rules.
  *
  * Strength bar has 5 levels (localized labels):
- * - Very Weak
- * - Weak
- * - Medium
- * - Strong
- * - Very Strong
+ * - `Very Weak`
+ * - `Weak`
+ * - `Medium`
+ * - `Strong`
+ * - `Very Strong`
  *
  * Strength is evaluated by:
- * - Minimum 5 characters
- * - Contains lowercase, uppercase, digits, and special characters (! _ @ # $ ?)
+ * - Minimum `5` characters
+ * - Contains `lowercase`, `uppercase`, `digits`, and `special characters (! _ @ # $ ?)`
  *
  * The bar only appears when the password field is focused.
  */
@@ -337,7 +340,7 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
 }
 
 /**
- * Reusable composable that displays a flexible text field with a customizable character limit.
+ * Reusable [Composable] that displays a flexible text field with a customizable character limit.
  *
  * @param value The current text value of the input field.
  * @param label Localized label for the input field.
@@ -373,7 +376,7 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, length: Int
 }
 
 /**
- * Reusable composable that displays a simple submit button for forms or triggering actions.
+ * Reusable [Composable] that displays a simple submit button for forms or triggering actions.
  *
  * @param value Localized text displayed inside the button.
  * @param onButtonClicked Callback invoked when the button is clicked.
@@ -392,7 +395,7 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
 }
 
 /**
- * Reusable composable that displays error messages
+ * Reusable [Composable] that displays error messages
  *
  * @param value Localized error message text to display.
  */
@@ -407,7 +410,7 @@ fun ErrorMessageComponent(value: String) {
 }
 
 /**
- * Reusable composable that displays Material3 Date Picker dialog that allows users to select a date.
+ * Reusable [Composable] that displays Material3 Date Picker dialog that allows users to select a date.
  *
  * @param onDateSelected Callback invoked when the user selects a date and confirms.
  * @param onDismiss Callback invoked when the dialog is dismissed without selection.
@@ -474,7 +477,7 @@ fun DatePickerDialogComponent(
 }
 
 /**
- * Reusable composable that displays a search field with character limit and leading search icon.
+ * Reusable [Composable] that displays a search field with character limit and leading search icon.
  *
  * @param searchQuery The current query text input field.
  * @param length Maximum allowed character length.
@@ -506,7 +509,7 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
 }
 
 /**
- * Reusable composable that displays a row that shows the selected color and opens a color picker dialog when clicked.
+ * Reusable [Composable] that displays a row that shows the selected color and opens a color picker dialog when clicked.
  *
  * @param selectedColor The current selected color.
  * @param onColorSelected Callback invoked when a new color is selected from the dialog
@@ -567,7 +570,7 @@ fun ColorPickerRow(
 }
 
 /**
- * Reusable composable that displays a custom slider thumb and track background.
+ * Reusable [Composable] that displays a custom slider thumb and track background.
  *
  * @param value The current slider value.
  * @param onValueChange Callback invoked when the slider value changes.
@@ -613,11 +616,11 @@ fun CustomSlider(
 }
 
 /**
- * Reusable composable that displays a color picker dialog,
- * allows the user to pick a color using HSV sliders for Hue, Saturation, and Brightness.
+ * Reusable [Composable] that displays a color picker dialog,
+ * allows the user to pick a color using `HSV` sliders for `Hue`, `Saturation`, and `Brightness`.
  *
  * @param initialColor The color to start with when the dialog opens.
- * @param onColorSelected Callback invoked when the user selects a color and confirms.
+ * @param onColorSelected Callback invoked when the `User` selects a color and confirms.
  * @param onDismiss Callback invoked when the dialog is dismissed without selecting a color.
  */
 @Composable
@@ -700,7 +703,7 @@ fun ColorPickerDialog(
 }
 
 /**
- * Reusable composable that displays a row that shows the selected icon and open an icon picker dialog when clicked.
+ * Reusable [Composable] that displays a row that shows the selected icon and open an icon picker dialog when clicked.
  *
  * @param selectedIcon The currently selected icon.
  * @param onIconSelected Callback invoked when a new icon is selected from the dialog.
@@ -774,7 +777,7 @@ fun IconPickerRow(
 }
 
 /**
- * Reusable composable that displays a dialog of scrollable grid of icons.
+ * Reusable [Composable] that displays a dialog of scrollable grid of icons.
  *
  * @param onIconSelected Callback invoked when an icon is clicked.
  * @param onIconSelectedString Callback invoked with the icon's key (identifier) as a string.
@@ -851,7 +854,7 @@ fun IconPickerDialog(
 }
 
 /**
- * Reusable composable that displays a simple top app bar with a centered title and a back arrow icon.
+ * Reusable [Composable] that displays a simple top app bar with a centered title and a back arrow icon.
  *
  * @param text Localized title displayed in the center of the top app bar.
  * @param onBackClick Callback invoked when the back arrow is clicked.

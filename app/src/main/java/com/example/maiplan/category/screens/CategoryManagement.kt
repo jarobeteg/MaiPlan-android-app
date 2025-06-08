@@ -53,14 +53,14 @@ import com.example.maiplan.utils.model.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 /**
- * Composable screen for managing categories.
+ * [Composable] screen for managing `Categories`.
  *
- * Displays a list of categories in cards with swipe actions for delete and edit.
+ * Displays a list of `Categories` in cards with swipe actions for delete and edit.
  * A search bar is included and a top bar with back and create functions.
  *
- * @param viewModel The ViewModel providing the logic for managing categories.
- * @param onCardSwipeDelete Callback invoked when a category card is swiped from left to right.
- * @param onCardSwipeEdit Callback invoked when a category card is swiped from right to left.
+ * @param viewModel The `ViewModel` providing the logic for managing `Categories`.
+ * @param onCardSwipeDelete Callback invoked when a `Category` card is swiped from left to right.
+ * @param onCardSwipeEdit Callback invoked when a `Category` card is swiped from right to left.
  * @param onCreateCategoryClick Callback invoked when the add button is clicked.
  *
  * @see CategoryViewModel
@@ -138,13 +138,13 @@ fun CategoryManagementScreen(
 }
 
 /**
- * Top app bar for the category management screen.
+ * Top app bar for the [CategoryManagementScreen].
  *
- * Displays the screen title and includes a back and create button.
+ * Displays the screen title and includes a back and add button.
  *
  * @param text The title shown in the top app bar.
  * @param onBackClick Callback invoked when the back button is clicked.
- * @param onCreateCategoryClick Callback invoked when the add category button is clicked.
+ * @param onCreateCategoryClick Callback invoked when the [CreateCategoryScreen] button is clicked.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -186,12 +186,12 @@ fun CategoryManagementTopBar(
 }
 
 /**
- * Card representation of a category
+ * Card representation of a `Category`.
  *
- * Displays the category's icon, name, and description.
- * The background color reflects the category's assigned color.
+ * Displays the `Category`'s icon, name, and description.
+ * The background color reflects the `Category`'s assigned color.
  *
- * @param category The category data to display.
+ * @param category The `Category` data to display.
  *
  * @see IconData
  */
