@@ -57,6 +57,7 @@ dependencies {
     implementation(libs.auth0.jwt)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.navigation.compose)
     implementation(libs.androidx.compose.material)
     testImplementation(libs.junit)

@@ -15,19 +15,19 @@ sealed class EventRoutes(val route: String) {
 
     /**
      * Route for the Monthly View, which shows events for the selected month organized in a grid, each cell is a day in the month.
-     * Flagged for potential removement
+     * Flagged for potential re-movement
      */
     data object Monthly : EventRoutes("event-monthly-view")
 
     /**
      * Route for the Weekly View, which shows events for the selected week in cards organized in columns, each columns is a day in the week.
-     * Flagged for potential removement
+     * Flagged for potential re-movement
      */
     data object Weekly : EventRoutes("event-weekly-view")
 
     /**
      * Route fro the Daily View, which shows events for the selected day in card organized in rows, each row is an hour in the day.
-     * Flagged for potential removement
+     * Flagged for potential re-movement
      */
     data object Daily : EventRoutes("event-daily-view")
 
