@@ -43,10 +43,8 @@ import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.navigation.HomeNavigationBar
 
 /**
- * Displays the More screen, structured with a top app bar,
+ * Displays the `More` screen, structured with a top app bar,
  * a bottom navigation bar, and a list of navigable options.
- *
- * @param context The [Context] used to open new activities.
  *
  * @see MoreTopBar
  * @see HomeNavigationBar
@@ -77,7 +75,7 @@ fun MoreScreen(
 }
 
 /**
- * A centered top app bar displaying localized title for the More screen.
+ * A centered top app bar displaying localized title for the [MoreScreen].
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +95,7 @@ fun MoreTopBar() {
 }
 
 /**
- * A reusable button row for the More screen options list.
+ * A reusable button row for the [MoreScreen] options list.
  *
  * Each button includes:
  * - A leading [Icon].

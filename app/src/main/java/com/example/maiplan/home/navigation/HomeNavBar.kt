@@ -1,8 +1,6 @@
 package com.example.maiplan.home.navigation
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -16,25 +14,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 /**
- * Displays the bottom navigation bar for the Home component Activity screens.
+ * A [Composable] that displays the bottom navigation bar for the `Home` tabs.
  *
- * Each navigation item:
- * - Shows an icon and label.
- * - Highlights the currently active screen.
- * - Navigates to the corresponding [Activity] when clicked.
+ * - Renders a [NavigationBar] with four primary navigation items: `Events`, `Tasks`, `Files`, and `More`.
+ * - Each item includes an icon and a label, and highlights the currently active route.
+ * - When a user taps a different item:
+ *   - Navigates to the selected screen using the provided [navController].
+ *   - Pops up to the start destination and saves the back stack state.
+ *   - Prevents duplicate destinations with `launchSingleTop`.
+ *   - Restores saved state for previously visited destinations.
  *
- * When a different item is clicked:
- * - Starts the corresponding [Activity] with no animation.
- * - Reuses existing activities if possible (via [Intent.FLAG_ACTIVITY_REORDER_TO_FRONT]).
- * - Finishes the current [Activity] to avoid stacking duplicates.
- *
- * @param context The [Context] used to start new activities and determine the current one.
+ * @param navController The [NavHostController] used to manage navigation between composable destinations.
+ * @param context The [Context] used to fetch localized string resources and for intent-based operations (if needed).
  *
  * @see HomeNavRoutes
- * @see EventActivity
- * @see TaskActivity
- * @see FileActivity
- * @see MoreActivity
+ * @see NavigationBar
+ * @see NavHostController
  */
 @Composable
 fun HomeNavigationBar(navController: NavHostController, context: Context) {

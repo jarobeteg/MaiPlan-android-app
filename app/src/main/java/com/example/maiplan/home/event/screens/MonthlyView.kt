@@ -1,7 +1,6 @@
 package com.example.maiplan.home.event.screens
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -39,7 +38,6 @@ import java.util.Locale
  * - Calendar cells for each day of the month.
  *
  * @param selectedDate The [LocalDate] representing the month to display.
- * @param context The [Context] for retrieving localized weekday names.
  *
  * @see getWeekNumbersForMonth
  * @see WeekdayHeaders

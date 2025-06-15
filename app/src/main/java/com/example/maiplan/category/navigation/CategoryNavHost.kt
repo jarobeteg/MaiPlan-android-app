@@ -23,19 +23,20 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 /**
  * [Composable] that sets up the navigation host for the `Category` screens.
  *
- * It defines the entry point and connects the navigation graph for viewing, managing
- * ([CategoryManagementScreen]), creating ([CreateCategoryScreen]),
- * and updating ([UpdateCategoryScreen]) `Categories`.
+ * This host defines the entry point and connects the navigation graph for:
+ * - Viewing and managing categories ([CategoryManagementScreen])
+ * - Creating a new category ([CreateCategoryScreen])
+ * - Updating an existing categories ([UpdateCategoryScreen])
  *
  * Navigation transitions are set to instantly fade between screens for a seamless and subtle effect:
  * - `enterTransition`, `popEnterTransition`: Fade in with no delay.
  * - `exitTransition`, `popExitTransition`: Fade out with no delay.
  *
- * @param categoryViewModel The `ViewModel` shared across `Category`-related screens,
- * used for performing `CRUD` operations on `Categories`.
+ * @param categoryViewModel Shared `ViewModel` for performing `CRUD` operations on categories.
  *
  * @see CategoryViewModel
  * @see CategoryRoutes
+ * @see categoryNavGraph
  */
 @Composable
 fun CategoryNavHost(categoryViewModel: CategoryViewModel) {

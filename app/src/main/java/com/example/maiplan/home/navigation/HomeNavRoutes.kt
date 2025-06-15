@@ -7,11 +7,15 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Task
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.maiplan.R
+import com.example.maiplan.home.event.screens.*
+import com.example.maiplan.home.task.screens.TaskScreen
+import com.example.maiplan.home.file.screens.FileScreen
+import com.example.maiplan.home.more.screens.MoreScreen
 
 /**
- * Represents the different navigation routes for the Home component screens.
+ * Represents the different navigation routes for the `Home` component screens.
  *
- * Each object corresponds to a specific Home component screen.
+ * Each object corresponds to a specific `Home` component screen.
  *
  * @property route Every object holds a route string value to differentiate route endpoints.
  * @property labelResId Every object holds an Id value for localized string resource to differentiate route endpoints.
@@ -23,22 +27,22 @@ sealed class HomeNavRoutes(
     val icon: ImageVector
 ) {
     /**
-     * Route for the Event Main Screen, which opens the EventScreenWithNav screen with Monthly view selected by default.
+     * Route for the Event Main Screen, which opens the [EventScreen] screen with [MonthlyView]selected by default.
      */
     data object Events : HomeNavRoutes("events", R.string.event, Icons.Filled.Event)
 
     /**
-     * Route for the Task Main Screen, which opens the TaskScreenWithNav screen.
+     * Route for the Task Main Screen, which opens the [TaskScreen].
      */
     data object Tasks : HomeNavRoutes("tasks", R.string.task, Icons.Filled.Task)
 
     /**
-     * Route for the File Main Screen, which opens the FileScreenWithNav screen.
+     * Route for the File Main Screen, which opens the [FileScreen].
      */
     data object Files : HomeNavRoutes("files", R.string.file, Icons.Filled.Folder)
 
     /**
-     * Route for the More Main Screen, which opens the MoreScreenWithNav screen.
+     * Route for the More Main Screen, which opens the [MoreScreen].
      */
     data object More : HomeNavRoutes("more", R.string.more, Icons.Filled.Menu)
 }

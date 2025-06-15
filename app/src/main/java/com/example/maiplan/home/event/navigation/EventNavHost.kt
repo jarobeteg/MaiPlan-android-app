@@ -14,18 +14,22 @@ import com.example.maiplan.viewmodel.event.EventViewModel
 /**
  * [Composable] that sets up the navigation host for the `Event` screens.
  *
- * It defines the entry point and connects the navigation graph for viewing, managing
- * ([EventScreen]), creating ([CreateEventScreen]), and updating ([UpdateEventScreen]).
+ * This host defines the entry point and connects the navigation graph for:
+ * - Viewing and managing events ([EventScreen])
+ * - Creating a new event ([CreateEventScreen])
+ * - Updating an existing event ([UpdateEventScreen])
  *
  * Navigation transitions are set to instantly fade between screens for a seamless and subtle effect:
  * - `enterTransition`, `popEnterTransition`: Fade in with no delay.
  * - `exitTransition`, `popExitTransition`: Fade out with no delay.
  *
- * @param eventViewModel The `ViewModel` shared across `Event`-related screens,
- * used for performing `CRUD` operations on `Events`.
+ * @param rootNavController Navigation controller for switching between root-level screens (e.g. `Home` tabs).
+ * @param localNavController Navigation controller scoped to `Event`-related screens.
+ * @param eventViewModel Shared `ViewModel` for performing `CRUD` operations on events.
  *
  * @see EventViewModel
  * @see EventRoutes
+ * @see eventNavGraph
  */
 @Composable
 fun EventNavHost(rootNavController: NavHostController, localNavController: NavHostController, eventViewModel: EventViewModel) {
@@ -49,7 +53,8 @@ fun EventNavHost(rootNavController: NavHostController, localNavController: NavHo
  * - [CreateEventScreen]: Allows `User` to create a new `Event`.
  * - [UpdateEventScreen]: Enables editing of an existing `Event` by its Id.
  *
- * Navigation between screens is handled by [localNavController] and [rootNavController].
+ * Navigation is handled via [localNavController] for `Event` screens,
+ * and [rootNavController] for navigating between root-level `Home` tabs.
  * The [eventViewModel] is passed to all screens to ensure shared state.
  *
  * @param localNavController The controller that handles navigation between `Event` screens.
