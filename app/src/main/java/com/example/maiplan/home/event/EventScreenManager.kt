@@ -8,8 +8,6 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.event.navigation.EventNavHost
-import com.example.maiplan.home.event.navigation.EventRoutes
-import com.example.maiplan.home.event.screens.EventScreen
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.event.EventRemoteDataSource
 import com.example.maiplan.repository.event.EventRepository

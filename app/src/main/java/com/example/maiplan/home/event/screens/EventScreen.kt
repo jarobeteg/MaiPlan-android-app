@@ -74,6 +74,7 @@ import java.util.Locale
 fun EventScreen(
     viewModel: EventViewModel,
     rootNavController: NavHostController,
+    localNavController: NavHostController, // use this to navigate from view to update or view details screen
     onCreateEventClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -101,10 +102,10 @@ fun EventScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {
-                0 -> MonthlyView(selectedDate, context)
+                0 -> MonthlyView(selectedDate)
                 1 -> WeeklyView(selectedDate)
                 2 -> DailyView(selectedDate)
-                else -> MonthlyView(selectedDate, context)
+                else -> MonthlyView(selectedDate)
             }
         }
     }

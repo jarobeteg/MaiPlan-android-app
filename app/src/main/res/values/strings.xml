@@ -77,6 +77,7 @@
     <string name="weekly">Weekly</string>
     <string name="daily">Daily</string>
     <string name="event_new">New Event</string>
+    <string name="event_update">Update Event</string>
     <string name="event_save">Save Event</string>
 
     <!-- days -->

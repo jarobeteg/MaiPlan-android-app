@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,7 +47,8 @@ import java.util.Locale
  */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun MonthlyView(selectedDate: LocalDate, context: Context) {
+fun MonthlyView(selectedDate: LocalDate) {
+    val context = LocalContext.current
     val daysInMonth = selectedDate.lengthOfMonth()
     val firstDayOfMonth = selectedDate.withDayOfMonth(1).dayOfWeek.value % 7
 
