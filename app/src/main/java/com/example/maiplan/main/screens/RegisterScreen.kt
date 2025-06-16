@@ -34,11 +34,11 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 /**
- * Composable function for the Register screen UI.
+ * [Composable] function for the Register screen UI.
  *
  * This screen allows users to create a new account by providing an email, username,
  * password, and confirming the password. It also handles displaying registration errors
- * and provides a navigation link to return to the login screen.
+ * and provides a navigation link to return to the [LoginScreen].
  *
  * - Includes input fields for email, username, password, and password confirmation.
  * - Provides password visibility toggles.
@@ -48,7 +48,7 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
  * @param viewModel The [AuthViewModel] instance used to observe the registration result.
  * @param onRegisterClick Callback invoked when the register button is clicked,
  * passing email, username, password, and password confirmation.
- * @param onBackToLogin Callback invoked when the user wants to navigate back to the login screen.
+ * @param onBackToLogin Callback invoked when the user wants to navigate back to the [LoginScreen].
  *
  * @see AuthViewModel
  * @see Result

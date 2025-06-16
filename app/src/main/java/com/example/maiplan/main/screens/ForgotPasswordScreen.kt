@@ -33,20 +33,20 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 
 /**
- * A composable screen for resetting the user's password.
+ * [Composable] screen for resetting the user's password.
  *
  * This screen allows the user to:
  * - Enter their email address.
  * - Enter a new password and confirm it.
  * - Submit a password reset request.
- * - Navigate back to the login screen.
+ * - Navigate back to the [LoginScreen].
  *
  * It also observes the password reset result from the [AuthViewModel]
  * and displays an error message based on error codes (from the backend server) if the reset fails.
  *
  * @param viewModel The [AuthViewModel] used to observe the password reset result.
  * @param onResetClick A lambda invoked when the user clicks the reset button. Provides email, new password, and confirmation password as parameters.
- * @param onBackToLogin A lambda invoked when the user clicks the "Return to Login" text.
+ * @param onBackToLogin A lambda invoked when the user clicks the `Return to Login` text.
  *
  * @see AuthViewModel
  * @see Result

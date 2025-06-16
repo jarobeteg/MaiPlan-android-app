@@ -21,12 +21,13 @@ import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.model.UserSession
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
+import com.example.maiplan.home.event.screens.EventScreen
 
 /**
- * This activity is responsible for managing and displaying Authentication screens.
+ * The [MainActivity] is responsible for managing and displaying Authentication screens.
  *
- * This activity initializes the Auth ViewModel, checks if a user is already authenticated,
- * and either navigates to the main Event screen or shows the authentication flow.
+ * This activity initializes the [AuthViewModel], checks if a user is already authenticated,
+ * and either navigates to the main [EventScreen] or shows the authentication flow.
  * It also observes authentication-related operations and provides user feedback.
  */
 class MainActivity : AppCompatActivity() {
@@ -34,27 +35,33 @@ class MainActivity : AppCompatActivity() {
     /** Manager for handling session-related actions such as saving and retrieving tokens. */
     private lateinit var sessionManager: SessionManager
 
-    /** ViewModel instance to handle Authentication related logic. */
+    /** [AuthViewModel] instance to handle Authentication related logic. */
     private lateinit var viewModel: AuthViewModel
 
     /**
-     * Lifecycle method onCreate is called when the activity is created.
+     * Lifecycle method [onCreate] is called when the [MainActivity] is created.
+     * - The [AuthRepository] is initialized using the [AuthRemoteDataSource].
+     * - The [AuthRemoteDataSource] is initialized via the [RetrofitClient.authApi].
+     * - The [AuthRepository] provides authentication logic using [AuthRemoteDataSource].
+     * - The [AuthRemoteDataSource] handles communication with the authentication API.
+     * - The [GenericViewModelFactory] is used to pass the [AuthRepository] dependency to the [AuthViewModel].
+     * - Checks if a token already exists in the [UserSession] (i.e., user previously authenticated).
+     * - If a token exists:
+     *      - Refreshes the access token.
+     *      - Retrieves the user's profile data and stores it in [UserSession].
+     * - If no token exists:
+     *      - Displays the authentication flow to the user.
+     * - Sets up the UI using `Jetpack Compose`
+     * - Observes [AuthViewModel] result `LiveData` to provide feedback to the user.
      *
-     * - Initializes the ViewModel using a repository and generic factory.
-     * -- The repository interacts with the authentication API via Retrofit.
-     * -- The factory injects the repository dependency into the ViewModel.
-     * - Checks if a user is already authenticated based on the stored token.
-     * -- If a token exists, it refreshes the token and fetches the user's profile.
-     * -- If no token exists, it displays the authentication screens.
-     * - Observes authentication operation results and provides feedback to the user.
-     *
-     * @param savedInstanceState Saved state of this activity if previously existed.
+     * @param savedInstanceState Saved state of this [MainActivity] if previously existed.
      *
      * @see RetrofitClient
      * @see AuthRepository
      * @see UserSession
      * @see AuthViewModel
      * @see GenericViewModelFactory
+     * @see AuthRemoteDataSource
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Initializes the User Session singleton object, and refreshes the JWT token and saves it in the Shared Preferences.
+     * Initializes the [UserSession] singleton object, and refreshes the JWT token and saves it in the Shared Preferences.
      *
      * @param token The JWT token string.
      * @param flag Is a boolean data that is only false on login, register or password reset since then we don't need to refresh the token.
@@ -121,7 +128,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Sets up the UI content using Jetpack Compose and applies the app theme.
      *
-     * Displays the Authentication navigation flow.
+     * Displays the `Authentication` navigation flow.
      *
      * @see AppTheme
      * @see AuthNavHost
@@ -135,9 +142,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Observes LiveData from the ViewModel to handle authentication operation results.
+     * Observes `LiveData` from the [AuthViewModel] to handle authentication operation results.
      *
-     * Displays Toast messages based on the result of login, register, and reset password operations.
+     * Displays [Toast] messages based on the result of authentication operations.
      */
     private fun observeViewModel() {
         /**
@@ -166,7 +173,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        /**
+        /*
          * Sets up the Observers for authentication operations (login, register, reset password).
          */
         viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })

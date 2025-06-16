@@ -34,22 +34,22 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 /**
- * Composable function for the Login screen UI.
+ * [Composable] function for the Login screen UI.
  *
  * This screen allows users to input their email and password to log into the application.
- * It provides navigation options to the registration screen and forgot password screen.
+ * It provides navigation options to the [RegisterScreen] and [ForgotPasswordScreen].
  * Displays an error message if login fails.
  *
  * - Shows email and password input fields.
  * - Includes password visibility toggle.
- * - Provides links for "Forgot Password" and "No Account? Register".
+ * - Provides links for `Forgot Password?` and `No Account? Register`.
  * - Displays login errors based on error codes.
  * - Uses the app's theme and gradient background styling.
  *
  * @param viewModel The [AuthViewModel] instance to observe login results.
  * @param onLoginClick Callback when the login button is clicked, passing email and password.
- * @param toRegisterClick Callback when the user wants to navigate to the registration screen.
- * @param toForgotPasswordClick Callback when the user wants to navigate to the forgot password screen.
+ * @param toRegisterClick Callback when the user wants to navigate to the [RegisterScreen].
+ * @param toForgotPasswordClick Callback when the user wants to navigate to the [ForgotPasswordScreen].
  *
  * @see AuthViewModel
  * @see Result
