@@ -8,18 +8,17 @@ import androidx.core.content.edit
 
 /**
  * A manager class responsible for handling the user's authentication token
- * using [SharedPreferences] for persistent storage.
+ * using `SharedPreferences` for persistent storage.
  *
  * ## Responsibilities:
  * - Saving the auth token securely.
- * - Retrieving the auth token with a "Bearer" prefix.
+ * - Retrieving the auth token with a `Bearer` prefix.
  * - Checking if the token is expired and clearing it if necessary.
  *
  * ## Token Format
- * The token is a JWT (JSON Web Token) and extracts the exp field
- * to determine expiration.
+ * The token is a JWT (JSON Web Token) and extracts the exp field to determine expiration.
  *
- * @property context The application [Context] used to access [SharedPreferences].
+ * @property context The application [Context] used to access `SharedPreferences`.
  */
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
@@ -36,7 +35,7 @@ class SessionManager(context: Context) {
     /**
      * Retrieves the saved authentication token if it exists and is not expired.
      *
-     * @return The token prefixed with "Bearer", or null if no valid token exists.
+     * @return The token prefixed with `Bearer`, or null if no valid token exists.
      *
      * @see clearAuthToken
      * @see isTokenExpired
@@ -51,7 +50,7 @@ class SessionManager(context: Context) {
     }
 
     /**
-     * Clears the saved authentication token from shared preferences.
+     * Clears the saved authentication token from `SharedPreferences`.
      */
     private fun clearAuthToken() {
         sharedPreferences.edit { remove("access_token") }

@@ -11,6 +11,8 @@ import androidx.lifecycle.ViewModelProvider
  *
  * @param T The type of ViewModel to create.
  * @property creator A function that returns an instance of the ViewModel.
+ *
+ * @see ViewModel
  */
 class GenericViewModelFactory<T : ViewModel>(
     private val creator: () -> T

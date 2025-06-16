@@ -9,25 +9,22 @@ import com.example.maiplan.repository.handleResponse
 /**
  * Repository responsible for handling reminder-related network operations.
  *
- * Wraps API calls and returns a [com.example.maiplan.repository.Result] indicating success or failure,
+ * Wraps API calls and returns a [Result] indicating success or failure,
  * abstracting network and error handling from the rest of the app.
  *
- * @property reminderApi An instance of [com.example.maiplan.network.api.ReminderApi] for making reminder network requests.
+ * @property remoteDataSource An instance of [ReminderRemoteDataSource] used to perform reminder-related API calls.
  *
- * @see com.example.maiplan.network.api.ReminderApi
- * @see com.example.maiplan.repository.Result
+ * @see ReminderApi
+ * @see Result
+ * @see handleResponse
  */
 class ReminderRepository(private val remoteDataSource: ReminderRemoteDataSource) {
 
     /**
      * Creates a new reminder.
      *
-     * @param reminder The [com.example.maiplan.network.api.ReminderCreate] object containing reminder data.
-     * @return A [com.example.maiplan.repository.Result] indicating success or failure.
-     *
-     * @see com.example.maiplan.repository.Result
-     * @see com.example.maiplan.network.api.ReminderCreate
-     * @see com.example.maiplan.repository.handleResponse
+     * @param reminder The [ReminderCreate] object containing reminder data like time, label, and repeat settings.
+     * @return A [Result] indicating success (with `Unit`) or failure (with an [Exception]).
      */
     suspend fun createReminder(reminder: ReminderCreate): Result<Unit> {
         return try {
@@ -37,15 +34,12 @@ class ReminderRepository(private val remoteDataSource: ReminderRemoteDataSource)
         }
     }
 
+
     /**
      * Retrieves a specific reminder by its ID.
      *
-     * @param reminderId The ID of the reminder.
-     * @return A [Result] containing a [com.example.maiplan.network.api.ReminderResponse] or an error.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.ReminderResponse
-     * @see handleResponse
+     * @param reminderId The ID of the reminder to retrieve.
+     * @return A [Result] containing a [ReminderResponse] on success, or an [Exception] on failure.
      */
     suspend fun getReminder(reminderId: Int): Result<ReminderResponse> {
         return try {

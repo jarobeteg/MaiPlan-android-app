@@ -9,25 +9,23 @@ import com.example.maiplan.repository.handleResponse
 /**
  * Repository responsible for handling event-related network operations.
  *
- * Wraps API calls and returns a [com.example.maiplan.repository.Result] indicating success or failure,
- * abstracting network and error handling from the rest of the app.
+ * Acts as an intermediary between the [EventRemoteDataSource] and the rest of the application.
+ * Wraps API calls with standardized [Result] types to simplify error and success handling.
  *
- * @property eventApi An instance of [com.example.maiplan.network.api.EventApi] for making event network requests.
+ * @property remoteDataSource An instance of [EventRemoteDataSource] used to perform event-related API calls.
  *
- * @see com.example.maiplan.network.api.EventApi
- * @see com.example.maiplan.repository.Result
+ * @see EventRemoteDataSource
+ * @see EventApi
+ * @see Result
+ * @see handleResponse
  */
 class EventRepository(private val remoteDataSource: EventRemoteDataSource) {
 
     /**
      * Creates a new event.
      *
-     * @param event The [com.example.maiplan.network.api.EventCreate] object containing event data.
-     * @return A [com.example.maiplan.repository.Result] indicating success or failure.
-     *
-     * @see com.example.maiplan.repository.Result
-     * @see com.example.maiplan.network.api.EventCreate
-     * @see com.example.maiplan.repository.handleResponse
+     * @param event The [EventCreate] object containing event data like title, category, time, etc.
+     * @return A [Result] indicating success (with `Unit`) or failure ([Exception]).
      */
     suspend fun createEvent(event: EventCreate): Result<Unit> {
         return try {
@@ -38,14 +36,10 @@ class EventRepository(private val remoteDataSource: EventRemoteDataSource) {
     }
 
     /**
-     * Retrieves a specific event by its Id.
+     * Retrieves a specific event by its unique ID.
      *
-     * @param eventId The Id of the event.
-     * @return A [Result] containing an [com.example.maiplan.network.api.EventResponse] or an error.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.EventResponse
-     * @see handleResponse
+     * @param eventId The ID of the event to retrieve.
+     * @return A [Result] containing an [EventResponse] on success, or an [Exception] on failure.
      */
     suspend fun getEvent(eventId: Int): Result<EventResponse> {
         return try {

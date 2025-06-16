@@ -18,7 +18,7 @@ object RetrofitClient {
     private const val BASE_URL = "http://100.70.156.115:8000/"
 
     /**
-     * Lazy-initialized Retrofit instance configured with the base URL and Gson converter.
+     * Lazy-initialized [Retrofit] instance configured with the base URL and Gson converter.
      */
     val retrofit: Retrofit by lazy {
         Retrofit.Builder()

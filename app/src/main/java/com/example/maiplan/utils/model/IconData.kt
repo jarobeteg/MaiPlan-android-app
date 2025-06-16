@@ -169,12 +169,12 @@ import androidx.compose.material.icons.filled.Yard
 import androidx.compose.ui.graphics.vector.ImageVector
 
 /**
- * A centralized object that provides access to a set of [androidx.compose.ui.graphics.vector.ImageVector] icons
+ * A centralized object that provides access to a set of [ImageVector] icons
  * categorized into groups like work, personal, health, finance, education, hobbies, and more.
  *
  * ## Overview
- * - [allIcons] is a Map<String, ImageVector> where each key is a human-readable string
- *   representing an icon name (search, home, etc.) and the value is the corresponding [androidx.compose.ui.graphics.vector.ImageVector].
+ * - [allIcons] is a `Map<String, ImageVector>` where each key is a human-readable string
+ *   representing an icon name (search, home, etc.) and the value is the corresponding [ImageVector].
  * - [getIconByKey] provides a safe way to fetch an icon by its key, returning a fallback icon if the key is not found.
  *
  * ## Categories Included

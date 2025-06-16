@@ -5,32 +5,34 @@ import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.network.api.UserResponse
+import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.repository.Result
+import retrofit2.Response
 import com.example.maiplan.repository.handleResponse
 
 /**
- * Repository responsible for handling authentication-related network operations.
+ * Repository responsible for handling authentication-related operations.
  *
- * Wraps API calls and returns a [com.example.maiplan.repository.Result] indicating success or failure,
- * abstracting network and error handling from the rest of the app.
+ * Acts as an abstraction layer between the [AuthRemoteDataSource] and the rest of the application.
+ * It wraps raw network responses using [Result] and manages error handling.
  *
- * @property authApi An instance of [com.example.maiplan.network.api.AuthApi] for making authentication network requests.
+ * - All methods use `try-catch` to return a clean [Result] object.
+ * - Uses [handleResponse] to convert [Response] into [Result].
  *
- * @see com.example.maiplan.network.api.AuthApi
- * @see com.example.maiplan.repository.Result
+ * @property remoteDataSource An instance of [AuthRemoteDataSource] that directly communicates with the [AuthApi].
+ *
+ * @see AuthRemoteDataSource
+ * @see AuthApi
+ * @see Result
+ * @see handleResponse
  */
 class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
 
     /**
      * Registers a new user.
      *
-     * @param user The [com.example.maiplan.network.api.UserRegister] object containing registration data.
-     * @return A [com.example.maiplan.repository.Result] containing a [com.example.maiplan.network.api.Token] on success or an error on failure.
-     *
-     * @see com.example.maiplan.repository.Result
-     * @see com.example.maiplan.network.api.UserRegister
-     * @see com.example.maiplan.network.api.Token
-     * @see com.example.maiplan.repository.handleResponse
+     * @param user The [UserRegister] data containing user registration info.
+     * @return A [Result] containing a [Token] on success, or an [Exception] on failure.
      */
     suspend fun register(user: UserRegister): Result<Token> {
         return try {
@@ -43,13 +45,8 @@ class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
     /**
      * Logs in an existing user.
      *
-     * @param user The [com.example.maiplan.network.api.UserLogin] object containing login credentials.
-     * @return A [Result] containing a [Token] on success or an error on failure.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.UserLogin
-     * @see Token
-     * @see handleResponse
+     * @param user The [UserLogin] data containing user login credentials.
+     * @return A [Result] containing a [Token] on success, or an [Exception] on failure.
      */
     suspend fun login(user: UserLogin): Result<Token> {
         return try {
@@ -60,15 +57,10 @@ class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
     }
 
     /**
-     * Requests a password reset for a user.
+     * Requests a password reset for the user.
      *
-     * @param user The [com.example.maiplan.network.api.UserResetPassword] object containing password reset info.
-     * @return A [Result] containing a [Token] on success or an error on failure.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.UserResetPassword
-     * @see Token
-     * @see handleResponse
+     * @param user The [UserResetPassword] data containing email or reset info.
+     * @return A [Result] containing a [Token] on success, or an [Exception] on failure.
      */
     suspend fun resetPassword(user: UserResetPassword): Result<Token> {
         return try {
@@ -79,14 +71,10 @@ class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
     }
 
     /**
-     * Refreshes the authentication token.
+     * Refreshes the current authentication token.
      *
-     * @param token The expired or soon to expire token to refresh.
-     * @return A [Result] containing a new [Token] or an error on failure.
-     *
-     * @see Result
-     * @see Token
-     * @see handleResponse
+     * @param token The expired or near-expiry token string.
+     * @return A [Result] containing a new [Token] on success, or an [Exception] on failure.
      */
     suspend fun tokenRefresh(token: String): Result<Token> {
         return try {
@@ -97,14 +85,10 @@ class AuthRepository(private val remoteDataSource: AuthRemoteDataSource) {
     }
 
     /**
-     * Fetches the user's profile data.
+     * Fetches the authenticated user's profile information.
      *
-     * @param token The authentication token.
-     * @return A [Result] containing [com.example.maiplan.network.api.UserResponse] with user data or an error on failure.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.UserResponse
-     * @see handleResponse
+     * @param token A valid bearer token for the user.
+     * @return A [Result] containing a [UserResponse] on success, or an [Exception] on failure.
      */
     suspend fun getProfile(token: String): Result<UserResponse> {
         return try {

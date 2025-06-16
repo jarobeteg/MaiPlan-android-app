@@ -7,27 +7,25 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleResponse
 
 /**
- * Repository responsible for handling category-related network operations.
+ * Repository responsible for handling category-related business logic and network operations.
  *
- * Wraps API calls and returns a [com.example.maiplan.repository.Result] indicating success or failure,
- * abstracting network and error handling from the rest of the app.
+ * Acts as an abstraction layer between the [CategoryRemoteDataSource] and the rest of the application.
+ * Wraps raw network responses using [Result] and handles errors gracefully via [handleResponse].
  *
- * @property categoryApi An instance of [com.example.maiplan.network.api.CategoryApi] for making category network requests.
+ * @property remoteDataSource An instance of [CategoryRemoteDataSource] that interacts with the [CategoryApi].
  *
- * @see com.example.maiplan.network.api.CategoryApi
- * @see com.example.maiplan.repository.Result
+ * @see CategoryRemoteDataSource
+ * @see CategoryApi
+ * @see Result
+ * @see handleResponse
  */
 class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource) {
 
     /**
      * Creates a new category.
      *
-     * @param category The [com.example.maiplan.network.api.CategoryCreate] object containing category data.
-     * @return A [com.example.maiplan.repository.Result] indicating success or failure.
-     *
-     * @see com.example.maiplan.repository.Result
-     * @see com.example.maiplan.network.api.CategoryCreate
-     * @see com.example.maiplan.repository.handleResponse
+     * @param category The [CategoryCreate] object containing category name, icon, color, etc.
+     * @return A [Result] indicating success (with [Unit]) or failure ([Exception]).
      */
     suspend fun createCategory(category: CategoryCreate): Result<Unit> {
         return try {
@@ -40,12 +38,8 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
     /**
      * Fetches all categories associated with a specific user.
      *
-     * @param userId The Id of the user.
-     * @return A [Result] containing a list of [com.example.maiplan.network.api.CategoryResponse] or an error.
-     *
-     * @see Result
-     * @see com.example.maiplan.network.api.CategoryResponse
-     * @see handleResponse
+     * @param userId The unique identifier of the user.
+     * @return A [Result] containing a list of [CategoryResponse] objects on success, or an [Exception] on failure.
      */
     suspend fun getAllCategories(userId: Int): Result<List<CategoryResponse>> {
         return try {
@@ -56,14 +50,10 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
     }
 
     /**
-     * Updates an existing category.
+     * Updates an existing category with new data.
      *
-     * @param category The [CategoryResponse] object with updated information.
-     * @return A [Result] indicating success or failure.
-     *
-     * @see Result
-     * @see CategoryResponse
-     * @see handleResponse
+     * @param category The [CategoryResponse] object containing updated category fields.
+     * @return A [Result] indicating success (with [Unit]) or failure ([Exception]).
      */
     suspend fun updateCategory(category: CategoryResponse): Result<Unit> {
         return try {
@@ -74,13 +64,10 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
     }
 
     /**
-     * Deletes a category by its Id.
+     * Deletes a category identified by its unique ID.
      *
-     * @param categoryId The Id of the category to delete.
-     * @return A [Result] indicating success or failure.
-     *
-     * @see Result
-     * @see handleResponse
+     * @param categoryId The ID of the category to delete.
+     * @return A [Result] indicating success (with [Unit]) or failure ([Exception]).
      */
     suspend fun deleteCategory(categoryId: Int): Result<Unit> {
         return try {
