@@ -3,7 +3,6 @@ package com.example.maiplan.category
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
@@ -13,17 +12,22 @@ import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.theme.AppTheme
+import com.example.maiplan.utils.BaseActivity
 import com.example.maiplan.utils.model.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 /**
- * The [CategoryActivity] is responsible for managing and displaying `Category` screens.
+ * [CategoryActivity] manages category-related UI and interactions,
+ * including creating, updating, and displaying categories.
  *
- * The [CategoryActivity] initializes the [CategoryViewModel], sets up the UI (`Jetpack Compose`),
- * and observes result states from `Category` `CRUD` operations.
+ * Inherits from [BaseActivity] to maintain consistent edge-to-edge UI and
+ * system bar styling throughout the app.
+ *
+ * This activity initializes the [CategoryViewModel], sets up UI components,
+ * and observes category operation results to update the interface accordingly.
  */
-class CategoryActivity : AppCompatActivity() {
+class CategoryActivity : BaseActivity() {
     /** [CategoryViewModel] instance to handle `Category` related logic. */
     private lateinit var categoryViewModel: CategoryViewModel
 

@@ -1,10 +1,12 @@
 package com.example.maiplan.main
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.enableEdgeToEdge
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
@@ -22,15 +24,20 @@ import com.example.maiplan.utils.model.UserSession
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.home.event.screens.EventScreen
+import com.example.maiplan.utils.BaseActivity
 
 /**
- * The [MainActivity] is responsible for managing and displaying Authentication screens.
+ * [MainActivity] handles user authentication flows,
+ * including login, registration, and session management.
  *
- * This activity initializes the [AuthViewModel], checks if a user is already authenticated,
- * and either navigates to the main [EventScreen] or shows the authentication flow.
- * It also observes authentication-related operations and provides user feedback.
+ * Inherits from [BaseActivity] to maintain consistent edge-to-edge UI and
+ * system bar styling throughout the app.
+ *
+ * This activity initializes the [AuthViewModel], checks the user’s authentication status,
+ * and either navigates to the main content or presents the authentication screens.
+ * It observes authentication-related state changes to provide appropriate UI feedback.
  */
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
 
     /** Manager for handling session-related actions such as saving and retrieving tokens. */
     private lateinit var sessionManager: SessionManager
@@ -64,7 +71,16 @@ class MainActivity : AppCompatActivity() {
      * @see AuthRemoteDataSource
      */
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        val isDark = resources.configuration.uiMode and
+                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+
+        WindowCompat.getInsetsController(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !isDark
+            isAppearanceLightNavigationBars = !isDark
+        }
 
         // Show a loading screen while checking authentication state
         setContent { AppTheme { LoadingScreen() } }

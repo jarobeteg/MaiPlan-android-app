@@ -1,21 +1,25 @@
 package com.example.maiplan.home
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.navigation.HomeNavHost
 import com.example.maiplan.theme.AppTheme
+import com.example.maiplan.utils.BaseActivity
 
 /**
- * The [HomeActivity] is the main entry point and single-activity host for the application.
+ * [HomeActivity] serves as the main single-activity host and entry point
+ * for the app’s core features.
  *
- * It sets up the root [NavHostController] and applies the app-wide [AppTheme].
- * The [HomeActivity] is responsible for initializing navigation between major feature sections
- * such as Events, Tasks, Files, and More via the [HomeNavHost].
+ * Inherits from [BaseActivity] to maintain consistent edge-to-edge UI and
+ * system bar styling throughout the app.
+ *
+ * This activity initializes the root navigation controller ([NavHostController]),
+ * applies the app’s theme, and manages navigation across major sections
+ * such as Events, Tasks, Files, and More.
  */
-class HomeActivity : ComponentActivity() {
+class HomeActivity : BaseActivity() {
 
     /**
      * Lifecycle method [onCreate] called when the [HomeActivity] is created.

@@ -68,7 +68,6 @@ dependencies {
     implementation(libs.material.icons.extended)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.compose.foundation)
-    implementation(libs.accompanist.systemuicontroller)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 }

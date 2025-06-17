@@ -8,12 +8,10 @@ import androidx.compose.material3.Typography
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 /**
  * Defines the light color scheme used across the app.
@@ -76,27 +74,25 @@ val AppShapes = Shapes(
 )
 
 /**
- * Custom App Theme that applies light/dark color schemes, typography, and shapes.
+ * Applies the custom app theme including color schemes, typography, and shapes,
+ * adapting dynamically to light or dark mode.
  *
- * Also sets the system status bar color and icons dynamically based on theme.
+ * This composable sets the Material3 [MaterialTheme] colors, typography, and shapes
+ * according to the current theme preference.
  *
- * @param darkTheme Whether to use the dark color scheme. Defaults to system setting.
- * @param content The composable content to which the theme will be applied.
+ * It also manages system UI elements like the status bar color and icon appearance
+ * to ensure seamless integration with the app’s theme.
+ *
+ * @param darkTheme Controls whether to use the dark color scheme.
+ *                  Defaults to the device’s current system theme setting.
+ * @param content The composable content that will be styled with the app theme.
  */
 @Composable
 fun AppTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
     val colors = if (darkTheme) DarkColorScheme else LightColorScheme
-
-    SideEffect {
-        systemUiController.setStatusBarColor(
-            color = Color.Transparent,
-            darkIcons = !darkTheme
-        )
-    }
 
     MaterialTheme(
         colorScheme = colors,
