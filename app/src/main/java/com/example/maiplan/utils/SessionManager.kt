@@ -68,7 +68,7 @@ class SessionManager(context: Context) {
         try {
             val jwt: DecodedJWT = JWT.decode(token)
             val expirationDate: Date? = jwt.expiresAt
-            return expirationDate?.before(Date()) ?: true
+            return expirationDate?.before(Date()) != false
         } catch (e: Exception) {
             e.printStackTrace()
             return true
