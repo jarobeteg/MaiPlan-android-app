@@ -36,7 +36,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    composeOptions {
+    composeOptions { //ignore this as it's marked incubating, means its still under work and might be unstable, hence the IDE warning
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
