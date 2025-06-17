@@ -14,40 +14,43 @@ import com.example.maiplan.repository.auth.AuthRepository
 import kotlinx.coroutines.launch
 
 /**
- * [AuthViewModel] manages user authentication-related operations
- * and exposes their results to the UI through [androidx.lifecycle.LiveData].
+ * [AuthViewModel] handles user authentication and exposes results to the UI
+ * through [LiveData] wrapped in [Result] objects.
  *
  * ## Responsibilities:
- * - Handling user registration, login, password reset, token refresh, and profile retrieval.
- * - Managing the UI state (success, loading, error) for each operation using a [com.example.maiplan.repository.Result] wrapper.
- * - Clearing previous error or idle states when needed.
+ * - User registration, login, and password reset.
+ * - Token refresh and profile retrieval.
+ * - Managing loading, success, error, and idle states per operation.
+ * - Clearing previous states before new operations.
+ *
+ * Acts as a bridge between the UI and [AuthRepository], ensuring proper threading via [viewModelScope].
  *
  * @property authRepository The repository responsible for making authentication API calls.
  *
- * @see com.example.maiplan.repository.auth.AuthRepository
- * @see com.example.maiplan.repository.Result
- * @see com.example.maiplan.network.api.Token
- * @see com.example.maiplan.network.api.UserResponse
+ * @see AuthRepository
+ * @see Result
+ * @see Token
+ * @see UserResponse
  */
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     private val _registerResult = MutableLiveData<Result<Token>>()
-    /** Exposes the registration operation result. */
+    /** Emits the result of a user registration request. */
     val registerResult: LiveData<Result<Token>> get() = _registerResult
 
     private val _loginResult = MutableLiveData<Result<Token>>()
-    /** Exposes the login operation result. */
+    /** Emits the result of a user login request. */
     val loginResult: LiveData<Result<Token>> get() = _loginResult
 
     private val _resetPasswordResult = MutableLiveData<Result<Token>>()
-    /** Exposes the password reset operation result. */
+    /** Emits the result of a password reset request. */
     val resetPasswordResult: LiveData<Result<Token>> get() = _resetPasswordResult
 
     private val _tokenRefreshResult = MutableLiveData<Result<Token>>()
-    /** Exposes the token refresh operation result. */
+    /** Emits the result of a token refresh operation. */
     val tokenRefreshResult: LiveData<Result<Token>> get() = _tokenRefreshResult
 
     private val _profileResult = MutableLiveData<Result<UserResponse>>()
-    /** Exposes the user profile retrieval operation result. */
+    /** Emits the result of fetching the user profile. */
     val profileResult: LiveData<Result<UserResponse>> get() = _profileResult
 
     init {
@@ -55,11 +58,10 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Initiates the user registration process.
+     * Registers a new user.
      *
-     * @param user The [com.example.maiplan.network.api.UserRegister] data to register a new user.
-     *
-     * @see com.example.maiplan.network.api.UserRegister
+     * @param user The registration data provided via [UserRegister].
+     * @see UserRegister
      */
     fun register(user: UserRegister) {
         viewModelScope.launch {
@@ -68,11 +70,10 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Initiates the user login process.
+     * Logs in a user with credentials.
      *
-     * @param user The [com.example.maiplan.network.api.UserLogin] data containing user credentials.
-     *
-     * @see com.example.maiplan.network.api.UserLogin
+     * @param user The login data provided via [UserLogin].
+     * @see UserLogin
      */
     fun login(user: UserLogin) {
         viewModelScope.launch {
@@ -81,11 +82,10 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Initiates the password reset process.
+     * Initiates password reset for a user.
      *
-     * @param user The [com.example.maiplan.network.api.UserResetPassword] data containing reset information.
-     *
-     * @see com.example.maiplan.network.api.UserResetPassword
+     * @param user The password reset data provided via [UserResetPassword].
+     * @see UserResetPassword
      */
     fun resetPassword(user: UserResetPassword) {
         viewModelScope.launch {
@@ -94,9 +94,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Requests a new token using the existing token.
+     * Requests a refreshed authentication token.
      *
-     * @param token The current expired or near-expiration token.
+     * @param token The current (expired or soon-to-expire) token.
      */
     fun tokenRefresh(token: String) {
         viewModelScope.launch {
@@ -105,9 +105,9 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Fetches the user profile using a valid token.
+     * Retrieves the current user's profile.
      *
-     * @param token The authentication token to access profile information.
+     * @param token A valid authentication token.
      */
     fun getProfile(token: String) {
         viewModelScope.launch {
@@ -117,8 +117,8 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     /**
-     * Resets the error states for registration, login, and password reset operations.
-     * Useful for clearing previous errors before new form submissions.
+     * Clears existing login, register, and reset error states by resetting them to [Result.Idle].
+     * This is typically called during screen initialization or before submitting a new request.
      */
     fun clearErrors() {
         _loginResult.postValue(Result.Idle)

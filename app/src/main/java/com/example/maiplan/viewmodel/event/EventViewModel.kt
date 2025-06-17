@@ -11,30 +11,35 @@ import com.example.maiplan.repository.event.EventRepository
 import kotlinx.coroutines.launch
 
 /**
- * [EventViewModel] handles operations related to events,
- * including creating a new event and retrieving an event by its Id.
+ * [EventViewModel] is responsible for managing event-related operations
+ * and exposing the corresponding UI state. It interacts with [EventRepository]
+ * to perform API calls and updates the UI via [LiveData].
  *
- * @property eventRepository The repository responsible for event-related API calls.
+ * ## Responsibilities:
+ * - Creating new events.
+ * - Fetching a single event by its ID.
+ * - Propagating success, error, and loading states to the UI layer.
  *
- * @see com.example.maiplan.repository.event.EventRepository
- * @see com.example.maiplan.repository.Result
- * @see com.example.maiplan.network.api.EventResponse
+ * @property eventRepository The repository used to perform API operations related to events.
+ *
+ * @see EventRepository
+ * @see Result
+ * @see EventResponse
  */
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _createEventResult = MutableLiveData<Result<Unit>>()
-    /** Exposes the result of creating a new event. */
+    /** Emits the result of the event creation operation. */
     val createEventResult: LiveData<Result<Unit>> get() = _createEventResult
 
     private val _getEventResult = MutableLiveData<Result<EventResponse>>()
-    /** Exposes the result of fetching an event. */
+    /** Emits the result of fetching a single event by ID. */
     val getEventResult: LiveData<Result<EventResponse>> get() = _getEventResult
 
     /**
-     * Creates a new event.
+     * Creates a new event using the provided [EventCreate] data.
+     * The result is emitted via [createEventResult] to notify the UI.
      *
-     * @param event The [com.example.maiplan.network.api.EventCreate] object containing event details.
-     *
-     * @see com.example.maiplan.network.api.EventCreate
+     * @param event The event data to be created.
      */
     fun createEvent(event: EventCreate) {
         viewModelScope.launch {
@@ -43,10 +48,10 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     }
 
     /**
-     * Fetches a single event by its Id.
+     * Retrieves an event by its unique ID.
+     * The result is emitted via [getEventResult] for UI observation.
      *
-     * @param eventId The Id of the event to retrieve.
-     *
+     * @param eventId The unique identifier of the event to fetch.
      */
     fun getEvent(eventId: Int) {
         viewModelScope.launch {

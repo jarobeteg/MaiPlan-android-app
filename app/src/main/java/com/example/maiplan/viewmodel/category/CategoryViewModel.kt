@@ -12,42 +12,40 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
- * [CategoryViewModel] handles operations related to category management,
- * such as creating, retrieving, updating, and deleting categories.
- *
- * It also manages UI states for form operations and navigation flags
- * needed for smooth category editing interactions.
+ * [CategoryViewModel] manages all category-related operations and UI state updates
+ * by interacting with [CategoryRepository]. It serves as the bridge between the
+ * repository layer and UI, exposing results via [LiveData].
  *
  * ## Responsibilities:
- * - Creating, fetching, updating, and deleting categories via [com.example.maiplan.repository.category.CategoryRepository].
- * - Exposing operation results through [androidx.lifecycle.LiveData] to update the UI.
- * - Managing a temporary navigation flag to handle swipe-to-edit behaviors.
+ * - Creating, retrieving, updating, and deleting categories.
+ * - Managing success/error/loading states for each operation.
+ * - Supporting navigation behavior for edit workflows (e.g., swipe-to-edit).
  *
- * @property categoryRepository The repository responsible for category-related API calls.
+ * @property categoryRepository The repository responsible for performing category API requests.
  *
- * @see com.example.maiplan.repository.category.CategoryRepository
- * @see com.example.maiplan.repository.Result
- * @see com.example.maiplan.network.api.CategoryResponse
+ * @see CategoryRepository
+ * @see Result
+ * @see CategoryResponse
  */
 class CategoryViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
-    /** Exposes the result of creating a new category. */
+    /** Emits the result of the create category operation. */
     val createCategoryResult: LiveData<Result<Unit>> get() = _createCategoryResult
 
     private var _categoryList = MutableLiveData<List<CategoryResponse>>()
-    /** Exposes the current list of categories. */
+    /** Emits the current list of categories retrieved from the server. */
     val categoryList: LiveData<List<CategoryResponse>> get() = _categoryList
 
     private val _updateCategoryResult = MutableLiveData<Result<Unit>>()
-    /** Exposes the result of updating a category. */
+    /** Emits the result of the update category operation. */
     val updateCategoryResult: LiveData<Result<Unit>> get() = _updateCategoryResult
 
     private val _deleteCategoryResult = MutableLiveData<Result<Unit>>()
-    /** Exposes the result of deleting a category. */
+    /** Emits the result of the delete category operation. */
     val deleteCategoryResult: LiveData<Result<Unit>> get() = _deleteCategoryResult
 
     private val _isNavigating = MutableLiveData(false)
-    /** Indicates whether a swipe navigation action is currently in progress. */
+    /** Tracks whether a navigation action (e.g., swipe-to-edit) is currently in progress. */
     val isNavigating: LiveData<Boolean> get() = _isNavigating
 
     init {
@@ -55,11 +53,10 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Creates a new category and refreshes the category list on Success.
+     * Creates a new category using the provided data.
+     * On success, refreshes the category list for the user.
      *
-     * @param category The [com.example.maiplan.network.api.CategoryCreate] object containing the new category's data.
-     *
-     * @see com.example.maiplan.network.api.CategoryCreate
+     * @param category The [CategoryCreate] data for the new category.
      */
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {
@@ -70,9 +67,9 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Fetches all categories for a given user.
+     * Fetches all categories associated with the specified user.
      *
-     * @param userId The Id of the user whose categories should be fetched.
+     * @param userId The ID of the user whose categories will be fetched.
      */
     fun getAllCategories(userId: Int) {
         viewModelScope.launch {
@@ -84,22 +81,26 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Fetches a single category by its Id from the local category list.
+     * Retrieves a specific category by its ID from the currently loaded category list.
      *
-     * @param categoryId The Id of the category to find.
-     * @return The [CategoryResponse] corresponding to the given Id.
+     * This function assumes that the category list has already been populated and that
+     * the requested category ID exists in the list. A null assertion is used because
+     * under normal application flow, this method should never be called unless data is present.
+     *
+     * @param categoryId The ID of the category to retrieve.
+     * @return The matching [CategoryResponse] object.
+     * @throws NullPointerException if the category list is null or the ID is not found — though this should never occur in expected usage, hence the assertion.
      */
     fun getCategoryById(categoryId: Int): CategoryResponse {
         return _categoryList.value!!.find { it.categoryId == categoryId }!!
     }
 
     /**
-     * Updates an existing category and refreshes the category list on Success.
+     * Updates a category with new data.
+     * On success, refreshes the user's category list.
      *
-     * @param category The updated [CategoryResponse] object.
-     * @param userId The Id of the user owning the category.
-     *
-     * @see CategoryResponse
+     * @param category The updated category data.
+     * @param userId The ID of the user to fetch updated categories for.
      */
     fun updateCategory(category: CategoryResponse, userId: Int) {
         viewModelScope.launch {
@@ -110,10 +111,11 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Deletes a category by its Id and refreshes the category list on Success.
+     * Deletes a category by its ID.
+     * On success, refreshes the user's category list.
      *
-     * @param categoryId The Id of the category to delete.
-     * @param userId The Id of the user owning the category.
+     * @param categoryId The ID of the category to delete.
+     * @param userId The ID of the user to fetch updated categories for.
      */
     fun deleteCategory(categoryId: Int, userId: Int) {
         viewModelScope.launch {
@@ -124,34 +126,31 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Resets the create category result to idle.
+     * Clears the result state for category creation operations.
+     * Useful before re-submitting a form.
      */
     fun clearCreateResult() {
         _createCategoryResult.postValue(Result.Idle)
     }
 
     /**
-     * Resets the update category result to idle.
+     * Clears the result state for category update operations.
      */
     fun clearUpdateResult() {
         _updateCategoryResult.postValue(Result.Idle)
     }
 
     /**
-     * Starts a navigation action by setting the navigation flag to true.
-     *
-     * This is used as a workaround to prevent double navigation events
-     * when using swipe to edit functionality on the category list.
+     * Initiates a navigation flag, typically used to prevent duplicate
+     * navigation's (e.g., during swipe-to-edit).
      */
     fun startNavigation() {
         _isNavigating.value = true
     }
 
     /**
-     * Resets the navigation flag after a short delay.
-     *
-     * This prevents duplicate navigation events that could cause the
-     * [UpdateCategoryScreen] to open twice and create flickering.
+     * Resets the navigation flag after a short delay to prevent double-triggering.
+     * Helps avoid screen flickering or duplicate navigation events.
      */
     fun resetNavigation() {
         viewModelScope.launch {
@@ -161,7 +160,8 @@ class CategoryViewModel(private val categoryRepository: CategoryRepository) : Vi
     }
 
     /**
-     * Clears previous error or idle states for create and update operations.
+     * Clears idle/error states for both create and update operations.
+     * Useful when resetting UI between screens or actions.
      */
     fun clearErrors() {
         _createCategoryResult.postValue(Result.Idle)
