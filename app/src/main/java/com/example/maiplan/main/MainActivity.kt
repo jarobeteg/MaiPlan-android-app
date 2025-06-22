@@ -45,6 +45,8 @@ class MainActivity : BaseActivity() {
     /** [AuthViewModel] instance to handle Authentication related logic. */
     private lateinit var viewModel: AuthViewModel
 
+    private var serverOffline = false
+
     /**
      * Lifecycle method [onCreate] is called when the [MainActivity] is created.
      * - The [AuthRepository] is initialized using the [AuthRemoteDataSource].
@@ -71,19 +73,15 @@ class MainActivity : BaseActivity() {
      * @see AuthRemoteDataSource
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-
-        val isDark = resources.configuration.uiMode and
-                Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-
-        WindowCompat.getInsetsController(window, window.decorView).apply {
-            isAppearanceLightStatusBars = !isDark
-            isAppearanceLightNavigationBars = !isDark
-        }
 
         // Show a loading screen while checking authentication state
         setContent { AppTheme { LoadingScreen() } }
+
+        if (serverOffline) {
+            startActivity(Intent(this, HomeActivity::class.java))
+            finish()
+        }
 
         // Initialize repository, ViewModel, and session manager
         initViewModel()

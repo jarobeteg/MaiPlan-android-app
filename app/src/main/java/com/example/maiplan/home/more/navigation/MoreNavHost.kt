@@ -62,6 +62,6 @@ fun NavGraphBuilder.moreNavGraph(
 ) {
     // --- Main More Screen ---
     composable(MoreRoutes.MoreMain.route) {
-        MoreScreen(rootNavController)
+        MoreScreen(localNavController, rootNavController)
     }
 }

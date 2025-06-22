@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
@@ -46,12 +47,16 @@ import com.example.maiplan.home.navigation.HomeNavigationBar
  * Displays the `More` screen, structured with a top app bar,
  * a bottom navigation bar, and a list of navigable options.
  *
+ * @param localNavController The controller for navigating between `More` sub-screens.
+ * @param rootNavController The controller used to navigate across the broader `Home` tabs.
+ *
  * @see MoreTopBar
  * @see HomeNavigationBar
  * @see MoreScreenButton
  */
 @Composable
 fun MoreScreen(
+    localNavController: NavController,
     rootNavController: NavHostController
 ) {
     val context = LocalContext.current
