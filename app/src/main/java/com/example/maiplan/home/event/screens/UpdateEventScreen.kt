@@ -14,7 +14,7 @@ import com.example.maiplan.viewmodel.event.EventViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UpdateEventScreen(
-    viewModel: EventViewModel,
+    eventViewModel: EventViewModel,
     onSaveClick: () -> Unit,
     onBackClick: () -> Unit
 ) {

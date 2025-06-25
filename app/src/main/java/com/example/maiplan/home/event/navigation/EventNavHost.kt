@@ -9,7 +9,9 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.example.maiplan.home.event.screens.*
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
+import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 
 /**
  * [Composable] that sets up the navigation host for the `Event` screens.
@@ -26,13 +28,22 @@ import com.example.maiplan.viewmodel.event.EventViewModel
  * @param rootNavController Navigation controller for switching between root-level screens (e.g. `Home` tabs).
  * @param localNavController Navigation controller scoped to `Event`-related screens.
  * @param eventViewModel Shared `ViewModel` for performing `CRUD` operations on events.
+ * @param categoryViewModel Shared `ViewModel` for performing `CRUD` operations on categories.
+ * @param reminderViewModel Shared `ViewModel` for performing `CRUD` operations on reminders.
  *
  * @see EventViewModel
+ * @see CategoryViewModel
+ * @see ReminderViewModel
  * @see EventRoutes
  * @see eventNavGraph
  */
 @Composable
-fun EventNavHost(rootNavController: NavHostController, localNavController: NavHostController, eventViewModel: EventViewModel) {
+fun EventNavHost(
+    rootNavController: NavHostController,
+    localNavController: NavHostController,
+    eventViewModel: EventViewModel,
+    categoryViewModel: CategoryViewModel,
+    reminderViewModel: ReminderViewModel) {
     NavHost(
         navController = localNavController,
         startDestination = EventRoutes.EventMain.route,
@@ -41,7 +52,7 @@ fun EventNavHost(rootNavController: NavHostController, localNavController: NavHo
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
-        eventNavGraph(localNavController, rootNavController, eventViewModel)
+        eventNavGraph(localNavController, rootNavController, eventViewModel, categoryViewModel, reminderViewModel)
     }
 }
 
@@ -60,8 +71,12 @@ fun EventNavHost(rootNavController: NavHostController, localNavController: NavHo
  * @param localNavController The controller that handles navigation between `Event` screens.
  * @param rootNavController The controller that handles navigation between `Home` screens.
  * @param eventViewModel The `ViewModel` providing data and logic for the `Event` screens.
+ * @param categoryViewModel The `ViewModel` providing data and logic for the `Event` screens.
+ * @param reminderViewModel The `ViewModel` providing data and logic for the `Event` screens.
  *
  * @see EventViewModel
+ * @see CategoryViewModel
+ * @see ReminderViewModel
  * @see EventRoutes
  * @see EventScreen
  * @see CreateEventScreen
@@ -70,12 +85,14 @@ fun EventNavHost(rootNavController: NavHostController, localNavController: NavHo
 fun NavGraphBuilder.eventNavGraph(
     localNavController: NavHostController,
     rootNavController: NavHostController,
-    eventViewModel: EventViewModel
+    eventViewModel: EventViewModel,
+    categoryViewModel: CategoryViewModel,
+    reminderViewModel: ReminderViewModel
 ) {
     // --- Main Event Screen ---
     composable(EventRoutes.EventMain.route) {
         EventScreen(
-            viewModel = eventViewModel,
+            eventViewModel = eventViewModel,
             rootNavController = rootNavController,
             localNavController = localNavController,
             onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) }
@@ -85,7 +102,9 @@ fun NavGraphBuilder.eventNavGraph(
     // --- Create Event Screen ---
     composable(EventRoutes.Create.route) {
         CreateEventScreen(
-            viewModel = eventViewModel,
+            eventViewModel = eventViewModel,
+            categoryViewModel = categoryViewModel,
+            reminderViewModel = reminderViewModel,
             onSaveClick = {},
             onBackClick = { localNavController.popBackStack() }
         )
@@ -94,7 +113,7 @@ fun NavGraphBuilder.eventNavGraph(
     // --- Update Event Screen ---
     composable(EventRoutes.Update.route) {
         UpdateEventScreen(
-            viewModel = eventViewModel,
+            eventViewModel = eventViewModel,
             onSaveClick = {},
             onBackClick = { localNavController.popBackStack() }
         )

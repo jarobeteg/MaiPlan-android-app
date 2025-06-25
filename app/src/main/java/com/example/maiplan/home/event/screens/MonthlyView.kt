@@ -28,6 +28,7 @@ import com.example.maiplan.R
 import java.time.LocalDate
 import java.time.temporal.WeekFields
 import java.util.Locale
+import kotlin.math.ceil
 
 /**
  * Displays a monthly calendar view showing the days of the selected month.
@@ -39,7 +40,6 @@ import java.util.Locale
  *
  * @param selectedDate The [LocalDate] representing the month to display.
  *
- * @see getWeekNumbersForMonth
  * @see WeekdayHeaders
  * @see CalendarGrid
  */
@@ -48,9 +48,8 @@ import java.util.Locale
 fun MonthlyView(selectedDate: LocalDate) {
     val context = LocalContext.current
     val daysInMonth = selectedDate.lengthOfMonth()
-    val firstDayOfMonth = selectedDate.withDayOfMonth(1).dayOfWeek.value % 7
+    val firstDayOfMonth = (selectedDate.withDayOfMonth(1).dayOfWeek.value + 6) % 7
 
-    val weekNumbers = getWeekNumbersForMonth(selectedDate)
     val weekdays = listOf(
         getString(context, R.string.mon),
         getString(context, R.string.tue),
@@ -61,15 +60,18 @@ fun MonthlyView(selectedDate: LocalDate) {
         getString(context, R.string.sun)
     )
 
+    val totalCells = firstDayOfMonth + daysInMonth
+    val rowCount = ceil(totalCells / 7.0).toInt()
+
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val weekNumberWidth = 12.dp
         val cellSize = (maxWidth - weekNumberWidth) / 7
         val headerHeight = 18.dp
-        val rowHeight = (maxHeight - headerHeight) / weekNumbers.size
+        val rowHeight = (maxHeight - headerHeight) / rowCount
 
         Column(modifier = Modifier.fillMaxSize()) {
             WeekdayHeaders(weekdays, weekNumberWidth, cellSize, headerHeight)
-            CalendarGrid(weekNumbers, daysInMonth, firstDayOfMonth, weekNumberWidth, cellSize, rowHeight)
+            CalendarGrid(selectedDate, rowCount, daysInMonth, firstDayOfMonth, weekNumberWidth, cellSize, rowHeight)
         }
     }
 }
@@ -104,27 +106,31 @@ fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, he
 /**
  * Displays the grid of week rows, each containing the week number and day cells.
  *
- * @param weekNumbers A list of week numbers to display on the side.
+ * @param selectedDate The currently selected date used to calculate the correct week number for each row.
+ * @param rowCount The total number of rows (weeks) to render in the calendar grid.
  * @param daysInMonth The number of days in the selected month.
  * @param firstDayOfMonth The index of the first weekday of the month (0 = Sunday).
  * @param weekNumberWidth The width reserved for the week number column.
  * @param cellSize The width of each day cell.
  * @param rowHeight The height of each week row (day cell height).
  *
+ * @see getWeekNumberForRow
  * @see WeekNumberColumn
  * @see DaysRow
  */
 @Composable
 fun CalendarGrid(
-    weekNumbers: List<Int>,
+    selectedDate: LocalDate,
+    rowCount: Int,
     daysInMonth: Int,
     firstDayOfMonth: Int,
     weekNumberWidth: Dp,
     cellSize: Dp,
     rowHeight: Dp
 ) {
-    weekNumbers.forEachIndexed { weekIndex, weekNumber ->
+    for (weekIndex in 0 until rowCount) {
         Row(modifier = Modifier.height(rowHeight)) {
+            val weekNumber = getWeekNumberForRow(selectedDate, weekIndex)
             WeekNumberColumn(weekNumber, weekNumberWidth)
             DaysRow(weekIndex, daysInMonth, firstDayOfMonth, cellSize, rowHeight)
         }
@@ -207,24 +213,24 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
 }
 
 /**
- * Calculates the week numbers that appear within a given month on the side.
+ * Returns the week number for a given row in a month-view calendar.
  *
- * Handles cases where the month spans the end of one year into the next.
+ * Calculates the ISO week number (1–53) based on the row index and selected date.
+ * If the date in the row falls outside the current month, it defaults to the first week's number.
  *
- * @param selectedDate A [LocalDate] representing the month to calculate for.
- * @return A list of week numbers appearing in the month.
+ * @param selectedDate A date within the displayed month.
+ * @param weekIndex Zero-based index of the calendar row.
+ * @return The localized week number for the row.
  */
-fun getWeekNumbersForMonth(selectedDate: LocalDate): List<Int> {
-    val daysInMonth = selectedDate.lengthOfMonth()
+fun getWeekNumberForRow(selectedDate: LocalDate, weekIndex: Int): Int {
     val weekFields = WeekFields.of(Locale.getDefault())
+    val firstOfMonth = selectedDate.withDayOfMonth(1)
+    val firstDayOffset = (firstOfMonth.dayOfWeek.value + 6) % 7
+    val dateInRow = firstOfMonth.plusDays((weekIndex * 7 - firstDayOffset).toLong())
 
-    val startWeek = selectedDate.withDayOfMonth(1).get(weekFields.weekOfYear())
-    val endWeek = selectedDate.withDayOfMonth(daysInMonth).get(weekFields.weekOfYear())
-
-    return if (endWeek < startWeek) {
-        val yearEnd = selectedDate.withDayOfMonth(1).plusWeeks(4).get(weekFields.weekOfYear())
-        (startWeek..yearEnd).toList()
+    return if (dateInRow.month == selectedDate.month) {
+        dateInRow.get(weekFields.weekOfYear())
     } else {
-        (startWeek..endWeek).toList()
+        firstOfMonth.get(weekFields.weekOfYear())
     }
 }

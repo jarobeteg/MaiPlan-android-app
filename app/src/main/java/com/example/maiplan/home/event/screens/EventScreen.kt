@@ -62,7 +62,7 @@ import java.util.Locale
  * - A date picker dialog to change the selected date for the views.
  * - A floating add icon to navigate to the [CreateEventScreen].
  *
- * @param viewModel The shared [EventViewModel] that provides event data and logic.
+ * @param eventViewModel The shared [EventViewModel] that provides event data and logic.
  * @param rootNavController The controller used to navigate across the broader `Home` tabs.
  * @param localNavController The controller for navigating between event-specific sub-screens.
  * @param onCreateEventClick Callback triggered when the add button is clicked to open the [CreateEventScreen].
@@ -77,7 +77,7 @@ import java.util.Locale
  */
 @Composable
 fun EventScreen(
-    viewModel: EventViewModel,
+    eventViewModel: EventViewModel,
     rootNavController: NavHostController,
     localNavController: NavHostController, // use this to navigate from view to update or view details screen
     onCreateEventClick: () -> Unit

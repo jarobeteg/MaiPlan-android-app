@@ -45,7 +45,7 @@ class MainActivity : BaseActivity() {
     /** [AuthViewModel] instance to handle Authentication related logic. */
     private lateinit var viewModel: AuthViewModel
 
-    private var serverOffline = false
+    private var serverOffline = false // ONLY FOR DEBUGGING AND TESTING NON SERVER RELATED FUNCTIONS
 
     /**
      * Lifecycle method [onCreate] is called when the [MainActivity] is created.
@@ -78,7 +78,7 @@ class MainActivity : BaseActivity() {
         // Show a loading screen while checking authentication state
         setContent { AppTheme { LoadingScreen() } }
 
-        if (serverOffline) {
+        if (serverOffline) { // ONLY FOR DEBUGGING AND TESTING NON SERVER RELATED FUNCTIONS
             startActivity(Intent(this, HomeActivity::class.java))
             finish()
         }
