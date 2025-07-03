@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,9 +79,9 @@ fun UpdateCategoryScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            AdjustableTextFieldLengthComponent(name, stringResource(R.string.name), 255) { name = it }
+            AdjustableTextFieldLengthComponent(name, stringResource(R.string.name), Icons.Filled.Title, 255) { name = it }
 
-            AdjustableTextFieldLengthComponent(description, stringResource(R.string.description), 512) { description = it }
+            AdjustableTextFieldLengthComponent(description, stringResource(R.string.description), Icons.Filled.Description, 512) { description = it }
 
             ColorPickerRow(
                 selectedColor = selectedColor,

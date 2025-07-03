@@ -79,6 +79,18 @@
     <string name="event_new">New Event</string>
     <string name="event_update">Update Event</string>
     <string name="event_save">Save Event</string>
+    <string name="date">Date</string>
+    <string name="start_time">Start Time</string>
+    <string name="end_time">End Time</string>
+    <string name="priority">Priority</string>
+    <string name="location">Location</string>
+    <string name="low">Low</string>
+    <string name="mid">Mid</string>
+    <string name="high">High</string>
+    <string name="category">Category</string>
+    <string name="reminder">Reminder</string>
+    <string name="message">Message</string>
+    <string name="date_time">Select date &amp; time</string>
 
     <!-- days -->
     <string name="mon">Mon</string>

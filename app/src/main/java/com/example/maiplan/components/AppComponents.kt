@@ -25,8 +25,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Visibility
@@ -37,10 +40,14 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
@@ -49,8 +56,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -71,14 +81,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
+import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.utils.model.IconData
 import com.example.maiplan.utils.model.IconData.allIcons
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 /**
  * Reusable [Composable] that displays a heading style text.
@@ -122,6 +138,8 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
  *
  * @param email The current text value of the email input field.
  * @param onEmailChange Callback invoked when the email input changes.
+ *
+ * @see OutlinedTextField
  */
 @Composable
 fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
@@ -157,6 +175,8 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
  *
  * @param username The current text value of the username input field.
  * @param onUsernameChange Callback invoked when the username input changes.
+ *
+ * @see OutlinedTextField
  */
 @Composable
 fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
@@ -196,6 +216,8 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
  * @param passwordVisible Whether the password should be shown in plain text.
  * @param onTogglePasswordVisibility Called when the visibility icon is clicked.
  * @param shouldIndicatorBeVisible Controls if the strength indicator should be shown.
+ *
+ * @see OutlinedTextField
  */
 @Composable
 fun PasswordTextComponent(
@@ -344,11 +366,14 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
  *
  * @param value The current text value of the input field.
  * @param label Localized label for the input field.
+ * @param icon The [ImageVector] used as the trailing icon.
  * @param length The maximum number of characters allowed.
  * @param onValueChange Callback invoked when the input value changes.
+ *
+ * @see OutlinedTextField
  */
 @Composable
-fun AdjustableTextFieldLengthComponent(value: String, label: String, length: Int, onValueChange: (String) -> Unit) {
+fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
@@ -357,6 +382,21 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, length: Int
             }
         },
         label = { Text(label) },
+        trailingIcon = {
+            Box(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(36.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
@@ -410,10 +450,12 @@ fun ErrorMessageComponent(value: String) {
 }
 
 /**
- * Reusable [Composable] that displays Material3 Date Picker dialog that allows users to select a date.
+ * Reusable [Composable] that displays Material3 [DatePicker] dialog that allows users to select a date.
  *
  * @param onDateSelected Callback invoked when the user selects a date and confirms.
  * @param onDismiss Callback invoked when the dialog is dismissed without selection.
+ *
+ * @see DatePicker
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -477,11 +519,83 @@ fun DatePickerDialogComponent(
 }
 
 /**
+ * Reusable [Composable] that displays a time picker dialog using Material3's [TimePicker].
+ *
+ * The user can select an hour and minute, and confirm or cancel the selection.
+ *
+ * @param onTimeSelected Callback invoked with the selected [LocalTime] when the user confirms.
+ * @param onDismiss Callback invoked when the dialog is dismissed or canceled.
+ *
+ * @see TimePicker
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TimePickerDialogComponent(
+    onTimeSelected: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val timePickerState = rememberTimePickerState()
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 8.dp,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                TimePicker(
+                    state = timePickerState,
+                    colors = TimePickerDefaults.colors(
+                        clockDialColor = MaterialTheme.colorScheme.primary,
+                        clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        clockDialUnselectedContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectorColor = MaterialTheme.colorScheme.secondaryContainer,
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        periodSelectorBorderColor = MaterialTheme.colorScheme.secondary,
+                        periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                        periodSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                        timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                        timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    TextButton(onClick = {
+                        val hour = timePickerState.hour
+                        val minute = timePickerState.minute
+                        onTimeSelected(LocalTime.of(hour, minute))
+                    }) {
+                        Text("OK")
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * Reusable [Composable] that displays a search field with character limit and leading search icon.
  *
  * @param searchQuery The current query text input field.
  * @param length Maximum allowed character length.
  * @param onValueChange Callback invoked when the input value changes.
+ *
+ * @see OutlinedTextField
  */
 @Composable
 fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
@@ -550,7 +664,7 @@ fun ColorPickerRow(
 
             Box(
                 modifier = Modifier
-                    .size(42.dp)
+                    .size(36.dp)
                     .background(selectedColor, CircleShape)
                     .border(1.dp, Color.Gray, CircleShape)
             )
@@ -753,7 +867,7 @@ fun IconPickerRow(
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        modifier = Modifier.size(42.dp),
+                        modifier = Modifier.size(36.dp),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
@@ -886,4 +1000,367 @@ fun SimpleTopBar(
             containerColor = MaterialTheme.colorScheme.primary
         )
     )
+}
+
+/**
+ * Reusable [Composable] field that displays a selected [LocalDate] and opens a date picker dialog when tapped.
+ *
+ * @param label The label to display alongside the selected date.
+ * @param selectedDate The current selected date, or null if none.
+ * @param onDateSelected Callback triggered when a date is picked.
+ */
+
+@Composable
+fun DateInputComponent(
+    label: String,
+    selectedDate: LocalDate?,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+
+    val displayDate = selectedDate?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) ?: ""
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { showDatePicker = true }
+            .border(
+                OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+                MaterialTheme.colorScheme.onBackground,
+                OutlinedTextFieldDefaults.shape
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "$label: $displayDate",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Icon(
+                imageVector = Icons.Default.DateRange,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+
+    if (showDatePicker) {
+        DatePickerDialogComponent(
+            onDateSelected = {
+                onDateSelected(it)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
+}
+
+/**
+ * Reusable [Composable] field that displays a selected [LocalTime] and opens a picker picker dialog when tapped.
+ *
+ * @param label The label shown with the time.
+ * @param selectedTime The currently selected time, or null.
+ * @param onTimeSelected Callback when a time is selected.
+ */
+@Composable
+fun TimeInputComponent(
+    label: String,
+    selectedTime: LocalTime?,
+    onTimeSelected: (LocalTime) -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    var showDialog by remember { mutableStateOf(false) }
+
+    val displayTime = selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) { showDialog = true }
+            .border(
+                OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+                MaterialTheme.colorScheme.onBackground,
+                OutlinedTextFieldDefaults.shape
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "$label: $displayTime",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Icon(
+                imageVector = Icons.Default.AccessTime,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+
+    if (showDialog) {
+        TimePickerDialogComponent(
+            onTimeSelected = {
+                onTimeSelected(it)
+                showDialog = false
+            },
+            onDismiss = {
+                showDialog = false
+            }
+        )
+    }
+}
+
+/**
+ * Reusable [Composable] Dropdown menu for selecting priority (low, mid, high) using localized strings.
+ *
+ * @param selectedPriority The current priority level (1 to 3).
+ * @param onPrioritySelected Callback triggered when a new priority is chosen.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PriorityDropdown(
+    selectedPriority: Int,
+    onPrioritySelected: (Int) -> Unit
+) {
+    val priorityMap = mapOf(
+        1 to stringResource(R.string.low),
+        2 to stringResource(R.string.mid),
+        3 to stringResource(R.string.high)
+    )
+
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = priorityMap[selectedPriority] ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Priority") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                cursorColor = MaterialTheme.colorScheme.primary
+            )
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primary)
+        ) {
+            priorityMap.forEach { (value, label) ->
+                DropdownMenuItem(
+                    text = {
+                        Text(text = label, color = MaterialTheme.colorScheme.onBackground)
+                           },
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary)
+                        .fillMaxWidth(),
+                    onClick = {
+                        onPrioritySelected(value)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Reusable [Composable] that displays a centered large section title.
+ *
+ * @param text The text content to display.
+ */
+@Composable
+fun SectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleLarge,
+        color = MaterialTheme.colorScheme.onBackground,
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center
+    )
+}
+
+/**
+ * Reusable [Composable] field that allows selection of both date and time, returning a [LocalDateTime].
+ *
+ * @param label The label for the field.
+ * @param dateTime Currently selected date-time or null.
+ * @param onDateTimeSelected Callback with the full selected [LocalDateTime].
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LocalDateTimeInputField(
+    label: String,
+    dateTime: LocalDateTime?,
+    onDateTimeSelected: (LocalDateTime) -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    var showDatePicker by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var tempDate by remember { mutableStateOf(dateTime?.toLocalDate() ?: LocalDate.now()) }
+    var tempTime by remember { mutableStateOf(dateTime?.toLocalTime() ?: LocalTime.now()) }
+
+    val displayText = dateTime?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) ?: ""
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null
+            ) {
+                showDatePicker = true
+            }
+            .border(
+                OutlinedTextFieldDefaults.UnfocusedBorderThickness,
+                MaterialTheme.colorScheme.onBackground,
+                OutlinedTextFieldDefaults.shape
+            )
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "$label: $displayText",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Icon(
+                imageVector = Icons.Default.Event,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.size(36.dp)
+            )
+        }
+    }
+    if (showDatePicker) {
+        DatePickerDialogComponent(
+            onDateSelected = {
+                tempDate = it
+                showDatePicker = false
+                showTimePicker = true
+            },
+            onDismiss = { showDatePicker = false }
+        )
+    }
+
+    if (showTimePicker) {
+        TimePickerDialogComponent(
+            onTimeSelected = {
+                tempTime = it
+                showTimePicker = false
+                onDateTimeSelected(LocalDateTime.of(tempDate, tempTime))
+            },
+            onDismiss = {
+                showTimePicker = false
+            }
+        )
+    }
+}
+
+/**
+ * Reusable [Composable] dropdown menu for selecting a [CategoryResponse], showing its icon and name.
+ *
+ * @param categories List of available categories to choose from.
+ * @param selectedCategory Currently selected category, or null.
+ * @param onCategorySelected Callback when a category is selected.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryDropdownComponent(
+    categories: List<CategoryResponse>,
+    selectedCategory: CategoryResponse?,
+    onCategorySelected: (CategoryResponse) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded }
+    ) {
+        OutlinedTextField(
+            value = selectedCategory?.name ?: "",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Category") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.background,
+                unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                focusedTextColor = MaterialTheme.colorScheme.onBackground,
+                unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+                focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.primary)
+        ) {
+            categories.forEach { category ->
+                DropdownMenuItem(
+                    text = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = IconData.getIconByKey(category.icon),
+                                contentDescription = null,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Text(text = category.name, color = MaterialTheme.colorScheme.onBackground)
+                        }
+                    },
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.primary)
+                        .fillMaxWidth(),
+                    onClick = {
+                        onCategorySelected(category)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }
