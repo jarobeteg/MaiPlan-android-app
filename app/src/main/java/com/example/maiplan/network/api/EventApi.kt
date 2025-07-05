@@ -12,7 +12,6 @@ import java.time.LocalTime
 /**
  * Data model for creating a new event.
  *
- * @property eventId The unique Id for the event.
  * @property userId The Id of the user creating the event.
  * @property categoryId The Id of the category the event belongs to.
  * @property reminderId The Id of an associated reminder.
@@ -25,10 +24,9 @@ import java.time.LocalTime
  * @property location The location where the event takes place.
  */
 data class EventCreate(
-    @SerializedName("event_id") val eventId: Int,
     @SerializedName("user_id") val userId: Int,
-    @SerializedName("category_id") val categoryId: Int,
-    @SerializedName("reminder_id") val reminderId: Int,
+    @SerializedName("category_id") val categoryId: Int?,
+    @SerializedName("reminder_id") val reminderId: Int?,
     val title: String,
     val description: String,
     val date: LocalDate,

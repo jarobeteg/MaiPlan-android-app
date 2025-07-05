@@ -11,7 +11,6 @@ import java.time.LocalDateTime
 /**
  * Data model for creating a new reminder.
  *
- * @property reminderId The unique Id for the reminder.
  * @property userId The Id of the user setting the reminder.
  * @property reminderTime The exact date and time the reminder should trigger.
  * @property frequency How often the reminder repeats (0 - one-time, 1 - daily, etc.).
@@ -19,7 +18,6 @@ import java.time.LocalDateTime
  * @property message The message or note associated with the reminder.
  */
 data class ReminderCreate(
-    @SerializedName("reminder_id") val reminderId: Int,
     @SerializedName("user_id") val userId: Int,
     @SerializedName("reminder_time") val reminderTime: LocalDateTime,
     val frequency: Int,

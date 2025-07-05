@@ -1,12 +1,9 @@
 package com.example.maiplan.main
 
 import android.content.Intent
-import android.content.res.Configuration
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
@@ -191,9 +188,7 @@ class MainActivity : BaseActivity() {
          * Sets up the Observers for authentication operations (login, register, reset password).
          */
         viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
-        viewModel.registerResult.observe(this,
-            Observer { handleResult(it, R.string.register_success) })
-        viewModel.resetPasswordResult.observe(this,
-            Observer { handleResult(it, R.string.reset_password_success) })
+        viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success) })
+        viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
     }
 }

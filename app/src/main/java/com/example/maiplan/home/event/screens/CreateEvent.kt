@@ -31,6 +31,7 @@ import com.example.maiplan.components.DateInputComponent
 import com.example.maiplan.components.LocalDateTimeInputField
 import com.example.maiplan.components.PriorityDropdown
 import com.example.maiplan.components.SectionTitle
+import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.model.UserSession
@@ -105,6 +106,8 @@ fun CreateEventScreen(
             LocalDateTimeInputField(stringResource(R.string.date_time), dateTime) { dateTime = it }
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
+
+            SubmitButtonComponent(stringResource(R.string.event_save)) {  }
         }
     }
 }
