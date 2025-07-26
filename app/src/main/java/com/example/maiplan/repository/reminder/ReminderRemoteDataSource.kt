@@ -23,7 +23,7 @@ class ReminderRemoteDataSource(private val reminderApi: ReminderApi) {
      * @param reminder A [ReminderCreate] object containing reminder details such as time, title, etc.
      * @return A raw [Response] indicating success or failure of the creation operation.
      */
-    suspend fun createReminder(reminder: ReminderCreate): Response<Unit> {
+    suspend fun createReminder(reminder: ReminderCreate): Response<Int> {
         return reminderApi.createReminder(reminder)
     }
 
@@ -35,5 +35,15 @@ class ReminderRemoteDataSource(private val reminderApi: ReminderApi) {
      */
     suspend fun getReminder(reminderId: Int): Response<ReminderResponse> {
         return reminderApi.getReminder(reminderId)
+    }
+
+    /**
+     * Retrieves all reminders associated with a given user.
+     *
+     * @param userId The unique ID of the user whose reminders should be fetched.
+     * @return A raw [Response] containing a list of [ReminderResponse] objects or an error body.
+     */
+    suspend fun getAllReminders(userId: Int): Response<List<ReminderResponse>> {
+        return reminderApi.getAllReminders(userId)
     }
 }

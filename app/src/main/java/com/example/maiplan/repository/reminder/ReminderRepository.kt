@@ -26,7 +26,7 @@ class ReminderRepository(private val remoteDataSource: ReminderRemoteDataSource)
      * @param reminder The [ReminderCreate] object containing reminder data like time, label, and repeat settings.
      * @return A [Result] indicating success (with `Unit`) or failure (with an [Exception]).
      */
-    suspend fun createReminder(reminder: ReminderCreate): Result<Unit> {
+    suspend fun createReminder(reminder: ReminderCreate): Result<Int> {
         return try {
             handleResponse(remoteDataSource.createReminder(reminder))
         } catch (e: Exception) {
@@ -44,6 +44,20 @@ class ReminderRepository(private val remoteDataSource: ReminderRemoteDataSource)
     suspend fun getReminder(reminderId: Int): Result<ReminderResponse> {
         return try {
             handleResponse(remoteDataSource.getReminder(reminderId))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    /**
+     * Fetches all reminders associated with a specific user.
+     *
+     * @param userId The unique identifier of the user.
+     * @return A [Result] containing a list of [ReminderResponse] objects on success, or an [Exception] on failure.
+     */
+    suspend fun getAllReminders(userId: Int): Result<List<ReminderResponse>> {
+        return try {
+            handleResponse(remoteDataSource.getAllReminders(userId))
         } catch (e: Exception) {
             Result.Error(e)
         }

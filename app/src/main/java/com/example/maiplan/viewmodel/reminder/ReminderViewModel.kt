@@ -27,13 +27,16 @@ import kotlinx.coroutines.launch
  * @see ReminderResponse
  */
 class ReminderViewModel(private val reminderRepository: ReminderRepository) : ViewModel() {
-    private val _createReminderResult = MutableLiveData<Result<Unit>>()
+    private val _createReminderResult = MutableLiveData<Result<Int>>()
     /** Emits the result of the reminder creation operation. */
-    val createReminderResult: LiveData<Result<Unit>> get() = _createReminderResult
+    val createReminderResult: LiveData<Result<Int>> get() = _createReminderResult
 
     private val _getReminderResult = MutableLiveData<Result<ReminderResponse>>()
     /** Emits the result of fetching a specific reminder by ID. */
     val getReminderResult: LiveData<Result<ReminderResponse>> get() = _getReminderResult
+
+    private val _reminderList = MutableLiveData<List<ReminderResponse>>()
+    val reminderList: LiveData<List<ReminderResponse>> get() = _reminderList
 
     /**
      * Creates a new reminder using the given [ReminderCreate] data.
@@ -47,6 +50,10 @@ class ReminderViewModel(private val reminderRepository: ReminderRepository) : Vi
         }
     }
 
+    suspend fun createReminderSuspending(reminder: ReminderCreate): Result<Int> {
+        return reminderRepository.createReminder(reminder)
+    }
+
     /**
      * Retrieves a reminder by its unique ID.
      * The result is posted to [getReminderResult] for the UI to consume.
@@ -56,6 +63,20 @@ class ReminderViewModel(private val reminderRepository: ReminderRepository) : Vi
     fun getReminder(reminderId: Int) {
         viewModelScope.launch {
             _getReminderResult.postValue(reminderRepository.getReminder(reminderId))
+        }
+    }
+
+    /**
+     * Fetches all reminders associated with the specified user.
+     *
+     * @param userId The ID of the user whose reminders will be fetched.
+     */
+    fun getAllReminder(userId: Int) {
+        viewModelScope.launch {
+            when (val result = reminderRepository.getAllReminders(userId)) {
+                is Result.Success -> _reminderList.postValue(result.data)
+                else -> _reminderList.postValue(emptyList())
+            }
         }
     }
 }

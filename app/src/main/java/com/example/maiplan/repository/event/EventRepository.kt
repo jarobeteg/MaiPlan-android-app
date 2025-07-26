@@ -48,4 +48,18 @@ class EventRepository(private val remoteDataSource: EventRemoteDataSource) {
             Result.Error(e)
         }
     }
+
+    /**
+     * Fetches all events associated with a specific user.
+     *
+     * @param userId The unique identifier of the user.
+     * @return A [Result] containing a list of [EventResponse] objects on success, or an [Exception] on failure.
+     */
+    suspend fun getAllEvents(userId: Int): Result<List<EventResponse>> {
+        return try {
+            handleResponse(remoteDataSource.getAllEvents(userId))
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
 }

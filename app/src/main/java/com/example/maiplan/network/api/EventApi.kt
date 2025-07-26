@@ -6,8 +6,6 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Query
-import java.time.LocalDate
-import java.time.LocalTime
 
 /**
  * Data model for creating a new event.
@@ -29,9 +27,9 @@ data class EventCreate(
     @SerializedName("reminder_id") val reminderId: Int?,
     val title: String,
     val description: String,
-    val date: LocalDate,
-    @SerializedName("start_time") val startTime: LocalTime,
-    @SerializedName("end_time") val endTime: LocalTime,
+    val date: String,
+    @SerializedName("start_time") val startTime: String,
+    @SerializedName("end_time") val endTime: String,
     val priority: Int,
     val location: String
 )
@@ -56,9 +54,9 @@ data class EventResponse(
     @SerializedName("reminder_id") val reminderId: Int,
     val title: String,
     val description: String,
-    val date: LocalDate,
-    @SerializedName("start_time") val startTime: LocalTime,
-    @SerializedName("end_time") val endTime: LocalTime,
+    val date: String,
+    @SerializedName("start_time") val startTime: String,
+    @SerializedName("end_time") val endTime: String,
     val priority: Int,
     val location: String
 )
@@ -85,4 +83,13 @@ interface EventApi {
      */
     @GET("events/get-event-by-id")
     suspend fun getEvent(@Query("event_id") eventId: Int): Response<EventResponse>
+
+    /**
+     * Fetches all events for a specific user.
+     *
+     * @param userId The Id of the user whose events to fetch.
+     * @return A [Response] containing a list of [EventResponse] items.
+     */
+    @GET("events/get-all-event")
+    suspend fun getAllEvents(@Query("user_id") userId: Int): Response<List<EventResponse>>
 }

@@ -35,6 +35,9 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     /** Emits the result of fetching a single event by ID. */
     val getEventResult: LiveData<Result<EventResponse>> get() = _getEventResult
 
+    private var _eventList = MutableLiveData<List<EventResponse>>()
+    val eventList: LiveData<List<EventResponse>> get() = _eventList
+
     /**
      * Creates a new event using the provided [EventCreate] data.
      * The result is emitted via [createEventResult] to notify the UI.
@@ -56,6 +59,20 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     fun getEvent(eventId: Int) {
         viewModelScope.launch {
             _getEventResult.postValue(eventRepository.getEvent(eventId))
+        }
+    }
+
+    /**
+     * Fetches all events associated with the specified user.
+     *
+     * @param userId The ID of the user whose events will be fetched.
+     */
+    fun getAllEvent(userId: Int) {
+        viewModelScope.launch {
+            when (val result = eventRepository.getAllEvents(userId)) {
+                is Result.Success -> _eventList.postValue(result.data)
+                else -> _eventList.postValue(emptyList())
+            }
         }
     }
 }
