@@ -2,6 +2,8 @@
 agp = "8.10.1"
 kotlin = "1.9.24"
 coreKtx = "1.16.0"
+room = "2.7.2"
+ksp = "1.9.0-1.0.13"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -10,7 +12,7 @@ material = "1.12.0"
 activity = "1.8.0"
 constraintlayout = "2.2.0"
 retrofit = "2.9.0"
-gson = "2.10.1"
+gson = "2.11.0"
 lifecycle-ktx = "2.8.7"
 compose = "1.7.7"
 composeCompiler = "1.5.14" #do not remove this no matter what the IDE tells you, it might appear that this is not used but its a lie
@@ -26,6 +28,9 @@ compose-foundation = "1.7.8"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -53,4 +58,4 @@ compose-foundation = { module = "androidx.compose.foundation:foundation", versio
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
