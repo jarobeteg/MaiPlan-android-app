@@ -87,8 +87,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
 import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.utils.model.IconData
-import com.example.maiplan.utils.model.IconData.allIcons
+import com.example.maiplan.utils.common.IconData
+import com.example.maiplan.utils.common.IconData.allIcons
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime

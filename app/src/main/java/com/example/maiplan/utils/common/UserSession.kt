@@ -1,4 +1,4 @@
-package com.example.maiplan.utils.model
+package com.example.maiplan.utils.common
 
 import com.example.maiplan.network.api.UserResponse
 

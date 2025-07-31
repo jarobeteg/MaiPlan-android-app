@@ -1,4 +1,4 @@
-package com.example.maiplan.utils.model
+package com.example.maiplan.utils.common
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article

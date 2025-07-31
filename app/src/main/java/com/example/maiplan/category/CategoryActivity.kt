@@ -13,7 +13,7 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.BaseActivity
-import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 

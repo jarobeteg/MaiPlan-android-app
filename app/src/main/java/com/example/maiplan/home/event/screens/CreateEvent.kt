@@ -34,7 +34,7 @@ import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.reminder.ReminderViewModel

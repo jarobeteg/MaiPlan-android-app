@@ -17,10 +17,9 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
-import com.example.maiplan.utils.model.UserSession
+import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
-import com.example.maiplan.home.event.screens.EventScreen
 import com.example.maiplan.utils.BaseActivity
 
 /**
