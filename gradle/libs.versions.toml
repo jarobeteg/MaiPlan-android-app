@@ -1,9 +1,11 @@
 [versions]
-agp = "8.10.1"
+agp = "8.12.0"
 kotlin = "1.9.24"
 coreKtx = "1.16.0"
 room = "2.7.2"
 ksp = "1.9.0-1.0.13"
+auth0-jwt = "4.5.0"
+bcrypt = "0.10.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
@@ -22,7 +24,6 @@ materialIcons = "1.7.7"
 lifecycleRuntimeCompose = "2.8.7"
 runtimeLivedata = "1.7.7"
 androidx-navigation-compose = "2.8.7"
-auth0-jwt = "4.2.0"
 composeMaterial = "1.4.1"
 compose-foundation = "1.7.8"
 
@@ -31,6 +32,8 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+auth0-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "auth0-jwt" }
+bcrypt = { module = "at.favre.lib:bcrypt", version.ref = "bcrypt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -51,7 +54,6 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycleRuntimeCompose" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidx-navigation-compose" }
-auth0-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "auth0-jwt" }
 androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" }
 compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose-foundation" }
 
