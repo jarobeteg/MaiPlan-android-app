@@ -31,5 +31,17 @@ data class AuthEntity(
     val updatedAt: LocalDateTime = LocalDateTime.now(),
 
     @ColumnInfo(name = "password_hash")
-    val passwordHash: String
+    val passwordHash: String,
+
+    @ColumnInfo(name = "last_modified")
+    val lastModified: LocalDateTime = LocalDateTime.now(),
+
+    @ColumnInfo(name = "needs_sync")
+    val needsSync: Boolean = true,
+
+    @ColumnInfo(name = "is_deleted")
+    val isDeleted: Boolean = false,
+
+    @ColumnInfo(name = "server_id")
+    val serverId: Int? = null
 )

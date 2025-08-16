@@ -60,5 +60,17 @@ data class FinanceEntity(
     @ColumnInfo(name = "expense_date")
     val expenseDate: LocalDateTime? = null,
 
-    val description: String? = null
+    val description: String? = null,
+
+    @ColumnInfo(name = "last_modified")
+    val lastModified: LocalDateTime = LocalDateTime.now(),
+
+    @ColumnInfo(name = "needs_sync")
+    val needsSync: Boolean = true,
+
+    @ColumnInfo(name = "is_deleted")
+    val isDeleted: Boolean = false,
+
+    @ColumnInfo(name = "server_id")
+    val serverId: Int? = null
 )

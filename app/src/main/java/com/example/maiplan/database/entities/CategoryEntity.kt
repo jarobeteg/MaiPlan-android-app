@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "category",
@@ -34,6 +35,18 @@ data class CategoryEntity(
 
     val color: String,
 
-    val icon: String
+    val icon: String,
+
+    @ColumnInfo(name = "last_modified")
+    val lastModified: LocalDateTime = LocalDateTime.now(),
+
+    @ColumnInfo(name = "needs_sync")
+    val needsSync: Boolean = true,
+
+    @ColumnInfo(name = "is_deleted")
+    val isDeleted: Boolean = false,
+
+    @ColumnInfo(name = "server_id")
+    val serverId: Int? = null
 )
 
