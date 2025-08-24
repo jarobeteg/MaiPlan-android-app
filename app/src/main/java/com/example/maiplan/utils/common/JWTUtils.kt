@@ -9,11 +9,11 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 object JWTUtils {
-    private const val SECRET_KEY = "YOUR_SECRET_KEY" // this is just a placeholder
+    private const val SECRET_KEY = "dd98b292bdaa08e31b758425b20b328d26d627d55d56b9c61203a3db67207b11" // this is just a placeholder
     private val ALGORITHM: Algorithm = Algorithm.HMAC256(SECRET_KEY)
     private const val ACCESS_TOKEN_EXPIRY_DAYS = 7L
 
-    fun createAccessToken(userId: Int): String {
+    fun createAccessToken(userId: Long): String {
         val now = Date()
         val expiry = Date(now.time + TimeUnit.DAYS.toMillis(ACCESS_TOKEN_EXPIRY_DAYS))
 

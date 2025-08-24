@@ -13,5 +13,5 @@ interface AuthDAO {
     suspend fun getUserByEmail(email: String): AuthEntity?
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
-    suspend fun insertUser(user: AuthEntity): Int
+    suspend fun insertUser(user: AuthEntity): Long
 }

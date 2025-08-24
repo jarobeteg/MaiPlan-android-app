@@ -78,7 +78,7 @@ fun NavGraphBuilder.authNavGraph(
         LoginScreen(
             viewModel = viewModel,
             onLoginClick = { email, password ->
-                viewModel.login(UserLogin(email, password))
+                //login logic through viewmodel to implement
             },
             toRegisterClick = {
                 viewModel.clearErrors()
@@ -96,7 +96,7 @@ fun NavGraphBuilder.authNavGraph(
         RegisterScreen(
             viewModel = viewModel,
             onRegisterClick = { email, username, password, passwordAgain ->
-                viewModel.register(UserRegister(email, username, password, passwordAgain))
+                //register logic through viewmodel to implement
             },
             onBackToLogin = {
                 viewModel.clearErrors()
@@ -110,7 +110,7 @@ fun NavGraphBuilder.authNavGraph(
         ForgotPasswordScreen(
             viewModel = viewModel,
             onResetClick = { email, password, passwordAgain ->
-                viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
+                //password reset logic through viewmodel to implement
             },
             onBackToLogin = {
                 viewModel.clearErrors()

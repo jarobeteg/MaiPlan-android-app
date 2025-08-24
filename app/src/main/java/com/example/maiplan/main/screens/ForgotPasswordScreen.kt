@@ -60,13 +60,13 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 @Composable
 fun ForgotPasswordScreen(
     viewModel: AuthViewModel,
-    onResetClick: (String, String, String) -> Unit,
+    onResetClick: (String, CharArray, CharArray) -> Unit,
     onBackToLogin: () -> Unit
 ) {
     val resetPasswordResult by viewModel.resetPasswordResult.observeAsState()
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordAgain by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf(CharArray(0)) }
+    var passwordAgain by remember { mutableStateOf(CharArray(0)) }
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordAgainVisible by remember { mutableStateOf(false) }
 

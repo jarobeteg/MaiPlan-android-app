@@ -5,8 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Entity(
     tableName = "health_reminder",
@@ -33,15 +31,15 @@ data class HealthReminderEntity(
     val type: Int,
 
     @ColumnInfo(name = "start_time")
-    val startTime: LocalTime,
+    val startTime: Long,
 
     @ColumnInfo(name = "end_time")
-    val endTime: LocalTime,
+    val endTime: Long,
 
     val frequency: Int,
 
     @ColumnInfo(name = "last_modified")
-    val lastModified: LocalDateTime = LocalDateTime.now(),
+    val lastModified: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "needs_sync")
     val needsSync: Boolean = true,

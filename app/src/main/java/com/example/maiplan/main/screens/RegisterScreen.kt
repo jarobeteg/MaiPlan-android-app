@@ -63,14 +63,14 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 @Composable
 fun RegisterScreen(
     viewModel: AuthViewModel,
-    onRegisterClick: (String, String, String, String) -> Unit,
+    onRegisterClick: (String, String, CharArray, CharArray) -> Unit,
     onBackToLogin: () -> Unit
 ) {
     val registerResult by viewModel.registerResult.observeAsState()
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordAgain by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf(CharArray(0)) }
+    var passwordAgain by remember { mutableStateOf(CharArray(0)) }
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordAgainVisible by remember { mutableStateOf(false) }
 

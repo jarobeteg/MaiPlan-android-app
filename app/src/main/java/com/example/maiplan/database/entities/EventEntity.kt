@@ -5,9 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 @Entity(
     tableName = "event",
@@ -57,20 +54,20 @@ data class EventEntity(
 
     val description: String? = null,
 
-    val date: LocalDate,
+    val date: Long,
 
     @ColumnInfo(name = "start_time")
-    val startTime: LocalTime? = null,
+    val startTime: Long? = null,
 
     @ColumnInfo(name = "end_time")
-    val endTime: LocalTime? = null,
+    val endTime: Long? = null,
 
     val priority: Int = 0,
 
     val location: String? = null,
 
     @ColumnInfo(name = "last_modified")
-    val lastModified: LocalDateTime = LocalDateTime.now(),
+    val lastModified: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "needs_sync")
     val needsSync: Boolean = true,

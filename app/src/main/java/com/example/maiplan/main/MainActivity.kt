@@ -14,6 +14,7 @@ import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.Token
 import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.auth.AuthLocalDataSource
 import com.example.maiplan.repository.auth.AuthRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.SessionManager
@@ -40,8 +41,6 @@ class MainActivity : BaseActivity() {
 
     /** [AuthViewModel] instance to handle Authentication related logic. */
     private lateinit var viewModel: AuthViewModel
-
-    private var serverOffline = false // ONLY FOR DEBUGGING AND TESTING NON SERVER RELATED FUNCTIONS
 
     /**
      * Lifecycle method [onCreate] is called when the [MainActivity] is created.
@@ -74,11 +73,6 @@ class MainActivity : BaseActivity() {
         // Show a loading screen while checking authentication state
         setContent { AppTheme { LoadingScreen() } }
 
-        if (serverOffline) { // ONLY FOR DEBUGGING AND TESTING NON SERVER RELATED FUNCTIONS
-            startActivity(Intent(this, HomeActivity::class.java))
-            finish()
-        }
-
         // Initialize repository, ViewModel, and session manager
         initViewModel()
         sessionManager = SessionManager(this)
@@ -87,7 +81,8 @@ class MainActivity : BaseActivity() {
         val token = sessionManager.getAuthToken()
         if (token != null) {
             // If a token exists, fetch user profile and refresh the token
-            initUserSession(token)
+            //initUserSession(token)
+            setupComposeUI()
         } else {
             // No token: show authentication screens
             setupComposeUI()
@@ -97,9 +92,8 @@ class MainActivity : BaseActivity() {
     }
 
     private fun initViewModel() {
-        val authApi = RetrofitClient.authApi
-        val authRemoteDataSource = AuthRemoteDataSource(authApi)
-        val authRepository = AuthRepository(authRemoteDataSource)
+        val authLocalDataSource = AuthLocalDataSource(this)
+        val authRepository = AuthRepository(localDataSource = authLocalDataSource)
         val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
 
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
@@ -166,28 +160,33 @@ class MainActivity : BaseActivity() {
          * @see Result
          * @see AuthViewModel
          */
-        fun handleResult(result: Result<Token>, successMessage: Int) {
-            when (result) {
-                is Result.Success -> {
-                    sessionManager.saveAuthToken(result.data.accessToken)
-                    initUserSession(sessionManager.getAuthToken()!!, false)
-                    startActivity(Intent(this, HomeActivity::class.java))
-                    Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
-                    finish()
-                }
-                is Result.Failure -> {} // No feedback for Failure
-                is Result.Error -> {
-                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-                }
-                is Result.Idle -> {} // No action needed for Idle state
-            }
+        fun handleResult(token: String, successMessage: Int) {
+            sessionManager.saveAuthToken(token)
+            //initUserSession(sessionManager.getAuthToken()!!, false)
+            startActivity(Intent(this, HomeActivity::class.java))
+            Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
+            finish()
+//            when (result) {
+//                is Result.Success -> {
+//                    sessionManager.saveAuthToken(result.data.accessToken)
+//                    initUserSession(sessionManager.getAuthToken()!!, false)
+//                    startActivity(Intent(this, HomeActivity::class.java))
+//                    Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
+//                    finish()
+//                }
+//                is Result.Failure -> {} // No feedback for Failure
+//                is Result.Error -> {
+//                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
+//                }
+//                is Result.Idle -> {} // No action needed for Idle state
+//            }
         }
 
         /*
          * Sets up the Observers for authentication operations (login, register, reset password).
          */
-        viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
-        viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success) })
-        viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
+        //viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
+        viewModel.localRegisterResult.observe(this, Observer { handleResult(it, R.string.register_success) })
+        //viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
     }
 }

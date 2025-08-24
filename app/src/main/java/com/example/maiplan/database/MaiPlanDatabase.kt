@@ -10,7 +10,7 @@ import com.example.maiplan.database.entities.AuthEntity
 @Database(
     entities = [AuthEntity::class],
     version = 1,
-    exportSchema = true
+    exportSchema = false
 )
 abstract class MaiPlanDatabase: RoomDatabase() {
     abstract fun authDAO(): AuthDAO

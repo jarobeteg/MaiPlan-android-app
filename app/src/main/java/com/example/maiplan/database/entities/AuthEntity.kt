@@ -4,7 +4,6 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDateTime
 
 @Entity(
     tableName = "auth",
@@ -25,16 +24,16 @@ data class AuthEntity(
     val balance: Double = 0.00,
 
     @ColumnInfo(name = "created_at")
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: LocalDateTime = LocalDateTime.now(),
+    val updatedAt: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "password_hash")
     val passwordHash: String,
 
     @ColumnInfo(name = "last_modified")
-    val lastModified: LocalDateTime = LocalDateTime.now(),
+    val lastModified: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "needs_sync")
     val needsSync: Boolean = true,

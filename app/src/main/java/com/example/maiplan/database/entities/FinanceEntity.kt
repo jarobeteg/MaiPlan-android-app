@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.time.LocalDateTime
 
 @Entity(
     tableName = "finance",
@@ -58,12 +57,12 @@ data class FinanceEntity(
     val expenseAmount: Double,
 
     @ColumnInfo(name = "expense_date")
-    val expenseDate: LocalDateTime? = null,
+    val expenseDate: Long? = null,
 
     val description: String? = null,
 
     @ColumnInfo(name = "last_modified")
-    val lastModified: LocalDateTime = LocalDateTime.now(),
+    val lastModified: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "needs_sync")
     val needsSync: Boolean = true,

@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.network.api.Token
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
@@ -11,6 +12,7 @@ import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
+import com.example.maiplan.utils.common.JWTUtils
 import kotlinx.coroutines.launch
 
 /**
@@ -33,6 +35,11 @@ import kotlinx.coroutines.launch
  * @see UserResponse
  */
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
+
+    private val _localRegisterResult = MutableLiveData<String> ()
+
+    val localRegisterResult: LiveData<String> get() = _localRegisterResult
+
     private val _registerResult = MutableLiveData<Result<Token>>()
     /** Emits the result of a user registration request. */
     val registerResult: LiveData<Result<Token>> get() = _registerResult
@@ -55,6 +62,13 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     init {
         clearErrors()
+    }
+
+    fun localRegister(user: AuthEntity) {
+        viewModelScope.launch {
+            val token = JWTUtils.createAccessToken(authRepository.localRegister(user))
+            _localRegisterResult.postValue(token)
+        }
     }
 
     /**
