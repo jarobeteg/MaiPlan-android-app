@@ -30,11 +30,11 @@ object JWTUtils {
             val decodedJWT = verifier.verify(token)
             val subject = decodedJWT.subject ?: throw SecurityException("Missing 'sub' claim")
             return subject.toInt()
-        } catch (e: TokenExpiredException) {
+        } catch (_: TokenExpiredException) {
             throw SecurityException("Token has expired")
-        } catch (e: SignatureVerificationException) {
+        } catch (_: SignatureVerificationException) {
             throw SecurityException("Invalid token signature")
-        } catch (e: JWTDecodeException) {
+        } catch (_: JWTDecodeException) {
             throw SecurityException("Invalid token format")
         }
     }

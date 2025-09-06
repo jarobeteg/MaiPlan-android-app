@@ -6,20 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT
 import java.util.Date
 import androidx.core.content.edit
 
-/**
- * A manager class responsible for handling the user's authentication token
- * using `SharedPreferences` for persistent storage.
- *
- * ## Responsibilities:
- * - Saving the auth token securely.
- * - Retrieving the auth token with a `Bearer` prefix.
- * - Checking if the token is expired and clearing it if necessary.
- *
- * ## Token Format
- * The token is a JWT (JSON Web Token) and extracts the exp field to determine expiration.
- *
- * @property context The application [Context] used to access `SharedPreferences`.
- */
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
 

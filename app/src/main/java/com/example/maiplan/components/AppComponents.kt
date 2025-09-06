@@ -96,11 +96,6 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-/**
- * Reusable [Composable] that displays a heading style text.
- *
- * @param text The string to be displayed as the heading.
- */
 @Composable
 fun HeadingTextComponent(text: String) {
     Text(
@@ -111,12 +106,6 @@ fun HeadingTextComponent(text: String) {
     )
 }
 
-/**
- * Reusable [Composable] that displays clickable text without ripple effect.
- *
- * @param text The clickable string to be displayed.
- * @param onTextClicked Callback function that is invoked when the text is clicked.
- */
 @Composable
 fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -131,16 +120,6 @@ fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
     )
 }
 
-/**
- * Reusable [Composable] that displays an email input field.
- *
- * Only non whitespace characters are allowed and the email string is limited to 64 characters.
- *
- * @param email The current text value of the email input field.
- * @param onEmailChange Callback invoked when the email input changes.
- *
- * @see OutlinedTextField
- */
 @Composable
 fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
     OutlinedTextField(
@@ -168,16 +147,6 @@ fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
     )
 }
 
-/**
- * Reusable [Composable] that displays username input field.
- *
- * Only non whitespace characters are allowed and the username input string is limited to 32 characters
- *
- * @param username The current text value of the username input field.
- * @param onUsernameChange Callback invoked when the username input changes.
- *
- * @see OutlinedTextField
- */
 @Composable
 fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
     OutlinedTextField(
@@ -205,20 +174,6 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
     )
 }
 
-/**
- * Reusable [Composable] that displays password input field with optional visibility toggle and strength indicator.
- *
- * Only non whitespace characters are allowed and the password input string is limited to 64 characters.
- *
- * @param password The current text value of the password input field.
- * @param label Localized label for the password input field.
- * @param onPasswordChange Callback invoked when the password input changes.
- * @param passwordVisible Whether the password should be shown in plain text.
- * @param onTogglePasswordVisibility Called when the visibility icon is clicked.
- * @param shouldIndicatorBeVisible Controls if the strength indicator should be shown.
- *
- * @see OutlinedTextField
- */
 @Composable
 fun PasswordTextComponent(
     password: CharArray,
@@ -282,22 +237,6 @@ fun PasswordTextComponent(
     }
 }
 
-/**
- * Reusable [Composable] that displays a visual password strength indicator based on password rules.
- *
- * Strength bar has 5 levels (localized labels):
- * - `Very Weak`
- * - `Weak`
- * - `Medium`
- * - `Strong`
- * - `Very Strong`
- *
- * Strength is evaluated by:
- * - Minimum `5` characters
- * - Contains `lowercase`, `uppercase`, `digits`, and `special characters (! _ @ # $ ?)`
- *
- * The bar only appears when the password field is focused.
- */
 @Composable
 fun PasswordStrengthBar(password: String, isFocused: Boolean) {
     if (isFocused) {
@@ -364,17 +303,6 @@ fun PasswordStrengthBar(password: String, isFocused: Boolean) {
     }
 }
 
-/**
- * Reusable [Composable] that displays a flexible text field with a customizable character limit.
- *
- * @param value The current text value of the input field.
- * @param label Localized label for the input field.
- * @param icon The [ImageVector] used as the trailing icon.
- * @param length The maximum number of characters allowed.
- * @param onValueChange Callback invoked when the input value changes.
- *
- * @see OutlinedTextField
- */
 @Composable
 fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
     OutlinedTextField(
@@ -418,12 +346,6 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
     )
 }
 
-/**
- * Reusable [Composable] that displays a simple submit button for forms or triggering actions.
- *
- * @param value Localized text displayed inside the button.
- * @param onButtonClicked Callback invoked when the button is clicked.
- */
 @Composable
 fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
     Button(
@@ -437,11 +359,6 @@ fun SubmitButtonComponent(value: String, onButtonClicked: () -> Unit) {
     }
 }
 
-/**
- * Reusable [Composable] that displays error messages
- *
- * @param value Localized error message text to display.
- */
 @Composable
 fun ErrorMessageComponent(value: String) {
     Text(
@@ -452,14 +369,6 @@ fun ErrorMessageComponent(value: String) {
     )
 }
 
-/**
- * Reusable [Composable] that displays Material3 [DatePicker] dialog that allows users to select a date.
- *
- * @param onDateSelected Callback invoked when the user selects a date and confirms.
- * @param onDismiss Callback invoked when the dialog is dismissed without selection.
- *
- * @see DatePicker
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialogComponent(
@@ -521,16 +430,6 @@ fun DatePickerDialogComponent(
     }
 }
 
-/**
- * Reusable [Composable] that displays a time picker dialog using Material3's [TimePicker].
- *
- * The user can select an hour and minute, and confirm or cancel the selection.
- *
- * @param onTimeSelected Callback invoked with the selected [LocalTime] when the user confirms.
- * @param onDismiss Callback invoked when the dialog is dismissed or canceled.
- *
- * @see TimePicker
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialogComponent(
@@ -591,15 +490,6 @@ fun TimePickerDialogComponent(
     }
 }
 
-/**
- * Reusable [Composable] that displays a search field with character limit and leading search icon.
- *
- * @param searchQuery The current query text input field.
- * @param length Maximum allowed character length.
- * @param onValueChange Callback invoked when the input value changes.
- *
- * @see OutlinedTextField
- */
 @Composable
 fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
     OutlinedTextField(
@@ -625,12 +515,6 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
     )
 }
 
-/**
- * Reusable [Composable] that displays a row that shows the selected color and opens a color picker dialog when clicked.
- *
- * @param selectedColor The current selected color.
- * @param onColorSelected Callback invoked when a new color is selected from the dialog
- */
 @Composable
 fun ColorPickerRow(
     selectedColor: Color,
@@ -686,14 +570,6 @@ fun ColorPickerRow(
     }
 }
 
-/**
- * Reusable [Composable] that displays a custom slider thumb and track background.
- *
- * @param value The current slider value.
- * @param onValueChange Callback invoked when the slider value changes.
- * @param valueRange The allowed range of values for the slider.
- * @param trackBrush A brush used to paint the track background.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CustomSlider(
@@ -732,14 +608,6 @@ fun CustomSlider(
     )
 }
 
-/**
- * Reusable [Composable] that displays a color picker dialog,
- * allows the user to pick a color using `HSV` sliders for `Hue`, `Saturation`, and `Brightness`.
- *
- * @param initialColor The color to start with when the dialog opens.
- * @param onColorSelected Callback invoked when the `User` selects a color and confirms.
- * @param onDismiss Callback invoked when the dialog is dismissed without selecting a color.
- */
 @Composable
 fun ColorPickerDialog(
     initialColor: Color,
@@ -819,13 +687,6 @@ fun ColorPickerDialog(
     }
 }
 
-/**
- * Reusable [Composable] that displays a row that shows the selected icon and open an icon picker dialog when clicked.
- *
- * @param selectedIcon The currently selected icon.
- * @param onIconSelected Callback invoked when a new icon is selected from the dialog.
- * @param onIconSelectedString Callback invoked with selected icon's name as a string for storing purpose.
- */
 @Composable
 fun IconPickerRow(
     selectedIcon: ImageVector?,
@@ -893,13 +754,6 @@ fun IconPickerRow(
     }
 }
 
-/**
- * Reusable [Composable] that displays a dialog of scrollable grid of icons.
- *
- * @param onIconSelected Callback invoked when an icon is clicked.
- * @param onIconSelectedString Callback invoked with the icon's key (identifier) as a string.
- * @param onDismiss Callback invoked when the dialog is dismissed without selecting an icon.
- */
 @Composable
 fun IconPickerDialog(
     onIconSelected: (ImageVector) -> Unit,
@@ -970,12 +824,6 @@ fun IconPickerDialog(
     }
 }
 
-/**
- * Reusable [Composable] that displays a simple top app bar with a centered title and a back arrow icon.
- *
- * @param text Localized title displayed in the center of the top app bar.
- * @param onBackClick Callback invoked when the back arrow is clicked.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimpleTopBar(
@@ -1004,14 +852,6 @@ fun SimpleTopBar(
         )
     )
 }
-
-/**
- * Reusable [Composable] field that displays a selected [LocalDate] and opens a date picker dialog when tapped.
- *
- * @param label The label to display alongside the selected date.
- * @param selectedDate The current selected date, or null if none.
- * @param onDateSelected Callback triggered when a date is picked.
- */
 
 @Composable
 fun DateInputComponent(
@@ -1067,13 +907,6 @@ fun DateInputComponent(
     }
 }
 
-/**
- * Reusable [Composable] field that displays a selected [LocalTime] and opens a picker picker dialog when tapped.
- *
- * @param label The label shown with the time.
- * @param selectedTime The currently selected time, or null.
- * @param onTimeSelected Callback when a time is selected.
- */
 @Composable
 fun TimeInputComponent(
     label: String,
@@ -1130,12 +963,6 @@ fun TimeInputComponent(
     }
 }
 
-/**
- * Reusable [Composable] Dropdown menu for selecting priority (low, mid, high) using localized strings.
- *
- * @param selectedPriority The current priority level (1 to 3).
- * @param onPrioritySelected Callback triggered when a new priority is chosen.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PriorityDropdown(
@@ -1199,11 +1026,6 @@ fun PriorityDropdown(
     }
 }
 
-/**
- * Reusable [Composable] that displays a centered large section title.
- *
- * @param text The text content to display.
- */
 @Composable
 fun SectionTitle(text: String) {
     Text(
@@ -1215,13 +1037,6 @@ fun SectionTitle(text: String) {
     )
 }
 
-/**
- * Reusable [Composable] field that allows selection of both date and time, returning a [LocalDateTime].
- *
- * @param label The label for the field.
- * @param dateTime Currently selected date-time or null.
- * @param onDateTimeSelected Callback with the full selected [LocalDateTime].
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LocalDateTimeInputField(
@@ -1296,13 +1111,6 @@ fun LocalDateTimeInputField(
     }
 }
 
-/**
- * Reusable [Composable] dropdown menu for selecting a [CategoryResponse], showing its icon and name.
- *
- * @param categories List of available categories to choose from.
- * @param selectedCategory Currently selected category, or null.
- * @param onCategorySelected Callback when a category is selected.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdownComponent(
