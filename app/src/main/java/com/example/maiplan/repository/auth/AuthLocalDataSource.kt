@@ -18,4 +18,12 @@ class AuthLocalDataSource(private val context: Context) {
     suspend fun register(user: AuthEntity): Long {
         return authDAO.insertUser(user)
     }
+
+    suspend fun getPendingUsers(): List<AuthEntity>? {
+        return authDAO.getPendingUsers()
+    }
+
+    suspend fun markSynced(userIds: List<Int>): Boolean {
+        return authDAO.markUsersAsSynced(userIds)
+    }
 }

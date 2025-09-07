@@ -36,6 +36,9 @@ import kotlinx.coroutines.launch
  */
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
+    private val _syncResult = MutableLiveData<Result<Unit>>()
+    val syncResult: LiveData<Result<Unit>> = _syncResult
+
     private val _localRegisterResult = MutableLiveData<String> ()
 
     val localRegisterResult: LiveData<String> get() = _localRegisterResult
@@ -71,15 +74,14 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Registers a new user.
-     *
-     * @param user The registration data provided via [UserRegister].
-     * @see UserRegister
-     */
-    fun register(user: UserRegister) {
+    fun sync() {
         viewModelScope.launch {
-            _registerResult.postValue(authRepository.register(user))
+            try {
+                authRepository.sync()
+                _syncResult.postValue(Result.Success(Unit))
+            } catch (e: Exception) {
+                _syncResult.postValue(Result.Error(e))
+            }
         }
     }
 

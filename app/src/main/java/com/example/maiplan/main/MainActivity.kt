@@ -28,13 +28,14 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
+    private lateinit var networkChecker: NetworkChecker
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent { AppTheme { LoadingScreen() } }
 
-        val networkChecker = NetworkChecker(this)
+        networkChecker = NetworkChecker(this)
         println("Is android device online: ${networkChecker.isOnline()}")
         lifecycleScope.launch {
             println("Is server reachable: ${networkChecker.canReachServer()}")
@@ -55,8 +56,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun initViewModel() {
+        val authRemoteDataSource = AuthRemoteDataSource(RetrofitClient.authApi)
         val authLocalDataSource = AuthLocalDataSource(this)
-        val authRepository = AuthRepository(localDataSource = authLocalDataSource)
+        val authRepository = AuthRepository(authRemoteDataSource, authLocalDataSource)
         val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
 
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
@@ -96,8 +98,13 @@ class MainActivity : BaseActivity() {
     private fun observeViewModel() {
 
         fun handleResult(token: String, successMessage: Int) {
-            sessionManager.saveAuthToken(token)
+            //sessionManager.saveAuthToken(token)
             //initUserSession(sessionManager.getAuthToken()!!, false)
+            lifecycleScope.launch {
+                if (networkChecker.isOnline() && networkChecker.canReachServer()) {
+                    viewModel.sync()
+                }
+            }
             startActivity(Intent(this, HomeActivity::class.java))
             Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show()
             finish()
@@ -119,6 +126,13 @@ class MainActivity : BaseActivity() {
 
         //viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
         viewModel.localRegisterResult.observe(this, Observer { handleResult(it, R.string.register_success) })
+        viewModel.syncResult.observe(this, { result ->
+            when (result)  {
+                is Result.Success -> println("Sync completed")
+                is Result.Error -> println("Sync failed: ${result.exception}")
+                else -> println("Unknown error")
+            }
+        })
         //viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
     }
 }

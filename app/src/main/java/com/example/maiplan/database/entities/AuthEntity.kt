@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.maiplan.network.api.UserRegister
 
 @Entity(
     tableName = "auth",
@@ -44,3 +45,11 @@ data class AuthEntity(
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
 )
+
+fun AuthEntity.toUserRegister(): UserRegister {
+    return UserRegister(
+        email = this.email,
+        username = this.username,
+        passwordHash = this.passwordHash
+    )
+}

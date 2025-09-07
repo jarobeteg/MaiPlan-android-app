@@ -9,12 +9,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.main.screens.ForgotPasswordScreen
 import com.example.maiplan.main.screens.LoginScreen
 import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.utils.common.JWTUtils
+import com.example.maiplan.utils.common.PasswordUtils
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 /**
@@ -96,7 +99,11 @@ fun NavGraphBuilder.authNavGraph(
         RegisterScreen(
             viewModel = viewModel,
             onRegisterClick = { email, username, password, passwordAgain ->
-                //register logic through viewmodel to implement
+                viewModel.localRegister(AuthEntity(
+                    email = email,
+                    username = username,
+                    passwordHash = PasswordUtils.hashPassword(password)
+                ))
             },
             onBackToLogin = {
                 viewModel.clearErrors()
