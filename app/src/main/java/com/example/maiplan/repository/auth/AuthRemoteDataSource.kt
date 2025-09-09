@@ -26,7 +26,7 @@ class AuthRemoteDataSource(private val authApi: AuthApi) {
      * @param user The registration payload.
      * @return The raw [Response] containing a [Token] or error body.
      */
-    suspend fun register(user: UserRegister): Response<UserResponse> {
+    suspend fun register(user: UserRegister): Response<Token> {
         return authApi.register(user)
     }
 

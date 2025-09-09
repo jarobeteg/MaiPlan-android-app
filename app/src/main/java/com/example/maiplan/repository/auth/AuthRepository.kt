@@ -43,7 +43,7 @@ class AuthRepository(
         } as Long
     }
 
-    suspend fun register(user: UserRegister): Result<UserResponse> {
+    suspend fun register(user: UserRegister): Result<Token> {
         return try {
             handleResponse(remoteDataSource.register(user))
         } catch (e: Exception) {

@@ -8,10 +8,6 @@ import com.example.maiplan.database.entities.AuthEntity
 
 @Dao
 interface AuthDAO {
-
-    @Query("SELECT * FROM auth WHERE email = :email LIMIT 1")
-    suspend fun getUserByEmail(email: String): AuthEntity?
-
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUser(user: AuthEntity): Long
 

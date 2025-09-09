@@ -10,7 +10,7 @@ import retrofit2.http.POST
 
 data class Token(@SerializedName("access_token") val accessToken: String, @SerializedName("token_type") val tokenType: String)
 
-data class UserRegister(val email: String, val username: String, @SerializedName("password_hash") val passwordHash: String)
+data class UserRegister(val email: String, val username: String, val password: String, @SerializedName("password_again") val passwordAgain: String)
 
 data class UserResetPassword(val email: String, val password: String, @SerializedName("password_again") val passwordAgain: String)
 
@@ -20,7 +20,7 @@ data class UserResponse(@SerializedName("user_id") val id: Int, val email: Strin
 
 interface AuthApi {
     @POST("auth/register")
-    suspend fun register(@Body auth: UserRegister): Response<UserResponse>
+    suspend fun register(@Body auth: UserRegister): Response<Token>
 
     @POST("auth/login")
     suspend fun login(@Body auth: UserLogin): Response<Token>
