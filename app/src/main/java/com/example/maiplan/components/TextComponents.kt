@@ -1,0 +1,319 @@
+package com.example.maiplan.components
+
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.maiplan.R
+
+@Composable
+fun HeadingTextComponent(text: String) {
+    Text(
+        text = text,
+        fontSize = 24.sp,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.primary
+    )
+}
+
+@Composable
+fun ClickableTextComponent(text: String, onTextClicked: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Text(
+        text = text,
+        modifier = Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null
+        ) { onTextClicked() },
+        color = MaterialTheme.colorScheme.primary,
+        fontWeight = FontWeight.Medium
+    )
+}
+
+@Composable
+fun EmailTextComponent(email: String, onEmailChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = email,
+        onValueChange = { newEmail ->
+            if (newEmail.length <= 64) {
+                onEmailChange(newEmail.filter { !it.isWhitespace() })
+            }
+        },
+        label = { Text(stringResource(R.string.email)) },
+        leadingIcon = { Icon(Icons.Filled.Email, contentDescription = stringResource(R.string.email_icon)) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary,
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Email,
+            autoCorrectEnabled = false
+        )
+    )
+}
+
+@Composable
+fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = username,
+        onValueChange = { newUsername ->
+            if (newUsername.length <= 32) {
+                onUsernameChange(newUsername.filter { !it.isWhitespace() })
+            }
+        },
+        label = { Text(stringResource(R.string.username)) },
+        leadingIcon = { Icon(Icons.Filled.AccountCircle, contentDescription = stringResource(R.string.username_icon)) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            focusedLabelColor = MaterialTheme.colorScheme.primary,
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Text,
+            autoCorrectEnabled = false
+        )
+    )
+}
+
+@Composable
+fun PasswordTextComponent(
+    password: CharArray,
+    label: String,
+    onPasswordChange: (CharArray) -> Unit,
+    passwordVisible: Boolean,
+    onTogglePasswordVisibility: () -> Unit,
+    shouldIndicatorBeVisible: Boolean = false
+) {
+    // CharArray converted to String to display in TextField
+    val passwordString = remember(password) { String(password) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    Column {
+        OutlinedTextField(
+            value = passwordString,
+            onValueChange = { newPasswordStr ->
+                if (newPasswordStr.length <= 64) {
+                    password.fill('\u0000') // clear old password array from memory
+                    onPasswordChange(newPasswordStr.filter { !it.isWhitespace() }.toCharArray())
+                }
+            },
+            label = { Text(label) },
+            leadingIcon = {
+                Icon(
+                    Icons.Filled.Lock,
+                    contentDescription = stringResource(R.string.password_icon)
+                )
+            },
+            trailingIcon = {
+                IconButton(onClick = onTogglePasswordVisibility) {
+                    Icon(
+                        imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
+                        contentDescription = stringResource(R.string.toggle_password_visibility)
+                    )
+                }
+            },
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            interactionSource = interactionSource,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                unfocusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                cursorColor = MaterialTheme.colorScheme.primary
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Password,
+                autoCorrectEnabled = false
+            )
+        )
+
+        if (shouldIndicatorBeVisible) {
+            PasswordStrengthBar(passwordString, isFocused)
+        } else {
+            PasswordStrengthBar(passwordString, false)
+        }
+    }
+}
+
+@Composable
+fun PasswordStrengthBar(password: String, isFocused: Boolean) {
+    if (isFocused) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        val hasMinLength = password.length >= 8
+        val hasLowerCase = password.any { it.isLowerCase() }
+        val hasUpperCase = password.any { it.isUpperCase() }
+        val hasDigit = password.any { it.isDigit() }
+        val hasSpecialChar = password.any { it in "!_@#$?" }
+
+        val rawScore = listOf(
+            hasMinLength,
+            hasLowerCase,
+            hasUpperCase,
+            hasDigit,
+            hasSpecialChar
+        ).count { it }
+
+        val score = (rawScore - 1).coerceAtLeast(0)
+
+
+        val strengthColors = listOf(
+            Color(0xFFD32F2F),
+            Color(0xFFF57C00),
+            Color(0xFFFBC02D),
+            Color(0xFF388E3C),
+            Color(0xFF1976D2)
+        )
+
+        val strengthLabels = listOf(
+            stringResource(R.string.very_weak),
+            stringResource(R.string.weak),
+            stringResource(R.string.medium),
+            stringResource(R.string.strong),
+            stringResource(R.string.very_strong)
+        )
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(MaterialTheme.shapes.extraSmall)
+            ) {
+                val progress = (size.width * (score / 4f)).coerceIn(0f, size.width)
+                drawRect(
+                    color = Color(0xFFB0BEC5),
+                    size = size
+                )
+                drawRect(
+                    color = strengthColors[score.coerceIn(0, 4)],
+                    size = androidx.compose.ui.geometry.Size(progress, size.height)
+                )
+            }
+            Text(
+                text = strengthLabels[score.coerceIn(0, 4)],
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = strengthColors[score.coerceIn(0, 4)],
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+@Composable
+fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = { newValue ->
+            if (newValue.length <= length) {
+                onValueChange(newValue)
+            }
+        },
+        label = { Text(label) },
+        trailingIcon = {
+            Box(
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .size(36.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colorScheme.onBackground
+                )
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            cursorColor = MaterialTheme.colorScheme.primary
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Text,
+            autoCorrectEnabled = false
+        )
+    )
+}
+
+@Composable
+fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = { newValue ->
+            if (newValue.length <= length) {
+                onValueChange(newValue)
+            }
+        },
+        modifier = Modifier.fillMaxWidth(),
+        placeholder = { Text(stringResource(R.string.category_search)) },
+        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedLabelColor = MaterialTheme.colorScheme.onBackground,
+            cursorColor = MaterialTheme.colorScheme.primary
+        )
+    )
+}

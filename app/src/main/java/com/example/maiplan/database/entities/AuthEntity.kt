@@ -45,11 +45,3 @@ data class AuthEntity(
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
 )
-
-fun AuthEntity.toUserRegister(): UserRegister {
-    return UserRegister(
-        email = this.email,
-        username = this.username,
-        passwordHash = this.passwordHash
-    )
-}

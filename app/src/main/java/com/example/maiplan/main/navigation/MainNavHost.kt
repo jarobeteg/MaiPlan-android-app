@@ -9,31 +9,17 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.main.screens.ForgotPasswordScreen
 import com.example.maiplan.main.screens.LoginScreen
 import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
-import com.example.maiplan.utils.common.JWTUtils
+import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.PasswordUtils
+import com.example.maiplan.utils.common.PasswordValidationException
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
-/**
- * [Composable] that sets up the navigation host for the `Authentication` screens.
- *
- * This host defines the entry point and connects the navigation graph for:
- * - Logging in an existing user ([LoginScreen])
- * - Registering a new user ([RegisterScreen])
- * - Resetting a password for an existing user ([ForgotPasswordScreen])
- *
- * @param viewModel Shared `ViewModel` for performing authentication-related operations.
- *
- * @see AuthViewModel
- * @see MainRoutes
- * @see authNavGraph
- */
 @Composable
 fun AuthNavHost(viewModel: AuthViewModel) {
     val navController = rememberNavController()
@@ -50,28 +36,6 @@ fun AuthNavHost(viewModel: AuthViewModel) {
     }
 }
 
-/**
- * Defines the navigation graph for the `Authentication` screens.
- *
- * This graph includes:
- * - [LoginScreen]: Allows the user to log in.
- * - [RegisterScreen]: Allows the user to create a new account.
- * - [ForgotPasswordScreen]: Allows the user to reset their password.
- *
- * Navigation between screens is handled by [navController].
- * The [viewModel] is passed to all screens to ensure shared state.
- *
- * @param navController The controller that handles navigation between screens.
- * @param viewModel The `ViewModel` providing data and logic for the `Authentication` screens.
- *
- * @see LoginScreen
- * @see RegisterScreen
- * @see ForgotPasswordScreen
- * @see AuthViewModel
- * @see UserLogin
- * @see UserRegister
- * @see UserResetPassword
- */
 fun NavGraphBuilder.authNavGraph(
     navController: NavController,
     viewModel: AuthViewModel
@@ -81,7 +45,15 @@ fun NavGraphBuilder.authNavGraph(
         LoginScreen(
             viewModel = viewModel,
             onLoginClick = { email, password ->
-                //login logic through viewmodel to implement
+                try {
+                    val trimmedPassword = PasswordUtils.validatePassword(password)
+                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
+                    println("password hash: $passwordHash")
+                    viewModel.login(UserLogin(email, passwordHash))
+
+                } catch (e: PasswordValidationException) {
+                    viewModel.setLoginError(Result.Failure(errorCode = e.code))
+                }
             },
             toRegisterClick = {
                 viewModel.clearErrors()
@@ -99,11 +71,17 @@ fun NavGraphBuilder.authNavGraph(
         RegisterScreen(
             viewModel = viewModel,
             onRegisterClick = { email, username, password, passwordAgain ->
-                viewModel.localRegister(AuthEntity(
-                    email = email,
-                    username = username,
-                    passwordHash = PasswordUtils.hashPassword(password)
-                ))
+                try {
+                    val trimmedPassword = PasswordUtils.validatePassword(password)
+                    PasswordUtils.validatePasswordStrength(trimmedPassword)
+                    PasswordUtils.validatePasswordMatch(trimmedPassword, passwordAgain)
+                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
+
+                    viewModel.register(UserRegister(email, username, passwordHash))
+
+                } catch (e: PasswordValidationException) {
+                    viewModel.setRegisterError(Result.Failure(errorCode = e.code))
+                }
             },
             onBackToLogin = {
                 viewModel.clearErrors()
@@ -117,7 +95,17 @@ fun NavGraphBuilder.authNavGraph(
         ForgotPasswordScreen(
             viewModel = viewModel,
             onResetClick = { email, password, passwordAgain ->
-                //password reset logic through viewmodel to implement
+                try {
+                    val trimmedPassword = PasswordUtils.validatePassword(password)
+                    PasswordUtils.validatePasswordStrength(trimmedPassword)
+                    PasswordUtils.validatePasswordMatch(trimmedPassword, passwordAgain)
+                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
+
+                    viewModel.resetPassword(UserResetPassword(email, passwordHash))
+
+                } catch (e: PasswordValidationException) {
+                    viewModel.setResetPasswordError(Result.Failure(errorCode = e.code))
+                }
             },
             onBackToLogin = {
                 viewModel.clearErrors()

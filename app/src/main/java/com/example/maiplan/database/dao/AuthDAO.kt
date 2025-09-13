@@ -12,7 +12,7 @@ interface AuthDAO {
     suspend fun insertUser(user: AuthEntity): Long
 
     @Query("SELECT * FROM auth WHERE needs_sync = 1")
-    suspend fun getPendingUsers(): List<AuthEntity>?
+    suspend fun getPendingUsers(): List<AuthEntity>
 
     @Query("UPDATE auth SET needs_sync = 0 WHERE user_id IN (:userIds)")
     suspend fun markUsersAsSyncedInternal(userIds: List<Int>): Int

@@ -10,16 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
-/**
- * A simple loading screen displaying a centered [CircularProgressIndicator].
- *
- * This [Composable] is typically shown while the app is performing background operations
- * such as authentication, data loading, or network requests.
- *
- * - Fills the entire available screen space.
- * - Sets the background color to white.
- * - Centers a primary-colored [CircularProgressIndicator] in the middle of the screen.
- */
 @Composable
 fun LoadingScreen() {
     Box(

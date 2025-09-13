@@ -12,55 +12,29 @@ import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
-import com.example.maiplan.utils.common.JWTUtils
 import kotlinx.coroutines.launch
 
-/**
- * [AuthViewModel] handles user authentication and exposes results to the UI
- * through [LiveData] wrapped in [Result] objects.
- *
- * ## Responsibilities:
- * - User registration, login, and password reset.
- * - Token refresh and profile retrieval.
- * - Managing loading, success, error, and idle states per operation.
- * - Clearing previous states before new operations.
- *
- * Acts as a bridge between the UI and [AuthRepository], ensuring proper threading via [viewModelScope].
- *
- * @property authRepository The repository responsible for making authentication API calls.
- *
- * @see AuthRepository
- * @see Result
- * @see Token
- * @see UserResponse
- */
 class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
 
     private val _syncResult = MutableLiveData<Result<Unit>>()
     val syncResult: LiveData<Result<Unit>> = _syncResult
 
     private val _localRegisterResult = MutableLiveData<String> ()
-
     val localRegisterResult: LiveData<String> get() = _localRegisterResult
 
     private val _registerResult = MutableLiveData<Result<Token>>()
-    /** Emits the result of a user registration request. */
     val registerResult: LiveData<Result<Token>> get() = _registerResult
 
     private val _loginResult = MutableLiveData<Result<Token>>()
-    /** Emits the result of a user login request. */
     val loginResult: LiveData<Result<Token>> get() = _loginResult
 
     private val _resetPasswordResult = MutableLiveData<Result<Token>>()
-    /** Emits the result of a password reset request. */
     val resetPasswordResult: LiveData<Result<Token>> get() = _resetPasswordResult
 
     private val _tokenRefreshResult = MutableLiveData<Result<Token>>()
-    /** Emits the result of a token refresh operation. */
     val tokenRefreshResult: LiveData<Result<Token>> get() = _tokenRefreshResult
 
     private val _profileResult = MutableLiveData<Result<UserResponse>>()
-    /** Emits the result of fetching the user profile. */
     val profileResult: LiveData<Result<UserResponse>> get() = _profileResult
 
     init {
@@ -68,63 +42,47 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
     }
 
     fun localRegister(user: AuthEntity) {
+        viewModelScope.launch {}
+    }
+
+    fun sync() {}
+
+    fun register(user: UserRegister) {
         viewModelScope.launch {
-            val token = JWTUtils.createAccessToken(authRepository.localRegister(user))
-            _localRegisterResult.postValue(token)
+            _registerResult.postValue(authRepository.register(user))
         }
     }
 
-    fun sync() {
-        viewModelScope.launch {
-            try {
-                authRepository.sync()
-                _syncResult.postValue(Result.Success(Unit))
-            } catch (e: Exception) {
-                _syncResult.postValue(Result.Error(e))
-            }
-        }
+    fun setRegisterError(failure: Result.Failure) {
+        _registerResult.postValue(failure)
     }
 
-    /**
-     * Logs in a user with credentials.
-     *
-     * @param user The login data provided via [UserLogin].
-     * @see UserLogin
-     */
     fun login(user: UserLogin) {
         viewModelScope.launch {
             _loginResult.postValue(authRepository.login(user))
         }
     }
 
-    /**
-     * Initiates password reset for a user.
-     *
-     * @param user The password reset data provided via [UserResetPassword].
-     * @see UserResetPassword
-     */
+    fun setLoginError(failure: Result.Failure) {
+        _loginResult.postValue(failure)
+    }
+
     fun resetPassword(user: UserResetPassword) {
         viewModelScope.launch {
             _resetPasswordResult.postValue(authRepository.resetPassword(user))
         }
     }
 
-    /**
-     * Requests a refreshed authentication token.
-     *
-     * @param token The current (expired or soon-to-expire) token.
-     */
+    fun setResetPasswordError(failure: Result.Failure) {
+        _resetPasswordResult.postValue(failure)
+    }
+
     fun tokenRefresh(token: String) {
         viewModelScope.launch {
             _tokenRefreshResult.postValue(authRepository.tokenRefresh(token))
         }
     }
 
-    /**
-     * Retrieves the current user's profile.
-     *
-     * @param token A valid authentication token.
-     */
     fun getProfile(token: String) {
         viewModelScope.launch {
             val result = authRepository.getProfile(token)
@@ -132,10 +90,6 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
-    /**
-     * Clears existing login, register, and reset error states by resetting them to [Result.Idle].
-     * This is typically called during screen initialization or before submitting a new request.
-     */
     fun clearErrors() {
         _loginResult.postValue(Result.Idle)
         _registerResult.postValue(Result.Idle)
