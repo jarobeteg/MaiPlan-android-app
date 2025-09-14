@@ -123,25 +123,22 @@ fun UsernameTextComponent(username: String, onUsernameChange: (String) -> Unit) 
 
 @Composable
 fun PasswordTextComponent(
-    password: CharArray,
+    password: String,
     label: String,
-    onPasswordChange: (CharArray) -> Unit,
+    onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
     shouldIndicatorBeVisible: Boolean = false
 ) {
-    // CharArray converted to String to display in TextField
-    val passwordString = remember(password) { String(password) }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
     Column {
         OutlinedTextField(
-            value = passwordString,
-            onValueChange = { newPasswordStr ->
-                if (newPasswordStr.length <= 64) {
-                    password.fill('\u0000') // clear old password array from memory
-                    onPasswordChange(newPasswordStr.filter { !it.isWhitespace() }.toCharArray())
+            value = password,
+            onValueChange = { newPassword ->
+                if (newPassword.length <= 64) {
+                    onPasswordChange(newPassword.filter { !it.isWhitespace() })
                 }
             },
             label = { Text(label) },
@@ -177,9 +174,9 @@ fun PasswordTextComponent(
         )
 
         if (shouldIndicatorBeVisible) {
-            PasswordStrengthBar(passwordString, isFocused)
+            PasswordStrengthBar(password, isFocused)
         } else {
-            PasswordStrengthBar(passwordString, false)
+            PasswordStrengthBar(password, false)
         }
     }
 }

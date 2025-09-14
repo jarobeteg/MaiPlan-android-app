@@ -30,19 +30,6 @@ import java.time.temporal.WeekFields
 import java.util.Locale
 import kotlin.math.ceil
 
-/**
- * Displays a monthly calendar view showing the days of the selected month.
- *
- * Layout includes:
- * - Weekday localized headers (Mon, Tue, etc.)
- * - Week numbers on the left.
- * - Calendar cells for each day of the month.
- *
- * @param selectedDate The [LocalDate] representing the month to display.
- *
- * @see WeekdayHeaders
- * @see CalendarGrid
- */
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MonthlyView(selectedDate: LocalDate) {
@@ -76,14 +63,6 @@ fun MonthlyView(selectedDate: LocalDate) {
     }
 }
 
-/**
- * Displays the weekday localized headers (Mon, Tue, etc.) above the calendar grid.
- *
- * @param weekdays A list of localized weekday names.
- * @param weekNumberWidth The width reserved for the week number column.
- * @param cellSize The width of each day cell.
- * @param headerHeight The height of the header row.
- */
 @Composable
 fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, headerHeight: Dp) {
     Row(modifier = Modifier.height(headerHeight)) {
@@ -103,21 +82,6 @@ fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, he
     }
 }
 
-/**
- * Displays the grid of week rows, each containing the week number and day cells.
- *
- * @param selectedDate The currently selected date used to calculate the correct week number for each row.
- * @param rowCount The total number of rows (weeks) to render in the calendar grid.
- * @param daysInMonth The number of days in the selected month.
- * @param firstDayOfMonth The index of the first weekday of the month (0 = Sunday).
- * @param weekNumberWidth The width reserved for the week number column.
- * @param cellSize The width of each day cell.
- * @param rowHeight The height of each week row (day cell height).
- *
- * @see getWeekNumberForRow
- * @see WeekNumberColumn
- * @see DaysRow
- */
 @Composable
 fun CalendarGrid(
     selectedDate: LocalDate,
@@ -137,12 +101,6 @@ fun CalendarGrid(
     }
 }
 
-/**
- * Displays the week number for a single row.
- *
- * @param weekNumber The week number to display.
- * @param width The width reserved for the week number column.
- */
 @Composable
 fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     Box(
@@ -157,15 +115,6 @@ fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     }
 }
 
-/**
- * Displays a single row of day cells for a given week.
- *
- * @param weekIndex The index of the current week row (starting from 0).
- * @param daysInMonth The total number of days in the month.
- * @param firstDayOfMonth The index of the first day of the month (0 = Sunday).
- * @param cellSize The width of each day cell.
- * @param rowHeight The height of each week row (day cell height).
- */
 @Composable
 fun DaysRow(weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp, rowHeight: Dp) {
     for (dayIndex in 0 until 7) {
@@ -178,13 +127,6 @@ fun DaysRow(weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp
     }
 }
 
-/**
- * Displays a single day cell in the calendar.
- *
- * @param dayNumber The day of the month to display (1–31).
- * @param cellSize The width of the cell.
- * @param rowHeight The height of the cell.
- */
 @Composable
 fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
     Card(
@@ -212,16 +154,6 @@ fun DayCell(dayNumber: Int, cellSize: Dp, rowHeight: Dp) {
     }
 }
 
-/**
- * Returns the week number for a given row in a month-view calendar.
- *
- * Calculates the ISO week number (1–53) based on the row index and selected date.
- * If the date in the row falls outside the current month, it defaults to the first week's number.
- *
- * @param selectedDate A date within the displayed month.
- * @param weekIndex Zero-based index of the calendar row.
- * @return The localized week number for the row.
- */
 fun getWeekNumberForRow(selectedDate: LocalDate, weekIndex: Int): Int {
     val weekFields = WeekFields.of(Locale.getDefault())
     val firstOfMonth = selectedDate.withDayOfMonth(1)

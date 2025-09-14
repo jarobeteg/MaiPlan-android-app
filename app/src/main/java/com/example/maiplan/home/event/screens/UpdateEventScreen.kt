@@ -8,9 +8,6 @@ import com.example.maiplan.R
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.viewmodel.event.EventViewModel
 
-/**
- * Still under work.
- */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UpdateEventScreen(

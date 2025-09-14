@@ -50,31 +50,6 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import java.util.Locale
 
-/**
- * The main `Event` screen that allows users to switch between views:
- * - [MonthlyView]
- * - [WeeklyView]
- * - [DailyView]
- *
- * It serves as a navigation host for subviews and manages:
- * - A top app bar with a dynamic title and a dropdown to switch between views.
- * - A bottom navigation bar for navigating between `Home` tabs.
- * - A date picker dialog to change the selected date for the views.
- * - A floating add icon to navigate to the [CreateEventScreen].
- *
- * @param eventViewModel The shared [EventViewModel] that provides event data and logic.
- * @param rootNavController The controller used to navigate across the broader `Home` tabs.
- * @param localNavController The controller for navigating between event-specific sub-screens.
- * @param onCreateEventClick Callback triggered when the add button is clicked to open the [CreateEventScreen].
-
- *
- * @see EventTopBar
- * @see HomeNavigationBar
- * @see DatePickerDialogComponent
- * @see MonthlyView
- * @see WeeklyView
- * @see DailyView
- */
 @Composable
 fun EventScreen(
     eventViewModel: EventViewModel,
@@ -126,19 +101,6 @@ fun EventScreen(
     }
 }
 
-/**
- * Returns a formatted title string based on the selected view and date.
- *
- * Formats:
- * - Monthly view: "MMM yyyy" (for example, "Apr 2025")
- * - Weekly view: "Week {week number}"
- * - Daily view: "Day, Month Date" (for example, "Fri, Apr 18")
- *
- * @param context The [Context] used to get localized string resources.
- * @param selectedView The currently selected view index (0: Month, 1: Week, 2: Day).
- * @param selectedDate The [LocalDate] representing the current selected date.
- * @return The formatted title as a [String].
- */
 @Composable
 fun getFormattedTitle(context: Context, selectedView: Int, selectedDate: LocalDate): String {
     return when (selectedView) {
@@ -149,20 +111,6 @@ fun getFormattedTitle(context: Context, selectedView: Int, selectedDate: LocalDa
     }
 }
 
-/**
- * The top app bar for the `Event` screen.
- *
- * Displays the formatted title and allows switching between different views via a dropdown menu.
- * Also includes actions for opening the date picker and creating a new event.
- *
- * @param formattedTitle The formatted title from [getFormattedTitle] displayed in the top bar.
- * @param views A list of view localized names (Monthly, Weekly, Daily) for the dropdown.
- * @param onViewSelected Callback when a new view is selected from the dropdown.
- * @param onDatePickerClick Callback when the calendar icon is clicked to open the date picker.
- * @param onCreateEventClick Callback when the add icon is clicked to navigate to the [CreateEventScreen].
- *
- * @see EventDropdownMenu
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventTopBar(
@@ -234,17 +182,6 @@ fun EventTopBar(
     )
 }
 
-/**
- * A dropdown menu for switching between [MonthlyView], [WeeklyView], [DailyView] views.
- *
- * Appears when the title button in the top app bar is clicked.
- *
- * @param expanded Whether the dropdown is currently expanded.
- * @param views A list of localized view names to display in the dropdown.
- * @param buttonWidth The width of the dropdown (matches the button's width).
- * @param onItemSelected Callback when an item is selected, passing the selected index.
- * @param onDismiss Callback when the dropdown is dismissed without a selection.
- */
 @Composable
 fun EventDropdownMenu(
     expanded: Boolean,

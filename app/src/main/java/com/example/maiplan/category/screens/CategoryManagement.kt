@@ -52,21 +52,6 @@ import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
-/**
- * [Composable] screen for managing `Categories`.
- *
- * Displays a list of `Categories` in cards with swipe actions for delete and edit.
- * A search bar is included and a top bar with back and create functions.
- *
- * @param viewModel The `ViewModel` providing the logic for managing `Categories`.
- * @param onCardSwipeDelete Callback invoked when a `Category` card is swiped from left to right.
- * @param onCardSwipeEdit Callback invoked when a `Category` card is swiped from right to left.
- * @param onCreateCategoryClick Callback invoked when the add button is clicked.
- *
- * @see CategoryViewModel
- * @see CategoryResponse
- * @see SearchFieldComponent
- */
 @Composable
 fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
@@ -137,15 +122,6 @@ fun CategoryManagementScreen(
     }
 }
 
-/**
- * Top app bar for the [CategoryManagementScreen].
- *
- * Displays the screen title and includes a back and add button.
- *
- * @param text The title shown in the top app bar.
- * @param onBackClick Callback invoked when the back button is clicked.
- * @param onCreateCategoryClick Callback invoked when the [CreateCategoryScreen] button is clicked.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryManagementTopBar(
@@ -185,16 +161,6 @@ fun CategoryManagementTopBar(
     )
 }
 
-/**
- * Card representation of a `Category`.
- *
- * Displays the `Category`'s icon, name, and description.
- * The background color reflects the `Category`'s assigned color.
- *
- * @param category The `Category` data to display.
- *
- * @see IconData
- */
 @Composable
 fun CategoryCard(category: CategoryResponse) {
     val backgroundColor = Color(category.color.toULong())
@@ -246,12 +212,6 @@ fun CategoryCard(category: CategoryResponse) {
     }
 }
 
-/**
- * Background shown during swipe to dismiss gesture.
- *
- * Displays a red background with a delete icon when swiping left to right.
- * Displays a green background with an edit icon when swiping right to left.
- */
 @Composable
 fun DismissBackground(dismissState: SwipeToDismissBoxState) {
     val color = when (dismissState.dismissDirection) {

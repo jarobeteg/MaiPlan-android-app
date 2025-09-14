@@ -15,11 +15,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.maiplan.home.navigation.HomeNavigationBar
 
-/**
- * Still under work.
- *
- * Placeholder UI elements found inside the code block.
- */
 @Composable
 fun TaskScreen(
     rootNavController: NavHostController

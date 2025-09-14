@@ -15,9 +15,6 @@ import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
-import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.common.PasswordUtils
-import com.example.maiplan.utils.common.PasswordValidationException
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @Composable
@@ -45,15 +42,7 @@ fun NavGraphBuilder.authNavGraph(
         LoginScreen(
             viewModel = viewModel,
             onLoginClick = { email, password ->
-                try {
-                    val trimmedPassword = PasswordUtils.validatePassword(password)
-                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
-                    println("password hash: $passwordHash")
-                    viewModel.login(UserLogin(email, passwordHash))
-
-                } catch (e: PasswordValidationException) {
-                    viewModel.setLoginError(Result.Failure(errorCode = e.code))
-                }
+                viewModel.login(UserLogin(email, password))
             },
             toRegisterClick = {
                 viewModel.clearErrors()
@@ -71,17 +60,7 @@ fun NavGraphBuilder.authNavGraph(
         RegisterScreen(
             viewModel = viewModel,
             onRegisterClick = { email, username, password, passwordAgain ->
-                try {
-                    val trimmedPassword = PasswordUtils.validatePassword(password)
-                    PasswordUtils.validatePasswordStrength(trimmedPassword)
-                    PasswordUtils.validatePasswordMatch(trimmedPassword, passwordAgain)
-                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
-
-                    viewModel.register(UserRegister(email, username, passwordHash))
-
-                } catch (e: PasswordValidationException) {
-                    viewModel.setRegisterError(Result.Failure(errorCode = e.code))
-                }
+                viewModel.register(UserRegister(email, username, password, passwordAgain))
             },
             onBackToLogin = {
                 viewModel.clearErrors()
@@ -95,17 +74,7 @@ fun NavGraphBuilder.authNavGraph(
         ForgotPasswordScreen(
             viewModel = viewModel,
             onResetClick = { email, password, passwordAgain ->
-                try {
-                    val trimmedPassword = PasswordUtils.validatePassword(password)
-                    PasswordUtils.validatePasswordStrength(trimmedPassword)
-                    PasswordUtils.validatePasswordMatch(trimmedPassword, passwordAgain)
-                    val passwordHash = PasswordUtils.hashPassword(trimmedPassword)
-
-                    viewModel.resetPassword(UserResetPassword(email, passwordHash))
-
-                } catch (e: PasswordValidationException) {
-                    viewModel.setResetPasswordError(Result.Failure(errorCode = e.code))
-                }
+                viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
             },
             onBackToLogin = {
                 viewModel.clearErrors()

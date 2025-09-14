@@ -35,25 +35,6 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
-/**
- * [Composable] screen for editing and updating existing `Category` details.
- *
- * @param viewModel Provides `Category` update logic and `Category` result state.
- * @param category The object containing the values of the `Category` to edit and update.
- * @param onSaveClick Callback invoked when the `User` submits the update form.
- * @param onBackClick Callback invoked when the back button in the top app bar is clicked.
- *
- * @see AdjustableTextFieldLengthComponent
- * @see SimpleTopBar
- * @see ColorPickerRow
- * @see ErrorMessageComponent
- * @see IconPickerRow
- * @see SubmitButtonComponent
- * @see CategoryViewModel
- * @see CategoryResponse
- * @see IconData
- * @see Result
- */
 @Composable
 fun UpdateCategoryScreen(
     viewModel: CategoryViewModel,

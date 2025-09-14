@@ -13,24 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
-/**
- * A [Composable] that displays the bottom navigation bar for the `Home` tabs.
- *
- * - Renders a [NavigationBar] with four primary navigation items: `Events`, `Tasks`, `Files`, and `More`.
- * - Each item includes an icon and a label, and highlights the currently active route.
- * - When a user taps a different item:
- *   - Navigates to the selected screen using the provided [navController].
- *   - Pops up to the start destination and saves the back stack state.
- *   - Prevents duplicate destinations with `launchSingleTop`.
- *   - Restores saved state for previously visited destinations.
- *
- * @param navController The [NavHostController] used to manage navigation between composable destinations.
- * @param context The [Context] used to fetch localized string resources and for intent-based operations (if needed).
- *
- * @see HomeNavRoutes
- * @see NavigationBar
- * @see NavHostController
- */
 @Composable
 fun HomeNavigationBar(navController: NavHostController, context: Context) {
     val items = listOf(

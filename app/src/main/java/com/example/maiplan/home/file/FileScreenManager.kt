@@ -5,9 +5,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.file.navigation.FileNavHost
 
-/**
- * Still under work.
- */
 @Composable
 fun FileScreenManager(rootNavController: NavHostController) {
     val localNavController = rememberNavController()

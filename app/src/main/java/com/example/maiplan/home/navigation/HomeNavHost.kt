@@ -13,24 +13,6 @@ import com.example.maiplan.home.task.TaskScreenManager
 import com.example.maiplan.home.more.MoreScreenManager
 import com.example.maiplan.home.file.FileScreenManager
 
-/**
- * [Composable] that sets up the navigation host for the root-level `Home` tabs.
- *
- * This host manages the navigation between top-level sections:
- * - `Events` via [EventScreenManager]
- * - `Tasks` via [TaskScreenManager]
- * - `Files` via [FileScreenManager]
- * - `More` via [MoreScreenManager]
- *
- * Navigation transitions use instant fade effects to create smooth and subtle screen changes:
- * - `enterTransition`, `popEnterTransition`: Fade in with no delay.
- * - `exitTransition`, `popExitTransition`: Fade out with no delay.
- *
- * @param rootNavController The central [NavHostController] shared across all major screens (used by the bottom navigation bar).
- *
- * @see HomeNavRoutes
- * @see homeNavGraph
- */
 @Composable
 fun HomeNavHost(rootNavController: NavHostController) {
     NavHost(
@@ -45,25 +27,6 @@ fun HomeNavHost(rootNavController: NavHostController) {
     }
 }
 
-/**
- * Defines the navigation graph for the top-level `Home` tabs.
- *
- * Each destination corresponds to a screen section managed by a dedicated screen manager:
- * - [EventScreenManager] for `Event`-related views.
- * - [TaskScreenManager] for `Task`-related views.
- * - [FileScreenManager] for `File`-related views.
- * - [MoreScreenManager] for user options, settings, or additional features.
- *
- * Navigation within each section is handled internally via their own local nav controllers.
- *
- * @param rootNavController The root-level [NavHostController] used for main screen navigation.
- *
- * @see HomeNavRoutes
- * @see EventScreenManager
- * @see TaskScreenManager
- * @see FileScreenManager
- * @see MoreScreenManager
- */
 fun NavGraphBuilder.homeNavGraph(
     rootNavController: NavHostController
 ) {

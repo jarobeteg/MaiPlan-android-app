@@ -168,29 +168,6 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.filled.Yard
 import androidx.compose.ui.graphics.vector.ImageVector
 
-/**
- * A centralized object that provides access to a set of [ImageVector] icons
- * categorized into groups like work, personal, health, finance, education, hobbies, and more.
- *
- * ## Overview
- * - [allIcons] is a `Map<String, ImageVector>` where each key is a human-readable string
- *   representing an icon name (search, home, etc.) and the value is the corresponding [ImageVector].
- * - [getIconByKey] provides a safe way to fetch an icon by its key, returning a fallback icon if the key is not found.
- *
- * ## Categories Included
- * - General and Miscellaneous
- * - Work
- * - Personal
- * - Health and Fitness
- * - Finance
- * - Shopping
- * - Education and Learning
- * - Family and Relationships
- * - Hobbies and Leisure
- * - Home and Maintenance
- * - Travel and Transportation
- * - Goals and Productivity
- */
 object IconData {
     val allIcons: Map<String, ImageVector> = mapOf(
         // general and misc
@@ -383,12 +360,6 @@ object IconData {
         "grade" to Icons.Filled.Grade,
     )
 
-    /**
-     * Retrieves an [ImageVector] based on the provided [key].
-     *
-     * @param key The string key representing the desired icon (home, flight, shopping cart, etc.).
-     * @return The matching [ImageVector] if the key exists, or a fallback Help icon if the key is not found.
-     */
     fun getIconByKey(key: String): ImageVector {
         return allIcons[key] ?: Icons.AutoMirrored.Filled.Help
     }

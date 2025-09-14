@@ -20,24 +20,6 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
-/**
- * [Composable] that sets up the navigation host for the `Category` screens.
- *
- * This host defines the entry point and connects the navigation graph for:
- * - Viewing and managing categories ([CategoryManagementScreen])
- * - Creating a new category ([CreateCategoryScreen])
- * - Updating an existing categories ([UpdateCategoryScreen])
- *
- * Navigation transitions are set to instantly fade between screens for a seamless and subtle effect:
- * - `enterTransition`, `popEnterTransition`: Fade in with no delay.
- * - `exitTransition`, `popExitTransition`: Fade out with no delay.
- *
- * @param categoryViewModel Shared `ViewModel` for performing `CRUD` operations on categories.
- *
- * @see CategoryViewModel
- * @see CategoryRoutes
- * @see categoryNavGraph
- */
 @Composable
 fun CategoryNavHost(categoryViewModel: CategoryViewModel) {
     val navController = rememberNavController()
@@ -54,28 +36,6 @@ fun CategoryNavHost(categoryViewModel: CategoryViewModel) {
     }
 }
 
-/**
- * Defines the navigation graph for the `Category` screens.
- *
- * This graph includes:
- * - [CategoryManagementScreen]: Displays all `Categories` with options to edit or delete.
- * - [CreateCategoryScreen]: Allows `User` to create a new `Category`.
- * - [UpdateCategoryScreen]: Enables editing of an existing `Category` by its Id.
- *
- * Navigation between screens is handled by [navController]
- * The [categoryViewModel] is passed to all screens to ensure shared state.
- *
- * @param navController The `NavController` that handles navigation between screens.
- * @param categoryViewModel The `ViewModel` providing data and logic for the `Category` screens.
- *
- * @see CategoryManagementScreen
- * @see CreateCategoryScreen
- * @see UpdateCategoryScreen
- * @see CategoryViewModel
- * @see CategoryCreate
- * @see CategoryResponse
- * @see UserSession
- */
 fun NavGraphBuilder.categoryNavGraph(
     navController: NavController,
     categoryViewModel: CategoryViewModel
