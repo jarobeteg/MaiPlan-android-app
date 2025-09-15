@@ -19,7 +19,7 @@ class AuthLocalDataSource(private val context: Context) {
         return authDAO.insertUser(user)
     }
 
-    suspend fun getPendingUsers(): List<AuthEntity>? {
+    suspend fun getPendingUsers(): List<AuthEntity> {
         return authDAO.getPendingUsers()
     }
 

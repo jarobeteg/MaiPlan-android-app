@@ -40,10 +40,10 @@ data class CategoryEntity(
     val lastModified: Long = System.currentTimeMillis(),
 
     @ColumnInfo(name = "needs_sync")
-    val needsSync: Boolean = true,
+    val needsSync: Int = 0,
 
     @ColumnInfo(name = "is_deleted")
-    val isDeleted: Boolean = false,
+    val isDeleted: Int = 0,
 
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
