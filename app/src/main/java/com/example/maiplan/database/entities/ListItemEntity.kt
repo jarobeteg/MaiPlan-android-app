@@ -17,8 +17,11 @@ import androidx.room.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["list_id"], name = "idx_list_item"),
-        Index(value = ["list_id", "name"], unique = true, name = "uq_item_name")
+        Index(value = ["list_id"]),
+        Index(value = ["list_id", "name"], unique = true),
+        Index(value = ["last_modified"]),
+        Index(value = ["sync_state"]),
+        Index(value = ["server_id"])
     ]
 )
 data class ListItemEntity(

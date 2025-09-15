@@ -29,9 +29,12 @@ import androidx.room.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["user_id"], name = "idx_note_user"),
-        Index(value = ["category_id"], name = "idx_note_category"),
-        Index(value = ["reminder_id"], name = "idx_note_reminder")
+        Index(value = ["user_id"]),
+        Index(value = ["category_id"]),
+        Index(value = ["reminder_id"]),
+        Index(value = ["last_modified"]),
+        Index(value = ["sync_state"]),
+        Index(value = ["server_id"])
     ]
 )
 data class NoteEntity(

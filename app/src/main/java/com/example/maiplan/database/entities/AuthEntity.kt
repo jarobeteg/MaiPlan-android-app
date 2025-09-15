@@ -10,7 +10,10 @@ import com.example.maiplan.network.api.UserRegister
     tableName = "auth",
     indices = [
         Index(value = ["email"], unique = true),
-        Index(value = ["username"], unique = true)
+        Index(value = ["username"], unique = true),
+        Index(value = ["last_modified"]),
+        Index(value = ["sync_state"]),
+        Index(value = ["server_id"])
     ]
 )
 data class AuthEntity(

@@ -29,11 +29,14 @@ import androidx.room.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["user_id"], name = "idx_event_user"),
-        Index(value = ["category_id"], name = "idx_event_category"),
-        Index(value = ["reminder_id"], name = "idx_event_reminder"),
-        Index(value = ["date"], name = "idx_event_date"),
-        Index(value = ["user_id", "date"], name = "idx_event_user_date"),
+        Index(value = ["user_id"]),
+        Index(value = ["category_id"]),
+        Index(value = ["reminder_id"]),
+        Index(value = ["date"]),
+        Index(value = ["user_id", "date"]),
+        Index(value = ["last_modified"]),
+        Index(value = ["sync_state"]),
+        Index(value = ["server_id"])
     ]
 )
 data class EventEntity(

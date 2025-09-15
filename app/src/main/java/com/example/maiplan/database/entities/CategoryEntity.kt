@@ -17,7 +17,10 @@ import androidx.room.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["user_id"], name = "idx_category_user")
+        Index(value = ["user_id"]),
+        Index(value = ["last_modified"]),
+        Index(value = ["sync_state"]),
+        Index(value = ["server_id"])
     ]
 )
 data class CategoryEntity(
