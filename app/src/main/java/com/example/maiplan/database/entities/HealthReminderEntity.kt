@@ -41,8 +41,8 @@ data class HealthReminderEntity(
     @ColumnInfo(name = "last_modified")
     val lastModified: Long = System.currentTimeMillis(),
 
-    @ColumnInfo(name = "needs_sync")
-    val needsSync: Int = 0,
+    @ColumnInfo(name = "sync_state")
+    val syncState: Int = 0,
 
     @ColumnInfo(name = "is_deleted")
     val isDeleted: Int = 0,
