@@ -24,6 +24,7 @@
     <string name="login_success">You are now logged in.</string>
     <string name="register_success">Registration successful! You are now logged in.</string>
     <string name="reset_password_success">Password reset successful! You are now logged in.</string>
+    <string name="welcome_back">Welcome back to MaiPlan!</string>
 
     <!-- content descriptions -->
     <string name="email_icon">Email Icon</string>

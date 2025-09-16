@@ -11,6 +11,7 @@ import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
+import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.network.api.Token
 import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
@@ -26,95 +27,98 @@ import com.example.maiplan.utils.BaseActivity
 class MainActivity : BaseActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
+    private var messageId: Int? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent { AppTheme { LoadingScreen() } }
-        setupViewModel()
-
-        val token = sessionManager.getAuthToken()
-        if (token != null) {
-            // If a token exists, fetch user profile and refresh the token
-            setupUserSession(token)
-        }
-
-        setupComposeUI()
+        setupDependencies()
         observeViewModel()
+
+        sessionManager.getToken()?.let { token ->
+            viewModel.getProfile(token)
+        } ?: run {
+            setupComposeUI()
+        }
     }
 
-    private fun setupViewModel() {
-        val authRemoteDataSource = AuthRemoteDataSource(RetrofitClient.authApi)
-        val authLocalDataSource = AuthLocalDataSource(this)
-        val authRepository = AuthRepository(authRemoteDataSource, authLocalDataSource)
-        val factory = GenericViewModelFactory { AuthViewModel(authRepository) }
+    private fun setupComposeUI() {
+        setContent { AppTheme { AuthNavHost(viewModel) } }
+    }
+
+    private fun setupDependencies() {
+        val authRemote = AuthRemoteDataSource(RetrofitClient.authApi)
+        val authLocal = AuthLocalDataSource(this)
+        val authRepo = AuthRepository(authRemote, authLocal)
+        val factory = GenericViewModelFactory { AuthViewModel(authRepo) }
 
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
         sessionManager = SessionManager(this)
     }
 
-    // needs refactoring as its an unreadable pile of mess
-    private fun setupUserSession(token: String, message: Int = R.string.login_success, flag: Boolean = true) {
-        viewModel.getProfile(token)
-
-        viewModel.profileResult.observe(this, Observer { result ->
+    private fun observeViewModel() {
+        val authObserver = Observer<Result<AuthResponse>> { result ->
             if (result is Result.Success) {
-                UserSession.setup(result.data)
-
-                if (flag) {
-                    viewModel.tokenRefresh(token)
-
-                    viewModel.tokenRefreshResult.observe(this, Observer { result ->
-                        if (result is Result.Success) {
-                            sessionManager.saveAuthToken(result.data.accessToken)
-                        }
-                        else {
-                            Toast.makeText(this, getString(R.string.token_refresh_failed), Toast.LENGTH_SHORT).show()
-                        }
-                        goToHome(message)
-                    })
-                } else {
-                    goToHome(message)
-                }
+                UserSession.setup(result.data.user)
+                sessionManager.saveToken(result.data.accessToken)
+                goToHome()
             } else {
-                Toast.makeText(this, getString(R.string.no_user_data_found), Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun setupComposeUI() {
-        setContent {
-            AppTheme {
-                AuthNavHost(viewModel)
+                handleAuthFailure(result)
             }
         }
-    }
 
-    private fun goToHome(message: Int) {
-        startActivity(Intent(this, HomeActivity::class.java))
-        Toast.makeText(this, getString(message), Toast.LENGTH_SHORT).show()
-        finish()
-    }
-
-    private fun observeViewModel() {
-        fun handleResult(result: Result<Token>, message: Int) {
+        viewModel.profileResult.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
-                    sessionManager.saveAuthToken(result.data.accessToken)
-                    setupUserSession(sessionManager.getAuthToken()!!, message, flag = false)
+                    UserSession.setup(result.data.user)
+                    sessionManager.saveToken(result.data.accessToken)
+                    messageId = R.string.welcome_back
+                    goToHome()
                 }
-                is Result.Failure -> {
-                    Toast.makeText(this, getString(R.string.failure) + " ${result.errorCode}", Toast.LENGTH_SHORT).show()
+                is Result.Failure, is Result.Error -> {
+                    Toast.makeText(this, getString(R.string.no_user_data_found), Toast.LENGTH_SHORT).show()
+                    sessionManager.clearToken()
+                    setupComposeUI()
                 }
-                is Result.Error -> {
-                    Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show()
-                }
-                is Result.Idle -> {} // No action needed for Idle state
+                is Result.Idle -> {}
             }
         }
 
-        viewModel.loginResult.observe(this, Observer { handleResult(it, R.string.login_success) })
-        viewModel.registerResult.observe(this, Observer { handleResult(it, R.string.register_success)})
-        viewModel.resetPasswordResult.observe(this, Observer { handleResult(it, R.string.reset_password_success) })
+        viewModel.loginResult.observe(this) { result ->
+            messageId = R.string.login_success
+            authObserver.onChanged(result)
+        }
+
+        viewModel.registerResult.observe(this) { result ->
+            messageId = R.string.register_success
+            authObserver.onChanged(result)
+        }
+
+        viewModel.resetPasswordResult.observe(this) { result ->
+            messageId = R.string.reset_password_success
+            authObserver.onChanged(result)
+        }
+    }
+
+    private fun handleAuthFailure(result: Result<AuthResponse>) {
+        val message = when (result) {
+            is Result.Failure -> getString(R.string.failure) + "${result.errorCode}"
+            is Result.Error -> getString(R.string.unknown_error)
+            else -> return
+        }
+        if (result is Result.Error) {
+            println("error: ${result.exception.message}")
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+        setupComposeUI()
+    }
+
+    private fun goToHome() {
+        startActivity(Intent(this, HomeActivity::class.java))
+        messageId?.let {
+            Toast.makeText(this, getString(it), Toast.LENGTH_SHORT).show()
+        }
+        finish()
     }
 }

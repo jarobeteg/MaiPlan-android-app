@@ -9,20 +9,20 @@ import androidx.core.content.edit
 class SessionManager(context: Context) {
     private val sharedPreferences = context.getSharedPreferences("user_session", Context.MODE_PRIVATE)
 
-    fun saveAuthToken(token: String) {
+    fun saveToken(token: String) {
         sharedPreferences.edit { putString("access_token", token) }
     }
 
-    fun getAuthToken(): String? {
+    fun getToken(): String? {
         val token = sharedPreferences.getString("access_token", null)
         if (isTokenExpired(token)) {
-            clearAuthToken()
+            clearToken()
             return null
         }
         return "Bearer $token"
     }
 
-    private fun clearAuthToken() {
+    fun clearToken() {
         sharedPreferences.edit { remove("access_token") }
     }
 

@@ -7,10 +7,10 @@ object UserSession {
     var email: String? = null
     var username: String? = null
 
-    fun setup(data: UserResponse) {
-        userId = data.id
-        email = data.email
-        username = data.username
+    fun setup(user: UserResponse) {
+        userId = user.id
+        email = user.email
+        username = user.username
     }
 
     fun clear() {

@@ -25,7 +25,7 @@ data class AuthEntity(
 
     val username: String,
 
-    val balance: Double = 0.00,
+    val balance: Float = 0.00f,
 
     @ColumnInfo(name = "created_at")
     val createdAt: Long = System.currentTimeMillis(),

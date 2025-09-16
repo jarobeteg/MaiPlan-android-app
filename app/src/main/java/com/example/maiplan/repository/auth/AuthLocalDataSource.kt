@@ -15,8 +15,8 @@ class AuthLocalDataSource(private val context: Context) {
         database.authDAO()
     }
 
-    suspend fun register(user: AuthEntity): Long {
-        return authDAO.insertUser(user)
+    suspend fun register(user: AuthEntity) {
+        authDAO.insertUser(user)
     }
 
     suspend fun getPendingUsers(): List<AuthEntity> {

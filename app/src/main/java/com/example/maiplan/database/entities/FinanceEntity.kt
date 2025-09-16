@@ -57,7 +57,7 @@ data class FinanceEntity(
     val type: Boolean,
 
     @ColumnInfo(name = "expense_amount")
-    val expenseAmount: Double,
+    val expenseAmount: Float,
 
     @ColumnInfo(name = "expense_date")
     val expenseDate: Long? = null,
