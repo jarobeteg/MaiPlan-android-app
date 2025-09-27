@@ -4,7 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.maiplan.network.api.UserRegister
+import com.example.maiplan.network.api.AuthSync
 
 @Entity(
     tableName = "auth",
@@ -48,3 +48,35 @@ data class AuthEntity(
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
 )
+
+fun AuthEntity.toAuthSync(): AuthSync {
+    return AuthSync(
+        userId = this.userId,
+        serverId = this.serverId ?: 0,
+        email = this.email,
+        username = this.username,
+        balance = this.balance,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        passwordHash = this.passwordHash,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted
+    )
+}
+
+fun AuthSync.toAuthEntity(): AuthEntity {
+    return AuthEntity(
+        userId = this.userId,
+        email = this.email,
+        username = this.username,
+        balance = this.balance,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        passwordHash = this.passwordHash,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted,
+        serverId = this.serverId
+    )
+}

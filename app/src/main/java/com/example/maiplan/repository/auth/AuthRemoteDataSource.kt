@@ -2,10 +2,13 @@ package com.example.maiplan.repository.auth
 
 import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.AuthResponse
+import com.example.maiplan.network.api.AuthSync
 import com.example.maiplan.network.api.Token
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.network.sync.SyncRequest
+import com.example.maiplan.network.sync.SyncResponse
 import retrofit2.Response
 
 class AuthRemoteDataSource(private val authApi: AuthApi) {
@@ -26,6 +29,10 @@ class AuthRemoteDataSource(private val authApi: AuthApi) {
     }
 
     suspend fun getProfile(token: String): Response<AuthResponse> {
-        return  authApi.getProfile(token)
+        return authApi.getProfile(token)
+    }
+
+    suspend fun authSync(request: SyncRequest<AuthSync>): Response<SyncResponse<AuthSync>> {
+        return authApi.authSync(request)
     }
 }

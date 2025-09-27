@@ -115,6 +115,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun goToHome() {
+        viewModel.sync()
         startActivity(Intent(this, HomeActivity::class.java))
         messageId?.let {
             Toast.makeText(this, getString(it), Toast.LENGTH_SHORT).show()

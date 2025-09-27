@@ -48,7 +48,11 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
         }
     }
 
-    fun sync() {}
+    fun sync() {
+        viewModelScope.launch {
+            authRepo.sync()
+        }
+    }
 
     fun register(user: UserRegister) {
         viewModelScope.launch {
@@ -59,7 +63,7 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
                     email = user.email,
                     username = user.username,
                     passwordHash = PasswordUtils.hashPassword(user.password),
-                    syncState = 2
+                    syncState = 4
                 )
                 localRegister(authEntity)
             }

@@ -49,6 +49,8 @@ data class AuthSync(
     val email: String,
     val username: String,
     val balance: Float,
+    @SerializedName("created_at") val createdAt: Long,
+    @SerializedName("updated_at") val updatedAt: Long,
     @SerializedName("password_hash") val passwordHash: String,
     @SerializedName("last_modified") val lastModified: Long,
     @SerializedName("sync_state") val syncState: Int = 0,
