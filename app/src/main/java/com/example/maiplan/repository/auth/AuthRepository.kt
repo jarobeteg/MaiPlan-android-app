@@ -43,14 +43,6 @@ class AuthRepository(
         }
     }
 
-    suspend fun localRegister(user: AuthEntity) {
-        try {
-            local.register(user)
-        } catch (_: Exception) {
-
-        }
-    }
-
     suspend fun register(user: UserRegister): Result<AuthResponse> {
         return try {
             handleResponse(remote.register(user))

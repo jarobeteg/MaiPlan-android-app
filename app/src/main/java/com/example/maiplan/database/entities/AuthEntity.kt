@@ -17,9 +17,9 @@ import com.example.maiplan.network.api.AuthSync
     ]
 )
 data class AuthEntity(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "user_id")
-    val userId: Int = 0,
+    val userId: Int,
 
     val email: String,
 

@@ -4,7 +4,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.network.api.Token
 import com.example.maiplan.network.api.UserLogin
@@ -12,7 +11,6 @@ import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
-import com.example.maiplan.utils.common.PasswordUtils
 import kotlinx.coroutines.launch
 
 class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
@@ -42,12 +40,6 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
         clearErrors()
     }
 
-    fun localRegister(user: AuthEntity) {
-        viewModelScope.launch {
-            authRepo.localRegister(user)
-        }
-    }
-
     fun sync() {
         viewModelScope.launch {
             authRepo.sync()
@@ -56,18 +48,7 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
 
     fun register(user: UserRegister) {
         viewModelScope.launch {
-            val result = authRepo.register(user)
             _registerResult.postValue(authRepo.register(user))
-            if (result is Result.Success) {
-                val authEntity = AuthEntity(
-                    email = user.email,
-                    username = user.username,
-                    passwordHash = PasswordUtils.hashPassword(user.password),
-                    syncState = 4
-                )
-                localRegister(authEntity)
-            }
-            _registerResult.postValue(result)
         }
     }
 

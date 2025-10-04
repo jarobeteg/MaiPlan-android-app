@@ -6,10 +6,12 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.example.maiplan.R
 import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
+import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.network.api.Token
@@ -23,8 +25,10 @@ import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.utils.BaseActivity
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
+    private lateinit var networkChecker: NetworkChecker
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
     private var messageId: Int? = null
@@ -36,10 +40,17 @@ class MainActivity : BaseActivity() {
         setupDependencies()
         observeViewModel()
 
-        sessionManager.getToken()?.let { token ->
-            viewModel.getProfile(token)
-        } ?: run {
-            setupComposeUI()
+        lifecycleScope.launch {
+            if (networkChecker.isOnline() && networkChecker.canReachServer()) {
+                sessionManager.getToken()?.let { token ->
+                    viewModel.getProfile(token)
+                } ?: run {
+                    setupComposeUI()
+                }
+            } else {
+                Toast.makeText(this@MainActivity, getString(R.string.server_unreachable), Toast.LENGTH_SHORT).show()
+                setupComposeUI()
+            }
         }
     }
 
@@ -55,6 +66,7 @@ class MainActivity : BaseActivity() {
 
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
         sessionManager = SessionManager(this)
+        networkChecker = NetworkChecker(this)
     }
 
     private fun observeViewModel() {
