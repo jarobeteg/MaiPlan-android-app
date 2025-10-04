@@ -107,9 +107,6 @@ class MainActivity : BaseActivity() {
             is Result.Error -> getString(R.string.unknown_error)
             else -> return
         }
-        if (result is Result.Error) {
-            println("error: ${result.exception.message}")
-        }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
         setupComposeUI()
     }

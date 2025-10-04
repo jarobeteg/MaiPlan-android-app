@@ -24,7 +24,39 @@ class AuthLocalDataSource(private val context: Context) {
     }
 
     suspend fun authSync(entity: AuthEntity): Int {
-        return authDAO.authSync(entity)
+        var result = 0
+        if (entity.userId == 0) {
+            result = authDAO.authDataUpdate(
+                email = entity.email,
+                username = entity.username,
+                balance = entity.balance,
+                createdAt = entity.createdAt,
+                updatedAt = entity.updatedAt,
+                passwordHash = entity.passwordHash,
+                lastModified = entity.lastModified,
+                syncState = entity.syncState,
+                isDeleted = entity.isDeleted,
+                serverId = entity.serverId ?: 0
+            )
+
+            if (result == 0) {
+                result = authDAO.authDataInsert(
+                    email = entity.email,
+                    username = entity.username,
+                    balance = entity.balance,
+                    createdAt = entity.createdAt,
+                    updatedAt = entity.updatedAt,
+                    passwordHash = entity.passwordHash,
+                    lastModified = entity.lastModified,
+                    syncState = entity.syncState,
+                    isDeleted = entity.isDeleted,
+                    serverId = entity.serverId ?: 0
+                )
+            }
+        } else {
+            result = authDAO.authSync(entity)
+        }
+        return result
     }
 
     suspend fun deleteUser(entity: AuthEntity): Int {
