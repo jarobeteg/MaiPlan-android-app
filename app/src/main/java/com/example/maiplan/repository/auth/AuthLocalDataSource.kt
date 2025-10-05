@@ -4,6 +4,10 @@ import android.content.Context
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.database.dao.AuthDAO
 import com.example.maiplan.database.entities.AuthEntity
+import com.example.maiplan.database.entities.AuthEntityResponse
+import com.example.maiplan.network.api.UserLogin
+import com.example.maiplan.network.api.UserResponse
+import com.example.maiplan.utils.common.PasswordUtils
 
 class AuthLocalDataSource(private val context: Context) {
 
@@ -25,5 +29,19 @@ class AuthLocalDataSource(private val context: Context) {
 
     suspend fun deleteUser(entity: AuthEntity): Int {
         return authDAO.deleteUser(entity)
+    }
+
+    suspend fun login(user: UserLogin): AuthEntityResponse? {
+        val authEntityResponse = authDAO.loginUser(user.email)
+        println("auth entity response: $authEntityResponse")
+        return if (authEntityResponse != null) {
+            if (PasswordUtils.verifyPassword(user.password, authEntityResponse.passwordHash)) {
+                authEntityResponse
+            } else {
+                null
+            }
+        } else {
+            null
+        }
     }
 }

@@ -8,13 +8,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.example.maiplan.R
+import com.example.maiplan.database.entities.toUserResponse
 import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.AuthResponse
-import com.example.maiplan.network.api.Token
 import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthLocalDataSource
@@ -32,6 +32,8 @@ class MainActivity : BaseActivity() {
     private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
     private var messageId: Int? = null
+    private var lastReachable: Boolean? = null
+    private var uiInitialized = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +43,30 @@ class MainActivity : BaseActivity() {
         observeViewModel()
 
         lifecycleScope.launch {
-            if (networkChecker.isOnline() && networkChecker.canReachServer()) {
-                sessionManager.getToken()?.let { token ->
-                    viewModel.getProfile(token)
-                } ?: run {
-                    setupComposeUI()
+            viewModel.isServerReachable.collect { reachable ->
+                if (lastReachable == reachable) return@collect
+                lastReachable = reachable
+
+                val token = sessionManager.getToken()
+
+                if (reachable) {
+                    if (token != null) {
+                        viewModel.getProfile(token)
+                    } else {
+                        setupComposeUIOnce()
+                    }
+                } else {
+                    Toast.makeText(this@MainActivity, getString(R.string.server_unreachable), Toast.LENGTH_SHORT).show()
+                    setupComposeUIOnce()
                 }
-            } else {
-                Toast.makeText(this@MainActivity, getString(R.string.server_unreachable), Toast.LENGTH_SHORT).show()
-                setupComposeUI()
             }
+        }
+    }
+
+    private fun setupComposeUIOnce() {
+        if (!uiInitialized) {
+            uiInitialized = true
+            setupComposeUI()
         }
     }
 
@@ -67,6 +83,8 @@ class MainActivity : BaseActivity() {
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
         sessionManager = SessionManager(this)
         networkChecker = NetworkChecker(this)
+
+        viewModel.startNetworkMonitoring(networkChecker)
     }
 
     private fun observeViewModel() {
@@ -91,7 +109,7 @@ class MainActivity : BaseActivity() {
                 is Result.Failure, is Result.Error -> {
                     Toast.makeText(this, getString(R.string.no_user_data_found), Toast.LENGTH_SHORT).show()
                     sessionManager.clearToken()
-                    setupComposeUI()
+                    setupComposeUIOnce()
                 }
                 is Result.Idle -> {}
             }
@@ -111,6 +129,16 @@ class MainActivity : BaseActivity() {
             messageId = R.string.reset_password_success
             authObserver.onChanged(result)
         }
+
+        viewModel.localLoginResult.observe(this) { response ->
+            if (response != null) {
+                UserSession.setup(response.toUserResponse())
+                messageId = R.string.login_success
+                goToHome()
+            } else {
+                Toast.makeText(this, getString(R.string.incorrect_cred), Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun handleAuthFailure(result: Result<AuthResponse>) {
@@ -120,7 +148,7 @@ class MainActivity : BaseActivity() {
             else -> return
         }
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-        setupComposeUI()
+        setupComposeUIOnce()
     }
 
     private fun goToHome() {

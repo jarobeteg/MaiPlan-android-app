@@ -1,6 +1,7 @@
 package com.example.maiplan.repository.auth
 
 import com.example.maiplan.database.entities.AuthEntity
+import com.example.maiplan.database.entities.AuthEntityResponse
 import com.example.maiplan.database.entities.toAuthEntity
 import com.example.maiplan.database.entities.toAuthSync
 import com.example.maiplan.network.api.AuthResponse
@@ -9,6 +10,7 @@ import com.example.maiplan.network.api.Token
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.network.sync.SyncRequest
 import com.example.maiplan.network.sync.Syncable
 import com.example.maiplan.repository.Result
@@ -57,6 +59,10 @@ class AuthRepository(
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    suspend fun localLogin(user: UserLogin): AuthEntityResponse? {
+        return local.login(user)
     }
 
     suspend fun resetPassword(user: UserResetPassword): Result<AuthResponse> {

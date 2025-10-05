@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.maiplan.network.api.AuthSync
+import com.example.maiplan.network.api.UserResponse
 
 @Entity(
     tableName = "auth",
@@ -78,5 +79,22 @@ fun AuthSync.toAuthEntity(): AuthEntity {
         syncState = this.syncState,
         isDeleted = this.isDeleted,
         serverId = this.serverId
+    )
+}
+
+data class AuthEntityResponse(
+    @ColumnInfo(name = "user_id")
+    val userId: Int,
+    val email: String,
+    val username: String,
+    @ColumnInfo(name = "password_hash")
+    val passwordHash: String
+)
+
+fun AuthEntityResponse.toUserResponse(): UserResponse {
+    return UserResponse(
+        id = this.userId,
+        email = this.email,
+        username = this.username
     )
 }

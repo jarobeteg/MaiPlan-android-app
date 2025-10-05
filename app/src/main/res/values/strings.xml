@@ -69,6 +69,7 @@
     <string name="token_refresh_failed">Token refresh failed!</string>
     <string name="unknown_error">Unknown error! Please try again.</string>
     <string name="server_unreachable">Can\'t reach the server! Local database in use.</string>
+    <string name="incorrect_cred">Incorrect credentials!</string>
 
     <!-- bottom nav label -->
     <string name="event">Events</string>
