@@ -146,7 +146,7 @@ class MainActivity : BaseActivity() {
                    viewModel.showServerUnreachableToast.collect {
                        Toast.makeText(
                            this@MainActivity,
-                           getString(R.string.server_unreachable),
+                           getString(R.string.server_unreachable_try_again),
                            Toast.LENGTH_SHORT).show()
                    }
                }
