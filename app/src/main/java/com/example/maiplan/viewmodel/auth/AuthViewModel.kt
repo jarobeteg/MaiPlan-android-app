@@ -13,19 +13,19 @@ import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
-    private val _isServerReachable = MutableSharedFlow<Boolean>(replay = 1)
-    val isServerReachable: SharedFlow<Boolean> = _isServerReachable.asSharedFlow()
-    private var pollingJob: Job? = null
+class AuthViewModel(
+    private val authRepo: AuthRepository,
+    private val networkChecker: NetworkChecker
+) : ViewModel() {
+    private val _showServerUnreachableToast = MutableSharedFlow<Unit>()
+    val showServerUnreachableToast: SharedFlow<Unit> get() = _showServerUnreachableToast
+
+    private val _showLocalLoginToast = MutableSharedFlow<Unit>()
+    val showLocalLoginToast: SharedFlow<Unit> get() = _showLocalLoginToast
 
     // not in use
     private val _syncResult = MutableLiveData<Result<Unit>>()
@@ -54,30 +54,6 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
         clearErrors()
     }
 
-    fun startNetworkMonitoring(networkChecker: NetworkChecker) {
-        viewModelScope.launch {
-            networkChecker.observeNetworkStatus().collect { isOnline ->
-                if (isOnline) {
-                    startReachabilityPolling(networkChecker)
-                } else {
-                    _isServerReachable.emit(false)
-                }
-            }
-        }
-    }
-
-    private fun startReachabilityPolling(networkChecker: NetworkChecker) {
-        pollingJob?.cancel()
-
-        pollingJob = viewModelScope.launch(Dispatchers.IO) {
-            while (isActive) {
-                val reachable = networkChecker.canReachServer()
-                _isServerReachable.emit(reachable)
-                delay(2500)
-            }
-        }
-    }
-
     fun sync() {
         viewModelScope.launch {
             authRepo.sync()
@@ -86,28 +62,41 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
 
     fun register(user: UserRegister) {
         viewModelScope.launch {
-            _registerResult.postValue(authRepo.register(user))
+            _registerResult.postValue(Result.Loading)
+            if (networkChecker.canReachServer()) {
+                _registerResult.postValue(authRepo.register(user))
+            } else {
+                _registerResult.postValue(Result.Idle)
+                _showServerUnreachableToast.emit(Unit)
+            }
         }
     }
 
     fun login(user: UserLogin) {
         viewModelScope.launch {
-            _loginResult.postValue(authRepo.login(user))
-        }
-    }
-
-    fun localLogin(user: UserLogin) {
-        viewModelScope.launch {
-            _localLoginResult.postValue(authRepo.localLogin(user))
+            _loginResult.postValue(Result.Loading)
+            if (networkChecker.canReachServer()) {
+                _loginResult.postValue(authRepo.login(user))
+            } else {
+                _localLoginResult.postValue(authRepo.localLogin(user))
+                _showLocalLoginToast.emit(Unit)
+            }
         }
     }
 
     fun resetPassword(user: UserResetPassword) {
         viewModelScope.launch {
-            _resetPasswordResult.postValue(authRepo.resetPassword(user))
+            _resetPasswordResult.postValue(Result.Loading)
+            if (networkChecker.canReachServer()) {
+                _resetPasswordResult.postValue(authRepo.resetPassword(user))
+            } else {
+                _resetPasswordResult.postValue(Result.Idle)
+                _showServerUnreachableToast.emit(Unit)
+            }
         }
     }
 
+    // not in use
     fun tokenRefresh(token: String) {
         viewModelScope.launch {
             _tokenRefreshResult.postValue(authRepo.tokenRefresh(token))
@@ -124,5 +113,9 @@ class AuthViewModel(private val authRepo: AuthRepository) : ViewModel() {
         _loginResult.postValue(Result.Idle)
         _registerResult.postValue(Result.Idle)
         _resetPasswordResult.postValue(Result.Idle)
+    }
+
+    fun resetLoginResult() {
+        _loginResult.postValue(Result.Idle)
     }
 }

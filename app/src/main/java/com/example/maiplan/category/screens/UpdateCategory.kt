@@ -97,7 +97,7 @@ fun UpdateCategoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_update)) { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) }
+            SubmitButtonComponent(stringResource(R.string.category_update), onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) })
         }
     }
 }

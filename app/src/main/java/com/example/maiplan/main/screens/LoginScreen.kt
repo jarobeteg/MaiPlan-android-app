@@ -41,6 +41,7 @@ fun LoginScreen(
     toForgotPasswordClick: () -> Unit
 ) {
     val loginResult by viewModel.loginResult.observeAsState()
+    val isLoading = loginResult is Result.Loading
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -91,7 +92,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.login), onButtonClicked = { onLoginClick(email, password) })
+            SubmitButtonComponent(
+                value = stringResource(R.string.login),
+                onButtonClicked = { onLoginClick(email, password) },
+                loadingText = stringResource(R.string.logging_in),
+                isLoading = isLoading
+                )
 
             if (loginResult is Result.Failure) {
                 Spacer(modifier = Modifier.height(8.dp))

@@ -19,8 +19,11 @@
     <string name="password">Password</string>
     <string name="password_again">Password Again</string>
     <string name="login">Login</string>
+    <string name="logging_in">Logging in…</string>
     <string name="register">Register</string>
+    <string name="registering">Registering…</string>
     <string name="reset">Reset</string>
+    <string name="resetting">Resetting…</string>
     <string name="login_success">You are now logged in.</string>
     <string name="register_success">Registration successful! You are now logged in.</string>
     <string name="reset_password_success">Password reset successful! You are now logged in.</string>
@@ -68,7 +71,8 @@
     <string name="no_user_data_found">No user data found!</string>
     <string name="token_refresh_failed">Token refresh failed!</string>
     <string name="unknown_error">Unknown error! Please try again.</string>
-    <string name="server_unreachable">Can\'t reach the server! Local database in use.</string>
+    <string name="server_unreachable">Server is unreachable. Please try again later.</string>
+    <string name="server_unreachable_skip_to_login">Server is unreachable. Proceeding with local login.</string>
     <string name="incorrect_cred">Incorrect credentials!</string>
 
     <!-- bottom nav label -->

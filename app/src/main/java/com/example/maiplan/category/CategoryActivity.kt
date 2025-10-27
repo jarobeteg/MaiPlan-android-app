@@ -53,6 +53,7 @@ class CategoryActivity : BaseActivity() {
                 is Result.Error -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
                 is Result.Failure -> {} // No feedback for Failure
                 is Result.Idle -> {} // No action needed since it's Idle
+                is Result.Loading -> {} // No action needed since it's Loading
             }
         }
 

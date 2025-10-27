@@ -4,9 +4,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -18,7 +15,6 @@ import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
-import com.example.maiplan.utils.common.PasswordUtils
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @Composable
@@ -43,27 +39,18 @@ fun NavGraphBuilder.authNavGraph(
 ) {
     // --- Login Screen ---
     composable(MainRoutes.Login.route) {
-        val isServerReachable by viewModel.isServerReachable.collectAsStateWithLifecycle(false)
         LoginScreen(
             viewModel = viewModel,
             onLoginClick = { email, password ->
-                if (isServerReachable) {
-                    viewModel.login(UserLogin(email, password))
-                } else {
-                    viewModel.localLogin(UserLogin(email, password))
-                }
+                viewModel.login(UserLogin(email, password))
             },
             toRegisterClick = {
-                if (isServerReachable) {
-                    viewModel.clearErrors()
-                    navController.navigate(MainRoutes.Register.route)
-                }
+                viewModel.clearErrors()
+                navController.navigate(MainRoutes.Register.route)
             },
             toForgotPasswordClick = {
-                if (isServerReachable) {
-                    viewModel.clearErrors()
-                    navController.navigate(MainRoutes.ForgotPassword.route)
-                }
+                viewModel.clearErrors()
+                navController.navigate(MainRoutes.ForgotPassword.route)
             }
         )
     }

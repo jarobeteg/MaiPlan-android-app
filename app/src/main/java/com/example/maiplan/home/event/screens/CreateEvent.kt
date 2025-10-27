@@ -104,7 +104,7 @@ fun CreateEventScreen(
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
 
-            SubmitButtonComponent(stringResource(R.string.event_save)) {  }
+            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {})
         }
     }
 }

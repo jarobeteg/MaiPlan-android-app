@@ -38,6 +38,7 @@ fun ForgotPasswordScreen(
     onBackToLogin: () -> Unit
 ) {
     val resetPasswordResult by viewModel.resetPasswordResult.observeAsState()
+    val isLoading = resetPasswordResult is Result.Loading
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordAgain by remember { mutableStateOf("") }
@@ -92,7 +93,12 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.reset), onButtonClicked = { onResetClick(email, password, passwordAgain) })
+            SubmitButtonComponent(
+                value = stringResource(R.string.reset),
+                onButtonClicked = { onResetClick(email, password, passwordAgain) },
+                loadingText = stringResource(R.string.resetting),
+                isLoading = isLoading
+            )
 
             if (resetPasswordResult is Result.Failure) {
                 Spacer(modifier = Modifier.height(8.dp))

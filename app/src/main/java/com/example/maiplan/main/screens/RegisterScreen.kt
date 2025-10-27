@@ -40,6 +40,7 @@ fun RegisterScreen(
     onBackToLogin: () -> Unit
 ) {
     val registerResult by viewModel.registerResult.observeAsState()
+    val isLoading = registerResult is Result.Loading
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -99,7 +100,12 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.register), onButtonClicked = { onRegisterClick(email, username, password, passwordAgain) })
+            SubmitButtonComponent(
+                value = stringResource(R.string.register),
+                onButtonClicked = { onRegisterClick(email, username, password, passwordAgain) },
+                loadingText = stringResource(R.string.registering),
+                isLoading = isLoading
+            )
 
             if (registerResult is Result.Failure) {
                 Spacer(modifier = Modifier.height(8.dp))
