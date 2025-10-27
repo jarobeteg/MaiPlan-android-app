@@ -103,7 +103,6 @@ fun RegisterScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.register),
                 onButtonClicked = { onRegisterClick(email, username, password, passwordAgain) },
-                loadingText = stringResource(R.string.registering),
                 isLoading = isLoading
             )
 
@@ -131,7 +130,13 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClickableTextComponent(stringResource(R.string.have_account), onBackToLogin)
+            ClickableTextComponent(
+                text = stringResource(R.string.have_account),
+                onTextClicked = {
+                    viewModel.cancelRegister()
+                    onBackToLogin()
+                }
+            )
         }
     }
 }

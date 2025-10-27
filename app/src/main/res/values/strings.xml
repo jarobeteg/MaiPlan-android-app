@@ -19,11 +19,8 @@
     <string name="password">Password</string>
     <string name="password_again">Password Again</string>
     <string name="login">Login</string>
-    <string name="logging_in">Logging in…</string>
     <string name="register">Register</string>
-    <string name="registering">Registering…</string>
     <string name="reset">Reset</string>
-    <string name="resetting">Resetting…</string>
     <string name="login_success">You are now logged in.</string>
     <string name="register_success">Registration successful! You are now logged in.</string>
     <string name="reset_password_success">Password reset successful! You are now logged in.</string>

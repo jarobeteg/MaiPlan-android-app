@@ -96,7 +96,6 @@ fun ForgotPasswordScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.reset),
                 onButtonClicked = { onResetClick(email, password, passwordAgain) },
-                loadingText = stringResource(R.string.resetting),
                 isLoading = isLoading
             )
 
@@ -122,7 +121,13 @@ fun ForgotPasswordScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClickableTextComponent(stringResource(R.string.return_to_login), onBackToLogin)
+            ClickableTextComponent(
+                text = stringResource(R.string.return_to_login),
+                onTextClicked = {
+                    viewModel.cancelResetPassword()
+                    onBackToLogin()
+                }
+            )
         }
     }
 }

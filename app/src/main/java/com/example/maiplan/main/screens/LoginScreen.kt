@@ -87,7 +87,13 @@ fun LoginScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                ClickableTextComponent(stringResource(R.string.forgot_password), toForgotPasswordClick)
+                ClickableTextComponent(
+                    text = stringResource(R.string.forgot_password),
+                    onTextClicked = {
+                        viewModel.cancelLogin()
+                        toForgotPasswordClick()
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +101,6 @@ fun LoginScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.login),
                 onButtonClicked = { onLoginClick(email, password) },
-                loadingText = stringResource(R.string.logging_in),
                 isLoading = isLoading
                 )
 
@@ -119,7 +124,13 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            ClickableTextComponent(stringResource(R.string.no_account), toRegisterClick)
+            ClickableTextComponent(
+                text = stringResource(R.string.no_account),
+                onTextClicked = {
+                    viewModel.cancelLogin()
+                    toRegisterClick()
+                }
+            )
         }
     }
 }

@@ -13,6 +13,7 @@ import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
@@ -31,15 +32,18 @@ class AuthViewModel(
     private val _syncResult = MutableLiveData<Result<Unit>>()
     val syncResult: LiveData<Result<Unit>> = _syncResult
 
+    private var registerJob: Job? = null
     private val _registerResult = MutableLiveData<Result<AuthResponse>>()
     val registerResult: LiveData<Result<AuthResponse>> get() = _registerResult
 
+    private var loginJob: Job? = null
     private val _loginResult = MutableLiveData<Result<AuthResponse>>()
     val loginResult: LiveData<Result<AuthResponse>> get() = _loginResult
 
     private val _localLoginResult = MutableLiveData<AuthEntityResponse>()
     val localLoginResult: LiveData<AuthEntityResponse> get() = _localLoginResult
 
+    private var resetPasswordJob: Job? = null
     private val _resetPasswordResult = MutableLiveData<Result<AuthResponse>>()
     val resetPasswordResult: LiveData<Result<AuthResponse>> get() = _resetPasswordResult
 
@@ -61,7 +65,8 @@ class AuthViewModel(
     }
 
     fun register(user: UserRegister) {
-        viewModelScope.launch {
+        cancelRegister()
+        registerJob = viewModelScope.launch {
             _registerResult.postValue(Result.Loading)
             if (networkChecker.canReachServer()) {
                 _registerResult.postValue(authRepo.register(user))
@@ -73,7 +78,8 @@ class AuthViewModel(
     }
 
     fun login(user: UserLogin) {
-        viewModelScope.launch {
+        cancelLogin()
+        loginJob = viewModelScope.launch {
             _loginResult.postValue(Result.Loading)
             if (networkChecker.canReachServer()) {
                 _loginResult.postValue(authRepo.login(user))
@@ -85,7 +91,8 @@ class AuthViewModel(
     }
 
     fun resetPassword(user: UserResetPassword) {
-        viewModelScope.launch {
+        cancelResetPassword()
+        resetPasswordJob = viewModelScope.launch {
             _resetPasswordResult.postValue(Result.Loading)
             if (networkChecker.canReachServer()) {
                 _resetPasswordResult.postValue(authRepo.resetPassword(user))
@@ -115,7 +122,30 @@ class AuthViewModel(
         _resetPasswordResult.postValue(Result.Idle)
     }
 
+    fun cancelRegister() {
+        registerJob?.cancel()
+        resetRegisterResult()
+    }
+
+    fun resetRegisterResult() {
+        _registerResult.postValue(Result.Idle)
+    }
+
+    fun cancelLogin() {
+        loginJob?.cancel()
+        resetLoginResult()
+    }
+
     fun resetLoginResult() {
         _loginResult.postValue(Result.Idle)
+    }
+
+    fun cancelResetPassword() {
+        resetPasswordJob?.cancel()
+        resetPasswordResult()
+    }
+
+    fun resetPasswordResult() {
+        _resetPasswordResult.postValue(Result.Idle)
     }
 }

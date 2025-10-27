@@ -1,10 +1,8 @@
 package com.example.maiplan.components
 
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -20,7 +18,6 @@ import androidx.compose.ui.unit.sp
 fun SubmitButtonComponent(
     value: String,
     onButtonClicked: () -> Unit,
-    loadingText: String = "",
     isLoading: Boolean = false
 ) {
     Button(
@@ -33,21 +30,11 @@ fun SubmitButtonComponent(
         if (isLoading) {
             CircularProgressIndicator(
                 color = MaterialTheme.colorScheme.primary,
-                strokeWidth = 2.dp,
+                strokeWidth = 3.dp,
                 modifier = Modifier
-                    .size(20.dp)
+                    .size(32.dp)
                     .padding(2.dp)
             )
-
-            if (loadingText.isNotEmpty()) {
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    text = loadingText,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontSize = 16.sp
-                )
-            }
-
         } else {
             Text(
                 text = value,
