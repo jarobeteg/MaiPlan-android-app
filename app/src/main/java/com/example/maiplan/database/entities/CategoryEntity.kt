@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.maiplan.network.api.CategorySync
 
 @Entity(
     tableName = "category",
@@ -33,7 +34,7 @@ data class CategoryEntity(
 
     val name: String,
 
-    val description: String? = null,
+    val description: String,
 
     val color: String,
 
@@ -52,3 +53,32 @@ data class CategoryEntity(
     val serverId: Int? = null
 )
 
+fun CategoryEntity.toCategorySync(): CategorySync {
+    return CategorySync(
+        categoryId = this.categoryId,
+        serverId = this.serverId ?: 0,
+        userId = this.userId,
+        name = this.name,
+        description = this.description,
+        color = this.color,
+        icon = this.icon,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted
+    )
+}
+
+fun CategorySync.toCategoryEntity(): CategoryEntity {
+    return CategoryEntity(
+        categoryId = this.categoryId,
+        userId = this.userId,
+        name = this.name,
+        description = this.description,
+        color = this.color,
+        icon = this.color,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted,
+        serverId = this.serverId
+    )
+}
