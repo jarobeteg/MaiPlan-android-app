@@ -89,7 +89,7 @@ class AuthRepository(
         }
     }
 
-    suspend fun pseudoAuth(user: UserResponse): Boolean{
+    suspend fun pseudoAuth(user: UserResponse): Boolean {
         if (!local.doesUserExist(user.email)) {
             val auth = AuthEntity(
                 userId = user.id,

@@ -1,40 +1,46 @@
 package com.example.maiplan.network
 
-import com.example.maiplan.network.api.RaspiApi
 import android.content.Context
 import android.net.ConnectivityManager
-import android.net.Network
 import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.InetSocketAddress
+import java.net.Socket
 
 class NetworkChecker (context: Context) {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
-    fun observeNetworkStatus(): Flow<Boolean> = callbackFlow {
-        val callback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) { trySend(true) }
-            override fun onLost(network: Network) { trySend(false) }
-        }
-
-        val request = NetworkRequest.Builder()
-            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-            .build()
-
-        connectivityManager.registerNetworkCallback(request, callback)
-
-        val activeNetwork = connectivityManager.activeNetwork
-        val capabilities = connectivityManager.getNetworkCapabilities(activeNetwork)
-        trySend(capabilities?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true)
-
-        awaitClose { connectivityManager.unregisterNetworkCallback(callback) }
+    private fun isOnline(): Boolean {
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) ||
+                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)
     }
 
-    suspend fun canReachServer(): Boolean {
+    private fun isPortOpen(): Boolean {
+        val host = "100.70.156.115"
+        val port = 8000
+        val timeout = 500
         return try {
-            val response = RetrofitClient.retrofit.create(RaspiApi::class.java).checkHealth()
+            Socket().use { socket ->
+                socket.connect(InetSocketAddress(host, port), timeout)
+                true
+            }
+        } catch (_: Exception) {
+            false
+        }
+    }
+
+    suspend fun canReachServer(): Boolean = withContext(Dispatchers.IO) {
+
+        if (!isOnline()) return@withContext false
+
+        if (!isPortOpen()) return@withContext false
+
+        return@withContext try {
+            val response = RetrofitClient.raspiApi.checkHealth()
             if (response.isSuccessful) {
                 println("Server response: ${response.body()}")
                 true
@@ -42,7 +48,8 @@ class NetworkChecker (context: Context) {
                 println("Server error: ${response.code()}")
                 false
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            println("Health check failed: ${e.message}")
             false
         }
     }
