@@ -11,6 +11,7 @@ import com.example.maiplan.network.api.Token
 import com.example.maiplan.network.api.UserLogin
 import com.example.maiplan.network.api.UserRegister
 import com.example.maiplan.network.api.UserResetPassword
+import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
 import kotlinx.coroutines.Job
@@ -82,7 +83,25 @@ class AuthViewModel(
         loginJob = viewModelScope.launch {
             _loginResult.postValue(Result.Loading)
             if (networkChecker.canReachServer()) {
-                _loginResult.postValue(authRepo.login(user))
+                val result = authRepo.login(user)
+
+                if (result is Result.Success) {
+                    var pseudoException: Exception = Exception()
+                    val pseudoOk = try {
+                        authRepo.pseudoAuth(result.data.user)
+                    } catch (e: Exception) {
+                        pseudoException = e
+                        false
+                    }
+
+                    if (pseudoOk) {
+                        _loginResult.postValue(result)
+                    } else {
+                        _loginResult.postValue(Result.Error(pseudoException))
+                    }
+                } else {
+                    _loginResult.postValue(result)
+                }
             } else {
                 _localLoginResult.postValue(authRepo.localLogin(user))
                 _showLocalLoginToast.emit(Unit)
@@ -114,6 +133,12 @@ class AuthViewModel(
         viewModelScope.launch {
             _profileResult.postValue(authRepo.getProfile(token))
         }
+    }
+
+    fun pseudoAuth(user: UserResponse) {
+     viewModelScope.launch {
+         authRepo.pseudoAuth(user)
+     }
     }
 
     fun clearErrors() {

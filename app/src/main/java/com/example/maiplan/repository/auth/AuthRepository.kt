@@ -88,4 +88,19 @@ class AuthRepository(
             Result.Error(e)
         }
     }
+
+    suspend fun pseudoAuth(user: UserResponse): Boolean{
+        if (!local.doesUserExist(user.email)) {
+            val auth = AuthEntity(
+                userId = user.id,
+                email = user.email,
+                username = user.username,
+                passwordHash = "pseudo",
+                syncState = 4
+            )
+            return local.insertPseudoAuth(auth)
+        } else {
+            return true
+        }
+    }
 }

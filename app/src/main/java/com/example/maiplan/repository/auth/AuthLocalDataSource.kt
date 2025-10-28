@@ -19,6 +19,19 @@ class AuthLocalDataSource(private val context: Context) {
         database.authDAO()
     }
 
+    suspend fun doesUserExist(email: String): Boolean {
+        return authDAO.getUserByEmail(email) != null
+    }
+
+    suspend fun insertPseudoAuth(entity: AuthEntity): Boolean {
+        return try {
+            authDAO.insertPseudoAuth(entity)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     suspend fun getPendingUser(email: String): AuthEntity? {
         return authDAO.getPendingUser(email)
     }
