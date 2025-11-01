@@ -52,13 +52,13 @@ class CategoryViewModel(
         }
     }
 
-    fun getCategoryById(categoryId: Int): CategoryResponse {
+    fun getCategory(categoryId: Int): CategoryResponse {
         return _categoryList.value!!.find { it.categoryId == categoryId }!!
     }
 
     fun updateCategory(category: CategoryResponse, userId: Int) {
         viewModelScope.launch {
-            val result = categoryRepository.updateCategory(category)
+            val result = categoryRepository.updateCategory(category, userId)
             _updateCategoryResult.postValue(result)
             if (result is Result.Success) getAllCategories(userId)
         }
@@ -66,7 +66,7 @@ class CategoryViewModel(
 
     fun deleteCategory(categoryId: Int, userId: Int) {
         viewModelScope.launch {
-            val result = categoryRepository.deleteCategory(categoryId)
+            val result = categoryRepository.deleteCategory(categoryId, userId)
             _deleteCategoryResult.postValue(result)
             if (result is Result.Success) getAllCategories(userId)
         }

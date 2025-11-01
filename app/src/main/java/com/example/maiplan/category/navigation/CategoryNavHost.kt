@@ -102,7 +102,7 @@ fun NavGraphBuilder.categoryNavGraph(
          * Retrieves selected Category using the retrieved categoryId.
          */
         val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: return@composable
-        val selectedCategory = categoryViewModel.getCategoryById(categoryId)
+        val selectedCategory = categoryViewModel.getCategory(categoryId)
 
         UpdateCategoryScreen(
             viewModel = categoryViewModel,

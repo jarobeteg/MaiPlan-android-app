@@ -5,6 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.maiplan.network.api.CategoryCreate
+import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.network.api.CategorySync
 
 @Entity(
@@ -80,5 +82,37 @@ fun CategorySync.toCategoryEntity(): CategoryEntity {
         syncState = this.syncState,
         isDeleted = this.isDeleted,
         serverId = this.serverId
+    )
+}
+
+fun CategoryCreate.toCategoryEntity(): CategoryEntity {
+    return CategoryEntity (
+        userId = this.userId,
+        name = this.name,
+        description = this.description,
+        color = this.color,
+        icon = this.icon,
+        syncState = 4
+    )
+}
+
+fun CategoryEntity.toCategoryResponse(): CategoryResponse {
+    return CategoryResponse (
+        categoryId = this.categoryId,
+        name = this.name,
+        description = this.description,
+        color = this.color,
+        icon = this.icon
+    )
+}
+
+fun CategoryResponse.toCategoryEntity(userId: Int): CategoryEntity {
+    return CategoryEntity (
+        categoryId = this.categoryId,
+        userId = userId,
+        name = this.name,
+        description = this.description,
+        color = this.color,
+        icon = this.icon
     )
 }
