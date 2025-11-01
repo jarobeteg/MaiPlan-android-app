@@ -8,7 +8,9 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.event.navigation.EventNavHost
+import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.RetrofitClient
+import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.event.EventRemoteDataSource
@@ -24,28 +26,27 @@ import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 fun EventScreenManager(rootNavController: NavHostController) {
     val localNavController = rememberNavController()
     val context = LocalContext.current
+    val networkChecker = NetworkChecker(context)
 
     val eventViewModel = remember {
-        val eventApi = RetrofitClient.eventApi
-        val eventRemoteDataSource = EventRemoteDataSource(eventApi)
-        val eventRepository = EventRepository(eventRemoteDataSource)
-        val factory = GenericViewModelFactory { EventViewModel(eventRepository) }
+        val eventRemote = EventRemoteDataSource(RetrofitClient.eventApi)
+        val eventRepo = EventRepository(eventRemote)
+        val factory = GenericViewModelFactory { EventViewModel(eventRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
     }
 
     val categoryViewModel = remember {
-        val categoryApi = RetrofitClient.categoryApi
-        val categoryRemoteDataSource = CategoryRemoteDataSource(categoryApi)
-        val categoryRepository = CategoryRepository(categoryRemoteDataSource)
-        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
+        val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
+        val categoryLocal = CategoryLocalDataSource(context)
+        val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
+        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo, networkChecker) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[CategoryViewModel::class.java]
     }
 
     val reminderViewModel = remember {
-        val reminderApi = RetrofitClient.reminderApi
-        val reminderReminderRemoteDataSource = ReminderRemoteDataSource(reminderApi)
-        val reminderRepository = ReminderRepository(reminderReminderRemoteDataSource)
-        val factory = GenericViewModelFactory { ReminderViewModel(reminderRepository) }
+        val reminderRemote = ReminderRemoteDataSource(RetrofitClient.reminderApi)
+        val reminderRepo = ReminderRepository(reminderRemote)
+        val factory = GenericViewModelFactory { ReminderViewModel(reminderRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[ReminderViewModel::class.java]
     }
 

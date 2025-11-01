@@ -2,13 +2,22 @@ package com.example.maiplan.repository.category
 
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.network.sync.Syncable
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleResponse
 
-class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource) {
+class CategoryRepository(
+    private val remote: CategoryRemoteDataSource,
+    private val local: CategoryLocalDataSource
+    ) : Syncable {
+
+    override suspend fun sync() {
+        TODO("Not yet implemented")
+    }
+
     suspend fun createCategory(category: CategoryCreate): Result<Unit> {
         return try {
-            handleResponse(remoteDataSource.createCategory(category))
+            handleResponse(remote.createCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -16,7 +25,7 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
 
     suspend fun getAllCategories(userId: Int): Result<List<CategoryResponse>> {
         return try {
-            handleResponse(remoteDataSource.getAllCategories(userId))
+            handleResponse(remote.getAllCategories(userId))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -24,7 +33,7 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
 
     suspend fun updateCategory(category: CategoryResponse): Result<Unit> {
         return try {
-            handleResponse(remoteDataSource.updateCategory(category))
+            handleResponse(remote.updateCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -32,7 +41,7 @@ class CategoryRepository(private val remoteDataSource: CategoryRemoteDataSource)
 
     suspend fun deleteCategory(categoryId: Int): Result<Unit> {
         return try {
-            handleResponse(remoteDataSource.deleteCategory(categoryId))
+            handleResponse(remote.deleteCategory(categoryId))
         } catch (e: Exception) {
             Result.Error(e)
         }

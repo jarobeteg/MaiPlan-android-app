@@ -3,6 +3,9 @@ package com.example.maiplan.repository.category
 import com.example.maiplan.network.api.CategoryApi
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.network.api.CategorySync
+import com.example.maiplan.network.sync.SyncRequest
+import com.example.maiplan.network.sync.SyncResponse
 import retrofit2.Response
 
 class CategoryRemoteDataSource(private val categoryApi: CategoryApi) {
@@ -20,5 +23,9 @@ class CategoryRemoteDataSource(private val categoryApi: CategoryApi) {
 
     suspend fun deleteCategory(categoryId: Int): Response<Unit> {
         return categoryApi.deleteCategory(categoryId)
+    }
+
+    suspend fun categorySync(request: SyncRequest<CategorySync>): Response<SyncResponse<CategorySync>> {
+        return categoryApi.categorySync(request)
     }
 }

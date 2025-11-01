@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
@@ -11,7 +12,10 @@ import com.example.maiplan.repository.category.CategoryRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class CategoryViewModel(private val categoryRepository: CategoryRepository) : ViewModel() {
+class CategoryViewModel(
+    private val categoryRepository: CategoryRepository,
+    private val networkChecker: NetworkChecker
+) : ViewModel() {
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
     val createCategoryResult: LiveData<Result<Unit>> get() = _createCategoryResult
 

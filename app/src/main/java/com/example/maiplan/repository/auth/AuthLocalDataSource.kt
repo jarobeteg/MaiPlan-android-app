@@ -6,7 +6,6 @@ import com.example.maiplan.database.dao.AuthDAO
 import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.database.entities.AuthEntityResponse
 import com.example.maiplan.network.api.UserLogin
-import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.utils.common.PasswordUtils
 
 class AuthLocalDataSource(private val context: Context) {

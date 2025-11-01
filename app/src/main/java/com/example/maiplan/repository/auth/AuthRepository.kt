@@ -22,9 +22,6 @@ class AuthRepository(
     private val local: AuthLocalDataSource
 ) : Syncable {
 
-    // a side note to later be fixed when the code will be refactored
-    // if the returned user_id is 0 or the user got registered on the server first
-    // how to sync such data as those
     override suspend fun sync() {
         try {
             val pendingUser: AuthEntity? = local.getPendingUser(UserSession.email!!)

@@ -14,7 +14,6 @@ import com.example.maiplan.database.entities.toUserResponse
 import com.example.maiplan.home.HomeActivity
 import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
-import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.repository.auth.AuthRepository
@@ -22,7 +21,6 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthLocalDataSource
 import com.example.maiplan.repository.auth.AuthRemoteDataSource
 import com.example.maiplan.theme.AppTheme
-import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
@@ -32,8 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : BaseActivity() {
-    private lateinit var networkChecker: NetworkChecker
-    private lateinit var sessionManager: SessionManager
     private lateinit var viewModel: AuthViewModel
     private var messageId: Int? = null
     private var uiInitialized = false
@@ -78,12 +74,9 @@ class MainActivity : BaseActivity() {
         val authLocal = AuthLocalDataSource(this)
         val authRepo = AuthRepository(authRemote, authLocal)
 
-        networkChecker = NetworkChecker(this)
-
         val factory = GenericViewModelFactory { AuthViewModel(authRepo, networkChecker) }
 
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
-        sessionManager = SessionManager(this)
     }
 
     private fun observeViewModel() {

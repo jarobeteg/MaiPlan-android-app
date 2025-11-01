@@ -10,6 +10,7 @@ import com.example.maiplan.category.navigation.CategoryNavHost
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.BaseActivity
@@ -23,16 +24,16 @@ class CategoryActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initViewModel()
+        setupDependencies()
         setupComposeUI()
         observeCategoryViewModel()
     }
 
-    private fun initViewModel() {
-        val categoryApi = RetrofitClient.categoryApi
-        val categoryRemoteDataSource = CategoryRemoteDataSource(categoryApi)
-        val categoryRepository = CategoryRepository(categoryRemoteDataSource)
-        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepository) }
+    private fun setupDependencies() {
+        val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
+        val categoryLocal = CategoryLocalDataSource(this)
+        val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
+        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo, networkChecker) }
 
         categoryViewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
         categoryViewModel.getAllCategories(UserSession.userId!!)
