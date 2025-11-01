@@ -41,6 +41,7 @@ fun CreateCategoryScreen(
     onBackClick: () -> Unit
 ) {
     val saveResult by viewModel.createCategoryResult.observeAsState()
+    val isLoading = saveResult is Result.Loading
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf(Color(0xFF4A6583)) }
@@ -75,7 +76,11 @@ fun CreateCategoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_save), onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) })
+            SubmitButtonComponent(
+                value = stringResource(R.string.category_save),
+                onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) },
+                isLoading = isLoading
+            )
 
             if (saveResult is Result.Failure) {
                 val error = saveResult as Result.Failure

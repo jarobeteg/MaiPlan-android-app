@@ -9,11 +9,12 @@ import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryRepository
+import com.example.maiplan.repository.orEmptyList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class CategoryViewModel(
-    private val categoryRepository: CategoryRepository,
+    private val categoryRepo: CategoryRepository,
     private val networkChecker: NetworkChecker
 ) : ViewModel() {
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
@@ -37,7 +38,8 @@ class CategoryViewModel(
 
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {
-            val result = categoryRepository.createCategory(category)
+            _createCategoryResult.postValue(Result.Loading)
+            val result = categoryRepo.createCategory(category)
             _createCategoryResult.postValue(result)
             if (result is Result.Success) getAllCategories(category.userId)
         }
@@ -45,10 +47,8 @@ class CategoryViewModel(
 
     fun getAllCategories(userId: Int) {
         viewModelScope.launch {
-            when (val result = categoryRepository.getAllCategories(userId)) {
-                is Result.Success -> _categoryList.postValue(result.data)
-                else -> _categoryList.postValue(emptyList())
-            }
+            val result = categoryRepo.getAllCategories(userId)
+            _categoryList.postValue(result.orEmptyList())
         }
     }
 
@@ -58,15 +58,16 @@ class CategoryViewModel(
 
     fun updateCategory(category: CategoryResponse, userId: Int) {
         viewModelScope.launch {
-            val result = categoryRepository.updateCategory(category, userId)
+            _updateCategoryResult.postValue(Result.Loading)
+            val result = categoryRepo.updateCategory(category, userId)
             _updateCategoryResult.postValue(result)
             if (result is Result.Success) getAllCategories(userId)
         }
     }
 
-    fun deleteCategory(categoryId: Int, userId: Int) {
+    fun softDeleteCategory(categoryId: Int, userId: Int) {
         viewModelScope.launch {
-            val result = categoryRepository.deleteCategory(categoryId, userId)
+            val result = categoryRepo.softDeleteCategory(categoryId, userId)
             _deleteCategoryResult.postValue(result)
             if (result is Result.Success) getAllCategories(userId)
         }

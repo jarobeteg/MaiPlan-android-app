@@ -47,7 +47,7 @@ fun NavGraphBuilder.categoryNavGraph(
         CategoryManagementScreen(
             viewModel = categoryViewModel,
             onCardSwipeDelete = { categoryId ->
-                categoryViewModel.deleteCategory(categoryId, userId)
+                categoryViewModel.softDeleteCategory(categoryId, userId)
             },
             onCardSwipeEdit = { category ->
                 // Prevent double navigation using isNavigating flag

@@ -34,3 +34,16 @@ sealed class Result<out T> {
     data class Failure(val errorCode: Int) : Result<Nothing>()
     data class Error(val exception: Exception) : Result<Nothing>()
 }
+
+inline fun <T, R> Result<T>.map(transform: (T) -> R): Result<R> = when (this) {
+    is Result.Success -> Result.Success(transform(data))
+    is Result.Failure -> Result.Failure(errorCode)
+    is Result.Error -> Result.Error(exception)
+    is Result.Loading -> Result.Loading
+    is Result.Idle -> Result.Idle
+}
+
+fun <T> Result<List<T>>.orEmptyList(): List<T> = when (this) {
+    is Result.Success -> data
+    else -> emptyList()
+}

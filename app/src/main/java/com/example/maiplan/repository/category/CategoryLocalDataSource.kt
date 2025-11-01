@@ -54,6 +54,13 @@ class CategoryLocalDataSource(private val context: Context) {
         }
     }
 
+    suspend fun softDeleteCategory(categoryId: Int, userId: Int): Result<Unit> {
+        println("categoryId: $categoryId, userId: $userId")
+        return handleLocalResponse {
+            categoryDao.softDeleteCategory(categoryId, userId)
+        }
+    }
+
     suspend fun deleteCategory(category: CategoryEntity): Result<Unit> {
         return handleLocalResponse {
             categoryDao.deleteCategory(category)

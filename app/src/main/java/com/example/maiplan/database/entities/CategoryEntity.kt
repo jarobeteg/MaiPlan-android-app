@@ -106,13 +106,14 @@ fun CategoryEntity.toCategoryResponse(): CategoryResponse {
     )
 }
 
-fun CategoryResponse.toCategoryEntity(userId: Int): CategoryEntity {
+fun CategoryResponse.toCategoryEntity(userId: Int, syncState: Int): CategoryEntity {
     return CategoryEntity (
         categoryId = this.categoryId,
         userId = userId,
         name = this.name,
         description = this.description,
         color = this.color,
-        icon = this.icon
+        icon = this.icon,
+        syncState = syncState
     )
 }

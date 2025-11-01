@@ -43,6 +43,7 @@ fun UpdateCategoryScreen(
     onBackClick: () -> Unit
 ) {
     val saveResult by viewModel.updateCategoryResult.observeAsState()
+    val isLoading = saveResult is Result.Loading
     var name by remember { mutableStateOf(category.name) }
     var description by remember { mutableStateOf(category.description) }
     var selectedColor by remember { mutableStateOf(Color(category.color.toULong())) }
@@ -97,7 +98,11 @@ fun UpdateCategoryScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SubmitButtonComponent(stringResource(R.string.category_update), onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) })
+            SubmitButtonComponent(
+                value = stringResource(R.string.category_update),
+                onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) },
+                isLoading = isLoading
+                )
         }
     }
 }
