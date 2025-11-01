@@ -4,6 +4,8 @@ import android.content.Context
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.database.dao.CategoryDAO
 import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.handleLocalResponse
 
 class CategoryLocalDataSource(private val context: Context) {
 
@@ -15,19 +17,25 @@ class CategoryLocalDataSource(private val context: Context) {
         database.categoryDAO()
     }
 
-    suspend fun getPendingCategory(categoryId: Int): CategoryEntity? {
-        return categoryDao.getPendingCategory(categoryId)
+    suspend fun getPendingCategory(categoryId: Int): Result<CategoryEntity?> {
+        return handleLocalResponse {
+            categoryDao.getPendingCategory(categoryId)
+        }
     }
 
-    suspend fun getCategory(categoryId: Int): CategoryEntity? {
-        return categoryDao.getCategory(categoryId)
+    suspend fun getCategory(categoryId: Int): Result<CategoryEntity?> {
+        return handleLocalResponse {
+            categoryDao.getCategory(categoryId)
+        }
     }
 
-    suspend fun categoryUpsert(category: CategoryEntity){
+    suspend fun categoryUpsert(category: CategoryEntity) {
         categoryDao.categoryUpsert(category)
     }
 
-    suspend fun deleteCategory(category: CategoryEntity): Int {
-        return categoryDao.deleteCategory(category)
+    suspend fun deleteCategory(category: CategoryEntity): Result<Int> {
+        return handleLocalResponse {
+            categoryDao.deleteCategory(category)
+        }
     }
 }

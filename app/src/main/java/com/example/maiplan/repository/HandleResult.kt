@@ -4,7 +4,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonObject
 import retrofit2.Response
 
-fun <T> handleResponse(response: Response<T>): Result<T> {
+fun <T> handleRemoteResponse(response: Response<T>): Result<T> {
     return if (response.isSuccessful) {
         response.body()?.let {
             Result.Success(it)
@@ -15,6 +15,15 @@ fun <T> handleResponse(response: Response<T>): Result<T> {
         val errorDetail = json.getAsJsonObject("detail")
         val errorCode = errorDetail?.get("code")?.asInt ?: -1
         Result.Failure(errorCode)
+    }
+}
+
+suspend fun <T> handleLocalResponse(block: suspend () -> T): Result<T> {
+    return try {
+        val data = block()
+        Result.Success(data)
+    } catch (e: Exception) {
+        Result.Error(e)
     }
 }
 

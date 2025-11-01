@@ -14,7 +14,7 @@ import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.network.sync.SyncRequest
 import com.example.maiplan.network.sync.Syncable
 import com.example.maiplan.repository.Result
-import com.example.maiplan.repository.handleResponse
+import com.example.maiplan.repository.handleRemoteResponse
 import com.example.maiplan.utils.common.UserSession
 
 class AuthRepository(
@@ -44,7 +44,7 @@ class AuthRepository(
 
     suspend fun register(user: UserRegister): Result<AuthResponse> {
         return try {
-            handleResponse(remote.register(user))
+            handleRemoteResponse(remote.register(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -52,7 +52,7 @@ class AuthRepository(
 
     suspend fun login(user: UserLogin): Result<AuthResponse> {
         return try {
-            handleResponse(remote.login(user))
+            handleRemoteResponse(remote.login(user))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -64,7 +64,7 @@ class AuthRepository(
 
     suspend fun resetPassword(user: UserResetPassword): Result<AuthResponse> {
         return try {
-            handleResponse(remote.resetPassword(user))
+            handleRemoteResponse(remote.resetPassword(user))
         } catch (e: Exception){
             Result.Error(e)
         }
@@ -72,7 +72,7 @@ class AuthRepository(
 
     suspend fun tokenRefresh(token: String): Result<Token> {
         return try {
-            handleResponse(remote.tokenRefresh(token))
+            handleRemoteResponse(remote.tokenRefresh(token))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -80,7 +80,7 @@ class AuthRepository(
 
     suspend fun getProfile(token: String): Result<AuthResponse> {
         return try {
-            handleResponse(remote.getProfile(token))
+            handleRemoteResponse(remote.getProfile(token))
         } catch (e: Exception) {
             Result.Error(e)
         }

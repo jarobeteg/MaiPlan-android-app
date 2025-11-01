@@ -4,7 +4,7 @@ import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.network.sync.Syncable
 import com.example.maiplan.repository.Result
-import com.example.maiplan.repository.handleResponse
+import com.example.maiplan.repository.handleRemoteResponse
 
 class CategoryRepository(
     private val remote: CategoryRemoteDataSource,
@@ -17,7 +17,7 @@ class CategoryRepository(
 
     suspend fun createCategory(category: CategoryCreate): Result<Unit> {
         return try {
-            handleResponse(remote.createCategory(category))
+            handleRemoteResponse(remote.createCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -25,7 +25,7 @@ class CategoryRepository(
 
     suspend fun getAllCategories(userId: Int): Result<List<CategoryResponse>> {
         return try {
-            handleResponse(remote.getAllCategories(userId))
+            handleRemoteResponse(remote.getAllCategories(userId))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -33,7 +33,7 @@ class CategoryRepository(
 
     suspend fun updateCategory(category: CategoryResponse): Result<Unit> {
         return try {
-            handleResponse(remote.updateCategory(category))
+            handleRemoteResponse(remote.updateCategory(category))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -41,7 +41,7 @@ class CategoryRepository(
 
     suspend fun deleteCategory(categoryId: Int): Result<Unit> {
         return try {
-            handleResponse(remote.deleteCategory(categoryId))
+            handleRemoteResponse(remote.deleteCategory(categoryId))
         } catch (e: Exception) {
             Result.Error(e)
         }
