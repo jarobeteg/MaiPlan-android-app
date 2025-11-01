@@ -9,6 +9,10 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
 
 class CategoryLocalDataSource(private val context: Context) {
+    companion object {
+        private const val EMPTY_CATEGORY_NAME_ERROR = 1
+        private const val EMPTY_CATEGORY_DESCRIPTION_ERROR = 2
+    }
 
     private val database: MaiPlanDatabase by lazy {
         MaiPlanDatabase.getDatabase(context)
@@ -37,9 +41,17 @@ class CategoryLocalDataSource(private val context: Context) {
     }
 
     suspend fun categoryUpsert(category: CategoryEntity): Result<Unit> {
-       return handleLocalResponse {
-           categoryDao.categoryUpsert(category)
-       }
+        if (category.name.isEmpty() || category.name.isBlank()) {
+            return Result.Failure(EMPTY_CATEGORY_NAME_ERROR)
+        }
+
+        if (category.description.isEmpty() || category.description.isBlank()) {
+            return Result.Failure(EMPTY_CATEGORY_DESCRIPTION_ERROR)
+        }
+
+        return handleLocalResponse {
+            categoryDao.categoryUpsert(category)
+        }
     }
 
     suspend fun deleteCategory(category: CategoryEntity): Result<Unit> {
