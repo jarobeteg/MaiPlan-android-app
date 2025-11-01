@@ -8,11 +8,14 @@ import com.example.maiplan.database.entities.CategoryEntity
 
 @Dao
 interface CategoryDAO {
-    @Query("SELECT * FROM category WHERE category_id = :categoryId AND sync_state != 0")
-    suspend fun getPendingCategory(categoryId: Int): CategoryEntity?
+    @Query("SELECT * FROM category WHERE user_id = :userId AND sync_state != 0")
+    suspend fun getPendingCategories(userId: Int): List<CategoryEntity>
 
-    @Query("SELECT * FROM category WHERE category_id = :categoryId")
-    suspend fun getCategory(categoryId: Int): CategoryEntity?
+    @Query("SELECT * FROM category WHERE category_id = :categoryId AND user_id = :userId")
+    suspend fun getCategory(categoryId: Int, userId: Int): CategoryEntity
+
+    @Query("SELECT * FROM category WHERE user_id = :userId")
+    suspend fun getCategories(userId: Int): List<CategoryEntity>
 
     @Upsert
     suspend fun categoryUpsert(entity: CategoryEntity)
