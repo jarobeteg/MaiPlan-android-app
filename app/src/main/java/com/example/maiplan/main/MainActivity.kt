@@ -16,6 +16,7 @@ import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.AuthResponse
+import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthLocalDataSource
@@ -42,25 +43,25 @@ class MainActivity : BaseActivity() {
         observeViewModel()
 
         lifecycleScope.launch {
-            val token = withContext(Dispatchers.IO) { sessionManager.getToken() }
+            val isReachable = withContext(Dispatchers.IO) { networkChecker.canReachServer() }
+            if (!isReachable) Toast.makeText(this@MainActivity, getString(R.string.server_unreachable), Toast.LENGTH_SHORT).show()
 
-            /*
-            * if there is no token, proceed with setting up UI. The user has to login either remotely or locally
-            *
-            * if there is a valid token, we check if the server is reachable
-            * if its reachable we get the profile and refresh the token
-            * if its unreachable we still log the user in but no token refresh will occur
-            * but where to get user info from? reverse the token to get user id?
-            */
+            val token = withContext(Dispatchers.IO) { sessionManager.getToken() }
 
             if (token == null) {
                 setupComposeUIOnce()
+                return@launch
+            }
+
+            if (isReachable) {
+                viewModel.getProfile(token)
             } else {
-                val isReachable = withContext(Dispatchers.IO) { networkChecker.canReachServer() }
-                if (isReachable) {
-                    viewModel.getProfile(token)
+                val user = sessionManager.getUserInfo()
+                if (user != null) {
+                    UserSession.setup(user)
+                    messageId = R.string.welcome_back
+                    goToHome()
                 } else {
-                    Toast.makeText(this@MainActivity, getString(R.string.server_unreachable), Toast.LENGTH_SHORT).show()
                     setupComposeUIOnce()
                 }
             }
@@ -91,8 +92,7 @@ class MainActivity : BaseActivity() {
     private fun observeViewModel() {
         val authObserver = Observer<Result<AuthResponse>> { result ->
             if (result is Result.Success) {
-                UserSession.setup(result.data.user)
-                sessionManager.saveToken(result.data.accessToken)
+                sessionManager.saveSession(result.data.accessToken, result.data.user)
                 goToHome()
             } else {
                 handleAuthFailure(result)
@@ -102,14 +102,13 @@ class MainActivity : BaseActivity() {
         viewModel.profileResult.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
-                    UserSession.setup(result.data.user)
-                    sessionManager.saveToken(result.data.accessToken)
+                    sessionManager.saveSession(result.data.accessToken, result.data.user)
                     messageId = R.string.welcome_back
                     goToHome()
                 }
                 is Result.Failure, is Result.Error -> {
                     Toast.makeText(this, getString(R.string.no_user_data_found), Toast.LENGTH_SHORT).show()
-                    sessionManager.clearToken()
+                    sessionManager.clear()
                     setupComposeUIOnce()
                 }
                 else -> {}
