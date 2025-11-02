@@ -85,7 +85,7 @@ fun CategorySync.toCategoryEntity(): CategoryEntity {
         name = this.name,
         description = this.description,
         color = this.color,
-        icon = this.color,
+        icon = this.icon,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         lastModified = this.lastModified,
@@ -113,17 +113,5 @@ fun CategoryEntity.toCategoryResponse(): CategoryResponse {
         description = this.description,
         color = this.color,
         icon = this.icon
-    )
-}
-
-fun CategoryResponse.toCategoryEntity(userId: Int, syncState: Int): CategoryEntity {
-    return CategoryEntity (
-        categoryId = this.categoryId,
-        userId = userId,
-        name = this.name,
-        description = this.description,
-        color = this.color,
-        icon = this.icon,
-        syncState = syncState
     )
 }

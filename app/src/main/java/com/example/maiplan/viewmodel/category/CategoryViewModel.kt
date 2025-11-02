@@ -36,6 +36,12 @@ class CategoryViewModel(
         clearErrors()
     }
 
+    fun sync() {
+        viewModelScope.launch {
+            categoryRepo.sync()
+        }
+    }
+
     fun createCategory(category: CategoryCreate) {
         viewModelScope.launch {
             _createCategoryResult.postValue(Result.Loading)

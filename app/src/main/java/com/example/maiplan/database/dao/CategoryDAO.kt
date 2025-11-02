@@ -2,8 +2,8 @@ package com.example.maiplan.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
 import com.example.maiplan.database.entities.CategoryEntity
 
@@ -20,6 +20,21 @@ interface CategoryDAO {
 
     @Upsert
     suspend fun categoryUpsert(entity: CategoryEntity)
+
+    @Insert
+    suspend fun categoryInsert(entity: CategoryEntity)
+
+    @Query("""
+        UPDATE category
+        SET
+            name = :name,
+            description = :description,
+            color = :color,
+            icon = :icon,
+            sync_state = 2
+        WHERE category_id = :categoryId AND user_id = :userId
+    """)
+    suspend fun categoryUpdate(name: String, description: String, color: String, icon: String, categoryId: Int, userId: Int)
 
     @Query("UPDATE category SET sync_state = 98, is_deleted = 1 WHERE category_id = :categoryId AND user_id = :userId")
     suspend fun softDeleteCategory(categoryId: Int, userId: Int)

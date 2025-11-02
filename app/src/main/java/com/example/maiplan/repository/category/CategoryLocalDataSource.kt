@@ -41,6 +41,18 @@ class CategoryLocalDataSource(private val context: Context) {
     }
 
     suspend fun categoryUpsert(category: CategoryEntity): Result<Unit> {
+        return handleLocalResponse {
+            categoryDao.categoryUpsert(category)
+        }
+    }
+
+    suspend fun categoryUpdate(category: CategoryResponse, userId: Int): Result<Unit> {
+        return handleLocalResponse {
+            categoryDao.categoryUpdate(category.name, category.description, category.color, category.icon, category.categoryId, userId)
+        }
+    }
+
+    suspend fun categoryInsert(category: CategoryEntity): Result<Unit> {
         if (category.name.isEmpty() || category.name.isBlank()) {
             return Result.Failure(EMPTY_CATEGORY_NAME_ERROR)
         }
@@ -50,12 +62,11 @@ class CategoryLocalDataSource(private val context: Context) {
         }
 
         return handleLocalResponse {
-            categoryDao.categoryUpsert(category)
+            categoryDao.categoryInsert(category)
         }
     }
 
     suspend fun softDeleteCategory(categoryId: Int, userId: Int): Result<Unit> {
-        println("categoryId: $categoryId, userId: $userId")
         return handleLocalResponse {
             categoryDao.softDeleteCategory(categoryId, userId)
         }

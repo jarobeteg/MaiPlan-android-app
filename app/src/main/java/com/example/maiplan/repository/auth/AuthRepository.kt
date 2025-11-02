@@ -27,7 +27,7 @@ class AuthRepository(
             val pendingUser: AuthEntity? = local.getPendingUser(UserSession.userId!!)
             val changes: MutableList<AuthSync> = mutableListOf()
             if (pendingUser != null) changes.add(pendingUser.toAuthSync())
-            val request : SyncRequest<AuthSync> = SyncRequest(UserSession.userId!!, changes)
+            val request: SyncRequest<AuthSync> = SyncRequest(UserSession.userId!!, changes)
             val response = remote.authSync(request)
 
             if (response.isSuccessful) {

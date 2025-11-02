@@ -19,7 +19,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 
 class CategoryActivity : BaseActivity() {
-    private lateinit var categoryViewModel: CategoryViewModel
+    private lateinit var viewModel: CategoryViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +27,9 @@ class CategoryActivity : BaseActivity() {
         setupDependencies()
         setupComposeUI()
         observeCategoryViewModel()
+
+        // this is only temporary for testing purpose only - it will be removed later on
+        viewModel.sync()
     }
 
     private fun setupDependencies() {
@@ -35,14 +38,14 @@ class CategoryActivity : BaseActivity() {
         val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
         val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo, networkChecker) }
 
-        categoryViewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
-        categoryViewModel.getAllCategories(UserSession.userId!!)
+        viewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
+        viewModel.getAllCategories(UserSession.userId!!)
     }
 
     private fun setupComposeUI() {
         setContent {
             AppTheme {
-                CategoryNavHost(categoryViewModel)
+                CategoryNavHost(viewModel)
             }
         }
     }
@@ -58,8 +61,8 @@ class CategoryActivity : BaseActivity() {
             }
         }
 
-        categoryViewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_created_success) })
-        categoryViewModel.updateCategoryResult.observe(this, Observer { handleResult(it, R.string.category_updated_success) })
-        categoryViewModel.deleteCategoryResult.observe(this, Observer { handleResult(it, R.string.category_deleted) })
+        viewModel.createCategoryResult.observe(this, Observer { handleResult(it, R.string.category_created_success) })
+        viewModel.updateCategoryResult.observe(this, Observer { handleResult(it, R.string.category_updated_success) })
+        viewModel.deleteCategoryResult.observe(this, Observer { handleResult(it, R.string.category_deleted) })
     }
 }
