@@ -42,6 +42,12 @@ data class CategoryEntity(
 
     val icon: String,
 
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "updated_at")
+    val updatedAt: Long = System.currentTimeMillis(),
+
     @ColumnInfo(name = "last_modified")
     val lastModified: Long = System.currentTimeMillis(),
 
@@ -64,6 +70,8 @@ fun CategoryEntity.toCategorySync(): CategorySync {
         description = this.description,
         color = this.color,
         icon = this.icon,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
         lastModified = this.lastModified,
         syncState = this.syncState,
         isDeleted = this.isDeleted
@@ -78,6 +86,8 @@ fun CategorySync.toCategoryEntity(): CategoryEntity {
         description = this.description,
         color = this.color,
         icon = this.color,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
         lastModified = this.lastModified,
         syncState = this.syncState,
         isDeleted = this.isDeleted,

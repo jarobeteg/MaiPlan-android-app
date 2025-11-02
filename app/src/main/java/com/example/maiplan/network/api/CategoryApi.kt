@@ -35,6 +35,8 @@ data class CategorySync(
     val description: String,
     val color: String,
     val icon: String,
+    @SerializedName("created_at") val createdAt: Long,
+    @SerializedName("updated_at") val updatedAt: Long,
     @SerializedName("last_modified") val lastModified: Long,
     @SerializedName("sync_state") val syncState: Int = 0,
     @SerializedName("is_deleted") val isDeleted: Int = 0
