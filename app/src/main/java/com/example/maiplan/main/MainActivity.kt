@@ -44,6 +44,15 @@ class MainActivity : BaseActivity() {
         lifecycleScope.launch {
             val token = withContext(Dispatchers.IO) { sessionManager.getToken() }
 
+            /*
+            * if there is no token, proceed with setting up UI. The user has to login either remotely or locally
+            *
+            * if there is a valid token, we check if the server is reachable
+            * if its reachable we get the profile and refresh the token
+            * if its unreachable we still log the user in but no token refresh will occur
+            * but where to get user info from? reverse the token to get user id?
+            */
+
             if (token == null) {
                 setupComposeUIOnce()
             } else {
