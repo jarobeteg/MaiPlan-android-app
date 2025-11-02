@@ -1,12 +1,15 @@
 package com.example.maiplan.utils
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.view.WindowManager
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.WindowCompat.getInsetsController
 import androidx.core.view.WindowCompat.setDecorFitsSystemWindows
+import com.example.maiplan.main.MainActivity
 import com.example.maiplan.network.NetworkChecker
 
 open class BaseActivity : ComponentActivity() {
@@ -37,5 +40,20 @@ open class BaseActivity : ComponentActivity() {
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
         )
+    }
+
+    fun logout() {
+        sessionManager.clearAll()
+
+        val options = ActivityOptionsCompat.makeCustomAnimation(
+            this,
+            android.R.anim.fade_in,
+            android.R.anim.fade_out
+        )
+
+        val intent = Intent(this, MainActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent, options.toBundle())
+        finish()
     }
 }

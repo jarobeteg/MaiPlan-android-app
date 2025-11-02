@@ -45,6 +45,11 @@ class SessionManager(context: Context) {
         return UserResponse(userId, username, email)
     }
 
+    fun clearAll() {
+        UserSession.clear()
+        clear()
+    }
+
     fun clear() {
         sharedPreferences.edit { clear() }
     }

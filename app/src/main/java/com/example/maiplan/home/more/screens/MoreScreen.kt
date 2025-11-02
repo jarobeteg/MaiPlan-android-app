@@ -20,6 +20,8 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -27,9 +29,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,6 +49,7 @@ import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.navigation.HomeNavigationBar
+import com.example.maiplan.utils.BaseActivity
 
 @Composable
 fun MoreScreen(
@@ -50,6 +57,8 @@ fun MoreScreen(
     rootNavController: NavHostController
 ) {
     val context = LocalContext.current
+    val onLogoutClick = logoutHandler()
+
     Scaffold(
         topBar = { MoreTopBar() },
         bottomBar = { HomeNavigationBar(rootNavController, context) }
@@ -65,7 +74,7 @@ fun MoreScreen(
             MoreScreenButton(stringResource(R.string.category_management), { openActivity(context, CategoryActivity::class.java) }, Icons.Filled.Category, true)
             MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
             MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, true)
-            MoreScreenButton(stringResource(R.string.logout), onClick = { println("logout") }, Icons.AutoMirrored.Filled.Logout, false)
+            MoreScreenButton(stringResource(R.string.logout), onClick = onLogoutClick, Icons.AutoMirrored.Filled.Logout, false)
         }
     }
 }
@@ -143,6 +152,43 @@ fun MoreScreenButton(
             )
         }
     }
+}
+
+@Composable
+fun logoutHandler() : () -> Unit {
+    val context = LocalContext.current
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = {
+                Text(
+                    text = stringResource(R.string.logout_dialog),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDialog = false
+                        (context as? BaseActivity)?.logout()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                ) { Text(stringResource(R.string.yes)) }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDialog = false },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                ) { Text(stringResource(R.string.cancel)) }
+            },
+            containerColor = MaterialTheme.colorScheme.primary
+        )
+    }
+
+    return { showDialog = true }
 }
 
 fun openActivity(context: Context, activity: Class<out Activity>) {
