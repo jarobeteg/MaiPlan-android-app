@@ -5,12 +5,12 @@ interface Syncable {
 }
 
 data class SyncRequest<T>(
-    val email: String,
+    val userId: Int,
     val changes: List<T>
 )
 
 data class SyncResponse<T>(
-    val email: String,
+    val userId: Int,
     val acknowledged: List<T>,   // records that were acknowledged during sync
     val rejected: List<T>       // records that were rejected during sync
 )

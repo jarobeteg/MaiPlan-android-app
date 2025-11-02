@@ -31,8 +31,8 @@ class AuthLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun getPendingUser(email: String): AuthEntity? {
-        return authDAO.getPendingUser(email)
+    suspend fun getPendingUser(userId: Int): AuthEntity? {
+        return authDAO.getPendingUser(userId)
     }
 
     suspend fun authSync(entity: AuthEntity) {

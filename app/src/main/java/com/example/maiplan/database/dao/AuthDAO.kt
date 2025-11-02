@@ -11,8 +11,8 @@ import com.example.maiplan.database.entities.AuthEntityResponse
 
 @Dao
 interface AuthDAO {
-    @Query("SELECT * FROM auth WHERE email = :email AND sync_state != 0")
-    suspend fun getPendingUser(email: String): AuthEntity?
+    @Query("SELECT * FROM auth WHERE user_id = :userId AND sync_state != 0")
+    suspend fun getPendingUser(userId: Int): AuthEntity?
 
     @Query("SELECT * FROM auth WHERE email = :email")
     suspend fun getUserByEmail(email: String): AuthEntity?
