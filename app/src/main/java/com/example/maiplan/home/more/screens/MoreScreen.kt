@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -74,6 +75,7 @@ fun MoreScreen(
             MoreScreenButton(stringResource(R.string.category_management), { openActivity(context, CategoryActivity::class.java) }, Icons.Filled.Category, true)
             MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
             MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, true)
+            MoreScreenButton(stringResource(R.string.sync), onClick = { println("sync") }, Icons.Filled.Sync, true)
             MoreScreenButton(stringResource(R.string.logout), onClick = onLogoutClick, Icons.AutoMirrored.Filled.Logout, false)
         }
     }
