@@ -69,6 +69,7 @@ dependencies {
     implementation(libs.material.icons.extended)
     implementation(libs.lifecycle.runtime.compose)
     implementation(libs.compose.foundation)
+    implementation(libs.androidx.work.runtime.ktx)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     ksp(libs.room.compiler)

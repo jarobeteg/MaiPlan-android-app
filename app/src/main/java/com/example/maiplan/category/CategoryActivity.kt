@@ -29,7 +29,7 @@ class CategoryActivity : BaseActivity() {
         observeCategoryViewModel()
 
         // this is only temporary for testing purpose only - it will be removed later on
-        viewModel.sync()
+        //viewModel.sync()
     }
 
     private fun setupDependencies() {
