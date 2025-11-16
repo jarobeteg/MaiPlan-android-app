@@ -18,4 +18,8 @@ object UserSession {
         email = null
         username = null
     }
+
+    fun isLoggedIn(): Boolean {
+        return userId != null && email != null && username != null
+    }
 }

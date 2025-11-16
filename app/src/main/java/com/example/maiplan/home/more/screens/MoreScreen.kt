@@ -50,6 +50,7 @@ import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.navigation.HomeNavigationBar
+import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.utils.BaseActivity
 
 @Composable
@@ -75,7 +76,7 @@ fun MoreScreen(
             MoreScreenButton(stringResource(R.string.category_management), { openActivity(context, CategoryActivity::class.java) }, Icons.Filled.Category, true)
             MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
             MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, true)
-            MoreScreenButton(stringResource(R.string.sync), onClick = { println("sync") }, Icons.Filled.Sync, true)
+            MoreScreenButton(stringResource(R.string.sync), onClick = { SyncScheduler.runOneTimeSync(context) }, Icons.Filled.Sync, true)
             MoreScreenButton(stringResource(R.string.logout), onClick = onLogoutClick, Icons.AutoMirrored.Filled.Logout, false)
         }
     }

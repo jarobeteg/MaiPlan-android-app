@@ -3,10 +3,7 @@ package com.example.maiplan.network.sync
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.example.maiplan.network.RetrofitClient
-import com.example.maiplan.repository.category.CategoryLocalDataSource
-import com.example.maiplan.repository.category.CategoryRemoteDataSource
-import com.example.maiplan.repository.category.CategoryRepository
+import com.example.maiplan.utils.common.UserSession
 
 class SyncWorker(
     appContext: Context,
@@ -14,18 +11,15 @@ class SyncWorker(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {
+        if (!UserSession.isLoggedIn()) {
+            return Result.success()
+        }
+
+        val manager = ServiceLocator.provideSyncManager(applicationContext)
         return try {
-            val context = applicationContext
-            val api = RetrofitClient.categoryApi
-            val local = CategoryLocalDataSource(context)
-            val remote = CategoryRemoteDataSource(api)
-            val repo = CategoryRepository(remote, local)
-
-            repo.sync()
-
+            manager.syncAll()
             Result.success()
-        } catch (e: Exception) {
-            e.printStackTrace()
+        } catch (_: Exception) {
             Result.retry()
         }
     }

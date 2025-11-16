@@ -1,4 +1,12 @@
 package com.example.maiplan.network.sync
 
-class SyncManager {
+import com.example.maiplan.repository.category.CategoryRepository
+
+class SyncManager (
+    private val categoryRepo: CategoryRepository
+) {
+
+    suspend fun syncAll() {
+        categoryRepo.sync()
+    }
 }
