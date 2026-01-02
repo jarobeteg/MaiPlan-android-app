@@ -33,8 +33,11 @@ import com.example.maiplan.components.PriorityDropdown
 import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
+import com.example.maiplan.database.entities.EventEntity
+import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.reminder.ReminderViewModel
@@ -48,7 +51,7 @@ fun CreateEventScreen(
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
     reminderViewModel: ReminderViewModel,
-    onSaveClick: () -> Unit,
+    onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
     categoryViewModel.getAllCategories(UserSession.userId!!)
@@ -104,7 +107,30 @@ fun CreateEventScreen(
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
 
-            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {})
+            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {
+                var reminder: ReminderEntity? = null
+                dateTime?.let {
+                    reminder = ReminderEntity(
+                        userId = UserSession.userId!!,
+                        reminderTime = it.toEpochMillis(),
+                        message = message,
+                        syncState = 4
+                    )
+                }
+
+                val event = EventEntity(
+                    userId = UserSession.userId!!,
+                    title = title,
+                    description = description,
+                    date = date?.toEpochDay() ?: LocalDate.now().toEpochDay(),
+                    startTime = startTime?.toNanoOfDay(),
+                    endTime = endTime?.toNanoOfDay(),
+                    priority = priority,
+                    location = location,
+                    syncState = 4
+                    )
+                onSaveClick(reminder, event)
+            })
         }
     }
 }

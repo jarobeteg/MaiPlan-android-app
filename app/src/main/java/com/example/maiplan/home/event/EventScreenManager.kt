@@ -13,6 +13,7 @@ import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.repository.category.CategoryRepository
+import com.example.maiplan.repository.event.EventLocalDataSource
 import com.example.maiplan.repository.event.EventRemoteDataSource
 import com.example.maiplan.repository.event.EventRepository
 import com.example.maiplan.repository.reminder.ReminderRemoteDataSource
@@ -30,7 +31,8 @@ fun EventScreenManager(rootNavController: NavHostController) {
 
     val eventViewModel = remember {
         val eventRemote = EventRemoteDataSource(RetrofitClient.eventApi)
-        val eventRepo = EventRepository(eventRemote)
+        val eventLocal = EventLocalDataSource(context)
+        val eventRepo = EventRepository(eventRemote, eventLocal)
         val factory = GenericViewModelFactory { EventViewModel(eventRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
     }

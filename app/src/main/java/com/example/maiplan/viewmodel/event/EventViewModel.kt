@@ -4,6 +4,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maiplan.database.entities.EventEntity
+import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.network.api.EventCreate
 import com.example.maiplan.network.api.EventResponse
 import com.example.maiplan.repository.Result
@@ -19,6 +21,12 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
 
     private var _eventList = MutableLiveData<List<EventResponse>>()
     val eventList: LiveData<List<EventResponse>> get() = _eventList
+
+    fun createEventWithReminder(reminder: ReminderEntity?, event: EventEntity) {
+        viewModelScope.launch {
+            eventRepository.createEventWithReminder(reminder, event)
+        }
+    }
 
     fun createEvent(event: EventCreate) {
         viewModelScope.launch {
