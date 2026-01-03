@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.example.maiplan.network.api.ReminderSync
 
 @Entity(
     tableName = "reminder",
@@ -40,6 +41,12 @@ data class ReminderEntity(
 
     val message: String? = null,
 
+    @ColumnInfo(name = "created_at")
+    val createdAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "updated_at")
+    val updatedAt: Long = System.currentTimeMillis(),
+
     @ColumnInfo(name = "last_modified")
     val lastModified: Long = System.currentTimeMillis(),
 
@@ -52,3 +59,37 @@ data class ReminderEntity(
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
 )
+
+fun ReminderEntity.toReminderSync(): ReminderSync {
+    return ReminderSync(
+        reminderId = this.reminderId,
+        serverId = this.serverId ?: 0,
+        userId = this.userId,
+        reminderTime = this.reminderTime,
+        frequency = this.frequency,
+        status = this.status,
+        message = this.message ?: "",
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted
+    )
+}
+
+fun ReminderSync.toReminderEntity(): ReminderEntity {
+    return ReminderEntity(
+        reminderId = this.reminderId,
+        serverId = this.serverId,
+        userId = this.userId,
+        reminderTime = this.reminderTime,
+        frequency = this.frequency,
+        status = this.status,
+        message = this.message,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        lastModified = this.lastModified,
+        syncState = this.syncState,
+        isDeleted = this.isDeleted
+    )
+}

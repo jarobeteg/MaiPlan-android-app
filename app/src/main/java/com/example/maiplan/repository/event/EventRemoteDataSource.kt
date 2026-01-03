@@ -3,6 +3,9 @@ package com.example.maiplan.repository.event
 import com.example.maiplan.network.api.EventApi
 import com.example.maiplan.network.api.EventCreate
 import com.example.maiplan.network.api.EventResponse
+import com.example.maiplan.network.api.EventSync
+import com.example.maiplan.network.sync.SyncRequest
+import com.example.maiplan.network.sync.SyncResponse
 import retrofit2.Response
 
 class EventRemoteDataSource(private val eventApi: EventApi) {
@@ -16,5 +19,9 @@ class EventRemoteDataSource(private val eventApi: EventApi) {
 
     suspend fun getAllEvents(userId: Int): Response<List<EventResponse>> {
         return eventApi.getAllEvents(userId)
+    }
+
+    suspend fun eventSync(request: SyncRequest<EventSync>): Response<SyncResponse<EventSync>> {
+        return eventApi.eventSync(request)
     }
 }

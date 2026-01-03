@@ -7,6 +7,8 @@ import com.example.maiplan.database.dao.EventDAO
 import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
+import com.example.maiplan.repository.Result
+import com.example.maiplan.repository.handleLocalResponse
 
 class EventLocalDataSource(private val context: Context) {
     private val database: MaiPlanDatabase by lazy {
@@ -31,5 +33,29 @@ class EventLocalDataSource(private val context: Context) {
         }
 
         eventDao.eventInsert(event.copy(reminderId = reminderId))
+    }
+
+    suspend fun eventUpsert(event: EventEntity): Result<Unit> {
+        return handleLocalResponse {
+            eventDao.eventUpsert(event)
+        }
+    }
+
+    suspend fun deleteEvent(event: EventEntity): Result<Unit> {
+        return handleLocalResponse {
+            eventDao.deleteEvent(event)
+        }
+    }
+
+    suspend fun softDeleteEvent(eventId: Int, userId: Int): Result<Unit> {
+        return handleLocalResponse {
+            eventDao.softDeleteEvent(eventId, userId)
+        }
+    }
+
+    suspend fun getPendingEvents(userId: Int): Result<List<EventEntity>> {
+        return handleLocalResponse {
+            eventDao.getPendingEvents(userId)
+        }
     }
 }

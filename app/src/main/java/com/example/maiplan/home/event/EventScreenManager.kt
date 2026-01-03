@@ -16,6 +16,7 @@ import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.event.EventLocalDataSource
 import com.example.maiplan.repository.event.EventRemoteDataSource
 import com.example.maiplan.repository.event.EventRepository
+import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.repository.reminder.ReminderRemoteDataSource
 import com.example.maiplan.repository.reminder.ReminderRepository
 import com.example.maiplan.viewmodel.event.EventViewModel
@@ -47,7 +48,8 @@ fun EventScreenManager(rootNavController: NavHostController) {
 
     val reminderViewModel = remember {
         val reminderRemote = ReminderRemoteDataSource(RetrofitClient.reminderApi)
-        val reminderRepo = ReminderRepository(reminderRemote)
+        val reminderLocal = ReminderLocalDataSource(context)
+        val reminderRepo = ReminderRepository(reminderRemote, reminderLocal)
         val factory = GenericViewModelFactory { ReminderViewModel(reminderRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[ReminderViewModel::class.java]
     }
