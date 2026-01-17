@@ -23,4 +23,7 @@ interface EventDAO {
 
     @Query("SELECT * FROM event WHERE user_id = :userId AND sync_state != 0")
     suspend fun getPendingEvents(userId: Int): List <EventEntity>
+
+    @Query("SELECT * FROM event where event_id = :eventId")
+    suspend fun getEvent(eventId: Int): EventEntity
 }

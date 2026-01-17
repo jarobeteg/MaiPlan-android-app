@@ -45,7 +45,6 @@ class AuthLocalDataSource(private val context: Context) {
 
     suspend fun login(user: UserLogin): AuthEntityResponse? {
         val authEntityResponse = authDAO.loginUser(user.email)
-        println("auth entity response: $authEntityResponse")
         return if (authEntityResponse != null) {
             if (PasswordUtils.verifyPassword(user.password, authEntityResponse.passwordHash)) {
                 authEntityResponse

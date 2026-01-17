@@ -36,6 +36,8 @@ object ServiceLocator {
     private fun provideEventRepo(context: Context): EventRepository {
         val remote = EventRemoteDataSource(RetrofitClient.eventApi)
         val local = EventLocalDataSource(context)
-        return EventRepository(remote, local)
+        val localCategory = CategoryLocalDataSource(context)
+        val localReminder = ReminderLocalDataSource(context)
+        return EventRepository(remote, local, localCategory, localReminder)
     }
 }

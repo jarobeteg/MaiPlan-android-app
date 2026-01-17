@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.api.CategoryCreate
 import com.example.maiplan.network.api.CategoryResponse
@@ -20,8 +21,8 @@ class CategoryViewModel(
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
     val createCategoryResult: LiveData<Result<Unit>> get() = _createCategoryResult
 
-    private var _categoryList = MutableLiveData<List<CategoryResponse>>()
-    val categoryList: LiveData<List<CategoryResponse>> get() = _categoryList
+    private var _categoryList = MutableLiveData<List<CategoryEntity>>()
+    val categoryList: LiveData<List<CategoryEntity>> get() = _categoryList
 
     private val _updateCategoryResult = MutableLiveData<Result<Unit>>()
     val updateCategoryResult: LiveData<Result<Unit>> get() = _updateCategoryResult
@@ -58,7 +59,7 @@ class CategoryViewModel(
         }
     }
 
-    fun getCategory(categoryId: Int): CategoryResponse {
+    fun getCategory(categoryId: Int): CategoryEntity {
         return _categoryList.value!!.find { it.categoryId == categoryId }!!
     }
 

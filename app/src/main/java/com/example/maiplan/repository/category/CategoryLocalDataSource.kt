@@ -77,4 +77,12 @@ class CategoryLocalDataSource(private val context: Context) {
             categoryDao.deleteCategory(category)
         }
     }
+
+    suspend fun getCategoryId(serverId: Int): Int? {
+        return categoryDao.getCategoryId(serverId)
+    }
+
+    suspend fun getServerId(localId: Int): Int? {
+        return categoryDao.getServerId(localId)
+    }
 }

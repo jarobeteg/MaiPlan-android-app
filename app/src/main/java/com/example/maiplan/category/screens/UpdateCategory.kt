@@ -30,7 +30,7 @@ import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
-import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
@@ -38,7 +38,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 @Composable
 fun UpdateCategoryScreen(
     viewModel: CategoryViewModel,
-    category: CategoryResponse,
+    category: CategoryEntity,
     onSaveClick: (String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {

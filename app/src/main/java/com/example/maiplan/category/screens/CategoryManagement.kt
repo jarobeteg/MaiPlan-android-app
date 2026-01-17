@@ -48,6 +48,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.SearchFieldComponent
+import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
@@ -56,7 +57,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
     onCardSwipeDelete: (Int) -> Unit,
-    onCardSwipeEdit: (CategoryResponse) -> Unit,
+    onCardSwipeEdit: (CategoryEntity) -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
     val context = LocalContext.current
@@ -162,7 +163,7 @@ fun CategoryManagementTopBar(
 }
 
 @Composable
-fun CategoryCard(category: CategoryResponse) {
+fun CategoryCard(category: CategoryEntity) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
 

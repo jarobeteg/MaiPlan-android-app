@@ -61,7 +61,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
-import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.utils.common.IconData.allIcons
 import java.time.Instant
@@ -568,9 +568,9 @@ fun PriorityDropdown(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDropdownComponent(
-    categories: List<CategoryResponse>,
-    selectedCategory: CategoryResponse?,
-    onCategorySelected: (CategoryResponse) -> Unit
+    categories: List<CategoryEntity>,
+    selectedCategory: CategoryEntity?,
+    onCategorySelected: (CategoryEntity) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 

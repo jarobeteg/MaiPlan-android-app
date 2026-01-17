@@ -45,9 +45,8 @@ class CategoryRepository(
         return local.categoryInsert(category.toCategoryEntity())
     }
 
-    suspend fun getAllCategories(userId: Int): Result<List<CategoryResponse>> {
+    suspend fun getAllCategories(userId: Int): Result<List<CategoryEntity>> {
         return local.getCategories(userId)
-            .map { list -> list.map { it.toCategoryResponse() } }
     }
 
     suspend fun updateCategory(category: CategoryResponse, userId: Int): Result<Unit> {

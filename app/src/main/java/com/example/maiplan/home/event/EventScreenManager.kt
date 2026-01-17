@@ -33,7 +33,9 @@ fun EventScreenManager(rootNavController: NavHostController) {
     val eventViewModel = remember {
         val eventRemote = EventRemoteDataSource(RetrofitClient.eventApi)
         val eventLocal = EventLocalDataSource(context)
-        val eventRepo = EventRepository(eventRemote, eventLocal)
+        val localCategory = CategoryLocalDataSource(context)
+        val localReminder = ReminderLocalDataSource(context)
+        val eventRepo = EventRepository(eventRemote, eventLocal, localCategory, localReminder)
         val factory = GenericViewModelFactory { EventViewModel(eventRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
     }

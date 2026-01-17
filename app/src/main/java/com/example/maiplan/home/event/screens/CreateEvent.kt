@@ -33,9 +33,9 @@ import com.example.maiplan.components.PriorityDropdown
 import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
+import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
-import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.category.CategoryViewModel
@@ -56,7 +56,7 @@ fun CreateEventScreen(
 ) {
     categoryViewModel.getAllCategories(UserSession.userId!!)
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
-    var selectedCategory by remember { mutableStateOf<CategoryResponse?>(null) }
+    var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var date by remember { mutableStateOf<LocalDate?>(null) }
@@ -121,6 +121,7 @@ fun CreateEventScreen(
                 val event = EventEntity(
                     userId = UserSession.userId!!,
                     title = title,
+                    categoryId = selectedCategory!!.categoryId,
                     description = description,
                     date = date?.toEpochDay() ?: LocalDate.now().toEpochDay(),
                     startTime = startTime?.toNanoOfDay(),

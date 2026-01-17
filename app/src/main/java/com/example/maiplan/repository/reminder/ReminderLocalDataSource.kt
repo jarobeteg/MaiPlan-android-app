@@ -39,4 +39,12 @@ class ReminderLocalDataSource(private val context: Context) {
             reminderDao.getPendingReminders(userId)
         }
     }
+
+    suspend fun getReminderId(serverId: Int): Int? {
+        return reminderDao.getReminderId(serverId)
+    }
+
+    suspend fun getServerId(localId: Int): Int? {
+        return reminderDao.getServerId(localId)
+    }
 }

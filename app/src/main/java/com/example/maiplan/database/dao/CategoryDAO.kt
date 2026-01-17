@@ -41,4 +41,10 @@ interface CategoryDAO {
 
     @Delete
     suspend fun deleteCategory(entity: CategoryEntity): Int
+
+    @Query("SELECT category_id FROM category WHERE server_id = :serverId")
+    suspend fun getCategoryId(serverId: Int): Int?
+
+    @Query("SELECT server_id FROM category WHERE category_id = :localId")
+    suspend fun getServerId(localId: Int): Int?
 }

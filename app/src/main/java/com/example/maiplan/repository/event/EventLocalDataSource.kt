@@ -58,4 +58,8 @@ class EventLocalDataSource(private val context: Context) {
             eventDao.getPendingEvents(userId)
         }
     }
+
+    suspend fun getEvent(eventId: Int): EventEntity {
+        return eventDao.getEvent(eventId)
+    }
 }

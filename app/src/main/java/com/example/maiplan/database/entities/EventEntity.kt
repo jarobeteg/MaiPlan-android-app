@@ -111,7 +111,7 @@ fun EventEntity.toEventSync(): EventSync {
     )
 }
 
-fun EventSync.toEventSEntity(): EventEntity {
+fun EventSync.toEventEntity(): EventEntity {
     return EventEntity(
         eventId = this.eventId,
         serverId = this.serverId,
