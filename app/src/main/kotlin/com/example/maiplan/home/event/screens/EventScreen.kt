@@ -91,7 +91,7 @@ fun EventScreen(
             when (selectedView) {
                 0 -> MonthlyView(selectedDate, eventsByDate)
                 1 -> WeeklyView(selectedDate, eventsByDate)
-                2 -> DailyView(selectedDate)
+                2 -> DailyView(selectedDate, eventsByDate)
                 else -> MonthlyView(selectedDate, eventsByDate)
             }
         }

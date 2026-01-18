@@ -15,3 +15,13 @@ data class CalendarEventUI(
     val color: Color,
     val icon: ImageVector
 )
+
+fun CalendarEventUI.overlapsHour(hour: Int): Boolean {
+    val eventStart = date.atTime(startTime)
+    val eventEnd = date.atTime(endTime)
+
+    val hourStart = date.atTime(hour, 0)
+    val hourEnd = hourStart.plusHours(1)
+
+    return eventStart < hourEnd && eventEnd > hourStart
+}

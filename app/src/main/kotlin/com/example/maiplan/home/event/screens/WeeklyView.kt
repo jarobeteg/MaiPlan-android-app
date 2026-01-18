@@ -26,6 +26,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,6 +36,8 @@ import androidx.compose.ui.unit.sp
 import com.example.maiplan.home.event.utils.CalendarEventUI
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
@@ -97,6 +100,10 @@ fun WeeklyViewCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             events.take(5).forEach { event ->
+                val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
+
+                val start = event.startTime.format(timeFormatter)
+                val end = event.endTime.format(timeFormatter)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(vertical = 2.dp)
@@ -133,13 +140,20 @@ fun WeeklyViewCard(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
+                    text = "$start - $end",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onTertiary,
+                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                )
+
+                Text(
                     text = event.description,
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onTertiary,
-                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).padding(start = 2.dp)
+                    modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                 )
             }
 
