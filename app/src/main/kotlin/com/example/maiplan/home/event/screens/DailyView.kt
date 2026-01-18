@@ -30,11 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.home.event.utils.CalendarEventUI
+import com.example.maiplan.home.event.utils.to24hString
 import com.example.maiplan.utils.toEpochMillis
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun DailyView(
@@ -122,10 +122,8 @@ fun DailyHourRow(
 
 @Composable
 fun DailyEventCard(event: CalendarEventUI) {
-    val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
-
-    val start = event.startTime.format(timeFormatter)
-    val end = event.endTime.format(timeFormatter)
+    val start = event.startTime.to24hString()
+    val end = event.endTime.to24hString()
     Card(
         modifier = Modifier
             .fillMaxWidth()

@@ -25,3 +25,9 @@ fun CalendarEventUI.overlapsHour(hour: Int): Boolean {
 
     return eventStart < hourEnd && eventEnd > hourStart
 }
+
+fun LocalTime.to24hString(): String {
+    val h = this.hour
+    val m = this.minute
+    return "%02d:%02d".format(h, m)
+}

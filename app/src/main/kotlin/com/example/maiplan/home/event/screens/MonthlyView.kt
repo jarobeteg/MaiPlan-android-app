@@ -2,6 +2,7 @@ package com.example.maiplan.home.event.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -41,7 +42,8 @@ import kotlin.math.ceil
 @Composable
 fun MonthlyView(
     selectedDate: LocalDate,
-    eventsByDate: Map <LocalDate, List<CalendarEventUI>>
+    eventsByDate: Map <LocalDate, List<CalendarEventUI>>,
+    onDayClick: (LocalDate) -> Unit
 ) {
     val context = LocalContext.current
     val daysInMonth = selectedDate.lengthOfMonth()
@@ -68,7 +70,7 @@ fun MonthlyView(
 
         Column(modifier = Modifier.fillMaxSize()) {
             WeekdayHeaders(weekdays, weekNumberWidth, cellSize, headerHeight)
-            CalendarGrid(selectedDate, rowCount, daysInMonth, firstDayOfMonth, weekNumberWidth, cellSize, rowHeight, eventsByDate)
+            CalendarGrid(selectedDate, rowCount, daysInMonth, firstDayOfMonth, weekNumberWidth, cellSize, rowHeight, eventsByDate, onDayClick)
         }
     }
 }
@@ -101,13 +103,14 @@ fun CalendarGrid(
     weekNumberWidth: Dp,
     cellSize: Dp,
     rowHeight: Dp,
-    eventsByDate: Map <LocalDate, List<CalendarEventUI>>
+    eventsByDate: Map <LocalDate, List<CalendarEventUI>>,
+    onDayClick: (LocalDate) -> Unit
 ) {
     for (weekIndex in 0 until rowCount) {
         Row(modifier = Modifier.height(rowHeight)) {
             val weekNumber = getWeekNumberForRow(selectedDate, weekIndex)
             WeekNumberColumn(weekNumber, weekNumberWidth)
-            DaysRow(selectedDate, weekIndex, daysInMonth, firstDayOfMonth, cellSize, rowHeight, eventsByDate)
+            DaysRow(selectedDate, weekIndex, daysInMonth, firstDayOfMonth, cellSize, rowHeight, eventsByDate, onDayClick)
         }
     }
 }
@@ -127,13 +130,24 @@ fun WeekNumberColumn(weekNumber: Int, width: Dp) {
 }
 
 @Composable
-fun DaysRow(selectedDate: LocalDate, weekIndex: Int, daysInMonth: Int, firstDayOfMonth: Int, cellSize: Dp, rowHeight: Dp, eventsByDate: Map <LocalDate, List<CalendarEventUI>>) {
+fun DaysRow(
+    selectedDate: LocalDate,
+    weekIndex: Int,
+    daysInMonth: Int,
+    firstDayOfMonth: Int,
+    cellSize: Dp,
+    rowHeight: Dp,
+    eventsByDate: Map <LocalDate, List<CalendarEventUI>>,
+    onDayClick: (LocalDate) -> Unit
+) {
     for (dayIndex in 0 until 7) {
         val dayNumber = weekIndex * 7 + dayIndex - firstDayOfMonth + 1
         if (dayNumber in 1..daysInMonth) {
             val cellDate = selectedDate.withDayOfMonth(dayNumber)
             val events = eventsByDate[cellDate].orEmpty()
-            DayCell(selectedDate, dayNumber, cellSize, rowHeight, events)
+            DayCell(selectedDate, dayNumber, cellSize, rowHeight, events,
+                onClick = { onDayClick(cellDate) }
+            )
         } else {
             Spacer(modifier = Modifier.width(cellSize))
         }
@@ -141,12 +155,20 @@ fun DaysRow(selectedDate: LocalDate, weekIndex: Int, daysInMonth: Int, firstDayO
 }
 
 @Composable
-fun DayCell(selectedDate: LocalDate, dayNumber: Int, cellSize: Dp, rowHeight: Dp, events: List<CalendarEventUI>) {
+fun DayCell(
+    selectedDate: LocalDate,
+    dayNumber: Int,
+    cellSize: Dp,
+    rowHeight: Dp,
+    events: List<CalendarEventUI>,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .width(cellSize)
             .height(rowHeight)
-            .padding(0.5.dp),
+            .padding(0.5.dp)
+            .clickable{ onClick() },
         shape = RoundedCornerShape(2.dp),
         colors = CardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
@@ -169,7 +191,7 @@ fun DayCell(selectedDate: LocalDate, dayNumber: Int, cellSize: Dp, rowHeight: Dp
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            events.take(3).forEach { event ->
+            events.take(5).forEach { event ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier

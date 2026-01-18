@@ -4,14 +4,13 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,7 +25,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -34,16 +32,16 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.home.event.utils.CalendarEventUI
+import com.example.maiplan.home.event.utils.to24hString
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun WeeklyView(
     selectedDate: LocalDate,
-    eventsByDate: Map<LocalDate, List<CalendarEventUI>>
+    eventsByDate: Map<LocalDate, List<CalendarEventUI>>,
+    onDayClick: (LocalDate) -> Unit
 ) {
     val startOfWeek = selectedDate.with(DayOfWeek.MONDAY)
 
@@ -61,7 +59,8 @@ fun WeeklyView(
             items(7) { i ->
                 val day = startOfWeek.plusDays(i.toLong())
                 val events = eventsByDate[day].orEmpty()
-                WeeklyViewCard(day, events, cardWidth, cardHeight)
+                WeeklyViewCard(day, events, cardWidth, cardHeight,
+                    onClick = { onDayClick(day) })
             }
         }
     }
@@ -72,12 +71,14 @@ fun WeeklyViewCard(
     day: LocalDate,
     events: List<CalendarEventUI>,
     width: Dp,
-    height: Dp
+    height: Dp,
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .width(width)
             .height(height)
+            .clickable { onClick() }
             .border(
                 border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
                 shape = MaterialTheme.shapes.medium
@@ -100,10 +101,8 @@ fun WeeklyViewCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             events.take(5).forEach { event ->
-                val timeFormatter = remember { DateTimeFormatter.ofPattern("HH:mm") }
-
-                val start = event.startTime.format(timeFormatter)
-                val end = event.endTime.format(timeFormatter)
+                val start = event.startTime.to24hString()
+                val end = event.endTime.to24hString()
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.padding(vertical = 2.dp)

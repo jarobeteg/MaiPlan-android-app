@@ -139,7 +139,9 @@ fun TimePickerDialogComponent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val timePickerState = rememberTimePickerState()
+    val timePickerState = rememberTimePickerState(
+        is24Hour = true
+    )
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
