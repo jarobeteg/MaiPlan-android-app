@@ -90,7 +90,7 @@ fun EventScreen(
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {
                 0 -> MonthlyView(selectedDate, eventsByDate)
-                1 -> WeeklyView(selectedDate)
+                1 -> WeeklyView(selectedDate, eventsByDate)
                 2 -> DailyView(selectedDate)
                 else -> MonthlyView(selectedDate, eventsByDate)
             }

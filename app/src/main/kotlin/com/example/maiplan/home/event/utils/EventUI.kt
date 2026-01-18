@@ -11,6 +11,7 @@ data class CalendarEventUI(
     val startTime: LocalTime,
     val endTime: LocalTime,
     val title: String,
+    val description: String,
     val color: Color,
     val icon: ImageVector
 )

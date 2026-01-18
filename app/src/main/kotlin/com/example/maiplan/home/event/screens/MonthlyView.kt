@@ -205,9 +205,9 @@ fun DayCell(selectedDate: LocalDate, dayNumber: Int, cellSize: Dp, rowHeight: Dp
                 }
             }
 
-            if (events.size > 3) {
+            if (events.size > 5) {
                 Text(
-                    text = "+${events.size - 3}",
+                    text = "+${events.size - 5}",
                     fontSize = 10.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)

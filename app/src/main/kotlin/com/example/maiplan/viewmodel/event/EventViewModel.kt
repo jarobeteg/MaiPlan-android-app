@@ -73,9 +73,6 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
                 .toInstant()
                 .toEpochMilli() - 1
 
-            println("start: $start")
-            println("end: $end")
-
             val events = eventRepository.getEventsForRange(start, end, UserSession.userId)
             val grouped = events.groupBy { it.date }
 

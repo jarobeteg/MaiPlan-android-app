@@ -118,6 +118,7 @@ class EventRepository(
         return CalendarEventUI(
             eventId = this.eventId,
             title = this.title,
+            description = this.description!!,
             date = Instant.ofEpochMilli(this.date).atZone(ZoneId.systemDefault()).toLocalDate(),
             startTime = Instant.ofEpochMilli(this.startTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
             endTime = Instant.ofEpochMilli(this.endTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
@@ -161,7 +162,6 @@ class EventRepository(
     suspend fun getEventsForRange(startMillis: Long, endMillis: Long, userId: Int?): List<CalendarEventUI> {
         var result: List<CalendarEventUI>
         val events = local.getEventForRange(startMillis, endMillis, userId!!)
-        println(events)
         result = events.map { it.toCalendarEventUI() }
         return result
     }
