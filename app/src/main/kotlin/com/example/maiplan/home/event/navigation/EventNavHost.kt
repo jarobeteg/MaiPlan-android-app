@@ -57,6 +57,7 @@ fun NavGraphBuilder.eventNavGraph(
             reminderViewModel = reminderViewModel,
             onSaveClick = { reminder, event ->
                 eventViewModel.createEventWithReminder(reminder, event)
+                localNavController.popBackStack()
             },
             onBackClick = { localNavController.popBackStack() }
         )

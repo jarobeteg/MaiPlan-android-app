@@ -26,4 +26,15 @@ interface EventDAO {
 
     @Query("SELECT * FROM event where event_id = :eventId")
     suspend fun getEvent(eventId: Int): EventEntity
+
+    @Query("""
+        SELECT * FROM event
+        WHERE date BETWEEN :startMillis AND :endMillis
+        AND is_deleted = 0 AND user_id = :userId
+    """)
+    suspend fun getEventsForRange(
+        startMillis: Long,
+        endMillis: Long,
+        userId: Int
+    ): List<EventEntity>
 }

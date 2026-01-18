@@ -62,4 +62,8 @@ class EventLocalDataSource(private val context: Context) {
     suspend fun getEvent(eventId: Int): EventEntity {
         return eventDao.getEvent(eventId)
     }
+
+    suspend fun getEventForRange(startMillis: Long, endMillis: Long, userId: Int): List<EventEntity> {
+        return eventDao.getEventsForRange(startMillis, endMillis, userId)
+    }
 }

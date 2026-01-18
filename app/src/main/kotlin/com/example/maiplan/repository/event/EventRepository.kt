@@ -1,9 +1,11 @@
 package com.example.maiplan.repository.event
 
+import androidx.compose.ui.graphics.Color
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.database.entities.toEventEntity
 import com.example.maiplan.database.entities.toEventSync
+import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.network.api.EventCreate
 import com.example.maiplan.network.api.EventResponse
 import com.example.maiplan.network.api.EventSync
@@ -14,7 +16,10 @@ import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.handleLocalResponse
 import com.example.maiplan.repository.handleRemoteResponse
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
+import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.utils.common.UserSession
+import java.time.Instant
+import java.time.ZoneId
 
 class EventRepository(
     private val remote: EventRemoteDataSource,
@@ -107,6 +112,20 @@ class EventRepository(
         )
     }
 
+    private suspend fun EventEntity.toCalendarEventUI(): CalendarEventUI {
+        val category = localCategory.getCategory(this.categoryId, this.userId)
+
+        return CalendarEventUI(
+            eventId = this.eventId,
+            title = this.title,
+            date = Instant.ofEpochMilli(this.date).atZone(ZoneId.systemDefault()).toLocalDate(),
+            startTime = Instant.ofEpochMilli(this.startTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
+            endTime = Instant.ofEpochMilli(this.endTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
+            color = Color(category.color.toULong()),
+            icon = IconData.getIconByKey(category.icon)
+        )
+    }
+
     suspend fun createEventWithReminder(reminder: ReminderEntity?, event: EventEntity): Result<Unit> {
         return try {
             handleLocalResponse { local.createEventWithReminder(reminder, event) }
@@ -137,5 +156,13 @@ class EventRepository(
         } catch (e: Exception) {
             Result.Error(e)
         }
+    }
+
+    suspend fun getEventsForRange(startMillis: Long, endMillis: Long, userId: Int?): List<CalendarEventUI> {
+        var result: List<CalendarEventUI>
+        val events = local.getEventForRange(startMillis, endMillis, userId!!)
+        println(events)
+        result = events.map { it.toCalendarEventUI() }
+        return result
     }
 }

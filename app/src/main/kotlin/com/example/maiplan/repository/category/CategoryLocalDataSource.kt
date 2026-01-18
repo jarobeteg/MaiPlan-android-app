@@ -28,10 +28,8 @@ class CategoryLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun getCategory(categoryId: Int, userId: Int): Result<CategoryEntity> {
-        return handleLocalResponse {
-            categoryDao.getCategory(categoryId, userId)
-        }
+    suspend fun getCategory(categoryId: Int?, userId: Int): CategoryEntity {
+        return categoryDao.getCategory(categoryId!!, userId)
     }
 
     suspend fun getCategories(userId: Int): Result<List<CategoryEntity>> {

@@ -123,13 +123,14 @@ fun CreateEventScreen(
                     title = title,
                     categoryId = selectedCategory!!.categoryId,
                     description = description,
-                    date = date?.toEpochDay() ?: LocalDate.now().toEpochDay(),
-                    startTime = startTime?.toNanoOfDay(),
-                    endTime = endTime?.toNanoOfDay(),
+                    date = date!!.toEpochMillis(),
+                    startTime = startTime!!.toEpochMillis(date!!),
+                    endTime = endTime!!.toEpochMillis(date!!),
                     priority = priority,
                     location = location,
                     syncState = 4
                     )
+                println("date: ${event.date}")
                 onSaveClick(reminder, event)
             })
         }

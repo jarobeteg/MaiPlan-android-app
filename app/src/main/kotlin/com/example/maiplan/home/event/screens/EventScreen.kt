@@ -26,6 +26,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -57,9 +59,14 @@ fun EventScreen(
     localNavController: NavHostController, // use this to navigate from view to update or view details screen
     onCreateEventClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    LaunchedEffect(selectedDate.year, selectedDate.month) {
+        eventViewModel.loadMonth(selectedDate)
+    }
+
+    val context = LocalContext.current
+    val eventsByDate by eventViewModel.monthlyEvents.collectAsState()
+    var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     val formattedTitle = getFormattedTitle(context, selectedView, selectedDate)
@@ -82,10 +89,10 @@ fun EventScreen(
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
             when (selectedView) {
-                0 -> MonthlyView(selectedDate)
+                0 -> MonthlyView(selectedDate, eventsByDate)
                 1 -> WeeklyView(selectedDate)
                 2 -> DailyView(selectedDate)
-                else -> MonthlyView(selectedDate)
+                else -> MonthlyView(selectedDate, eventsByDate)
             }
         }
     }
