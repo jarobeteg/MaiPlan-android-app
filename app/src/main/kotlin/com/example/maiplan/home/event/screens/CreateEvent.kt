@@ -12,7 +12,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Description
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -34,13 +33,14 @@ import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.DateInputComponent
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.LocalDateTimeInputField
-import com.example.maiplan.components.PriorityDropdown
 import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
+import com.example.maiplan.utils.AlarmManager
+import com.example.maiplan.utils.ReminderData
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.category.CategoryViewModel
@@ -123,7 +123,6 @@ fun CreateEventScreen(
                 }
             }
 
-
             SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {
 
                 val today = LocalDate.now()
@@ -150,7 +149,10 @@ fun CreateEventScreen(
                         dateTime?.let {
                             reminder = ReminderEntity(
                                 userId = UserSession.userId!!,
-                                reminderTime = it.toEpochMillis(),
+                                reminderTime = it
+                                    .withSecond(0)
+                                    .withNano(0)
+                                    .toEpochMillis(),
                                 message = message,
                                 syncState = 4
                             )
@@ -170,6 +172,17 @@ fun CreateEventScreen(
                         )
 
                         onSaveClick(reminder, event)
+
+                        val alarmManager = AlarmManager()
+                        reminder?.let {
+                            val reminderData = ReminderData(
+                                reminderId = reminder.reminderId,
+                                reminderTime = reminder.reminderTime,
+                                reminderTitle = event.title,
+                                reminderMessage = reminder.message ?: ""
+                            )
+                            alarmManager.scheduleReminder(context, reminderData)
+                        }
                     }
                 }
             })

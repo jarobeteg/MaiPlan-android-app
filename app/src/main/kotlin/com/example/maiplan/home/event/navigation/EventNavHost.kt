@@ -82,8 +82,12 @@ fun NavGraphBuilder.eventNavGraph(
             eventViewModel = eventViewModel,
             categoryViewModel = categoryViewModel,
             reminderViewModel = reminderViewModel,
-            onUpdateClick = {},
-            onDeleteClick = {},
+            onUpdateClick = { reminder, event ->
+                localNavController.popBackStack()
+            },
+            onDeleteClick = { reminder, event ->
+                localNavController.popBackStack()
+            },
             onBackClick = { localNavController.popBackStack() }
         )
     }

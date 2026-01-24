@@ -1,20 +1,98 @@
 package com.example.maiplan.home.event.screens
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Message
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Title
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableTextFieldLengthComponent
+import com.example.maiplan.components.CategoryDropdownComponent
+import com.example.maiplan.components.DateInputComponent
+import com.example.maiplan.components.ErrorMessageComponent
+import com.example.maiplan.components.LocalDateTimeInputField
+import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SimpleTopBar
+import com.example.maiplan.components.SubmitButtonComponent
+import com.example.maiplan.components.TimeInputComponent
+import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.database.entities.EventEntity
+import com.example.maiplan.database.entities.ReminderEntity
+import com.example.maiplan.home.event.utils.CalendarEventUI
+import com.example.maiplan.utils.AlarmManager
+import com.example.maiplan.utils.ReminderData
+import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.toEpochMillis
+import com.example.maiplan.utils.toLocalDateTime
+import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
+import com.example.maiplan.viewmodel.reminder.ReminderViewModel
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun UpdateEventScreen(
+    eventId: Int,
     eventViewModel: EventViewModel,
-    onSaveClick: () -> Unit,
+    categoryViewModel: CategoryViewModel,
+    reminderViewModel: ReminderViewModel,
+    onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
+    onDeleteClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val event by eventViewModel
+        .getEventById(eventId)
+        .collectAsState()
+
+    if (event == null) return
+
+    val safeEvent = event!!
+
+    val context = LocalContext.current
+    categoryViewModel.getAllCategories(UserSession.userId!!)
+    val categories by categoryViewModel.categoryList.observeAsState(emptyList())
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
+    var title by remember { mutableStateOf(safeEvent.title) }
+    var description by remember { mutableStateOf(safeEvent.description) }
+    var date by remember { mutableStateOf<LocalDate?>(safeEvent.date) }
+    var startTime by remember { mutableStateOf<LocalTime?>(safeEvent.startTime) }
+    var endTime by remember { mutableStateOf<LocalTime?>(safeEvent.endTime) }
+    var priority by remember { mutableIntStateOf(1) }
+    var location by remember { mutableStateOf("") }
+    var dateTime by remember { mutableStateOf<LocalDateTime?>(safeEvent.reminderTime.toLocalDateTime()) }
+    var message by remember { mutableStateOf(safeEvent.reminderMessage) }
+
+    LaunchedEffect(categories, safeEvent.categoryId) {
+        selectedCategory = categories.find { it.categoryId == safeEvent.categoryId }
+    }
+
     Scaffold (
         topBar = {
             SimpleTopBar(
@@ -22,5 +100,115 @@ fun UpdateEventScreen(
                 onBackClick = onBackClick
             )
         }
-    ) {}
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            AdjustableTextFieldLengthComponent(title, stringResource(R.string.title), Icons.Filled.Title, 255) { title = it }
+
+            AdjustableTextFieldLengthComponent(description, stringResource(R.string.description), Icons.Filled.Description, 512) { description = it }
+
+            DateInputComponent(stringResource(R.string.date), date)  { date = it }
+
+            TimeInputComponent(stringResource(R.string.start_time), startTime) { startTime = it }
+
+            TimeInputComponent(stringResource(R.string.end_time), endTime) { endTime = it }
+
+            //PriorityDropdown(priority) { priority = it }
+
+            //AdjustableTextFieldLengthComponent(location, stringResource(R.string.location), Icons.Filled.LocationOn, 255) { location = it }
+
+            SectionTitle(stringResource(R.string.category))
+
+            CategoryDropdownComponent(categories, selectedCategory) { selectedCategory = it }
+
+            SectionTitle(stringResource(R.string.reminder))
+
+            LocalDateTimeInputField(stringResource(R.string.date_time), dateTime) { dateTime = it }
+
+            AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
+
+            errorMessage?.let {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorMessageComponent(it)
+                }
+            }
+
+            SubmitButtonComponent(stringResource(R.string.update), onButtonClicked = {
+
+                val today = LocalDate.now()
+
+                when {
+                    title.isBlank() -> errorMessage = context.getString(R.string.blank_event_title)
+
+                    date == null -> errorMessage = context.getString(R.string.blank_event_date)
+
+                    date!!.isBefore(today) -> errorMessage = context.getString(R.string.event_date_in_past)
+
+                    startTime == null -> errorMessage = context.getString(R.string.blank_event_start_time)
+
+                    endTime == null -> errorMessage = context.getString(R.string.blank_event_end_time)
+
+                    endTime!!.isBefore(startTime) -> errorMessage = context.getString(R.string.event_end_time_before_start_time)
+
+                    selectedCategory == null -> errorMessage = context.getString(R.string.blank_event_category)
+
+                    else -> {
+                        errorMessage = null
+
+                        var reminder: ReminderEntity? = null
+                        dateTime?.let {
+                            reminder = ReminderEntity(
+                                userId = UserSession.userId!!,
+                                reminderTime = it.toEpochMillis(),
+                                message = message,
+                                syncState = 4
+                            )
+                        }
+
+                        val event = EventEntity(
+                            userId = UserSession.userId!!,
+                            title = title,
+                            categoryId = selectedCategory!!.categoryId,
+                            description = description,
+                            date = date!!.toEpochMillis(),
+                            startTime = startTime!!.toEpochMillis(date!!),
+                            endTime = endTime!!.toEpochMillis(date!!),
+                            priority = priority,
+                            location = location,
+                            syncState = 4
+                        )
+
+                        onUpdateClick(reminder, event)
+
+                        val alarmManager = AlarmManager()
+                        reminder?.let {
+                            val reminderData = ReminderData(
+                                reminderId = reminder.reminderId,
+                                reminderTime = reminder.reminderTime,
+                                reminderTitle = event.title,
+                                reminderMessage = reminder.message ?: ""
+                            )
+                            alarmManager.scheduleReminder(context, reminderData)
+                        }
+                    }
+                }
+            })
+
+            SubmitButtonComponent(
+                value = stringResource(R.string.delete),
+                color = MaterialTheme.colorScheme.onError,
+                onButtonClicked = {
+
+                })
+        }
+    }
 }

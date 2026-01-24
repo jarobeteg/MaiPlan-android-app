@@ -6,6 +6,9 @@
     <string name="title">Title</string>
     <string name="name">Name</string>
     <string name="description">Description</string>
+    <string name="save">Save</string>
+    <string name="update">Update</string>
+    <string name="delete">Delete</string>
 
     <!-- main screens -->
     <string name="welcome_login">Welcome To MaiPlan!</string>

@@ -1,9 +1,16 @@
 package com.example.maiplan.utils
 
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+
+fun Long.toLocalDateTime(
+    zoneId: ZoneId = ZoneId.systemDefault()
+): LocalDateTime {
+    return Instant.ofEpochMilli(this).atZone(zoneId).toLocalDateTime()
+}
 
 fun LocalDateTime.toEpochMillis(
     zoneId: ZoneId = ZoneId.systemDefault()
@@ -14,7 +21,9 @@ fun LocalDateTime.toEpochMillis(
         .toEpochMilli()
 }
 
-fun LocalDate.toEpochMillis(zoneId: ZoneId = ZoneId.systemDefault()): Long {
+fun LocalDate.toEpochMillis(
+    zoneId: ZoneId = ZoneId.systemDefault()
+): Long {
     return this
         .atStartOfDay()
         .atZone(zoneId)
