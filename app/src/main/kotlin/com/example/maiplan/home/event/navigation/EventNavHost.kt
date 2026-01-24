@@ -11,6 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navArgument
 import com.example.maiplan.home.event.screens.*
+import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.reminder.ReminderViewModel
@@ -41,6 +42,8 @@ fun NavGraphBuilder.eventNavGraph(
     categoryViewModel: CategoryViewModel,
     reminderViewModel: ReminderViewModel
 ) {
+
+    val userId = UserSession.userId!!
     // --- Main Event Screen ---
     composable(EventRoutes.EventMain.route) {
         EventScreen(
@@ -83,9 +86,11 @@ fun NavGraphBuilder.eventNavGraph(
             categoryViewModel = categoryViewModel,
             reminderViewModel = reminderViewModel,
             onUpdateClick = { reminder, event ->
+                eventViewModel.updateEventWithReminder(reminder, event)
                 localNavController.popBackStack()
             },
-            onDeleteClick = { reminder, event ->
+            onDeleteClick = { reminderId, eventId ->
+                eventViewModel.softDeleteEventWithReminder(reminderId, eventId, userId)
                 localNavController.popBackStack()
             },
             onBackClick = { localNavController.popBackStack() }

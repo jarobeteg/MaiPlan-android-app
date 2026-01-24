@@ -148,6 +148,25 @@ class EventRepository(
         }
     }
 
+    suspend fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity): Result<Unit> {
+        return try {
+            handleLocalResponse { local.updateEventWithReminder(reminder, event) }
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
+    }
+
+    suspend fun softDeleteReminder(reminderId: Int?, userId: Int): Result<Unit> {
+        if (reminderId != null) {
+            return localReminder.softDeleteReminder(reminderId, userId)
+        }
+        return Result.Idle
+    }
+
+    suspend fun softDeleteEvent(eventId: Int, userId: Int): Result<Unit> {
+        return local.softDeleteEvent(eventId, userId)
+    }
+
     suspend fun createEvent(event: EventCreate): Result<Unit> {
         return try {
             handleRemoteResponse(remote.createEvent(event))

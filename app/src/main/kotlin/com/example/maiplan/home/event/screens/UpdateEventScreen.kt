@@ -42,8 +42,7 @@ import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
-import com.example.maiplan.home.event.utils.CalendarEventUI
-import com.example.maiplan.utils.AlarmManager
+import com.example.maiplan.utils.ReminderManager
 import com.example.maiplan.utils.ReminderData
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.toEpochMillis
@@ -63,7 +62,7 @@ fun UpdateEventScreen(
     categoryViewModel: CategoryViewModel,
     reminderViewModel: ReminderViewModel,
     onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
-    onDeleteClick: (ReminderEntity?, EventEntity) -> Unit,
+    onDeleteClick: (Int?, Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     val event by eventViewModel
@@ -73,6 +72,10 @@ fun UpdateEventScreen(
     if (event == null) return
 
     val safeEvent = event!!
+    var safeReminderTime: LocalDateTime? = null
+    if (safeEvent.reminderTime != 0L) {
+        safeReminderTime = safeEvent.reminderTime.toLocalDateTime()
+    }
 
     val context = LocalContext.current
     categoryViewModel.getAllCategories(UserSession.userId!!)
@@ -86,7 +89,7 @@ fun UpdateEventScreen(
     var endTime by remember { mutableStateOf<LocalTime?>(safeEvent.endTime) }
     var priority by remember { mutableIntStateOf(1) }
     var location by remember { mutableStateOf("") }
-    var dateTime by remember { mutableStateOf<LocalDateTime?>(safeEvent.reminderTime.toLocalDateTime()) }
+    var dateTime by remember { mutableStateOf(safeReminderTime) }
     var message by remember { mutableStateOf(safeEvent.reminderMessage) }
 
     LaunchedEffect(categories, safeEvent.categoryId) {
@@ -165,39 +168,55 @@ fun UpdateEventScreen(
                         errorMessage = null
 
                         var reminder: ReminderEntity? = null
-                        dateTime?.let {
-                            reminder = ReminderEntity(
-                                userId = UserSession.userId!!,
-                                reminderTime = it.toEpochMillis(),
-                                message = message,
-                                syncState = 4
-                            )
+                        if (safeEvent.reminderId == 0) {
+                            dateTime?.let {
+                                reminder = ReminderEntity(
+                                    userId = UserSession.userId!!,
+                                    reminderTime = it.toEpochMillis(),
+                                    message = message,
+                                    syncState = 2
+                                )
+                            }
+                        } else {
+                            dateTime?.let {
+                                reminder = ReminderEntity(
+                                    reminderId = safeEvent.reminderId,
+                                    userId = UserSession.userId!!,
+                                    reminderTime = it.toEpochMillis(),
+                                    message = message,
+                                    syncState = 2
+                                )
+                            }
                         }
 
-                        val event = EventEntity(
+                        val eventEntity = EventEntity(
+                            eventId = safeEvent.eventId,
                             userId = UserSession.userId!!,
                             title = title,
                             categoryId = selectedCategory!!.categoryId,
+                            reminderId = if (safeEvent.reminderId == 0) null else safeEvent.reminderId,
                             description = description,
                             date = date!!.toEpochMillis(),
                             startTime = startTime!!.toEpochMillis(date!!),
                             endTime = endTime!!.toEpochMillis(date!!),
                             priority = priority,
                             location = location,
-                            syncState = 4
+                            syncState = 2
                         )
 
-                        onUpdateClick(reminder, event)
+                        onUpdateClick(reminder, eventEntity)
 
-                        val alarmManager = AlarmManager()
-                        reminder?.let {
-                            val reminderData = ReminderData(
-                                reminderId = reminder.reminderId,
-                                reminderTime = reminder.reminderTime,
-                                reminderTitle = event.title,
-                                reminderMessage = reminder.message ?: ""
-                            )
-                            alarmManager.scheduleReminder(context, reminderData)
+                        if (reminder != null) {
+                            val reminderManager = ReminderManager()
+                            reminder?.let {
+                                val reminderData = ReminderData(
+                                    reminderId = reminder!!.reminderId,
+                                    reminderTime = reminder!!.reminderTime,
+                                    reminderTitle = eventEntity.title,
+                                    reminderMessage = reminder!!.message ?: ""
+                                )
+                                reminderManager.scheduleReminder(context, reminderData)
+                            }
                         }
                     }
                 }
@@ -207,7 +226,14 @@ fun UpdateEventScreen(
                 value = stringResource(R.string.delete),
                 color = MaterialTheme.colorScheme.onError,
                 onButtonClicked = {
+                    val eventId: Int = safeEvent.eventId
+                    val reminderId: Int? = if (safeEvent.reminderId == 0) null else safeEvent.reminderId
+                    onDeleteClick(reminderId, eventId)
 
+                    if (reminderId != null) {
+                        val reminderManager = ReminderManager()
+                        reminderManager.cancelReminder(context, reminderId)
+                    }
                 })
         }
     }

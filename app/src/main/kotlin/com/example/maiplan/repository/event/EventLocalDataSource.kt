@@ -35,6 +35,23 @@ class EventLocalDataSource(private val context: Context) {
         eventDao.eventInsert(event.copy(reminderId = reminderId))
     }
 
+    @Transaction
+    suspend fun updateEventWithReminder(
+        reminder: ReminderEntity?,
+        event: EventEntity
+    ) {
+        if (event.reminderId == null) {
+            val reminderId: Int? = reminder?.let {
+                reminderDao.reminderInsert(it).toInt()
+            }
+
+            eventDao.eventUpsert(event.copy(reminderId = reminderId))
+        } else {
+            reminderDao.reminderUpsert(reminder!!)
+            eventDao.eventUpsert(event)
+        }
+    }
+
     suspend fun eventUpsert(event: EventEntity): Result<Unit> {
         return handleLocalResponse {
             eventDao.eventUpsert(event)

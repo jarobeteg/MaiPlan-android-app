@@ -43,6 +43,19 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         }
     }
 
+    fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity) {
+        viewModelScope.launch {
+            eventRepository.updateEventWithReminder(reminder, event)
+        }
+    }
+
+    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userId: Int) {
+        viewModelScope.launch {
+            eventRepository.softDeleteReminder(reminderId, userId)
+            eventRepository.softDeleteEvent(eventId, userId)
+        }
+    }
+
     fun createEvent(event: EventCreate) {
         viewModelScope.launch {
             _createEventResult.postValue(eventRepository.createEvent(event))

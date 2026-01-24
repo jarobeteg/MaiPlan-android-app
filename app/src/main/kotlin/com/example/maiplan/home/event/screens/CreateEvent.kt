@@ -39,7 +39,7 @@ import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
-import com.example.maiplan.utils.AlarmManager
+import com.example.maiplan.utils.ReminderManager
 import com.example.maiplan.utils.ReminderData
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.toEpochMillis
@@ -173,7 +173,7 @@ fun CreateEventScreen(
 
                         onSaveClick(reminder, event)
 
-                        val alarmManager = AlarmManager()
+                        val reminderManager = ReminderManager()
                         reminder?.let {
                             val reminderData = ReminderData(
                                 reminderId = reminder.reminderId,
@@ -181,7 +181,7 @@ fun CreateEventScreen(
                                 reminderTitle = event.title,
                                 reminderMessage = reminder.message ?: ""
                             )
-                            alarmManager.scheduleReminder(context, reminderData)
+                            reminderManager.scheduleReminder(context, reminderData)
                         }
                     }
                 }
