@@ -13,7 +13,11 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.event.EventRepository
 import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
@@ -79,4 +83,21 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
             _monthlyEvents.value = grouped
         }
     }
+
+
+    fun getEventById(eventId: Int): StateFlow<CalendarEventUI?> {
+        return monthlyEvents
+            .map { eventsByDate ->
+                eventsByDate
+                    .values
+                    .flatten()
+                    .firstOrNull { it.eventId == eventId }
+            }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = null
+            )
+    }
+
 }

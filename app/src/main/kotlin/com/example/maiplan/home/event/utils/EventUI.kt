@@ -7,11 +7,15 @@ import java.time.LocalTime
 
 data class CalendarEventUI(
     val eventId: Int,
+    val reminderId: Int,
+    val categoryId: Int,
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,
     val title: String,
     val description: String,
+    val reminderTime: Long,
+    val reminderMessage: String,
     val color: Color,
     val icon: ImageVector
 )

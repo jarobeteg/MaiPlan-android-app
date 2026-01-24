@@ -38,10 +38,6 @@ class EventRepository(
                 for (event in events) {
                     val eventSync = event.toEventSyncResolved()
 
-                    if (eventSync.categoryId == 0 || eventSync.reminderId == 0) {
-                        continue
-                    }
-
                     changes.add(eventSync)
                 }
 
@@ -89,7 +85,10 @@ class EventRepository(
     private suspend fun EventSync.toEventEntityResolved(): EventEntity {
         val eventEntity = local.getEvent(this.eventId)
         val categoryId = eventEntity.categoryId
-        val reminderId = eventEntity.reminderId
+        var reminderId: Int? = null
+        if (this.reminderId != 0) {
+            reminderId = eventEntity.reminderId
+        }
 
         return EventEntity(
             eventId = eventId,
@@ -114,16 +113,30 @@ class EventRepository(
 
     private suspend fun EventEntity.toCalendarEventUI(): CalendarEventUI {
         val category = localCategory.getCategory(this.categoryId, this.userId)
+        var reminderTime = 0L
+        var reminderMessage = ""
+
+        if (this.reminderId != null) {
+            val reminder = localReminder.getReminder(this.reminderId)
+            reminderTime = reminder.reminderTime
+            reminderMessage = reminder.message.toString()
+        }
 
         return CalendarEventUI(
             eventId = this.eventId,
             title = this.title,
             description = this.description!!,
             date = Instant.ofEpochMilli(this.date).atZone(ZoneId.systemDefault()).toLocalDate(),
-            startTime = Instant.ofEpochMilli(this.startTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
-            endTime = Instant.ofEpochMilli(this.endTime!!).atZone(ZoneId.systemDefault()).toLocalTime(),
+            startTime = Instant.ofEpochMilli(this.startTime!!).atZone(ZoneId.systemDefault())
+                .toLocalTime(),
+            endTime = Instant.ofEpochMilli(this.endTime!!).atZone(ZoneId.systemDefault())
+                .toLocalTime(),
             color = Color(category.color.toULong()),
-            icon = IconData.getIconByKey(category.icon)
+            icon = IconData.getIconByKey(category.icon),
+            reminderId = this.reminderId ?: 0,
+            categoryId = this.categoryId ?: 0,
+            reminderTime = reminderTime,
+            reminderMessage = reminderMessage
         )
     }
 

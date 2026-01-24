@@ -45,6 +45,7 @@ import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
+import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
@@ -57,7 +58,8 @@ fun EventScreen(
     eventViewModel: EventViewModel,
     rootNavController: NavHostController,
     localNavController: NavHostController, // use this to navigate from view to update or view details screen
-    onCreateEventClick: () -> Unit
+    onCreateEventClick: () -> Unit,
+    onUpdateEventClick: (Int) -> Unit
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     LaunchedEffect(selectedDate.year, selectedDate.month) {
@@ -99,7 +101,7 @@ fun EventScreen(
                         selectedDate = clickedDate
                         selectedView = 2
                     })
-                2 -> DailyView(selectedDate, eventsByDate)
+                2 -> DailyView(selectedDate, eventsByDate, onUpdateEventClick)
                 else -> MonthlyView(selectedDate, eventsByDate,
                     onDayClick = { clickedDate ->
                         selectedDate = clickedDate

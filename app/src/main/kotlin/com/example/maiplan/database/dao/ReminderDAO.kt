@@ -29,4 +29,7 @@ interface ReminderDAO {
 
     @Query("SELECT server_id FROM reminder WHERE reminder_id = :localId")
     suspend fun getServerId(localId: Int): Int?
+
+    @Query("SELECT * FROM reminder WHERE reminder_id = :reminderId")
+    suspend fun getReminder(reminderId: Int): ReminderEntity
 }

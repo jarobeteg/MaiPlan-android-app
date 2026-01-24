@@ -2,8 +2,10 @@ package com.example.maiplan.home.event.screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,7 +22,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.components.SimpleTopBar
@@ -28,6 +32,7 @@ import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.DateInputComponent
+import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.LocalDateTimeInputField
 import com.example.maiplan.components.PriorityDropdown
 import com.example.maiplan.components.SectionTitle
@@ -54,8 +59,10 @@ fun CreateEventScreen(
     onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val context = LocalContext.current
     categoryViewModel.getAllCategories(UserSession.userId!!)
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
@@ -93,9 +100,9 @@ fun CreateEventScreen(
 
             TimeInputComponent(stringResource(R.string.end_time), endTime) { endTime = it }
 
-            PriorityDropdown(priority) { priority = it }
+            //PriorityDropdown(priority) { priority = it }
 
-            AdjustableTextFieldLengthComponent(location, stringResource(R.string.location), Icons.Filled.LocationOn, 255) { location = it }
+            //AdjustableTextFieldLengthComponent(location, stringResource(R.string.location), Icons.Filled.LocationOn, 255) { location = it }
 
             SectionTitle(stringResource(R.string.category))
 
@@ -107,31 +114,64 @@ fun CreateEventScreen(
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
 
-            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {
-                var reminder: ReminderEntity? = null
-                dateTime?.let {
-                    reminder = ReminderEntity(
-                        userId = UserSession.userId!!,
-                        reminderTime = it.toEpochMillis(),
-                        message = message,
-                        syncState = 4
-                    )
+            errorMessage?.let {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorMessageComponent(it)
                 }
+            }
 
-                val event = EventEntity(
-                    userId = UserSession.userId!!,
-                    title = title,
-                    categoryId = selectedCategory!!.categoryId,
-                    description = description,
-                    date = date!!.toEpochMillis(),
-                    startTime = startTime!!.toEpochMillis(date!!),
-                    endTime = endTime!!.toEpochMillis(date!!),
-                    priority = priority,
-                    location = location,
-                    syncState = 4
-                    )
-                println("date: ${event.date}")
-                onSaveClick(reminder, event)
+
+            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {
+
+                val today = LocalDate.now()
+
+                when {
+                    title.isBlank() -> errorMessage = context.getString(R.string.blank_event_title)
+
+                    date == null -> errorMessage = context.getString(R.string.blank_event_date)
+
+                    date!!.isBefore(today) -> errorMessage = context.getString(R.string.event_date_in_past)
+
+                    startTime == null -> errorMessage = context.getString(R.string.blank_event_start_time)
+
+                    endTime == null -> errorMessage = context.getString(R.string.blank_event_end_time)
+
+                    endTime!!.isBefore(startTime) -> errorMessage = context.getString(R.string.event_end_time_before_start_time)
+
+                    selectedCategory == null -> errorMessage = context.getString(R.string.blank_event_category)
+
+                    else -> {
+                        errorMessage = null
+
+                        var reminder: ReminderEntity? = null
+                        dateTime?.let {
+                            reminder = ReminderEntity(
+                                userId = UserSession.userId!!,
+                                reminderTime = it.toEpochMillis(),
+                                message = message,
+                                syncState = 4
+                            )
+                        }
+
+                        val event = EventEntity(
+                            userId = UserSession.userId!!,
+                            title = title,
+                            categoryId = selectedCategory!!.categoryId,
+                            description = description,
+                            date = date!!.toEpochMillis(),
+                            startTime = startTime!!.toEpochMillis(date!!),
+                            endTime = endTime!!.toEpochMillis(date!!),
+                            priority = priority,
+                            location = location,
+                            syncState = 4
+                        )
+
+                        onSaveClick(reminder, event)
+                    }
+                }
             })
         }
     }

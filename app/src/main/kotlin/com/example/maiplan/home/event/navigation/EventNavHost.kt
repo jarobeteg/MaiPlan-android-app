@@ -7,7 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
+import androidx.navigation.navArgument
 import com.example.maiplan.home.event.screens.*
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
@@ -45,7 +47,8 @@ fun NavGraphBuilder.eventNavGraph(
             eventViewModel = eventViewModel,
             rootNavController = rootNavController,
             localNavController = localNavController,
-            onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) }
+            onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) },
+            onUpdateEventClick = { eventId -> localNavController.navigate(EventRoutes.Update.withArgs(eventId)) }
         )
     }
 
@@ -64,10 +67,23 @@ fun NavGraphBuilder.eventNavGraph(
     }
 
     // --- Update Event Screen ---
-    composable(EventRoutes.Update.route) {
+    composable(
+        route = EventRoutes.Update.route,
+        arguments = listOf(
+            navArgument("eventId") { type = NavType.IntType }
+        )
+    ) { backstackEntry ->
+        val eventId = backstackEntry
+            .arguments
+            ?.getInt("eventId")
+            ?: return@composable
         UpdateEventScreen(
+            eventId = eventId,
             eventViewModel = eventViewModel,
-            onSaveClick = {},
+            categoryViewModel = categoryViewModel,
+            reminderViewModel = reminderViewModel,
+            onUpdateClick = {},
+            onDeleteClick = {},
             onBackClick = { localNavController.popBackStack() }
         )
     }

@@ -1,6 +1,7 @@
 package com.example.maiplan.home.event.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,7 +40,8 @@ import java.time.ZoneId
 @Composable
 fun DailyView(
     selectedDate: LocalDate,
-    eventsByDate: Map<LocalDate, List<CalendarEventUI>>
+    eventsByDate: Map<LocalDate, List<CalendarEventUI>>,
+    onEditEvent: (Int) -> Unit
 ) {
     val eventsForDay = eventsByDate[selectedDate].orEmpty()
     val defaultHourHeight = 72.dp
@@ -58,6 +60,7 @@ fun DailyView(
                 hour = hour,
                 rowHeight = rowHeight,
                 events = hourEvents,
+                onEventClick = onEditEvent
             )
         }
     }
@@ -90,7 +93,8 @@ fun buildEventsByStartHour(
 fun DailyHourRow(
     hour: Int,
     rowHeight: Dp,
-    events: List<CalendarEventUI>
+    events: List<CalendarEventUI>,
+    onEventClick: (Int) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -114,20 +118,27 @@ fun DailyHourRow(
             Divider()
 
             events.forEach { event ->
-                    DailyEventCard(event)
+                    DailyEventCard(
+                        event = event,
+                        onClick = onEventClick
+                    )
                 }
         }
     }
 }
 
 @Composable
-fun DailyEventCard(event: CalendarEventUI) {
+fun DailyEventCard(
+    event: CalendarEventUI,
+    onClick: (Int) -> Unit
+) {
     val start = event.startTime.to24hString()
     val end = event.endTime.to24hString()
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 2.dp),
+            .padding(vertical = 2.dp)
+            .clickable { onClick(event.eventId) },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer
         ),

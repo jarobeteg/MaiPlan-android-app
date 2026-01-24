@@ -102,6 +102,15 @@
     <string name="message">Message</string>
     <string name="date_time">Select date &amp; time</string>
 
+    <!-- event create error message -->
+    <string name="blank_event_title">Title is required</string>
+    <string name="blank_event_date">Date is required</string>
+    <string name="event_date_in_past">Event date cannot be in the past</string>
+    <string name="blank_event_start_time">Start time is required</string>
+    <string name="blank_event_end_time">End time is required</string>
+    <string name="event_end_time_before_start_time">End time cannot be earlier than start time</string>
+    <string name="blank_event_category">Category is required</string>
+
     <!-- days -->
     <string name="mon">Mon</string>
     <string name="tue">Tue</string>
