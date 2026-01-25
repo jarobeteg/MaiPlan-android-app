@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.SimpleTopBar
@@ -30,6 +32,7 @@ import com.example.maiplan.components.ColorPickerRow
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.IconData
@@ -49,6 +52,9 @@ fun UpdateCategoryScreen(
     var selectedColor by remember { mutableStateOf(Color(category.color.toULong())) }
     var selectedIcon by remember { mutableStateOf(IconData.getIconByKey(category.icon)) }
     var selectedIconString by remember { mutableStateOf(category.icon) }
+
+    val isTablet = isTablet()
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
 
     Scaffold ( topBar = { SimpleTopBar(
         text = stringResource(R.string.category_modify),
@@ -76,6 +82,16 @@ fun UpdateCategoryScreen(
                 onIconSelectedString = { selectedIconString = it }
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            SubmitButtonComponent(
+                value = stringResource(R.string.category_update),
+                onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) },
+                isLoading = isLoading,
+                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                modifier = Modifier.fillMaxWidth().height(fieldHeight)
+                )
+
             if (saveResult is Result.Failure) {
                 val error = saveResult as Result.Failure
                 val code = error.errorCode
@@ -92,17 +108,12 @@ fun UpdateCategoryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    ErrorMessageComponent(errorMessage)
+                    ErrorMessageComponent(
+                        value = errorMessage,
+                        fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                        style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            SubmitButtonComponent(
-                value = stringResource(R.string.category_update),
-                onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) },
-                isLoading = isLoading
-                )
         }
     }
 }

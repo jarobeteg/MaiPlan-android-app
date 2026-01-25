@@ -45,6 +45,14 @@ class CategoryLocalDataSource(private val context: Context) {
     }
 
     suspend fun categoryUpdate(category: CategoryResponse, userId: Int): Result<Unit> {
+        if (category.name.isEmpty() || category.name.isBlank()) {
+            return Result.Failure(EMPTY_CATEGORY_NAME_ERROR)
+        }
+
+        if (category.description.isEmpty() || category.description.isBlank()) {
+            return Result.Failure(EMPTY_CATEGORY_DESCRIPTION_ERROR)
+        }
+
         return handleLocalResponse {
             categoryDao.categoryUpdate(category.name, category.description, category.color, category.icon, category.categoryId, userId)
         }
