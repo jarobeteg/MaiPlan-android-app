@@ -477,36 +477,58 @@ fun IconPickerDialog(
 ) {
     val scrollState = rememberLazyGridState()
 
+    val isTablet = isTablet()
+
+    val dialogWidth = if (isTablet) 920.dp else Dp.Unspecified
+    val gridHeight = if (isTablet) 720.dp else 300.dp
+    val iconSize = if (isTablet) 128.dp else 48.dp
+    val padding = if (isTablet) 24.dp else 16.dp
+    val indicatorHeight = if (isTablet) 40.dp else 24.dp
+    val textSize = if (isTablet) 48.sp else 16.sp
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(padding)
+                .then(if (isTablet) Modifier.width(dialogWidth) else Modifier)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(padding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .height(300.dp)
+                        .height(gridHeight)
                         .fillMaxWidth()
                 ) {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(4),
-                        contentPadding = PaddingValues(8.dp),
+                        columns = GridCells.Adaptive(minSize = iconSize),
+                        contentPadding = PaddingValues(12.dp),
                         state = scrollState,
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(allIcons.entries.toList()) { (key, icon) ->
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onBackground,
+                            Box(
                                 modifier = Modifier
-                                    .size(48.dp)
-                                    .clickable { onIconSelected(icon); onIconSelectedString(key); onDismiss() }
-                            )
+                                    .size(iconSize)
+                                    .padding(if (isTablet) 12.dp else 8.dp)
+                                    .clickable {
+                                        onIconSelected(icon)
+                                        onIconSelectedString(key)
+                                        onDismiss()
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = icon,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+
                         }
                     }
 
@@ -518,7 +540,7 @@ fun IconPickerDialog(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .height(24.dp)
+                                .height(indicatorHeight)
                                 .background(
                                     Brush.verticalGradient(
                                         colors = listOf(
@@ -532,7 +554,7 @@ fun IconPickerDialog(
                 }
 
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onBackground)
+                    Text(stringResource(R.string.cancel), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
