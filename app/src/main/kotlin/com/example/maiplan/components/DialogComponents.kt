@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -58,7 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -269,6 +270,12 @@ fun CustomSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     trackBrush: Brush
 ) {
+    val isTablet = isTablet()
+
+    val sliderHeight = if (isTablet) 96.dp else 64.dp
+    val thumbSize = if (isTablet) 36.dp else 24.dp
+    val trackHeight = if (isTablet) 20.dp else 12.dp
+
     Slider(
         value = value,
         onValueChange = onValueChange,
@@ -280,11 +287,11 @@ fun CustomSlider(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp),
+            .height(sliderHeight),
         thumb = {
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(thumbSize)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
             )
         },
@@ -292,7 +299,7 @@ fun CustomSlider(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
+                    .height(trackHeight)
                     .background(trackBrush, MaterialTheme.shapes.extraSmall)
             )
         }
@@ -305,6 +312,13 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val isTablet = isTablet()
+
+    val previewSize = if (isTablet) 220.dp else 100.dp
+    val dialogPadding = if (isTablet) 64.dp else 16.dp
+    val textSize = if (isTablet) 32.sp else 16.sp
+    val dialogWidth = if (isTablet) 920.dp else Dp.Unspecified
+
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
 
@@ -321,22 +335,24 @@ fun ColorPickerDialog(
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier
+                .padding(dialogPadding)
+                .then(if (isTablet) Modifier.width(dialogWidth) else Modifier)
         ) {
             Column(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(dialogPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(100.dp)
+                        .size(previewSize)
                         .background(color, CircleShape)
                         .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
 
-                Text(stringResource(R.string.hue), color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.hue), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = hue,
                     onValueChange = { hue = it },
@@ -346,7 +362,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.saturation), color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.saturation), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = saturation,
                     onValueChange = { saturation = it },
@@ -356,7 +372,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.brightness), color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.brightness), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = value,
                     onValueChange = { value = it },
@@ -366,12 +382,12 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
 
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.onBackground) }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground) }
                     TextButton(onClick = { onColorSelected(color); onDismiss() }) { Text(
-                        stringResource(R.string.select), color = MaterialTheme.colorScheme.onBackground) }
+                        stringResource(R.string.select), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground) }
                 }
             }
         }
