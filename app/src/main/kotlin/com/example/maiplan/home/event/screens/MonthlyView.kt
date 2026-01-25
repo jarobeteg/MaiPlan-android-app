@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import com.example.maiplan.R
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.home.event.utils.CalendarEventUI
 import java.time.LocalDate
 import java.time.temporal.WeekFields
@@ -45,6 +46,7 @@ fun MonthlyView(
     eventsByDate: Map <LocalDate, List<CalendarEventUI>>,
     onDayClick: (LocalDate) -> Unit
 ) {
+    val isTablet = isTablet()
     val context = LocalContext.current
     val daysInMonth = selectedDate.lengthOfMonth()
     val firstDayOfMonth = (selectedDate.withDayOfMonth(1).dayOfWeek.value + 6) % 7
@@ -63,9 +65,9 @@ fun MonthlyView(
     val rowCount = ceil(totalCells / 7.0).toInt()
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val weekNumberWidth = 12.dp
+        val weekNumberWidth = if (isTablet) 24.dp else 12.dp
         val cellSize = (maxWidth - weekNumberWidth) / 7
-        val headerHeight = 18.dp
+        val headerHeight = if (isTablet) 32.dp else 18.dp
         val rowHeight = (maxHeight - headerHeight) / rowCount
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -77,6 +79,10 @@ fun MonthlyView(
 
 @Composable
 fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, headerHeight: Dp) {
+    val isTablet = isTablet()
+    val fontSize = if (isTablet) 32.sp else 10.sp
+    val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
+
     Row(modifier = Modifier.height(headerHeight)) {
         Spacer(modifier = Modifier.width(weekNumberWidth))
         weekdays.forEach { day ->
@@ -86,7 +92,8 @@ fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, he
             ) {
                 Text(
                     text = day,
-                    style = MaterialTheme.typography.bodySmall,
+                    fontSize = fontSize,
+                    style = style,
                     color = MaterialTheme.colorScheme.onTertiary
                 )
             }
@@ -117,13 +124,18 @@ fun CalendarGrid(
 
 @Composable
 fun WeekNumberColumn(weekNumber: Int, width: Dp) {
+    val isTablet = isTablet()
+    val fontSize = if (isTablet) 32.sp else 10.sp
+    val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
+
     Box(
         modifier = Modifier.width(width).fillMaxHeight(),
         contentAlignment = Alignment.TopCenter
     ) {
         Text(
             text = weekNumber.toString(),
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = 10.sp),
+            fontSize = fontSize,
+            style = style,
             color = MaterialTheme.colorScheme.onTertiary
         )
     }
@@ -163,6 +175,10 @@ fun DayCell(
     events: List<CalendarEventUI>,
     onClick: () -> Unit
 ) {
+    val isTablet = isTablet()
+    val fontSize = if (isTablet) 32.sp else 12.sp
+    val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
+
     Card(
         modifier = Modifier
             .width(cellSize)
@@ -185,7 +201,8 @@ fun DayCell(
 
             Text(
                 text = dayNumber.toString(),
-                style = MaterialTheme.typography.bodySmall,
+                fontSize = fontSize,
+                style = style,
                 color = MaterialTheme.colorScheme.onTertiary
             )
 
