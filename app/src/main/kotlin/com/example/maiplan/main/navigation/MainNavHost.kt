@@ -1,5 +1,6 @@
 package com.example.maiplan.main.navigation
 
+import android.app.Activity
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -18,7 +19,7 @@ import com.example.maiplan.network.api.UserResetPassword
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @Composable
-fun AuthNavHost(viewModel: AuthViewModel) {
+fun AuthNavHost(viewModel: AuthViewModel, activity: Activity) {
     val navController = rememberNavController()
 
     NavHost(
@@ -29,18 +30,20 @@ fun AuthNavHost(viewModel: AuthViewModel) {
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
-        authNavGraph(navController, viewModel)
+        authNavGraph(navController, viewModel, activity)
     }
 }
 
 fun NavGraphBuilder.authNavGraph(
     navController: NavController,
     viewModel: AuthViewModel,
+    activity: Activity
 ) {
     // --- Login Screen ---
     composable(MainRoutes.Login.route) {
         LoginScreen(
             viewModel = viewModel,
+            activity = activity,
             onLoginClick = { email, password ->
                 viewModel.login(UserLogin(email, password))
             },
@@ -59,6 +62,7 @@ fun NavGraphBuilder.authNavGraph(
     composable(MainRoutes.Register.route) {
         RegisterScreen(
             viewModel = viewModel,
+            activity = activity,
             onRegisterClick = { email, username, password, passwordAgain ->
                 viewModel.register(UserRegister(email, username, password, passwordAgain))
             },
@@ -73,6 +77,7 @@ fun NavGraphBuilder.authNavGraph(
     composable(MainRoutes.ForgotPassword.route) {
         ForgotPasswordScreen(
             viewModel = viewModel,
+            activity = activity,
             onResetClick = { email, password, passwordAgain ->
                 viewModel.resetPassword(UserResetPassword(email, password, passwordAgain))
             },

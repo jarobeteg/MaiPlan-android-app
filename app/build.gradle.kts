@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.navigation.compose)
     implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.material3.windowSizeClass)
     testImplementation(libs.junit)
     implementation(libs.compose.ui)
     implementation(libs.compose.ui.tooling.preview)

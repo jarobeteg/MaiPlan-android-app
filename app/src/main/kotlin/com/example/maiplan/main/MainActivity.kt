@@ -16,7 +16,6 @@ import com.example.maiplan.main.navigation.AuthNavHost
 import com.example.maiplan.main.screens.LoadingScreen
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.api.AuthResponse
-import com.example.maiplan.network.api.UserResponse
 import com.example.maiplan.repository.auth.AuthRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthLocalDataSource
@@ -76,7 +75,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupComposeUI() {
-        setContent { AppTheme { AuthNavHost(viewModel) } }
+        setContent { AppTheme { AuthNavHost(viewModel, this) } }
     }
 
     private fun setupDependencies() {

@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -20,12 +22,14 @@ fun SubmitButtonComponent(
     value: String,
     color: Color = MaterialTheme.colorScheme.primary,
     onButtonClicked: () -> Unit,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    fontSize: TextUnit = 18.sp,
+    modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     Button(
         onClick = { if (!isLoading) onButtonClicked() },
         enabled = !isLoading,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
@@ -40,18 +44,23 @@ fun SubmitButtonComponent(
         } else {
             Text(
                 text = value,
-                fontSize = 16.sp
+                fontSize = fontSize
             )
         }
     }
 }
 
 @Composable
-fun ErrorMessageComponent(value: String) {
+fun ErrorMessageComponent(
+    value: String,
+    fontSize: TextUnit = 16.sp,
+    style: TextStyle = MaterialTheme.typography.labelSmall
+) {
     Text(
         text = value,
         color = MaterialTheme.colorScheme.onError,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.Bold
+        fontSize = fontSize,
+        fontWeight = FontWeight.Bold,
+        style = style
     )
 }

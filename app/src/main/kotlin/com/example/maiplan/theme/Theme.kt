@@ -46,11 +46,13 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 val AppTypography = Typography(
-    titleLarge = TextStyle(fontSize = 22.sp),
+    titleLarge = TextStyle(fontSize = 32.sp),
     bodyLarge = TextStyle(fontSize = 16.sp),
     bodyMedium = TextStyle(fontSize = 14.sp),
     bodySmall = TextStyle(fontSize = 12.sp),
-    labelSmall = TextStyle(fontSize = 12.sp)
+    labelLarge = TextStyle(fontSize = 24.sp),
+    labelMedium = TextStyle(fontSize = 12.sp),
+    labelSmall = TextStyle(fontSize = 8.sp)
 )
 
 val AppShapes = Shapes(

@@ -140,7 +140,7 @@ fun WeeklyViewCard(
 
                 Text(
                     text = "$start - $end",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onTertiary,
                     modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -148,7 +148,7 @@ fun WeeklyViewCard(
 
                 Text(
                     text = event.description,
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     fontSize = 16.sp,
                     color = MaterialTheme.colorScheme.onTertiary,
                     overflow = TextOverflow.Ellipsis,

@@ -104,7 +104,7 @@ fun DailyHourRow(
     ) {
         Text(
             text = "%02d:00".format(hour),
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             modifier = Modifier
                 .width(48.dp)
                 .padding(top = 4.dp)
@@ -176,7 +176,7 @@ fun DailyEventCard(
 
         Text(
             text = "$start - $end",
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onTertiary,
             modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
@@ -184,7 +184,7 @@ fun DailyEventCard(
 
         Text(
             text = event.description,
-            style = MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelMedium,
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onTertiary,
             overflow = TextOverflow.Ellipsis,
