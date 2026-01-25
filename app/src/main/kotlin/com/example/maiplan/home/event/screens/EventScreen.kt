@@ -3,12 +3,19 @@ package com.example.maiplan.home.event.screens
 import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -34,6 +41,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
@@ -41,11 +49,12 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
-import com.example.maiplan.home.event.utils.CalendarEventUI
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
@@ -144,48 +153,67 @@ fun EventTopBar(
     var expanded by remember { mutableStateOf(false) }
     var buttonWidth by remember { mutableIntStateOf(0) }
 
+    val isTablet = isTablet()
+    val iconSize = if (isTablet) 64.dp else 24.dp
+    val fontSize = if (isTablet) 48.sp else 16.sp
+    val barHeight = if (isTablet) 160.dp else 112.dp
+
     TopAppBar(
+        modifier = Modifier.height(barHeight),
         title = {
             Box(
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.medium)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
+                modifier = Modifier.fillMaxHeight(),
+                contentAlignment = Alignment.CenterStart
             ) {
-                OutlinedButton(
-                    onClick = { expanded = !expanded },
+                Box(
                     modifier = Modifier
-                        .height(40.dp)
-                        .onGloballyPositioned { coordinates ->
-                            buttonWidth = coordinates.size.width
-                        },
-                    border = null,
-                    colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(MaterialTheme.colorScheme.primary)
+                        .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
                 ) {
-                    Text(
-                        text = formattedTitle,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(end = 4.dp)
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Dropdown Arrow",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.rotate(if (expanded) 90f else 0f)
+                    OutlinedButton(
+                        onClick = { expanded = !expanded },
+                        modifier = Modifier
+                            .height(if (isTablet) 70.dp else 40.dp)
+                            .onGloballyPositioned { coordinates ->
+                                buttonWidth = coordinates.size.width
+                            },
+                        border = null,
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = formattedTitle,
+                                style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = fontSize,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Default.ArrowDropDown,
+                                contentDescription = "Dropdown Arrow",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier
+                                    .size(if (isTablet) 64.dp else 24.dp)
+                                    .rotate(if (expanded) 0f else 90f)
+                            )
+                        }
+                    }
+
+                    EventDropdownMenu(
+                        expanded = expanded,
+                        views = views,
+                        buttonWidth = buttonWidth,
+                        onItemSelected = { index ->
+                            onViewSelected(index)
+                            expanded = false
+                        },
+                        onDismiss = { expanded = false }
                     )
                 }
-
-                EventDropdownMenu(
-                    expanded = expanded,
-                    views = views,
-                    buttonWidth = buttonWidth,
-                    onItemSelected = { index ->
-                        onViewSelected(index)
-                        expanded = false
-                    },
-                    onDismiss = { expanded = false }
-                )
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -193,11 +221,35 @@ fun EventTopBar(
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         actions = {
-            IconButton(onClick = onDatePickerClick) {
-                Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
-            }
-            IconButton(onClick = onCreateEventClick) {
-                Icon(Icons.Filled.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
+            Row(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(end = if (isTablet) 24.dp else 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(if (isTablet) 24.dp else 8.dp)
+            ) {
+                IconButton(
+                    onClick = onDatePickerClick,
+                    modifier = Modifier.size(iconSize)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
+                IconButton(
+                    onClick = onCreateEventClick,
+                    modifier = Modifier.size(iconSize)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        tint = MaterialTheme.colorScheme.onPrimary
+                    )
+                }
             }
         }
     )
@@ -211,6 +263,10 @@ fun EventDropdownMenu(
     onItemSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val isTablet = isTablet()
+    val fontSize = if (isTablet) 48.sp else 16.sp
+    val itemHeight = if (isTablet) 128.dp else 48.dp
+
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = {
@@ -223,13 +279,19 @@ fun EventDropdownMenu(
     ) {
         views.forEachIndexed { index, view ->
             DropdownMenuItem(
-                text = { Text(view, color = MaterialTheme.colorScheme.onPrimary) },
+                text = { Text(
+                    text = view,
+                    fontSize = fontSize,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.padding(vertical = if (isTablet) 24.dp else 4.dp)
+                ) },
                 onClick = {
                     onItemSelected(index)
                     onDismiss()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(itemHeight)
                     .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )

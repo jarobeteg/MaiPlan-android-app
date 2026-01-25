@@ -6,11 +6,14 @@ import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -49,6 +52,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.utils.BaseActivity
@@ -85,17 +89,30 @@ fun MoreScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreTopBar() {
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 48.sp else 24.sp
+    val barHeight = if (isTablet) 160.dp else 112.dp
+
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = stringResource(R.string.more),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            Box(
+                modifier = Modifier.fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(R.string.more),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontSize = fontSize,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center
+                )
+            }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
-        )
+        ),
+        modifier = Modifier.height(barHeight)
     )
 }
 

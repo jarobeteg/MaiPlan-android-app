@@ -13,17 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-
-@Composable
-fun isTablet(): Boolean {
-    val configuration = LocalConfiguration.current
-    return configuration.smallestScreenWidthDp >= 600
-}
+import com.example.maiplan.components.isTablet
 
 @Composable
 fun HomeNavigationBar(navController: NavHostController, context: Context) {
