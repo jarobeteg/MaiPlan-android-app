@@ -71,8 +71,13 @@ fun SimpleTopBar(
 
 @Composable
 fun SectionTitle(text: String) {
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 48.sp else 24.sp
+
     Text(
         text = text,
+        fontSize = fontSize,
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.fillMaxWidth(),

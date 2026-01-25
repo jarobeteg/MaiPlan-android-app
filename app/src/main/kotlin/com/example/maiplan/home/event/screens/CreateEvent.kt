@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Title
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
@@ -36,6 +39,7 @@ import com.example.maiplan.components.LocalDateTimeInputField
 import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
@@ -73,6 +77,9 @@ fun CreateEventScreen(
     var location by remember { mutableStateOf("") }
     var dateTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var message by remember { mutableStateOf("") }
+
+    val isTablet = isTablet()
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
 
     Scaffold (
         topBar = {
@@ -119,11 +126,17 @@ fun CreateEventScreen(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center
                 ) {
-                    ErrorMessageComponent(it)
+                    ErrorMessageComponent(
+                        value = it,
+                        fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                        style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
                 }
             }
 
-            SubmitButtonComponent(stringResource(R.string.event_save), onButtonClicked = {
+            SubmitButtonComponent(stringResource(R.string.event_save),
+                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                modifier = Modifier.fillMaxWidth().height(fieldHeight),
+                onButtonClicked = {
 
                 val today = LocalDate.now()
 

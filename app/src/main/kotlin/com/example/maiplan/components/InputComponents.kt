@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -42,9 +44,17 @@ fun DateInputComponent(
 
     val displayDate = selectedDate?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) ?: ""
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -63,13 +73,14 @@ fun DateInputComponent(
         ) {
             Text(
                 text = "$label: $displayDate",
-                style = MaterialTheme.typography.bodyLarge
+                fontSize = fontSize,
+                style = style
             )
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(iconSize)
             )
         }
     }
@@ -96,9 +107,17 @@ fun TimeInputComponent(
 
     val displayTime = selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -117,13 +136,14 @@ fun TimeInputComponent(
         ) {
             Text(
                 text = "$label: $displayTime",
-                style = MaterialTheme.typography.bodyLarge
+                fontSize = fontSize,
+                style = style
             )
             Icon(
                 imageVector = Icons.Default.AccessTime,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(iconSize)
             )
         }
     }
@@ -156,9 +176,17 @@ fun LocalDateTimeInputField(
 
     val displayText = dateTime?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) ?: ""
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -179,14 +207,15 @@ fun LocalDateTimeInputField(
         ) {
             Text(
                 text = "$label: $displayText",
-                style = MaterialTheme.typography.bodyLarge,
+                fontSize = fontSize,
+                style = style,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Icon(
                 imageVector = Icons.Default.Event,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(iconSize)
             )
         }
     }

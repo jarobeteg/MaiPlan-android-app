@@ -59,6 +59,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -216,11 +217,12 @@ fun ColorPickerRow(
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
     val iconSize = if (isTablet) 48.dp else 36.dp
     val fieldHeight = if (isTablet) 96.dp else 64.dp
-    val border = if (isTablet) 3.dp else 1.dp
+    val border = if (isTablet) 2.dp else 1.dp
 
     Box(
         modifier = Modifier
-            .fillMaxWidth().height(fieldHeight)
+            .fillMaxWidth()
+            .height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -633,16 +635,29 @@ fun CategoryDropdownComponent(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier.height(fieldHeight)
     ) {
         OutlinedTextField(
             value = selectedCategory?.name ?: "",
             onValueChange = {},
             readOnly = true,
-            label = { Text("Category") },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
+            label = { Text(
+                text = "Category",
+                fontSize = fontSize,
+                style = style
+            ) },
+            textStyle = TextStyle(fontSize = fontSize),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, modifier = Modifier.size(iconSize)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -667,13 +682,20 @@ fun CategoryDropdownComponent(
             categories.forEach { category ->
                 DropdownMenuItem(
                     text = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.height(fieldHeight)
+                        ) {
                             Icon(
                                 imageVector = IconData.getIconByKey(category.icon),
                                 contentDescription = null,
-                                modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier.size(iconSize).padding(end = 8.dp)
                             )
-                            Text(text = category.name, color = MaterialTheme.colorScheme.onBackground)
+                            Text(
+                                text = category.name,
+                                fontSize = fontSize,
+                                style = style,
+                                color = MaterialTheme.colorScheme.onBackground)
                         }
                     },
                     modifier = Modifier
