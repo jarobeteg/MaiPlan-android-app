@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -362,6 +363,13 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
 
 @Composable
 fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 42.dp else 24.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     OutlinedTextField(
         value = searchQuery,
         onValueChange = { newValue ->
@@ -369,9 +377,19 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
                 onValueChange(newValue)
             }
         },
-        modifier = Modifier.fillMaxWidth(),
-        placeholder = { Text(stringResource(R.string.category_search)) },
-        leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+        textStyle = TextStyle(fontSize = fontSize),
+        modifier = Modifier.fillMaxWidth().height(fieldHeight),
+        placeholder = { Text(
+            text = stringResource(R.string.category_search),
+            fontSize = fontSize,
+            style = style,
+            textAlign = TextAlign.Center
+        ) },
+        leadingIcon = { Icon(
+            imageVector = Icons.Filled.Search,
+            contentDescription = null,
+            modifier = Modifier.size(iconSize)
+        ) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,

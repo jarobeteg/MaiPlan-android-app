@@ -67,7 +67,6 @@ fun LoginScreen(
 
     val cardPadding = if (isCompact) 24.dp else 48.dp
     val itemSpacing = if (isCompact) 12.dp else 20.dp
-    val scale = if (isCompact) 1f else 2.5f
     val fieldHeight = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) 96.dp else 64.dp
 
     val contentWidth = when (windowSizeClass.widthSizeClass) {

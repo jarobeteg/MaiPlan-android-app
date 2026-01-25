@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,9 +47,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.components.SearchFieldComponent
+import com.example.maiplan.components.isTablet
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.utils.common.IconData
@@ -130,35 +135,57 @@ fun CategoryManagementTopBar(
     onBackClick: () -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 48.sp else 24.sp
+    val iconSize = if (isTablet) 64.dp else 24.dp
+    val barHeight = if (isTablet) 160.dp else 112.dp
+
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            Box(
+                modifier = Modifier.fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = text,
+                    fontSize = fontSize,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center
+                )
+            }
         },
         navigationIcon = {
-            IconButton(onClick = onBackClick) {
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier.size(iconSize * 1.25f)
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
         actions = {
-            IconButton(onClick = onCreateCategoryClick) {
+            IconButton(
+                onClick = onCreateCategoryClick,
+                modifier = Modifier.size(iconSize * 1.25f)
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
-        )
+        ),
+        modifier = Modifier.height(barHeight)
     )
 }
 
@@ -166,6 +193,14 @@ fun CategoryManagementTopBar(
 fun CategoryCard(category: CategoryEntity) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
+
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 48.sp else 16.sp
+    val iconSize = if (isTablet) 64.dp else 42.dp
+    val titleStyle = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
+    val bodyStyle = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
+    val cardHeight = if (isTablet) 256.dp else 128.dp
 
     val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
     val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
@@ -179,6 +214,7 @@ fun CategoryCard(category: CategoryEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .height(cardHeight)
             .padding(top = 4.dp, bottom = 4.dp)
             .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
@@ -188,7 +224,7 @@ fun CategoryCard(category: CategoryEntity) {
                 Icon(
                     imageVector = IconData.getIconByKey(category.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(42.dp),
+                    modifier = Modifier.size(iconSize),
                     tint = textColor
                 )
 
@@ -196,7 +232,8 @@ fun CategoryCard(category: CategoryEntity) {
 
                 Text(
                     text = category.name,
-                    style = MaterialTheme.typography.titleMedium,
+                    fontSize = fontSize,
+                    style = titleStyle,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
@@ -206,7 +243,8 @@ fun CategoryCard(category: CategoryEntity) {
 
             Text(
                 text = category.description,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = fontSize,
+                style = bodyStyle,
                 color = textColor.copy(alpha = 0.8f)
             )
         }
@@ -220,6 +258,10 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
         SwipeToDismissBoxValue.EndToStart -> Color(0xFF1DE9B6)
         SwipeToDismissBoxValue.Settled -> Color.Transparent
     }
+
+    val isTablet = isTablet()
+
+    val iconSize = if (isTablet) 64.dp else 32.dp
 
     Row(
         modifier = Modifier
@@ -239,14 +281,14 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(iconSize)
             )
         } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(iconSize)
             )
         }
     }
