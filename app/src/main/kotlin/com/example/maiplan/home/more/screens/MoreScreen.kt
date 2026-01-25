@@ -78,8 +78,8 @@ fun MoreScreen(
             horizontalAlignment = Alignment.Start
         ) {
             MoreScreenButton(stringResource(R.string.category_management), { openActivity(context, CategoryActivity::class.java) }, Icons.Filled.Category, true)
-            MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
-            MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, true)
+            //MoreScreenButton(stringResource(R.string.settings), onClick = { println("settings") }, Icons.Filled.Settings, true)
+            //MoreScreenButton(stringResource(R.string.help), onClick = { println("help") }, Icons.AutoMirrored.Filled.Help, true)
             MoreScreenButton(stringResource(R.string.sync), onClick = { SyncScheduler.runOneTimeSync(context) }, Icons.Filled.Sync, true)
             MoreScreenButton(stringResource(R.string.logout), onClick = onLogoutClick, Icons.AutoMirrored.Filled.Logout, false)
         }
@@ -125,6 +125,11 @@ fun MoreScreenButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 48.sp else 16.sp
+    val iconSize = if (isTablet) 64.dp else 24.dp
+
     Column {
         Row(
             modifier = Modifier
@@ -142,7 +147,7 @@ fun MoreScreenButton(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(iconSize)
             )
 
             Spacer(modifier = Modifier.width(4.dp))
@@ -150,7 +155,7 @@ fun MoreScreenButton(
             Text(
                 text = text,
                 color = MaterialTheme.colorScheme.onTertiary,
-                fontSize = 16.sp,
+                fontSize = fontSize,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)
             )
@@ -159,7 +164,7 @@ fun MoreScreenButton(
                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(iconSize)
             )
         }
 
@@ -167,7 +172,7 @@ fun MoreScreenButton(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth(),
-                thickness = 1.dp,
+                thickness = if (isTablet) 4.dp else 1.dp,
                 color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.2f)
             )
         }
