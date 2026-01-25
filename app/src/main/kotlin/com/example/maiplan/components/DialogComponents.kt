@@ -58,7 +58,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
@@ -207,16 +209,24 @@ fun ColorPickerRow(
     val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
     val borderShape = OutlinedTextFieldDefaults.shape
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val border = if (isTablet) 3.dp else 1.dp
+
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
                 onClick = { showColorPicker = true }
             )
             .border(borderWidth, borderColor, borderShape)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -225,15 +235,16 @@ fun ColorPickerRow(
         ) {
             Text(
                 text = stringResource(R.string.category_color),
-                style = MaterialTheme.typography.bodyLarge,
+                fontSize = fontSize,
+                style = style,
                 modifier = Modifier.weight(1f)
             )
 
             Box(
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(iconSize)
                     .background(selectedColor, CircleShape)
-                    .border(1.dp, Color.Gray, CircleShape)
+                    .border(width = border, Color.Gray, CircleShape)
             )
         }
     }
@@ -380,9 +391,16 @@ fun IconPickerRow(
     val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
     val borderShape = OutlinedTextFieldDefaults.shape
 
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     Box(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth().height(fieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
@@ -398,20 +416,21 @@ fun IconPickerRow(
         ) {
             Text(
                 text = stringResource(R.string.category_icon),
-                style = MaterialTheme.typography.bodyLarge,
+                fontSize = fontSize,
+                style = style,
                 modifier = Modifier.weight(1f)
             )
 
             Box(
                 modifier = Modifier
-                    .size(40.dp),
+                    .size(iconSize),
                 contentAlignment = Alignment.Center
             ) {
                 selectedIcon?.let {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        modifier = Modifier.size(36.dp),
+                        modifier = Modifier.fillMaxSize(),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }

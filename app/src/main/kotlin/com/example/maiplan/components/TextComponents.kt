@@ -320,6 +320,13 @@ fun PasswordStrengthBar(
 
 @Composable
 fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
+    val isTablet = isTablet()
+
+    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
+    val iconSize = if (isTablet) 48.dp else 36.dp
+    val fieldHeight = if (isTablet) 96.dp else 64.dp
+
     OutlinedTextField(
         value = value,
         onValueChange = { newValue ->
@@ -327,12 +334,16 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
                 onValueChange(newValue)
             }
         },
-        label = { Text(label) },
+        label = { Text(
+            text = label,
+            fontSize = fontSize,
+            style = style
+        ) },
         trailingIcon = {
             Box(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .size(36.dp),
+                    .size(iconSize),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -343,7 +354,8 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        textStyle = TextStyle(fontSize = fontSize),
+        modifier = Modifier.fillMaxWidth().height(fieldHeight),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
