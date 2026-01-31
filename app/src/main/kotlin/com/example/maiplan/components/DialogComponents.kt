@@ -1,5 +1,7 @@
 package com.example.maiplan.components
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,12 +12,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -42,6 +46,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
+import androidx.compose.material3.Typography
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -54,16 +59,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.utils.common.IconData
@@ -76,9 +85,113 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialogComponent(
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val datePickerState = rememberDatePickerState()
+
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+
+    val baseWidth = 360f
+    val baseHeight = 550f
+
+    val scaleFactor = remember(configuration) {
+        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            val targetHeight = configuration.screenHeightDp * 0.65f
+            targetHeight / baseHeight
+        } else {
+            val targetWidth = configuration.screenWidthDp * 0.6f
+            targetWidth / baseWidth
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                modifier = Modifier
+                    .width(360.dp)
+                    .scale(scaleFactor),
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.primary,
+                tonalElevation = 6.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    DatePicker(
+                        state = datePickerState,
+                        showModeToggle = false,
+                        colors = DatePickerDefaults.colors(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                            headlineContentColor = MaterialTheme.colorScheme.onPrimary,
+                            weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                            subheadContentColor = MaterialTheme.colorScheme.onPrimary,
+                            yearContentColor = MaterialTheme.colorScheme.onPrimary,
+                            selectedDayContentColor = MaterialTheme.colorScheme.primary,
+                            selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectedYearContentColor = MaterialTheme.colorScheme.primary,
+                            selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            todayDateBorderColor = MaterialTheme.colorScheme.secondary,
+                            todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                            currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                            dayContentColor = MaterialTheme.colorScheme.onPrimary,
+                            dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = 16.dp, bottom = 16.dp),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        ) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(
+                            onClick = {
+                                val selectedDateMillis = datePickerState.selectedDateMillis
+                                if (selectedDateMillis != null) {
+                                    val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate()
+                                    onDateSelected(selectedDate)
+                                }
+                                onDismiss()
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        ) {
+                            Text("OK")
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun XDatePickerDialogComponent(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -137,9 +250,108 @@ fun DatePickerDialogComponent(
     }
 }
 
+@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialogComponent(
+    onTimeSelected: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val timePickerState = rememberTimePickerState(is24Hour = true)
+
+    val configuration = LocalConfiguration.current
+    val orientation = configuration.orientation
+    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
+
+    val baseWidth = 360f
+    val baseHeight = 550f
+
+    val scaleFactor = remember(configuration) {
+        if (isLandscape) {
+            val targetHeight = configuration.screenHeightDp * 0.65f
+            targetHeight / baseHeight
+        } else {
+            val targetWidth = configuration.screenWidthDp * 0.6f
+            targetWidth / baseWidth
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            Surface(
+                modifier = if (isLandscape) {
+                    Modifier
+                        .fillMaxWidth(0.25f)
+                        .scale(scaleFactor)
+                } else {
+                    Modifier
+                        .width(baseWidth.dp)
+                        .scale(scaleFactor)
+                },
+                shape = MaterialTheme.shapes.extraLarge,
+                color = MaterialTheme.colorScheme.primary,
+                tonalElevation = 8.dp
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    TimePicker(
+                        state = timePickerState,
+                        colors = TimePickerDefaults.colors(
+                            clockDialColor = MaterialTheme.colorScheme.secondary,
+                            clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                            clockDialUnselectedContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                            selectorColor = MaterialTheme.colorScheme.secondaryContainer,
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            periodSelectorBorderColor = MaterialTheme.colorScheme.secondary,
+                            periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                            periodSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                            periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                            timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                            timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                            timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                            timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        ) {
+                            Text("Cancel", fontSize = 16.sp)
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(onClick = {
+                            onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
+                            onDismiss()
+                        }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        ) {
+                            Text("OK", fontSize = 16.sp)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun XTimePickerDialogComponent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
