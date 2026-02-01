@@ -82,7 +82,7 @@ fun WeeklyViewCard(
     val headerFontSize = if (isTablet) 54.sp else 16.sp
     val contentFontSize = if (isTablet) 32.sp else 16.sp
     val eventTitleSize = if (isTablet) 48.sp else 12.sp
-    val moreTextSize = if (isTablet) 18.sp else 10.sp
+    val moreTextSize = if (isTablet) 24.sp else 10.sp
     val dotSize = if (isTablet) 32.dp else 6.dp
     val iconSize = if (isTablet) 56.dp else 12.dp
     val padding = if (isTablet) 16.dp else 8.dp

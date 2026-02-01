@@ -184,7 +184,7 @@ fun DayCell(
     val dotSize = if (isTablet) 28.dp else 6.dp
     val iconSize = if (isTablet) 42.dp else 12.dp
     val spacingBetweenEvents = if (isTablet) 4.dp else 1.dp
-    val moreTextSize = if (isTablet) 18.sp else 10.sp
+    val moreTextSize = if (isTablet) 24.sp else 10.sp
 
     Card(
         modifier = Modifier
@@ -215,7 +215,7 @@ fun DayCell(
 
             Spacer(modifier = Modifier.height(2.dp))
 
-            events.take(5).forEach { event ->
+            events.take(3).forEach { event ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -252,9 +252,9 @@ fun DayCell(
                 }
             }
 
-            if (events.size > 5) {
+            if (events.size > 3) {
                 Text(
-                    text = "+${events.size - 5}",
+                    text = "+${events.size - 3}",
                     fontSize = moreTextSize,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)

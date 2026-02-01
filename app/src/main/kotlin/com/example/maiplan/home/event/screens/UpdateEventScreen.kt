@@ -237,6 +237,8 @@ fun UpdateEventScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.delete),
                 color = MaterialTheme.colorScheme.onError,
+                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 onButtonClicked = {
                     val eventId: Int = safeEvent.eventId
                     val reminderId: Int? = if (safeEvent.reminderId == 0) null else safeEvent.reminderId
