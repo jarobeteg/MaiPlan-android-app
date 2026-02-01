@@ -1,5 +1,6 @@
 package com.example.maiplan.home.event.utils
 
+import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.time.LocalDate
@@ -35,3 +36,8 @@ fun LocalTime.to24hString(): String {
     val m = this.minute
     return "%02d:%02d".format(h, m)
 }
+
+val LocalDateSaver = Saver<LocalDate, String>(
+    save = { it.toString() },
+    restore = { LocalDate.parse(it) }
+)

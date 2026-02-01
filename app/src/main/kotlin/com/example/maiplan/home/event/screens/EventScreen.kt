@@ -53,6 +53,7 @@ import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
 import com.example.maiplan.components.isTablet
+import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
@@ -68,7 +69,9 @@ fun EventScreen(
     onCreateEventClick: () -> Unit,
     onUpdateEventClick: (Int) -> Unit
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
+        mutableStateOf(LocalDate.now())
+    }
     LaunchedEffect(selectedDate.year, selectedDate.month) {
         eventViewModel.loadMonth(selectedDate)
     }
