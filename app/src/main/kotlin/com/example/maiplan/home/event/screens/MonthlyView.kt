@@ -179,13 +179,20 @@ fun DayCell(
     val fontSize = if (isTablet) 32.sp else 12.sp
     val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
 
+    val eventTitleStyle = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelMedium
+    val eventTitleSize = if (isTablet) 32.sp else 12.sp
+    val dotSize = if (isTablet) 28.dp else 6.dp
+    val iconSize = if (isTablet) 42.dp else 12.dp
+    val spacingBetweenEvents = if (isTablet) 4.dp else 1.dp
+    val moreTextSize = if (isTablet) 18.sp else 10.sp
+
     Card(
         modifier = Modifier
             .width(cellSize)
             .height(rowHeight)
             .padding(0.5.dp)
             .clickable{ onClick() },
-        shape = RoundedCornerShape(2.dp),
+        shape = RoundedCornerShape(if (isTablet) 4.dp else 2.dp),
         colors = CardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer,
             contentColor = MaterialTheme.colorScheme.onTertiary,
@@ -196,7 +203,7 @@ fun DayCell(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 3.dp, vertical = 2.dp)
+                .padding(horizontal = if (isTablet) 8.dp else 3.dp, vertical = if (isTablet) 6.dp else 2.dp)
         ) {
 
             Text(
@@ -213,11 +220,11 @@ fun DayCell(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 1.dp)
+                        .padding(vertical = spacingBetweenEvents)
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(6.dp)
+                            .size(dotSize)
                             .background(event.color, CircleShape)
                     )
 
@@ -225,7 +232,8 @@ fun DayCell(
 
                     Text(
                         text = event.title,
-                        style = MaterialTheme.typography.labelMedium,
+                        fontSize = eventTitleSize,
+                        style = eventTitleStyle,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
@@ -233,11 +241,11 @@ fun DayCell(
                     )
 
                     event.icon.let {
-                        Spacer(modifier = Modifier.width(2.dp))
+                        Spacer(modifier = Modifier.width(if (isTablet) 4.dp else 2.dp))
                         Icon(
                             imageVector = it,
                             contentDescription = null,
-                            modifier = Modifier.size(12.dp),
+                            modifier = Modifier.size(iconSize),
                             tint = MaterialTheme.colorScheme.onTertiary
                         )
                     }
@@ -247,7 +255,7 @@ fun DayCell(
             if (events.size > 5) {
                 Text(
                     text = "+${events.size - 5}",
-                    fontSize = 10.sp,
+                    fontSize = moreTextSize,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)
                 )
