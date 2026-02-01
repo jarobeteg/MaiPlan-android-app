@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,10 +48,6 @@ fun DailyView(
     onEditEvent: (Int) -> Unit
 ) {
     val eventsForDay = eventsByDate[selectedDate].orEmpty()
-    val isTablet = isTablet()
-
-    val defaultHourHeight = if (isTablet) 120.dp else 72.dp
-    val perEventHeight = if (isTablet) 160.dp else 100.dp
 
     val eventsByHour = remember(eventsForDay, selectedDate) {
         buildEventsByStartHour(eventsForDay, selectedDate)
@@ -59,11 +56,9 @@ fun DailyView(
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(24) { hour ->
             val hourEvents = eventsByHour[hour].orEmpty()
-            val rowHeight = max(defaultHourHeight, perEventHeight * hourEvents.size + (if (isTablet) perEventHeight else 16.dp))
 
             DailyHourRow(
                 hour = hour,
-                rowHeight = rowHeight,
                 events = hourEvents,
                 onEventClick = onEditEvent
             )
@@ -97,7 +92,6 @@ fun buildEventsByStartHour(
 @Composable
 fun DailyHourRow(
     hour: Int,
-    rowHeight: Dp,
     events: List<CalendarEventUI>,
     onEventClick: (Int) -> Unit
 ) {
@@ -106,7 +100,7 @@ fun DailyHourRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(rowHeight)
+            .height(IntrinsicSize.Min)
             .padding(horizontal = if (isTablet) 16.dp else 8.dp)
     ) {
         Text(
@@ -125,12 +119,13 @@ fun DailyHourRow(
         ) {
             HorizontalDivider(thickness = if (isTablet) 3.dp else 1.dp)
 
-            events.forEach { event ->
-                    DailyEventCard(
-                        event = event,
-                        onClick = onEventClick
-                    )
+            if (events.isEmpty()) {
+                Spacer(modifier = Modifier.height(if (isTablet) 120.dp else 48.dp))
+            } else {
+                events.forEach { event ->
+                    DailyEventCard(event = event, onClick = onEventClick)
                 }
+            }
         }
     }
 }
@@ -148,6 +143,8 @@ fun DailyEventCard(
     val eventTitleSize = if (isTablet) 48.sp else 12.sp
     val dotSize = if (isTablet) 32.dp else 6.dp
     val iconSize = if (isTablet) 56.dp else 12.dp
+    val paddingStart = if (isTablet) 12.dp else 4.dp
+    val paddingBottom = if (isTablet) 12.dp else 4.dp
 
     Card(
         modifier = Modifier
@@ -195,7 +192,7 @@ fun DailyEventCard(
             style = MaterialTheme.typography.labelMedium,
             fontSize = contentFontSize,
             color = MaterialTheme.colorScheme.onTertiary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            modifier = Modifier.padding(start = paddingStart, bottom = paddingBottom)
         )
 
         Text(
@@ -204,7 +201,7 @@ fun DailyEventCard(
             fontSize = contentFontSize,
             color = MaterialTheme.colorScheme.onTertiary,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+            modifier = Modifier.padding(start = paddingStart, bottom = paddingBottom)
         )
     }
 }
