@@ -23,7 +23,7 @@ open class BaseActivity : ComponentActivity() {
         val config = Configuration(newBase.resources.configuration)
 
         config.fontScale = 1.0f
-        config.densityDpi = DisplayMetrics.DENSITY_DEFAULT
+        config.densityDpi = DisplayMetrics.DENSITY_DEVICE_STABLE
 
         val context = newBase.createConfigurationContext(config)
 
