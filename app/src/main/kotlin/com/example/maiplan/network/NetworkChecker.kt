@@ -20,8 +20,8 @@ class NetworkChecker (context: Context) {
     }
 
     private fun isPortOpen(): Boolean {
-        val host = "100.70.156.115"
-        val port = 8000
+        val host = "100.70.156.115" // dev server
+        val port = 8000 // default port
         val timeout = 500
         return try {
             Socket().use { socket ->
