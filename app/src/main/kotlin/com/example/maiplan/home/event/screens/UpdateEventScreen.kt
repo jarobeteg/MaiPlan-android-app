@@ -96,7 +96,7 @@ fun UpdateEventScreen(
     var message by remember { mutableStateOf(safeEvent.reminderMessage) }
 
     val isTablet = isTablet()
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     LaunchedEffect(categories, safeEvent.categoryId) {
         selectedCategory = categories.find { it.categoryId == safeEvent.categoryId }
@@ -149,13 +149,13 @@ fun UpdateEventScreen(
                 ) {
                     ErrorMessageComponent(
                         value = it,
-                        fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                        fontSize = if (isTablet) 24.sp else 18.sp,
                         style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
                 }
             }
 
             SubmitButtonComponent(stringResource(R.string.update),
-                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                fontSize = if (isTablet) 24.sp else 18.sp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 onButtonClicked = {
 
@@ -237,7 +237,7 @@ fun UpdateEventScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.delete),
                 color = MaterialTheme.colorScheme.onError,
-                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                fontSize = if (isTablet) 24.sp else 18.sp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 onButtonClicked = {
                     val eventId: Int = safeEvent.eventId

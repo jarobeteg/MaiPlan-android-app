@@ -287,7 +287,7 @@ fun TimePickerDialogComponent(
             Surface(
                 modifier = if (isLandscape) {
                     Modifier
-                        .fillMaxWidth(0.25f)
+                        .fillMaxWidth(0.45f)
                         .scale(scaleFactor)
                 } else {
                     Modifier
@@ -849,10 +849,10 @@ fun CategoryDropdownComponent(
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 18.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 32.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     ExposedDropdownMenuBox(
         expanded = expanded,
