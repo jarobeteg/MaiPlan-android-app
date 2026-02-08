@@ -3,12 +3,13 @@ package com.example.maiplan.network
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.example.maiplan.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
 import java.net.Socket
 
-class NetworkChecker (context: Context) {
+class NetworkChecker (private val context: Context) {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private fun isOnline(): Boolean {
@@ -20,8 +21,8 @@ class NetworkChecker (context: Context) {
     }
 
     private fun isPortOpen(): Boolean {
-        val host = "100.70.156.115" // dev server --- important to not update on merge
-        val port = 8000 // default port --- important to not update on merge
+        val host = context.getString(R.string.api_host)
+        val port = context.resources.getInteger(R.integer.api_port)
         val timeout = 500
         return try {
             Socket().use { socket ->

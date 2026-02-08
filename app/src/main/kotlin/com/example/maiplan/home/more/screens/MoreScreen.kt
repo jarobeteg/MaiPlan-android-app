@@ -91,8 +91,8 @@ fun MoreScreen(
 fun MoreTopBar() {
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 48.sp else 24.sp
-    val barHeight = if (isTablet) 160.dp else 112.dp
+    val fontSize = if (isTablet) 32.sp else 24.sp
+    val barHeight = if (isTablet) 112.dp else 112.dp
 
     CenterAlignedTopAppBar(
         title = {
@@ -127,8 +127,8 @@ fun MoreScreenButton(
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 48.sp else 16.sp
-    val iconSize = if (isTablet) 64.dp else 24.dp
+    val fontSize = if (isTablet) 24.sp else 16.sp
+    val iconSize = if (isTablet) 32.dp else 24.dp
 
     Column {
         Row(
@@ -172,7 +172,7 @@ fun MoreScreenButton(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth(),
-                thickness = if (isTablet) 4.dp else 1.dp,
+                thickness = if (isTablet) 3.dp else 1.dp,
                 color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.2f)
             )
         }

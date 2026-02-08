@@ -1,10 +1,13 @@
 package com.example.maiplan.utils
 
+import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.util.DisplayMetrics
 import android.view.WindowManager
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.view.WindowCompat.getInsetsController

@@ -65,9 +65,9 @@ fun MonthlyView(
     val rowCount = ceil(totalCells / 7.0).toInt()
 
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-        val weekNumberWidth = if (isTablet) 24.dp else 12.dp
+        val weekNumberWidth = if (isTablet) 16.dp else 12.dp
         val cellSize = (maxWidth - weekNumberWidth) / 7
-        val headerHeight = if (isTablet) 32.dp else 18.dp
+        val headerHeight = if (isTablet) 24.dp else 18.dp
         val rowHeight = (maxHeight - headerHeight) / rowCount
 
         Column(modifier = Modifier.fillMaxSize()) {
@@ -80,7 +80,7 @@ fun MonthlyView(
 @Composable
 fun WeekdayHeaders(weekdays: List<String>, weekNumberWidth: Dp, cellSize: Dp, headerHeight: Dp) {
     val isTablet = isTablet()
-    val fontSize = if (isTablet) 32.sp else 10.sp
+    val fontSize = if (isTablet) 16.sp else 10.sp
     val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
 
     Row(modifier = Modifier.height(headerHeight)) {
@@ -125,7 +125,7 @@ fun CalendarGrid(
 @Composable
 fun WeekNumberColumn(weekNumber: Int, width: Dp) {
     val isTablet = isTablet()
-    val fontSize = if (isTablet) 32.sp else 10.sp
+    val fontSize = if (isTablet) 16.sp else 10.sp
     val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
 
     Box(
@@ -176,15 +176,15 @@ fun DayCell(
     onClick: () -> Unit
 ) {
     val isTablet = isTablet()
-    val fontSize = if (isTablet) 32.sp else 12.sp
+    val fontSize = if (isTablet) 18.sp else 12.sp
     val style = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodySmall
 
     val eventTitleStyle = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.labelMedium
-    val eventTitleSize = if (isTablet) 32.sp else 12.sp
-    val dotSize = if (isTablet) 28.dp else 6.dp
-    val iconSize = if (isTablet) 42.dp else 12.dp
-    val spacingBetweenEvents = if (isTablet) 4.dp else 1.dp
-    val moreTextSize = if (isTablet) 24.sp else 10.sp
+    val eventTitleSize = if (isTablet) 24.sp else 12.sp
+    val dotSize = if (isTablet) 12.dp else 6.dp
+    val iconSize = if (isTablet) 24.dp else 12.dp
+    val spacingBetweenEvents = if (isTablet) 3.dp else 1.dp
+    val moreTextSize = if (isTablet) 16.sp else 10.sp
 
     Card(
         modifier = Modifier

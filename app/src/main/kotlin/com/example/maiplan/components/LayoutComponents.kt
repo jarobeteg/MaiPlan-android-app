@@ -30,9 +30,9 @@ fun SimpleTopBar(
 ) {
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 48.sp else 24.sp
-    val iconSize = if (isTablet) 64.dp else 24.dp
-    val barHeight = if (isTablet) 160.dp else 112.dp
+    val fontSize = if (isTablet) 32.sp else 24.sp
+    val iconSize = if (isTablet) 36.dp else 24.dp
+    val barHeight = if (isTablet) 112.dp else 112.dp
 
     CenterAlignedTopAppBar(
         title = {
@@ -52,7 +52,7 @@ fun SimpleTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(iconSize * 1.25f)
+                modifier = Modifier.size(iconSize)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -73,7 +73,7 @@ fun SimpleTopBar(
 fun SectionTitle(text: String) {
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 48.sp else 24.sp
+    val fontSize = if (isTablet) 32.sp else 24.sp
 
     Text(
         text = text,

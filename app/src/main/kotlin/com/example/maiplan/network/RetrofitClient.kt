@@ -1,5 +1,7 @@
 package com.example.maiplan.network
 
+import android.content.Context
+import com.example.maiplan.AppConfig
 import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.CategoryApi
 import com.example.maiplan.network.api.EventApi
@@ -12,7 +14,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
-    private const val BASE_URL = "http://100.70.156.115:8000/" // dev server with default port --- important to not update on merge
+    private lateinit var BASE_URL: String
+
+    fun init(context: Context) {
+        BASE_URL = AppConfig.apiBaseUrl(context)
+    }
 
     private val normalClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)

@@ -63,10 +63,9 @@ fun RegisterScreen(
 
     val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
 
-    val cardPadding = if (isCompact) 24.dp else 48.dp
-    val itemSpacing = if (isCompact) 12.dp else 20.dp
-    val scale = if (isCompact) 1f else 1.5f
-    val fieldHeight = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) 96.dp else 64.dp
+    val cardPadding = if (isCompact) 24.dp else 36.dp
+    val itemSpacing = if (isCompact) 12.dp else 18.dp
+    val fieldHeight = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) 72.dp else 64.dp
 
     val contentWidth = when (windowSizeClass.widthSizeClass) {
         WindowWidthSizeClass.Compact -> Modifier.fillMaxWidth()
@@ -88,7 +87,7 @@ fun RegisterScreen(
         Column(
             modifier = Modifier
                 .then(contentWidth)
-                .padding(if (isCompact) 16.dp else 0.dp)
+                .padding(if (isCompact) 8.dp else 0.dp)
                 .clip(MaterialTheme.shapes.large)
                 .background(Color.White.copy(alpha = 0.95f))
                 .padding(cardPadding),
@@ -96,7 +95,7 @@ fun RegisterScreen(
         ) {
             HeadingTextComponent(
                 text = stringResource(R.string.create_an_account),
-                fontSize = if (isCompact) 24.sp else 24.sp * 2.5f,
+                fontSize = if (isCompact) 24.sp else 32.sp,
                 style = if (isCompact) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge
             )
 
@@ -105,9 +104,9 @@ fun RegisterScreen(
             EmailTextComponent(
                 email = email,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight),
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 42.dp,
+                iconSize = if (isCompact) 24.dp else 36.dp,
                 onEmailChange = { email = it }
             )
 
@@ -116,9 +115,9 @@ fun RegisterScreen(
             UsernameTextComponent(
                 username,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight),
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 42.dp,
+                iconSize = if (isCompact) 24.dp else 36.dp,
                 onUsernameChange = { username = it })
 
             Spacer(modifier = Modifier.height(itemSpacing))
@@ -129,9 +128,9 @@ fun RegisterScreen(
                 onPasswordChange = { password = it },
                 passwordVisible,
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 42.dp,
+                iconSize = if (isCompact) 24.dp else 36.dp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 isCompact = isCompact,
                 shouldIndicatorBeVisible = true
@@ -145,9 +144,9 @@ fun RegisterScreen(
                 onPasswordChange = { passwordAgain = it },
                 passwordAgainVisible,
                 onTogglePasswordVisibility = { passwordAgainVisible = !passwordAgainVisible },
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 42.dp,
+                iconSize = if (isCompact) 24.dp else 36.dp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight)
             )
 
@@ -157,7 +156,7 @@ fun RegisterScreen(
                 value = stringResource(R.string.register),
                 onButtonClicked = { onRegisterClick(email, username, password, passwordAgain) },
                 isLoading = isLoading,
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight)
             )
 
@@ -182,7 +181,7 @@ fun RegisterScreen(
                 val errorMessage = stringResource(errorMessageId)
                 ErrorMessageComponent(
                     value = errorMessage,
-                    fontSize = if (isCompact) 16.sp else 24.sp * 1.5f,
+                    fontSize = if (isCompact) 16.sp else 24.sp,
                     style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
                 )
             }
@@ -191,7 +190,7 @@ fun RegisterScreen(
 
             ClickableTextComponent(
                 text = stringResource(R.string.have_account),
-                fontSize = if (isCompact) 18.sp else 24.sp * 1.75f,
+                fontSize = if (isCompact) 18.sp else 24.sp,
                 onTextClicked = {
                     viewModel.cancelRegister()
                     onBackToLogin()

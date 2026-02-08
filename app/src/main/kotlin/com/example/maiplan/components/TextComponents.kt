@@ -236,8 +236,8 @@ fun PasswordTextComponent(
             )
         )
 
-        val height: Dp = if (isCompact) 8.dp else 24.dp
-        val fontSize: TextUnit = if (isCompact) 12.sp else 32.sp
+        val height: Dp = if (isCompact) 8.dp else 16.dp
+        val fontSize: TextUnit = if (isCompact) 12.sp else 22.sp
 
         if (shouldIndicatorBeVisible) {
             PasswordStrengthBar(password, isFocused, height, fontSize)
@@ -322,10 +322,10 @@ fun PasswordStrengthBar(
 fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 16.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 36.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     OutlinedTextField(
         value = value,
@@ -377,10 +377,10 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
 fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 18.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 42.dp else 24.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 32.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     OutlinedTextField(
         value = searchQuery,
