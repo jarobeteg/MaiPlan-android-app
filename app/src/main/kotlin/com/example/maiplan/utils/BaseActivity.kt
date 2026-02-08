@@ -19,6 +19,17 @@ open class BaseActivity : ComponentActivity() {
     lateinit var networkChecker: NetworkChecker
     lateinit var sessionManager: SessionManager
 
+    override fun attachBaseContext(newBase: Context) {
+        val config = Configuration(newBase.resources.configuration)
+
+        config.fontScale = 1.0f
+        config.densityDpi = DisplayMetrics.DENSITY_DEVICE_STABLE
+
+        val context = newBase.createConfigurationContext(config)
+
+        super.attachBaseContext(context)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         // Enable edge-to-edge display by telling the system not to fit content within system windows (status/navigation bars).
         setDecorFitsSystemWindows(window, false)
