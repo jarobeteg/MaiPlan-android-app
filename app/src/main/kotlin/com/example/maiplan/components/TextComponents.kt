@@ -236,8 +236,8 @@ fun PasswordTextComponent(
             )
         )
 
-        val height: Dp = if (isCompact) 8.dp else 24.dp
-        val fontSize: TextUnit = if (isCompact) 12.sp else 32.sp
+        val height: Dp = if (isCompact) 8.dp else 16.dp
+        val fontSize: TextUnit = if (isCompact) 12.sp else 22.sp
 
         if (shouldIndicatorBeVisible) {
             PasswordStrengthBar(password, isFocused, height, fontSize)
