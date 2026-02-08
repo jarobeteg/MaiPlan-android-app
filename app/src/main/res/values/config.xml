@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="api_base_url">http://100.70.156.115:8000/</string>
+    <string name="api_host">100.70.156.115</string>
+    <integer name="api_port">8000</integer>
+</resources>

@@ -31,9 +31,9 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
     val currentRoute = currentBackStackEntry?.destination?.route
 
     val isTablet = isTablet()
-    val iconSize = if (isTablet) 48.dp else 24.dp
-    val fontSize = if (isTablet) 32.sp else 12.sp
-    val barHeight = if (isTablet) 192.dp else 96.dp
+    val iconSize = if (isTablet) 32.dp else 24.dp
+    val fontSize = if (isTablet) 16.sp else 12.sp
+    val barHeight = if (isTablet) 128.dp else 96.dp
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primary,

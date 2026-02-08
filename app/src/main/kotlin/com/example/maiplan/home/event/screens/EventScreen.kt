@@ -155,9 +155,9 @@ fun EventTopBar(
     var buttonWidth by remember { mutableIntStateOf(0) }
 
     val isTablet = isTablet()
-    val iconSize = if (isTablet) 64.dp else 24.dp
-    val fontSize = if (isTablet) 48.sp else 16.sp
-    val barHeight = if (isTablet) 160.dp else 112.dp
+    val iconSize = if (isTablet) 36.dp else 24.dp
+    val fontSize = if (isTablet) 24.sp else 16.sp
+    val barHeight = if (isTablet) 112.dp else 112.dp
 
     TopAppBar(
         modifier = Modifier.height(barHeight),
@@ -175,7 +175,7 @@ fun EventTopBar(
                     OutlinedButton(
                         onClick = { expanded = !expanded },
                         modifier = Modifier
-                            .height(if (isTablet) 70.dp else 40.dp)
+                            .height(if (isTablet) 50.dp else 40.dp)
                             .onGloballyPositioned { coordinates ->
                                 buttonWidth = coordinates.size.width
                             },
@@ -198,7 +198,7 @@ fun EventTopBar(
                                 contentDescription = "Dropdown Arrow",
                                 tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier
-                                    .size(if (isTablet) 64.dp else 24.dp)
+                                    .size(if (isTablet) 32.dp else 24.dp)
                                     .rotate(if (expanded) 0f else 90f)
                             )
                         }
@@ -225,9 +225,9 @@ fun EventTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(end = if (isTablet) 24.dp else 8.dp),
+                    .padding(end = if (isTablet) 16.dp else 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(if (isTablet) 24.dp else 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(if (isTablet) 16.dp else 8.dp)
             ) {
                 IconButton(
                     onClick = onDatePickerClick,
@@ -265,8 +265,8 @@ fun EventDropdownMenu(
     onDismiss: () -> Unit
 ) {
     val isTablet = isTablet()
-    val fontSize = if (isTablet) 48.sp else 16.sp
-    val itemHeight = if (isTablet) 128.dp else 48.dp
+    val fontSize = if (isTablet) 24.sp else 16.sp
+    val itemHeight = if (isTablet) 64.dp else 48.dp
 
     DropdownMenu(
         expanded = expanded,
@@ -284,7 +284,7 @@ fun EventDropdownMenu(
                     text = view,
                     fontSize = fontSize,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(vertical = if (isTablet) 24.dp else 4.dp)
+                    modifier = Modifier.padding(vertical = if (isTablet) 8.dp else 4.dp)
                 ) },
                 onClick = {
                     onItemSelected(index)

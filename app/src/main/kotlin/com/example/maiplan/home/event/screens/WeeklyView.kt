@@ -79,13 +79,13 @@ fun WeeklyViewCard(
 ) {
     val isTablet = isTablet()
 
-    val headerFontSize = if (isTablet) 54.sp else 16.sp
-    val contentFontSize = if (isTablet) 32.sp else 16.sp
-    val eventTitleSize = if (isTablet) 48.sp else 12.sp
-    val moreTextSize = if (isTablet) 24.sp else 10.sp
-    val dotSize = if (isTablet) 32.dp else 6.dp
-    val iconSize = if (isTablet) 56.dp else 12.dp
-    val padding = if (isTablet) 16.dp else 8.dp
+    val headerFontSize = if (isTablet) 24.sp else 16.sp
+    val contentFontSize = if (isTablet) 20.sp else 16.sp
+    val eventTitleSize = if (isTablet) 24.sp else 12.sp
+    val moreTextSize = if (isTablet) 16.sp else 10.sp
+    val dotSize = if (isTablet) 24.dp else 6.dp
+    val iconSize = if (isTablet) 32.dp else 12.dp
+    val padding = if (isTablet) 12.dp else 8.dp
 
     Card(
         modifier = Modifier
@@ -97,7 +97,7 @@ fun WeeklyViewCard(
                 shape = MaterialTheme.shapes.medium
             ),
         shape = MaterialTheme.shapes.medium,
-        elevation = CardDefaults.cardElevation(if (isTablet) 8.dp else 4.dp)
+        elevation = CardDefaults.cardElevation(if (isTablet) 6.dp else 4.dp)
     ) {
         Column(
             modifier = Modifier
@@ -105,21 +105,21 @@ fun WeeklyViewCard(
                 .padding(padding)
         ) {
             Text(
-                text = "${day.dayOfWeek.name.take(3)}, ${day.dayOfMonth}",
+                text = "${day.dayOfWeek.name}, ${day.dayOfMonth}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onTertiary,
                 fontSize = headerFontSize,
                 fontWeight = FontWeight.Bold
             )
 
-            Spacer(modifier = Modifier.height(if (isTablet) 12.dp else 4.dp))
+            Spacer(modifier = Modifier.height(if (isTablet) 8.dp else 4.dp))
 
-            events.take(5).forEach { event ->
+            events.take(3).forEach { event ->
                 val start = event.startTime.to24hString()
                 val end = event.endTime.to24hString()
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = if (isTablet) 8.dp else 2.dp)
+                    modifier = Modifier.padding(vertical = if (isTablet) 6.dp else 2.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -127,7 +127,7 @@ fun WeeklyViewCard(
                             .background(event.color, CircleShape)
                     )
 
-                    Spacer(modifier = Modifier.width(if (isTablet) 10.dp else 4.dp))
+                    Spacer(modifier = Modifier.width(if (isTablet) 8.dp else 4.dp))
 
                     Text(
                         text = event.title,
@@ -164,6 +164,7 @@ fun WeeklyViewCard(
                 Text(
                     text = event.description,
                     style = MaterialTheme.typography.labelMedium,
+                    maxLines = 1,
                     fontSize = contentFontSize,
                     color = MaterialTheme.colorScheme.onTertiary,
                     overflow = TextOverflow.Ellipsis,
@@ -171,9 +172,9 @@ fun WeeklyViewCard(
                 )
             }
 
-            if (events.size > 5) {
+            if (events.size > 3) {
                 Text(
-                    text = "+${events.size - 5}",
+                    text = "+${events.size - 3}",
                     fontSize = moreTextSize,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)

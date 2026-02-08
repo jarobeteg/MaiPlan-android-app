@@ -101,26 +101,26 @@ fun DailyHourRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .padding(horizontal = if (isTablet) 16.dp else 8.dp)
+            .padding(horizontal = if (isTablet) 12.dp else 8.dp)
     ) {
         Text(
             text = "%02d:00".format(hour),
-            fontSize = if (isTablet) 32.sp else 16.sp,
+            fontSize = if (isTablet) 24.sp else 16.sp,
             style = if (isTablet) MaterialTheme.typography.titleMedium else MaterialTheme.typography.labelMedium,
             modifier = Modifier
-                .width(if (isTablet) 92.dp else 48.dp)
-                .padding(top = if (isTablet) 16.dp else 4.dp)
+                .width(if (isTablet) 64.dp else 48.dp)
+                .padding(top = if (isTablet) 8.dp else 4.dp)
         )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = if (isTablet) 16.dp else 8.dp)
+                .padding(start = if (isTablet) 12.dp else 8.dp)
         ) {
             HorizontalDivider(thickness = if (isTablet) 3.dp else 1.dp)
 
             if (events.isEmpty()) {
-                Spacer(modifier = Modifier.height(if (isTablet) 120.dp else 48.dp))
+                Spacer(modifier = Modifier.height(if (isTablet) 64.dp else 48.dp))
             } else {
                 events.forEach { event ->
                     DailyEventCard(event = event, onClick = onEventClick)
@@ -139,12 +139,12 @@ fun DailyEventCard(
     val start = event.startTime.to24hString()
     val end = event.endTime.to24hString()
 
-    val contentFontSize = if (isTablet) 32.sp else 16.sp
-    val eventTitleSize = if (isTablet) 48.sp else 12.sp
-    val dotSize = if (isTablet) 32.dp else 6.dp
-    val iconSize = if (isTablet) 56.dp else 12.dp
-    val paddingStart = if (isTablet) 12.dp else 4.dp
-    val paddingBottom = if (isTablet) 12.dp else 4.dp
+    val contentFontSize = if (isTablet) 24.sp else 16.sp
+    val eventTitleSize = if (isTablet) 32.sp else 12.sp
+    val dotSize = if (isTablet) 24.dp else 6.dp
+    val iconSize = if (isTablet) 32.dp else 12.dp
+    val paddingStart = if (isTablet) 8.dp else 4.dp
+    val paddingBottom = if (isTablet) 8.dp else 4.dp
 
     Card(
         modifier = Modifier
@@ -154,11 +154,11 @@ fun DailyEventCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.tertiaryContainer
         ),
-        shape = RoundedCornerShape(if (isTablet) 12.dp else 6.dp)
+        shape = RoundedCornerShape(if (isTablet) 8.dp else 6.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(if (isTablet) 16.dp else 8.dp)
+            modifier = Modifier.padding(if (isTablet) 12.dp else 8.dp)
         ) {
             Box(
                 modifier = Modifier

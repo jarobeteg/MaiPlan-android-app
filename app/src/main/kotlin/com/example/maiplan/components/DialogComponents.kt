@@ -287,7 +287,7 @@ fun TimePickerDialogComponent(
             Surface(
                 modifier = if (isLandscape) {
                     Modifier
-                        .fillMaxWidth(0.25f)
+                        .fillMaxWidth(0.45f)
                         .scale(scaleFactor)
                 } else {
                     Modifier
@@ -425,10 +425,10 @@ fun ColorPickerRow(
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 18.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 32.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
     val border = if (isTablet) 2.dp else 1.dp
 
     Box(
@@ -486,9 +486,9 @@ fun CustomSlider(
 ) {
     val isTablet = isTablet()
 
-    val sliderHeight = if (isTablet) 96.dp else 64.dp
-    val thumbSize = if (isTablet) 36.dp else 24.dp
-    val trackHeight = if (isTablet) 20.dp else 12.dp
+    val sliderHeight = if (isTablet) 72.dp else 64.dp
+    val thumbSize = if (isTablet) 30.dp else 24.dp
+    val trackHeight = if (isTablet) 18.dp else 12.dp
 
     Slider(
         value = value,
@@ -528,10 +528,10 @@ fun ColorPickerDialog(
 ) {
     val isTablet = isTablet()
 
-    val previewSize = if (isTablet) 220.dp else 100.dp
-    val dialogPadding = if (isTablet) 64.dp else 16.dp
-    val textSize = if (isTablet) 32.sp else 16.sp
-    val dialogWidth = if (isTablet) 920.dp else Dp.Unspecified
+    val previewSize = if (isTablet) 150.dp else 100.dp
+    val dialogPadding = if (isTablet) 32.dp else 16.dp
+    val textSize = if (isTablet) 24.sp else 16.sp
+    val dialogWidth = if (isTablet) 800.dp else Dp.Unspecified
 
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
@@ -623,10 +623,10 @@ fun IconPickerRow(
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 16.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 36.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     Box(
         modifier = Modifier
@@ -693,12 +693,12 @@ fun IconPickerDialog(
 
     val isTablet = isTablet()
 
-    val dialogWidth = if (isTablet) 920.dp else Dp.Unspecified
-    val gridHeight = if (isTablet) 720.dp else 300.dp
-    val iconSize = if (isTablet) 128.dp else 48.dp
+    val dialogWidth = if (isTablet) 800.dp else Dp.Unspecified
+    val gridHeight = if (isTablet) 600.dp else 300.dp
+    val iconSize = if (isTablet) 64.dp else 48.dp
     val padding = if (isTablet) 24.dp else 16.dp
-    val indicatorHeight = if (isTablet) 40.dp else 24.dp
-    val textSize = if (isTablet) 48.sp else 16.sp
+    val indicatorHeight = if (isTablet) 32.dp else 24.dp
+    val textSize = if (isTablet) 24.sp else 16.sp
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -849,10 +849,10 @@ fun CategoryDropdownComponent(
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 24.sp * 1.75f else 18.sp
+    val fontSize = if (isTablet) 24.sp else 18.sp
     val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val iconSize = if (isTablet) 32.dp else 24.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     ExposedDropdownMenuBox(
         expanded = expanded,
