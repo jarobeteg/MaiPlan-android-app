@@ -52,7 +52,7 @@ fun CreateCategoryScreen(
     var selectedIconString by remember { mutableStateOf("search") }
 
     val isTablet = isTablet()
-    val fieldHeight = if (isTablet) 96.dp else 64.dp
+    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     Scaffold ( topBar = { SimpleTopBar(
         text = stringResource(R.string.category_new),
@@ -86,7 +86,7 @@ fun CreateCategoryScreen(
                 value = stringResource(R.string.category_save),
                 onButtonClicked = { onSaveClick(name, description, selectedColor.value.toString(), selectedIconString) },
                 isLoading = isLoading,
-                fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                fontSize = if (isTablet) 24.sp else 18.sp,
                 modifier = Modifier.fillMaxWidth().height(fieldHeight)
             )
 
@@ -108,7 +108,7 @@ fun CreateCategoryScreen(
                 ) {
                     ErrorMessageComponent(
                         value = errorMessage,
-                        fontSize = if (isTablet) 24.sp * 1.75f else 18.sp,
+                        fontSize = if (isTablet) 24.sp else 18.sp,
                         style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
                     )
                 }

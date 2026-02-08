@@ -136,10 +136,9 @@ fun CategoryManagementTopBar(
     onCreateCategoryClick: () -> Unit
 ) {
     val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 48.sp else 24.sp
-    val iconSize = if (isTablet) 64.dp else 24.dp
-    val barHeight = if (isTablet) 160.dp else 112.dp
+    val iconSize = if (isTablet) 36.dp else 24.dp
+    val fontSize = if (isTablet) 24.sp else 16.sp
+    val barHeight = if (isTablet) 112.dp else 112.dp
 
     CenterAlignedTopAppBar(
         title = {
@@ -159,7 +158,7 @@ fun CategoryManagementTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(iconSize * 1.25f)
+                modifier = Modifier.size(iconSize)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -172,7 +171,7 @@ fun CategoryManagementTopBar(
         actions = {
             IconButton(
                 onClick = onCreateCategoryClick,
-                modifier = Modifier.size(iconSize * 1.25f)
+                modifier = Modifier.size(iconSize)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
@@ -196,11 +195,11 @@ fun CategoryCard(category: CategoryEntity) {
 
     val isTablet = isTablet()
 
-    val fontSize = if (isTablet) 48.sp else 16.sp
-    val iconSize = if (isTablet) 64.dp else 42.dp
+    val fontSize = if (isTablet) 24.sp else 16.sp
+    val iconSize = if (isTablet) 48.dp else 36.dp
     val titleStyle = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
     val bodyStyle = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
-    val cardHeight = if (isTablet) 256.dp else 128.dp
+    val cardHeight = if (isTablet) 160.dp else 128.dp
 
     val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
     val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
@@ -261,7 +260,7 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
 
     val isTablet = isTablet()
 
-    val iconSize = if (isTablet) 64.dp else 32.dp
+    val iconSize = if (isTablet) 48.dp else 32.dp
 
     Row(
         modifier = Modifier

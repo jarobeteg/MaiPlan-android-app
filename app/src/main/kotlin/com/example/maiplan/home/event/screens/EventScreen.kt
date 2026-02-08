@@ -155,7 +155,7 @@ fun EventTopBar(
     var buttonWidth by remember { mutableIntStateOf(0) }
 
     val isTablet = isTablet()
-    val iconSize = if (isTablet) 32.dp else 24.dp
+    val iconSize = if (isTablet) 36.dp else 24.dp
     val fontSize = if (isTablet) 24.sp else 16.sp
     val barHeight = if (isTablet) 112.dp else 112.dp
 
