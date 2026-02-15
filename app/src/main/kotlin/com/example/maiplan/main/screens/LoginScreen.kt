@@ -96,9 +96,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HeadingTextComponent(
-                text = stringResource(R.string.welcome_login),
-                fontSize = if (isCompact) 24.sp else 32.sp,
-                style = if (isCompact) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge
+                text = stringResource(R.string.welcome_login)
             )
 
             Spacer(modifier = Modifier.height(itemSpacing * 2))
