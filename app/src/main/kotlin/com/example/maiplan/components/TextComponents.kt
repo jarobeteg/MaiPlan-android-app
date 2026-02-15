@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -48,19 +47,19 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.utils.LocalUiScale
 
 @Composable
 fun HeadingTextComponent(
-    text: String,
-    fontSize: TextUnit,
-    style: TextStyle
+    text: String
 ) {
+    val ui = LocalUiScale.current
     Text(
         text = text,
-        fontSize = fontSize,
+        fontSize = ui.heading,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.primary,
-        style = style
+        style = ui.headingStyle
     )
 }
 

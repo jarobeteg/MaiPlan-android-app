@@ -3,7 +3,6 @@ package com.example.maiplan.main
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.compose.setContent
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -37,7 +36,7 @@ class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent { AppTheme { LoadingScreen() } }
+        setAppContent { AppTheme { LoadingScreen() } }
         setupDependencies()
         observeViewModel()
 
@@ -75,7 +74,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupComposeUI() {
-        setContent { AppTheme { AuthNavHost(viewModel, this) } }
+        setAppContent { AppTheme { AuthNavHost(viewModel, this) } }
     }
 
     private fun setupDependencies() {

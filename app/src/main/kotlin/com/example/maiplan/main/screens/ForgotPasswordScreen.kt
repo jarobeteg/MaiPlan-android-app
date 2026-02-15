@@ -91,9 +91,7 @@ fun ForgotPasswordScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HeadingTextComponent(
-                text = stringResource(R.string.reset_password),
-                fontSize = if (isCompact) 24.sp else 32.sp,
-                style = if (isCompact) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge
+                text = stringResource(R.string.reset_password)
             )
 
             Spacer(modifier = Modifier.height(itemSpacing * 2))

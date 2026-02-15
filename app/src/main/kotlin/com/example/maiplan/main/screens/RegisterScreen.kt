@@ -94,9 +94,7 @@ fun RegisterScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HeadingTextComponent(
-                text = stringResource(R.string.create_an_account),
-                fontSize = if (isCompact) 24.sp else 32.sp,
-                style = if (isCompact) MaterialTheme.typography.displaySmall else MaterialTheme.typography.titleLarge
+                text = stringResource(R.string.create_an_account)
             )
 
             Spacer(modifier = Modifier.height(itemSpacing * 2))
