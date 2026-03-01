@@ -13,11 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.maiplan.components.isTablet
+import com.example.maiplan.utils.LocalUiScale
 
 @Composable
 fun HomeNavigationBar(navController: NavHostController, context: Context) {
@@ -27,29 +25,25 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
         HomeNavRoutes.Files,
         HomeNavRoutes.More
     )
+    val ui = LocalUiScale.current
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route
-
-    val isTablet = isTablet()
-    val iconSize = if (isTablet) 32.dp else 24.dp
-    val fontSize = if (isTablet) 16.sp else 12.sp
-    val barHeight = if (isTablet) 128.dp else 96.dp
 
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.primary,
         contentColor = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier.height(barHeight)
+        modifier = Modifier.height(ui.components.bottomBarHeight)
     ) {
         items.forEach { screen ->
             NavigationBarItem(
                 icon = { Icon(
                     imageVector = screen.icon,
-                    modifier = Modifier.size(iconSize),
+                    modifier = Modifier.size(ui.components.bottomBarIconSize),
                     contentDescription = context.getString(screen.labelResId)
                 ) },
                 label = { Text(
                     text = context.getString(screen.labelResId),
-                    fontSize = fontSize
+                    fontSize = ui.fonts.bottomBarTextSize
                 ) },
                 selected = currentRoute == screen.route,
                 onClick = {

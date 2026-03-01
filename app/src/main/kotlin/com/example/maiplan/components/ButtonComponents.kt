@@ -1,6 +1,7 @@
 package com.example.maiplan.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -11,11 +12,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.maiplan.utils.LocalUiScale
 
 @Composable
 fun SubmitButtonComponent(
@@ -23,13 +22,13 @@ fun SubmitButtonComponent(
     color: Color = MaterialTheme.colorScheme.primary,
     onButtonClicked: () -> Unit,
     isLoading: Boolean = false,
-    fontSize: TextUnit = 18.sp,
-    modifier: Modifier = Modifier.fillMaxWidth()
 ) {
+    val ui = LocalUiScale.current
+
     Button(
         onClick = { if (!isLoading) onButtonClicked() },
         enabled = !isLoading,
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
@@ -44,7 +43,7 @@ fun SubmitButtonComponent(
         } else {
             Text(
                 text = value,
-                fontSize = fontSize
+                fontSize = ui.fonts.generalTextSize
             )
         }
     }
@@ -53,14 +52,14 @@ fun SubmitButtonComponent(
 @Composable
 fun ErrorMessageComponent(
     value: String,
-    fontSize: TextUnit = 16.sp,
-    style: TextStyle = MaterialTheme.typography.labelSmall
 ) {
+    val ui = LocalUiScale.current
+
     Text(
         text = value,
         color = MaterialTheme.colorScheme.onError,
-        fontSize = fontSize,
+        fontSize = ui.fonts.generalTextSize,
         fontWeight = FontWeight.Bold,
-        style = style
+        style = ui.typographies.generalTextStyle
     )
 }

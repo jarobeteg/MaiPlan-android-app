@@ -42,10 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.utils.LocalUiScale
 
@@ -54,21 +51,23 @@ fun HeadingTextComponent(
     text: String
 ) {
     val ui = LocalUiScale.current
+
     Text(
         text = text,
-        fontSize = ui.heading,
+        fontSize = ui.fonts.generalHeadingSize,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.primary,
-        style = ui.headingStyle
+        style = ui.typographies.generalHeadingStyle
     )
 }
 
 @Composable
 fun ClickableTextComponent(
     text: String,
-    fontSize: TextUnit = 18.sp,
     onTextClicked: () -> Unit) {
+    val ui = LocalUiScale.current
     val interactionSource = remember { MutableInteractionSource() }
+
     Text(
         text = text,
         modifier = Modifier.clickable(
@@ -76,7 +75,7 @@ fun ClickableTextComponent(
             indication = null
         ) { onTextClicked() },
         color = MaterialTheme.colorScheme.primary,
-        fontSize = fontSize,
+        fontSize = ui.fonts.generalTextSize,
         fontWeight = FontWeight.Medium
     )
 }
@@ -84,12 +83,10 @@ fun ClickableTextComponent(
 @Composable
 fun EmailTextComponent(
     email: String,
-    modifier: Modifier,
-    fontSize: TextUnit,
-    style: TextStyle,
-    iconSize: Dp,
     onEmailChange: (String) -> Unit
 ) {
+    val ui = LocalUiScale.current
+
     OutlinedTextField(
         value = email,
         onValueChange = { newEmail ->
@@ -99,17 +96,17 @@ fun EmailTextComponent(
         },
         label = { Text(
             text = stringResource(R.string.email),
-            fontSize = fontSize,
-            style = style,
+            fontSize = ui.fonts.generalTextSize,
+            style = ui.typographies.generalTextStyle,
             textAlign = TextAlign.Center
         ) },
-        textStyle = TextStyle(fontSize = fontSize),
+        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
         leadingIcon = { Icon(
             imageVector = Icons.Filled.Email,
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(ui.components.generalIconSize),
             contentDescription = stringResource(R.string.email_icon)
         ) },
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
             unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
@@ -128,11 +125,9 @@ fun EmailTextComponent(
 @Composable
 fun UsernameTextComponent(
     username: String,
-    modifier: Modifier,
-    fontSize: TextUnit,
-    style: TextStyle,
-    iconSize: Dp,
     onUsernameChange: (String) -> Unit) {
+    val ui = LocalUiScale.current
+
     OutlinedTextField(
         value = username,
         onValueChange = { newUsername ->
@@ -142,16 +137,16 @@ fun UsernameTextComponent(
         },
         label = { Text(
             text = stringResource(R.string.username),
-            fontSize = fontSize,
-            style = style,
+            fontSize = ui.fonts.generalTextSize,
+            style = ui.typographies.generalTextStyle,
             textAlign = TextAlign.Center
         ) },
-        textStyle = TextStyle(fontSize = fontSize),
+        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
         leadingIcon = { Icon(
             imageVector = Icons.Filled.AccountCircle,
-            modifier = Modifier.size(iconSize),
+            modifier = Modifier.size(ui.components.generalIconSize),
             contentDescription = stringResource(R.string.username_icon)) },
-        modifier = modifier,
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
             unfocusedContainerColor = MaterialTheme.colorScheme.onPrimary,
@@ -174,13 +169,9 @@ fun PasswordTextComponent(
     onPasswordChange: (String) -> Unit,
     passwordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
-    modifier: Modifier,
-    fontSize: TextUnit,
-    style: TextStyle,
-    iconSize: Dp,
-    isCompact: Boolean = true,
     shouldIndicatorBeVisible: Boolean = false
 ) {
+    val ui = LocalUiScale.current
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
@@ -194,22 +185,22 @@ fun PasswordTextComponent(
             },
             label = { Text(
                 text = label,
-                fontSize = fontSize,
-                style = style,
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.generalTextStyle,
                 textAlign = TextAlign.Center
             ) },
-            textStyle = TextStyle(fontSize = fontSize),
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Lock,
-                    modifier = Modifier.size(iconSize),
+                    modifier = Modifier.size(ui.components.generalIconSize),
                     contentDescription = stringResource(R.string.password_icon)
                 )
             },
             trailingIcon = {
                 IconButton(
                     onClick = onTogglePasswordVisibility,
-                    modifier = Modifier.size(iconSize).offset(x = (-8).dp)
+                    modifier = Modifier.size(ui.components.generalIconSize).offset(x = (-8).dp)
                 ) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff,
@@ -219,7 +210,7 @@ fun PasswordTextComponent(
                 }
             },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-            modifier = modifier,
+            modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
             interactionSource = interactionSource,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.onPrimary,
@@ -235,13 +226,10 @@ fun PasswordTextComponent(
             )
         )
 
-        val height: Dp = if (isCompact) 8.dp else 16.dp
-        val fontSize: TextUnit = if (isCompact) 12.sp else 22.sp
-
         if (shouldIndicatorBeVisible) {
-            PasswordStrengthBar(password, isFocused, height, fontSize)
+            PasswordStrengthBar(password, isFocused)
         } else {
-            PasswordStrengthBar(password, false, height, fontSize)
+            PasswordStrengthBar(password, false)
         }
     }
 }
@@ -250,11 +238,11 @@ fun PasswordTextComponent(
 fun PasswordStrengthBar(
     password: String,
     isFocused: Boolean,
-    height: Dp,
-    fontSize: TextUnit,
 ) {
+    val ui = LocalUiScale.current
+
     if (isFocused) {
-        Spacer(modifier = Modifier.height(height))
+        Spacer(modifier = Modifier.height(ui.components.passwordBarHeight))
 
         val hasMinLength = password.length >= 8
         val hasLowerCase = password.any { it.isLowerCase() }
@@ -293,7 +281,7 @@ fun PasswordStrengthBar(
             Canvas(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(height)
+                    .height(ui.components.passwordBarHeight)
                     .clip(MaterialTheme.shapes.extraSmall)
             ) {
                 val progress = (size.width * (score / 4f)).coerceIn(0f, size.width)
@@ -308,7 +296,7 @@ fun PasswordStrengthBar(
             }
             Text(
                 text = strengthLabels[score.coerceIn(0, 4)],
-                fontSize = fontSize,
+                fontSize = ui.fonts.passwordStrengthTextSize,
                 fontWeight = FontWeight.Bold,
                 color = strengthColors[score.coerceIn(0, 4)],
                 modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -319,12 +307,7 @@ fun PasswordStrengthBar(
 
 @Composable
 fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: ImageVector, length: Int, onValueChange: (String) -> Unit) {
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
+    val ui = LocalUiScale.current
 
     OutlinedTextField(
         value = value,
@@ -335,14 +318,14 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
         },
         label = { Text(
             text = label,
-            fontSize = fontSize,
-            style = style
+            fontSize = ui.fonts.generalTextSize,
+            style = ui.typographies.generalTextStyle
         ) },
         trailingIcon = {
             Box(
                 modifier = Modifier
                     .padding(end = 16.dp)
-                    .size(iconSize),
+                    .size(ui.components.generalIconSize),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -353,8 +336,8 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
                 )
             }
         },
-        textStyle = TextStyle(fontSize = fontSize),
-        modifier = Modifier.fillMaxWidth().height(fieldHeight),
+        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -374,12 +357,7 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
 
 @Composable
 fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 32.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
+    val ui = LocalUiScale.current
 
     OutlinedTextField(
         value = searchQuery,
@@ -388,18 +366,18 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
                 onValueChange(newValue)
             }
         },
-        textStyle = TextStyle(fontSize = fontSize),
-        modifier = Modifier.fillMaxWidth().height(fieldHeight),
+        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         placeholder = { Text(
             text = stringResource(R.string.category_search),
-            fontSize = fontSize,
-            style = style,
+            fontSize = ui.fonts.generalTextSize,
+            style = ui.typographies.generalTextStyle,
             textAlign = TextAlign.Center
         ) },
         leadingIcon = { Icon(
             imageVector = Icons.Filled.Search,
             contentDescription = null,
-            modifier = Modifier.size(iconSize)
+            modifier = Modifier.size(ui.components.generalIconSize)
         ) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,

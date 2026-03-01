@@ -1,10 +1,12 @@
 package com.example.maiplan.components
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 
 @Composable
-fun isTablet(): Boolean {
-    val configuration = LocalConfiguration.current
-    return configuration.smallestScreenWidthDp >= 600
+fun AdjustableSpacer(height: Dp) {
+    Spacer(modifier = Modifier.height(height))
 }

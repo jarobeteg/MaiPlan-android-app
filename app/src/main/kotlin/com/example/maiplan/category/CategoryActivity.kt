@@ -2,7 +2,6 @@ package com.example.maiplan.category
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.compose.setContent
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
@@ -43,7 +42,7 @@ class CategoryActivity : BaseActivity() {
     }
 
     private fun setupComposeUI() {
-        setContent {
+        setAppContent {
             AppTheme {
                 CategoryNavHost(viewModel)
             }

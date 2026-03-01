@@ -19,8 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.maiplan.utils.LocalUiScale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,11 +27,7 @@ fun SimpleTopBar(
     text: String,
     onBackClick: () -> Unit
 ) {
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 32.sp else 24.sp
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val barHeight = if (isTablet) 112.dp else 112.dp
+    val ui = LocalUiScale.current
 
     CenterAlignedTopAppBar(
         title = {
@@ -42,7 +37,7 @@ fun SimpleTopBar(
             ) {
                 Text(
                     text = text,
-                    fontSize = fontSize,
+                    fontSize = ui.fonts.generalTopBarTitleSize,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     textAlign = TextAlign.Center
@@ -52,7 +47,7 @@ fun SimpleTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -65,19 +60,17 @@ fun SimpleTopBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(barHeight)
+        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
 @Composable
 fun SectionTitle(text: String) {
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 32.sp else 24.sp
+    val ui = LocalUiScale.current
 
     Text(
         text = text,
-        fontSize = fontSize,
+        fontSize = ui.fonts.generalTopBarTitleSize,
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.fillMaxWidth(),

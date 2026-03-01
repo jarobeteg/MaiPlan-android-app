@@ -1,20 +1,12 @@
 package com.example.maiplan.main.screens
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -27,11 +19,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.ClickableTextComponent
 import com.example.maiplan.components.EmailTextComponent
 import com.example.maiplan.components.ErrorMessageComponent
@@ -40,16 +29,18 @@ import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.Result
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun RegisterScreen(
     viewModel: AuthViewModel,
-    activity: Activity,
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
+    val ui = LocalUiScale.current
+
     val registerResult by viewModel.registerResult.observeAsState()
     val isLoading = registerResult is Result.Loading
     var email by remember { mutableStateOf("") }
@@ -58,21 +49,6 @@ fun RegisterScreen(
     var passwordAgain by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordAgainVisible by remember { mutableStateOf(false) }
-
-    val windowSizeClass = calculateWindowSizeClass(activity)
-
-    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
-
-    val cardPadding = if (isCompact) 24.dp else 36.dp
-    val itemSpacing = if (isCompact) 12.dp else 18.dp
-    val fieldHeight = if (windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded) 72.dp else 64.dp
-
-    val contentWidth = when (windowSizeClass.widthSizeClass) {
-        WindowWidthSizeClass.Compact -> Modifier.fillMaxWidth()
-        WindowWidthSizeClass.Medium -> Modifier.widthIn(min = 500.dp, max = 700.dp)
-        WindowWidthSizeClass.Expanded -> Modifier.fillMaxWidth(0.7f)
-        else -> Modifier.fillMaxWidth()
-    }
 
     Box(
         modifier = Modifier
@@ -86,39 +62,32 @@ fun RegisterScreen(
     ) {
         Column(
             modifier = Modifier
-                .then(contentWidth)
-                .padding(if (isCompact) 8.dp else 0.dp)
+                .then(ui.components.contentWidth)
+                .padding(ui.dimensions.generalPadding)
                 .clip(MaterialTheme.shapes.large)
                 .background(Color.White.copy(alpha = 0.95f))
-                .padding(cardPadding),
+                .padding(ui.dimensions.cardPadding),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HeadingTextComponent(
                 text = stringResource(R.string.create_an_account)
             )
 
-            Spacer(modifier = Modifier.height(itemSpacing * 2))
+            AdjustableSpacer(ui.dimensions.generalSpacer * 2)
 
             EmailTextComponent(
                 email = email,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight),
-                fontSize = if (isCompact) 18.sp else 24.sp,
-                style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 36.dp,
                 onEmailChange = { email = it }
             )
 
-            Spacer(modifier = Modifier.height(itemSpacing))
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             UsernameTextComponent(
                 username,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight),
-                fontSize = if (isCompact) 18.sp else 24.sp,
-                style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 36.dp,
-                onUsernameChange = { username = it })
+                onUsernameChange = { username = it }
+            )
 
-            Spacer(modifier = Modifier.height(itemSpacing))
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             PasswordTextComponent(
                 password,
@@ -126,15 +95,10 @@ fun RegisterScreen(
                 onPasswordChange = { password = it },
                 passwordVisible,
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
-                fontSize = if (isCompact) 18.sp else 24.sp,
-                style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 36.dp,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight),
-                isCompact = isCompact,
                 shouldIndicatorBeVisible = true
             )
 
-            Spacer(modifier = Modifier.height(itemSpacing))
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             PasswordTextComponent(
                 passwordAgain,
@@ -142,24 +106,18 @@ fun RegisterScreen(
                 onPasswordChange = { passwordAgain = it },
                 passwordAgainVisible,
                 onTogglePasswordVisibility = { passwordAgainVisible = !passwordAgainVisible },
-                fontSize = if (isCompact) 18.sp else 24.sp,
-                style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
-                iconSize = if (isCompact) 24.dp else 36.dp,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight)
             )
 
-            Spacer(modifier = Modifier.height(itemSpacing * 2))
+            AdjustableSpacer(ui.dimensions.generalSpacer * 2)
 
             SubmitButtonComponent(
                 value = stringResource(R.string.register),
                 onButtonClicked = { onRegisterClick(email, username, password, passwordAgain) },
                 isLoading = isLoading,
-                fontSize = if (isCompact) 18.sp else 24.sp,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight)
             )
 
             if (registerResult is Result.Failure) {
-                Spacer(modifier = Modifier.height(itemSpacing))
+                AdjustableSpacer(ui.dimensions.generalSpacer)
                 val error = registerResult as Result.Failure
                 val code = error.errorCode
 
@@ -178,17 +136,14 @@ fun RegisterScreen(
 
                 val errorMessage = stringResource(errorMessageId)
                 ErrorMessageComponent(
-                    value = errorMessage,
-                    fontSize = if (isCompact) 16.sp else 24.sp,
-                    style = if (isCompact) MaterialTheme.typography.labelSmall else MaterialTheme.typography.labelLarge,
+                    value = errorMessage
                 )
             }
 
-            Spacer(modifier = Modifier.height(itemSpacing))
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             ClickableTextComponent(
                 text = stringResource(R.string.have_account),
-                fontSize = if (isCompact) 18.sp else 24.sp,
                 onTextClicked = {
                     viewModel.cancelRegister()
                     onBackToLogin()

@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.CategoryDropdownComponent
@@ -41,7 +39,6 @@ import com.example.maiplan.components.SectionTitle
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.components.TimeInputComponent
-import com.example.maiplan.components.isTablet
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
@@ -95,9 +92,6 @@ fun UpdateEventScreen(
     var dateTime by remember { mutableStateOf(safeReminderTime) }
     var message by remember { mutableStateOf(safeEvent.reminderMessage) }
 
-    val isTablet = isTablet()
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
-
     LaunchedEffect(categories, safeEvent.categoryId) {
         selectedCategory = categories.find { it.categoryId == safeEvent.categoryId }
     }
@@ -148,15 +142,12 @@ fun UpdateEventScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     ErrorMessageComponent(
-                        value = it,
-                        fontSize = if (isTablet) 24.sp else 18.sp,
-                        style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall)
+                        value = it
+                    )
                 }
             }
 
             SubmitButtonComponent(stringResource(R.string.update),
-                fontSize = if (isTablet) 24.sp else 18.sp,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 onButtonClicked = {
 
                 val today = LocalDate.now()
@@ -237,8 +228,6 @@ fun UpdateEventScreen(
             SubmitButtonComponent(
                 value = stringResource(R.string.delete),
                 color = MaterialTheme.colorScheme.onError,
-                fontSize = if (isTablet) 24.sp else 18.sp,
-                modifier = Modifier.fillMaxWidth().height(fieldHeight),
                 onButtonClicked = {
                     val eventId: Int = safeEvent.eventId
                     val reminderId: Int? = if (safeEvent.reminderId == 0) null else safeEvent.reminderId

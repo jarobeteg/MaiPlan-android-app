@@ -27,7 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.maiplan.utils.LocalUiScale
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -39,22 +39,16 @@ fun DateInputComponent(
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit
 ) {
+    val ui = LocalUiScale.current
     var showDatePicker by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
 
     val displayDate = selectedDate?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) ?: ""
 
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(fieldHeight)
+            .height(ui.components.generalFieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -73,14 +67,14 @@ fun DateInputComponent(
         ) {
             Text(
                 text = "$label: $displayDate",
-                fontSize = fontSize,
-                style = style
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.generalTextStyle
             )
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             )
         }
     }
@@ -102,22 +96,16 @@ fun TimeInputComponent(
     selectedTime: LocalTime?,
     onTimeSelected: (LocalTime) -> Unit
 ) {
+    val ui = LocalUiScale.current
     val interactionSource = remember { MutableInteractionSource() }
     var showDialog by remember { mutableStateOf(false) }
 
     val displayTime = selectedTime?.format(DateTimeFormatter.ofPattern("HH:mm")) ?: ""
 
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(fieldHeight)
+            .height(ui.components.generalFieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -136,14 +124,14 @@ fun TimeInputComponent(
         ) {
             Text(
                 text = "$label: $displayTime",
-                fontSize = fontSize,
-                style = style
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.generalTextStyle
             )
             Icon(
                 imageVector = Icons.Default.AccessTime,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             )
         }
     }
@@ -168,6 +156,7 @@ fun LocalDateTimeInputField(
     dateTime: LocalDateTime?,
     onDateTimeSelected: (LocalDateTime) -> Unit
 ) {
+    val ui = LocalUiScale.current
     val interactionSource = remember { MutableInteractionSource() }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -176,17 +165,10 @@ fun LocalDateTimeInputField(
 
     val displayText = dateTime?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")) ?: ""
 
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(fieldHeight)
+            .height(ui.components.generalFieldHeight)
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
@@ -207,15 +189,15 @@ fun LocalDateTimeInputField(
         ) {
             Text(
                 text = "$label: $displayText",
-                fontSize = fontSize,
-                style = style,
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.generalTextStyle,
                 color = MaterialTheme.colorScheme.onBackground
             )
             Icon(
                 imageVector = Icons.Default.Event,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             )
         }
     }

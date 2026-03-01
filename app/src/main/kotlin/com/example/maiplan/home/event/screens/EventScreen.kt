@@ -47,14 +47,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getString
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
-import com.example.maiplan.components.isTablet
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -99,26 +98,7 @@ fun EventScreen(
             )},
         bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {
-            when (selectedView) {
-                0 -> MonthlyView(selectedDate, eventsByDate,
-                    onDayClick = { clickedDate ->
-                        selectedDate = clickedDate
-                        selectedView = 2
-                    })
-                1 -> WeeklyView(selectedDate, eventsByDate,
-                    onDayClick = { clickedDate ->
-                        selectedDate = clickedDate
-                        selectedView = 2
-                    })
-                2 -> DailyView(selectedDate, eventsByDate, onUpdateEventClick)
-                else -> MonthlyView(selectedDate, eventsByDate,
-                    onDayClick = { clickedDate ->
-                        selectedDate = clickedDate
-                        selectedView = 2
-                    })
-            }
-        }
+        Column(modifier = Modifier.padding(innerPadding)) {}
     }
 
     if (showDatePicker) {
@@ -151,16 +131,12 @@ fun EventTopBar(
     onDatePickerClick: () -> Unit,
     onCreateEventClick: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     var expanded by remember { mutableStateOf(false) }
     var buttonWidth by remember { mutableIntStateOf(0) }
 
-    val isTablet = isTablet()
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val barHeight = if (isTablet) 112.dp else 112.dp
-
     TopAppBar(
-        modifier = Modifier.height(barHeight),
+        modifier = Modifier.height(ui.components.generalTopBarHeight),
         title = {
             Box(
                 modifier = Modifier.fillMaxHeight(),
@@ -175,7 +151,7 @@ fun EventTopBar(
                     OutlinedButton(
                         onClick = { expanded = !expanded },
                         modifier = Modifier
-                            .height(if (isTablet) 50.dp else 40.dp)
+                            .height(ui.components.dropdownHeight)
                             .onGloballyPositioned { coordinates ->
                                 buttonWidth = coordinates.size.width
                             },
@@ -188,9 +164,9 @@ fun EventTopBar(
                         ) {
                             Text(
                                 text = formattedTitle,
-                                style = if (isTablet) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
+                                style = ui.typographies.dropdownTextStyle,
                                 color = MaterialTheme.colorScheme.onPrimary,
-                                fontSize = fontSize,
+                                fontSize = ui.fonts.generalTextSize,
                                 modifier = Modifier.padding(end = 8.dp)
                             )
                             Icon(
@@ -198,7 +174,7 @@ fun EventTopBar(
                                 contentDescription = "Dropdown Arrow",
                                 tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier
-                                    .size(if (isTablet) 32.dp else 24.dp)
+                                    .size(ui.components.generalIconSize)
                                     .rotate(if (expanded) 0f else 90f)
                             )
                         }
@@ -225,13 +201,13 @@ fun EventTopBar(
             Row(
                 modifier = Modifier
                     .fillMaxHeight()
-                    .padding(end = if (isTablet) 16.dp else 8.dp),
+                    .padding(end = ui.dimensions.topBarIconPadding),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(if (isTablet) 16.dp else 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(ui.dimensions.topBarIconPadding)
             ) {
                 IconButton(
                     onClick = onDatePickerClick,
-                    modifier = Modifier.size(iconSize)
+                    modifier = Modifier.size(ui.components.generalIconSize)
                 ) {
                     Icon(
                         imageVector = Icons.Default.CalendarMonth,
@@ -242,7 +218,7 @@ fun EventTopBar(
                 }
                 IconButton(
                     onClick = onCreateEventClick,
-                    modifier = Modifier.size(iconSize)
+                    modifier = Modifier.size(ui.components.generalIconSize)
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Add,
@@ -264,9 +240,7 @@ fun EventDropdownMenu(
     onItemSelected: (Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val isTablet = isTablet()
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val itemHeight = if (isTablet) 64.dp else 48.dp
+    val ui = LocalUiScale.current
 
     DropdownMenu(
         expanded = expanded,
@@ -282,9 +256,9 @@ fun EventDropdownMenu(
             DropdownMenuItem(
                 text = { Text(
                     text = view,
-                    fontSize = fontSize,
+                    fontSize = ui.fonts.generalTextSize,
                     color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(vertical = if (isTablet) 8.dp else 4.dp)
+                    modifier = Modifier.padding(vertical = ui.dimensions.dropdownPadding)
                 ) },
                 onClick = {
                     onItemSelected(index)
@@ -292,7 +266,7 @@ fun EventDropdownMenu(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(itemHeight)
+                    .height(ui.components.dropdownItemHeight)
                     .background(MaterialTheme.colorScheme.primary)
                     .padding(horizontal = 8.dp, vertical = 4.dp)
             )
