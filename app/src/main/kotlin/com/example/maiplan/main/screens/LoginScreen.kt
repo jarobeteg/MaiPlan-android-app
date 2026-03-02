@@ -104,7 +104,7 @@ fun LoginScreen(
                 )
             }
 
-            AdjustableSpacer(ui.dimensions.generalSpacer * 2)
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             SubmitButtonComponent(
                 value = stringResource(R.string.login),

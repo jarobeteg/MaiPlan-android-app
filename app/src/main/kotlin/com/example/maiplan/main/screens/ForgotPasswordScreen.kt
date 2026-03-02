@@ -98,7 +98,7 @@ fun ForgotPasswordScreen(
                 onTogglePasswordVisibility = { passwordAgainVisible = !passwordAgainVisible },
             )
 
-            AdjustableSpacer(ui.dimensions.generalSpacer * 2)
+            AdjustableSpacer(ui.dimensions.generalSpacer)
 
             SubmitButtonComponent(
                 value = stringResource(R.string.reset),

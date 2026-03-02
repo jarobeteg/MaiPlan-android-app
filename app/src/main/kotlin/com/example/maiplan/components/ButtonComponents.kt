@@ -28,7 +28,7 @@ fun SubmitButtonComponent(
     Button(
         onClick = { if (!isLoading) onButtonClicked() },
         enabled = !isLoading,
-        modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
+        modifier = Modifier.fillMaxWidth().height(ui.components.generalSubmitButtonHeight),
         shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
