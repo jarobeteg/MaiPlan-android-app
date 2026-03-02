@@ -144,7 +144,7 @@ fun CategoryManagementTopBar(
             ) {
                 Text(
                     text = text,
-                    fontSize = ui.fonts.generalTextSize,
+                    fontSize = ui.fonts.generalTopBarTitleSize,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     textAlign = TextAlign.Center
@@ -154,12 +154,12 @@ fun CategoryManagementTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(ui.components.generalIconSize)
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -167,12 +167,12 @@ fun CategoryManagementTopBar(
         actions = {
             IconButton(
                 onClick = onCreateCategoryClick,
-                modifier = Modifier.size(ui.components.generalIconSize)
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }

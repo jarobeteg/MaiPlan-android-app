@@ -22,7 +22,8 @@ data class AppDimensions(
     val iconPickerDialogPadding: Dp,
     val gridPadding: Dp,
     val topBarIconPadding: Dp,
-    val dropdownPadding: Dp
+    val dropdownPadding: Dp,
+    val generalTouchTarget: Dp
 )
 
 @Stable
@@ -49,6 +50,7 @@ data class AppComponents(
     val bottomBarHeight: Dp,
     val bottomBarIconSize: Dp,
     val generalTopBarHeight: Dp,
+    val generalTopBarIconSize: Dp,
     val generalIconSize: Dp,
     val generalFieldHeight: Dp,
     val generalSubmitButtonHeight: Dp,
@@ -85,7 +87,8 @@ val DefaultUiScale = UiScale(
         iconPickerDialogPadding = 16.dp,
         gridPadding = 8.dp,
         topBarIconPadding = 8.dp,
-        dropdownPadding = 4.dp
+        dropdownPadding = 4.dp,
+        generalTouchTarget = 36.dp
     ),
 
     typographies = AppTypographies(
@@ -109,6 +112,7 @@ val DefaultUiScale = UiScale(
         bottomBarHeight = 96.dp,
         bottomBarIconSize = 24.dp,
         generalTopBarHeight = 112.dp,
+        generalTopBarIconSize = 28.dp,
         generalIconSize = 24.dp,
         generalFieldHeight = 64.dp,
         generalSubmitButtonHeight = 48.dp,

@@ -87,7 +87,8 @@ open class BaseActivity : ComponentActivity() {
                         iconPickerDialogPadding = 16.dp,
                         gridPadding = 8.dp,
                         topBarIconPadding = 8.dp,
-                        dropdownPadding = 4.dp
+                        dropdownPadding = 4.dp,
+                        generalTouchTarget = 36.dp
                     ),
 
                     typographies = AppTypographies(
@@ -111,6 +112,7 @@ open class BaseActivity : ComponentActivity() {
                         bottomBarHeight = 96.dp,
                         bottomBarIconSize = 24.dp,
                         generalTopBarHeight = 112.dp,
+                        generalTopBarIconSize = 28.dp,
                         generalIconSize = 24.dp,
                         generalFieldHeight = 64.dp,
                         generalSubmitButtonHeight = 48.dp,
@@ -142,7 +144,8 @@ open class BaseActivity : ComponentActivity() {
                         iconPickerDialogPadding = 20.dp,
                         gridPadding = 10.dp,
                         topBarIconPadding = 12.dp,
-                        dropdownPadding = 6.dp
+                        dropdownPadding = 6.dp,
+                        generalTouchTarget = 40.dp
                     ),
 
                     typographies = AppTypographies(
@@ -166,6 +169,7 @@ open class BaseActivity : ComponentActivity() {
                         bottomBarHeight = 112.dp,
                         bottomBarIconSize = 28.dp,
                         generalTopBarHeight = 112.dp,
+                        generalTopBarIconSize = 32.dp,
                         generalIconSize = 28.dp,
                         generalFieldHeight = 68.dp,
                         generalSubmitButtonHeight = 52.dp,
@@ -197,7 +201,8 @@ open class BaseActivity : ComponentActivity() {
                         iconPickerDialogPadding = 24.dp,
                         gridPadding = 12.dp,
                         topBarIconPadding = 16.dp,
-                        dropdownPadding = 8.dp
+                        dropdownPadding = 8.dp,
+                        generalTouchTarget = 48.dp
                     ),
 
                     typographies = AppTypographies(
@@ -221,6 +226,7 @@ open class BaseActivity : ComponentActivity() {
                         bottomBarHeight = 128.dp,
                         bottomBarIconSize = 32.dp,
                         generalTopBarHeight = 112.dp,
+                        generalTopBarIconSize = 36.dp,
                         generalIconSize = 32.dp,
                         generalFieldHeight = 72.dp,
                         generalSubmitButtonHeight = 56.dp,

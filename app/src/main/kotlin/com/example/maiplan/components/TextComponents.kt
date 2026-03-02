@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -366,13 +367,17 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
                 onValueChange(newValue)
             }
         },
-        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+        textStyle = TextStyle(
+            fontSize = ui.fonts.generalTextSize,
+            textAlign = TextAlign.Start
+        ),
         modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
+        singleLine = true,
         placeholder = { Text(
             text = stringResource(R.string.category_search),
             fontSize = ui.fonts.generalTextSize,
             style = ui.typographies.generalTextStyle,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Start
         ) },
         leadingIcon = { Icon(
             imageVector = Icons.Filled.Search,
