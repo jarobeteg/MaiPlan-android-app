@@ -243,7 +243,7 @@ fun PasswordStrengthBar(
     val ui = LocalUiScale.current
 
     if (isFocused) {
-        Spacer(modifier = Modifier.height(ui.components.passwordBarHeight))
+        AdjustableSpacer(ui.components.passwordBarHeight)
 
         val hasMinLength = password.length >= 8
         val hasLowerCase = password.any { it.isLowerCase() }

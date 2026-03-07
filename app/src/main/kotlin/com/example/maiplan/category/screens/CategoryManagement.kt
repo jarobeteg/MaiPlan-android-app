@@ -64,7 +64,9 @@ fun CategoryManagementScreen(
     onCardSwipeEdit: (CategoryEntity) -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val context = LocalContext.current
+
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
     var searchQuery by remember { mutableStateOf("") }
 
@@ -83,7 +85,7 @@ fun CategoryManagementScreen(
         ) {
             SearchFieldComponent(searchQuery, 32) { searchQuery = it }
 
-            AdjustableSpacer(8.dp)
+            AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             val filteredCategories = categoryList.filter {
                 it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true)
@@ -120,7 +122,7 @@ fun CategoryManagementScreen(
                         }
                     )
 
-                    AdjustableSpacer(8.dp)
+                    AdjustableSpacer(ui.dimensions.mediumSpacer)
                 }
             }
         }
@@ -216,7 +218,7 @@ fun CategoryCard(category: CategoryEntity) {
                     tint = textColor
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                AdjustableSpacer(ui.dimensions.mediumSpacer)
 
                 Text(
                     text = category.name,
@@ -227,7 +229,7 @@ fun CategoryCard(category: CategoryEntity) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            AdjustableSpacer(ui.dimensions.smallSpacer)
 
             Text(
                 text = category.description,

@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.DateInputComponent
@@ -39,6 +40,7 @@ import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.utils.ReminderManager
 import com.example.maiplan.utils.ReminderData
 import com.example.maiplan.utils.common.UserSession
@@ -59,7 +61,9 @@ fun CreateEventScreen(
     onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val context = LocalContext.current
+
     categoryViewModel.getAllCategories(UserSession.userId!!)
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -114,16 +118,7 @@ fun CreateEventScreen(
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
 
-            errorMessage?.let {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ErrorMessageComponent(
-                        value = it
-                    )
-                }
-            }
+            AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             SubmitButtonComponent(stringResource(R.string.event_save),
                 onButtonClicked = {
@@ -189,6 +184,17 @@ fun CreateEventScreen(
                     }
                 }
             })
+
+            errorMessage?.let {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorMessageComponent(
+                        value = it
+                    )
+                }
+            }
         }
     }
 }

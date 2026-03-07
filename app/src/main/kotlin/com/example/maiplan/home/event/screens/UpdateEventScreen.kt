@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.DateInputComponent
@@ -42,6 +45,7 @@ import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.utils.ReminderManager
 import com.example.maiplan.utils.ReminderData
 import com.example.maiplan.utils.common.UserSession
@@ -77,7 +81,9 @@ fun UpdateEventScreen(
         safeReminderTime = safeEvent.reminderTime.toLocalDateTime()
     }
 
+    val ui = LocalUiScale.current
     val context = LocalContext.current
+
     categoryViewModel.getAllCategories(UserSession.userId!!)
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -136,16 +142,7 @@ fun UpdateEventScreen(
 
             AdjustableTextFieldLengthComponent(message, stringResource(R.string.message), Icons.AutoMirrored.Filled.Message, 512) { message = it }
 
-            errorMessage?.let {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ErrorMessageComponent(
-                        value = it
-                    )
-                }
-            }
+            AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             SubmitButtonComponent(stringResource(R.string.update),
                 onButtonClicked = {
@@ -237,7 +234,19 @@ fun UpdateEventScreen(
                         val reminderManager = ReminderManager()
                         reminderManager.cancelReminder(context, reminderId)
                     }
-                })
+                }
+            )
+
+            errorMessage?.let {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ErrorMessageComponent(
+                        value = it
+                    )
+                }
+            }
         }
     }
 }

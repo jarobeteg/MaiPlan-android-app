@@ -80,6 +80,9 @@ open class BaseActivity : ComponentActivity() {
                     dimensions = AppDimensions (
                         generalPadding = 8.dp,
                         cardPadding = 24.dp,
+                        smallSpacer = 4.dp,
+                        mediumSpacer = 8.dp,
+                        largeSpacer = 12.dp,
                         generalSpacer = 12.dp,
                         generalDividerThickness = 1.dp,
                         generalBorder = 1.dp,
@@ -137,6 +140,9 @@ open class BaseActivity : ComponentActivity() {
                     dimensions = AppDimensions (
                         generalPadding = 4.dp,
                         cardPadding = 30.dp,
+                        smallSpacer = 4.dp,
+                        mediumSpacer = 8.dp,
+                        largeSpacer = 12.dp,
                         generalSpacer = 15.dp,
                         generalDividerThickness = 2.dp,
                         generalBorder = 2.dp,
@@ -194,6 +200,9 @@ open class BaseActivity : ComponentActivity() {
                     dimensions = AppDimensions (
                         generalPadding = 0.dp,
                         cardPadding = 36.dp,
+                        smallSpacer = 4.dp,
+                        mediumSpacer = 8.dp,
+                        largeSpacer = 12.dp,
                         generalSpacer = 18.dp,
                         generalDividerThickness = 3.dp,
                         generalBorder = 2.dp,

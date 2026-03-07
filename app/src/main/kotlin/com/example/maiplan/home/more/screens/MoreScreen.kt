@@ -51,6 +51,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.utils.BaseActivity
@@ -142,7 +143,7 @@ fun MoreScreenButton(
                 modifier = Modifier.size(ui.components.generalIconSize)
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            AdjustableSpacer(ui.dimensions.smallSpacer)
 
             Text(
                 text = text,

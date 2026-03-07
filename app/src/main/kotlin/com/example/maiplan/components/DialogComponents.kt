@@ -86,6 +86,7 @@ fun DatePickerDialogComponent(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val datePickerState = rememberDatePickerState()
 
     val configuration = LocalConfiguration.current
@@ -174,7 +175,7 @@ fun DatePickerDialogComponent(
                             ) {
                                 Text("Cancel")
                             }
-                            Spacer(modifier = Modifier.width(8.dp))
+                            AdjustableSpacer(ui.dimensions.mediumSpacer)
                             TextButton(
                                 onClick = {
                                     val selectedDateMillis = datePickerState.selectedDateMillis
@@ -205,6 +206,7 @@ fun TimePickerDialogComponent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val ui = LocalUiScale.current
     val timePickerState = rememberTimePickerState(is24Hour = true)
 
     val configuration = LocalConfiguration.current
@@ -270,7 +272,7 @@ fun TimePickerDialogComponent(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    AdjustableSpacer(ui.dimensions.largeSpacer)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -282,7 +284,7 @@ fun TimePickerDialogComponent(
                         ) {
                             Text("Cancel", fontSize = 16.sp)
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        AdjustableSpacer(ui.dimensions.mediumSpacer)
                         TextButton(onClick = {
                             onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
                             onDismiss()

@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.sp
 data class AppDimensions(
     val generalPadding: Dp,
     val cardPadding: Dp,
+    val smallSpacer: Dp,
+    val mediumSpacer: Dp,
+    val largeSpacer: Dp,
     val generalSpacer: Dp,
     val generalDividerThickness: Dp,
     val generalBorder: Dp,
@@ -80,6 +83,9 @@ val DefaultUiScale = UiScale(
     dimensions = AppDimensions (
         generalPadding = 8.dp,
         cardPadding = 24.dp,
+        smallSpacer = 4.dp,
+        mediumSpacer = 8.dp,
+        largeSpacer = 12.dp,
         generalSpacer = 12.dp,
         generalDividerThickness = 1.dp,
         generalBorder = 1.dp,
