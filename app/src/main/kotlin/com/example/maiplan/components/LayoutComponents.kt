@@ -47,12 +47,12 @@ fun SimpleTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(ui.components.generalIconSize)
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }

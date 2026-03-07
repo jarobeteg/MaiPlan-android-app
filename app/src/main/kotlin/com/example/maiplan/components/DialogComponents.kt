@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -112,70 +113,85 @@ fun DatePickerDialogComponent(
         )
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize()
         ) {
-            Surface(
-                modifier = Modifier
-                    .width(360.dp)
-                    .scale(scaleFactor),
-                shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.primary,
-                tonalElevation = 6.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    DatePicker(
-                        state = datePickerState,
-                        showModeToggle = false,
-                        colors = DatePickerDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                            headlineContentColor = MaterialTheme.colorScheme.onPrimary,
-                            weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            subheadContentColor = MaterialTheme.colorScheme.onPrimary,
-                            yearContentColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedDayContentColor = MaterialTheme.colorScheme.primary,
-                            selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedYearContentColor = MaterialTheme.colorScheme.primary,
-                            selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            todayDateBorderColor = MaterialTheme.colorScheme.secondary,
-                            todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            dayContentColor = MaterialTheme.colorScheme.onPrimary,
-                            dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                    )
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 16.dp, bottom = 16.dp),
-                        horizontalArrangement = Arrangement.End
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
                     ) {
-                        TextButton(
-                            onClick = onDismiss,
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        onDismiss()
+                    }
+            )
+
+            Box(
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .width(360.dp)
+                        .scale(scaleFactor),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    tonalElevation = 6.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        DatePicker(
+                            state = datePickerState,
+                            showModeToggle = false,
+                            colors = DatePickerDefaults.colors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                                headlineContentColor = MaterialTheme.colorScheme.onPrimary,
+                                weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                subheadContentColor = MaterialTheme.colorScheme.onPrimary,
+                                yearContentColor = MaterialTheme.colorScheme.onPrimary,
+                                selectedDayContentColor = MaterialTheme.colorScheme.primary,
+                                selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                selectedYearContentColor = MaterialTheme.colorScheme.primary,
+                                selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                todayDateBorderColor = MaterialTheme.colorScheme.secondary,
+                                todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                dayContentColor = MaterialTheme.colorScheme.onPrimary,
+                                dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 16.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.End
                         ) {
-                            Text("Cancel")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        TextButton(
-                            onClick = {
-                                val selectedDateMillis = datePickerState.selectedDateMillis
-                                if (selectedDateMillis != null) {
-                                    val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
-                                        .atZone(ZoneId.systemDefault())
-                                        .toLocalDate()
-                                    onDateSelected(selectedDate)
-                                }
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
-                        ) {
-                            Text("OK")
+                            TextButton(
+                                onClick = onDismiss,
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                            ) {
+                                Text("Cancel")
+                            }
+                            Spacer(modifier = Modifier.width(8.dp))
+                            TextButton(
+                                onClick = {
+                                    val selectedDateMillis = datePickerState.selectedDateMillis
+                                    if (selectedDateMillis != null) {
+                                        val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
+                                            .atZone(ZoneId.systemDefault())
+                                            .toLocalDate()
+                                        onDateSelected(selectedDate)
+                                    }
+                                    onDismiss()
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                            ) {
+                                Text("OK")
+                            }
                         }
                     }
                 }

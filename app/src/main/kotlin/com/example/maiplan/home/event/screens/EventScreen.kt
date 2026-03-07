@@ -1,53 +1,35 @@
 package com.example.maiplan.home.event.screens
 
-import android.content.Context
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat.getString
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.components.DatePickerDialogComponent
@@ -56,9 +38,6 @@ import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.WeekFields
-import java.util.Locale
 
 @Composable
 fun EventScreen(
@@ -77,22 +56,13 @@ fun EventScreen(
 
     val context = LocalContext.current
     val eventsByDate by eventViewModel.monthlyEvents.collectAsState()
-    var selectedView by rememberSaveable { mutableIntStateOf(0) }
     var showDatePicker by remember { mutableStateOf(false) }
-
-    val formattedTitle = getFormattedTitle(context, selectedView, selectedDate)
-    val views = listOf(
-        getString(context, R.string.monthly),
-        getString(context, R.string.weekly),
-        getString(context, R.string.daily)
-    )
+    val closeDatePicker = { showDatePicker = false }
 
     Scaffold(
         topBar = {
             EventTopBar(
-                formattedTitle,
-                views,
-                onViewSelected = { index -> selectedView = index },
+                title = stringResource(R.string.march),
                 onDatePickerClick = { showDatePicker = true },
                 onCreateEventClick = onCreateEventClick
             )},
@@ -105,171 +75,68 @@ fun EventScreen(
         DatePickerDialogComponent(
             onDateSelected = { date ->
                 selectedDate = date
-                showDatePicker = false
+                closeDatePicker()
             },
-            onDismiss = { showDatePicker = false }
+            onDismiss = {
+                closeDatePicker()
+            }
         )
-    }
-}
-
-@Composable
-fun getFormattedTitle(context: Context, selectedView: Int, selectedDate: LocalDate): String {
-    return when (selectedView) {
-        0 -> selectedDate.format(DateTimeFormatter.ofPattern("MMM yyyy"))
-        1 -> "${getString(context, R.string.week)} ${selectedDate.get(WeekFields.of(Locale.getDefault()).weekOfWeekBasedYear())}"
-        2 -> selectedDate.format(DateTimeFormatter.ofPattern("EE, MMM d"))
-        else -> ""
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventTopBar(
-    formattedTitle: String,
-    views: List<String>,
-    onViewSelected: (Int) -> Unit,
+    title: String,
     onDatePickerClick: () -> Unit,
-    onCreateEventClick: () -> Unit
+    onCreateEventClick: () -> Unit,
 ) {
     val ui = LocalUiScale.current
-    var expanded by remember { mutableStateOf(false) }
-    var buttonWidth by remember { mutableIntStateOf(0) }
 
-    TopAppBar(
-        modifier = Modifier.height(ui.components.generalTopBarHeight),
+    CenterAlignedTopAppBar(
         title = {
             Box(
                 modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.CenterStart
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .border(2.dp, MaterialTheme.colorScheme.secondary, MaterialTheme.shapes.medium)
-                ) {
-                    OutlinedButton(
-                        onClick = { expanded = !expanded },
-                        modifier = Modifier
-                            .height(ui.components.dropdownHeight)
-                            .onGloballyPositioned { coordinates ->
-                                buttonWidth = coordinates.size.width
-                            },
-                        border = null,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = formattedTitle,
-                                style = ui.typographies.dropdownTextStyle,
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                fontSize = ui.fonts.generalTextSize,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Dropdown Arrow",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier
-                                    .size(ui.components.generalIconSize)
-                                    .rotate(if (expanded) 0f else 90f)
-                            )
-                        }
-                    }
-
-                    EventDropdownMenu(
-                        expanded = expanded,
-                        views = views,
-                        buttonWidth = buttonWidth,
-                        onItemSelected = { index ->
-                            onViewSelected(index)
-                            expanded = false
-                        },
-                        onDismiss = { expanded = false }
-                    )
-                }
+                Text(
+                    text = title,
+                    fontSize = ui.fonts.generalTopBarTitleSize,
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = onDatePickerClick,
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+        },
+        actions = {
+            IconButton(
+                onClick = onCreateEventClick,
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary
+            containerColor = MaterialTheme.colorScheme.primary
         ),
-        actions = {
-            Row(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(end = ui.dimensions.topBarIconPadding),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(ui.dimensions.topBarIconPadding)
-            ) {
-                IconButton(
-                    onClick = onDatePickerClick,
-                    modifier = Modifier.size(ui.components.generalIconSize)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CalendarMonth,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-                IconButton(
-                    onClick = onCreateEventClick,
-                    modifier = Modifier.size(ui.components.generalIconSize)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Add,
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        tint = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-        }
+        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
-}
-
-@Composable
-fun EventDropdownMenu(
-    expanded: Boolean,
-    views: List<String>,
-    buttonWidth: Int,
-    onItemSelected: (Int) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val ui = LocalUiScale.current
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = {
-            onDismiss()
-        },
-        modifier = Modifier
-            .width(with(LocalDensity.current) { buttonWidth.toDp() })
-            .background(MaterialTheme.colorScheme.primary)
-            .clip(MaterialTheme.shapes.medium)
-    ) {
-        views.forEachIndexed { index, view ->
-            DropdownMenuItem(
-                text = { Text(
-                    text = view,
-                    fontSize = ui.fonts.generalTextSize,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.padding(vertical = ui.dimensions.dropdownPadding)
-                ) },
-                onClick = {
-                    onItemSelected(index)
-                    onDismiss()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ui.components.dropdownItemHeight)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
-            )
-        }
-    }
 }

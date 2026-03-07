@@ -69,9 +69,9 @@ fun CategoryManagementScreen(
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold (
-        topBar =
-            { CategoryManagementTopBar(
-                text = stringResource(R.string.categories),
+        topBar = {
+            CategoryManagementTopBar(
+                title = stringResource(R.string.categories),
                 onBackClick = { (context as? Activity)?.finish() },
                 onCreateCategoryClick = onCreateCategoryClick
             ) }) { innerPadding ->
@@ -130,7 +130,7 @@ fun CategoryManagementScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryManagementTopBar(
-    text: String,
+    title: String,
     onBackClick: () -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
@@ -143,7 +143,7 @@ fun CategoryManagementTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = text,
+                    text = title,
                     fontSize = ui.fonts.generalTopBarTitleSize,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
