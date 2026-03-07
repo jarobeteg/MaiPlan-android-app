@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -35,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
@@ -305,44 +303,51 @@ fun ColorPickerRow(
     onColorSelected: (Color) -> Unit
 ) {
     val ui = LocalUiScale.current
-    val interactionSource = remember { MutableInteractionSource() }
     var showColorPicker by remember { mutableStateOf(false) }
-
-    val borderColor = MaterialTheme.colorScheme.onBackground
-    val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
-    val borderShape = OutlinedTextFieldDefaults.shape
+    val closeColorPicker = { showColorPicker = false }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ui.components.generalFieldHeight)
             .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { showColorPicker = true }
-            )
-            .border(borderWidth, borderColor, borderShape)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                showColorPicker = true
+            }
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.category_color),
-                fontSize = ui.fonts.generalTextSize,
-                style = ui.typographies.generalTextStyle,
-                modifier = Modifier.weight(1f)
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = {
+                Text(
+                    text = stringResource(R.string.category_color),
+                    fontSize = ui.fonts.generalTextSize,
+                    style = ui.typographies.generalTextStyle
+                )
+            },
+            trailingIcon = {
+                Box(
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(ui.components.generalIconSize)
+                        .background(selectedColor, CircleShape)
+                        .border(ui.dimensions.generalBorder, Color.Gray, CircleShape)
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ui.components.generalFieldHeight),
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+            colors = TextFieldDefaults.colors(
+                disabledContainerColor = MaterialTheme.colorScheme.background,
+                disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                disabledLabelColor = MaterialTheme.colorScheme.onBackground
             )
-
-            Box(
-                modifier = Modifier
-                    .size(ui.components.generalIconSize)
-                    .background(selectedColor, CircleShape)
-                    .border(width = ui.dimensions.generalBorder, Color.Gray, CircleShape)
-            )
-        }
+        )
     }
 
     if (showColorPicker) {
@@ -350,9 +355,11 @@ fun ColorPickerRow(
             initialColor = selectedColor,
             onColorSelected = {
                 onColorSelected(it)
-                showColorPicker = false
+                closeColorPicker()
             },
-            onDismiss = { showColorPicker = false }
+            onDismiss = {
+                closeColorPicker()
+            }
         )
     }
 }
@@ -487,64 +494,69 @@ fun IconPickerRow(
     onIconSelectedString: (String) -> Unit
 ) {
     val ui = LocalUiScale.current
-    val interactionSource = remember { MutableInteractionSource() }
     var showIconPicker by remember { mutableStateOf(false) }
-
-    val borderColor = MaterialTheme.colorScheme.onBackground
-    val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
-    val borderShape = OutlinedTextFieldDefaults.shape
+    val closeIconPicker = { showIconPicker = false }
 
     Box(
         modifier = Modifier
-            .fillMaxWidth().height(ui.components.generalFieldHeight)
+            .fillMaxWidth()
             .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { showIconPicker = true }
-            )
-            .border(borderWidth, borderColor, borderShape)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.category_icon),
-                fontSize = ui.fonts.generalTextSize,
-                style = ui.typographies.generalTextStyle,
-                modifier = Modifier.weight(1f)
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(ui.components.generalIconSize),
-                contentAlignment = Alignment.Center
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
             ) {
+                showIconPicker = true
+            }
+    ) {
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = {
+                Text(
+                    text = stringResource(R.string.category_icon),
+                    fontSize = ui.fonts.generalTextSize,
+                    style = ui.typographies.generalTextStyle
+                )
+            },
+            trailingIcon = {
                 selectedIcon?.let {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .size(ui.components.generalIconSize),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
-            }
-        }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ui.components.generalFieldHeight),
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+            colors = TextFieldDefaults.colors(
+                disabledContainerColor = MaterialTheme.colorScheme.background,
+                disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                disabledLabelColor = MaterialTheme.colorScheme.onBackground
+            )
+        )
     }
 
     if (showIconPicker) {
         IconPickerDialog(
             onIconSelected = {
                 onIconSelected(it)
-                showIconPicker = false
+                closeIconPicker()
             },
             onIconSelectedString = {
                 onIconSelectedString(it)
-                showIconPicker = false
+                closeIconPicker()
             },
-            onDismiss = { showIconPicker = false }
+            onDismiss = {
+                closeIconPicker()
+            }
         )
     }
 }
