@@ -157,8 +157,9 @@
     <string name="may">May</string>
     <string name="june">June</string>
     <string name="july">July</string>
+    <string name="august">August</string>
     <string name="september">September</string>
-    <string name="October">October</string>
-    <string name="November">November</string>
-    <string name="December">December</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
 </resources>

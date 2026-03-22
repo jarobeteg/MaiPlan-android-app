@@ -91,7 +91,15 @@ open class BaseActivity : ComponentActivity() {
                         gridPadding = 8.dp,
                         topBarIconPadding = 8.dp,
                         dropdownPadding = 4.dp,
-                        generalTouchTarget = 36.dp
+                        verticalWeekdayPadding = 4.dp,
+                        generalTouchTarget = 32.dp,
+                        eventDotSize = 4.dp,
+                        spacedByExtraSmall = 2.dp,
+                        singleDotArea = 8.dp,
+                        doubleDotArea = 24.dp,
+                        generalWeight = 1f,
+                        calendarSectionWeight = 0.8f,
+                        eventSectionWeight = 1.2f
                     ),
 
                     typographies = AppTypographies(
@@ -151,7 +159,15 @@ open class BaseActivity : ComponentActivity() {
                         gridPadding = 10.dp,
                         topBarIconPadding = 12.dp,
                         dropdownPadding = 6.dp,
-                        generalTouchTarget = 40.dp
+                        verticalWeekdayPadding = 4.dp,
+                        generalTouchTarget = 40.dp,
+                        eventDotSize = 6.dp,
+                        spacedByExtraSmall = 2.dp,
+                        singleDotArea = 8.dp,
+                        doubleDotArea = 24.dp,
+                        generalWeight = 1f,
+                        calendarSectionWeight = 0.8f,
+                        eventSectionWeight = 1.2f
                     ),
 
                     typographies = AppTypographies(
@@ -211,7 +227,15 @@ open class BaseActivity : ComponentActivity() {
                         gridPadding = 12.dp,
                         topBarIconPadding = 16.dp,
                         dropdownPadding = 8.dp,
-                        generalTouchTarget = 48.dp
+                        verticalWeekdayPadding = 4.dp,
+                        generalTouchTarget = 48.dp,
+                        eventDotSize = 8.dp,
+                        spacedByExtraSmall = 2.dp,
+                        singleDotArea = 8.dp,
+                        doubleDotArea = 24.dp,
+                        generalWeight = 1f,
+                        calendarSectionWeight = 0.8f,
+                        eventSectionWeight = 1.2f
                     ),
 
                     typographies = AppTypographies(

@@ -1,16 +1,34 @@
 package com.example.maiplan.home.event.screens
 
+import android.R.attr.maxHeight
+import android.content.res.Configuration
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -18,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,12 +46,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.DatePickerDialogComponent
+import com.example.maiplan.components.getMonthText
+import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalUiScale
@@ -47,6 +73,8 @@ fun EventScreen(
     onCreateEventClick: () -> Unit,
     onUpdateEventClick: (Int) -> Unit
 ) {
+    val ui = LocalUiScale.current
+
     var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(LocalDate.now())
     }
@@ -59,16 +87,78 @@ fun EventScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     val closeDatePicker = { showDatePicker = false }
 
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Scaffold(
         topBar = {
             EventTopBar(
-                title = stringResource(R.string.march),
+                title = getMonthText(selectedDate.month.value),
                 onDatePickerClick = { showDatePicker = true },
                 onCreateEventClick = onCreateEventClick
             )},
         bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding)) {}
+        if (isLandscape) {
+            Row(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+                MonthCalendarSection(
+                    selectedDate = selectedDate,
+                    eventsByDate = eventsByDate,
+                    onDateSelected = { selectedDate = it },
+                    modifier = Modifier
+                        .weight(ui.dimensions.calendarSectionWeight)
+                        .wrapContentSize()
+                )
+
+                VerticalDivider(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .width(ui.dimensions.generalDividerThickness)
+                )
+
+
+                DayEventsSection(
+                    events = eventsByDate[selectedDate] ?: emptyList(),
+                    onUpdateEventClick = onUpdateEventClick,
+                    modifier = Modifier
+                        .weight(ui.dimensions.eventSectionWeight)
+                        .fillMaxHeight()
+                )
+            }
+        } else {
+            Column(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .fillMaxSize()
+            ) {
+
+                MonthCalendarSection(
+                    selectedDate = selectedDate,
+                    eventsByDate = eventsByDate,
+                    onDateSelected = { selectedDate = it },
+                    modifier = Modifier
+                        .weight(ui.dimensions.calendarSectionWeight)
+                        .wrapContentSize()
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(ui.dimensions.generalDividerThickness)
+                )
+
+                DayEventsSection(
+                    events = eventsByDate[selectedDate] ?: emptyList(),
+                    onUpdateEventClick = onUpdateEventClick,
+                    modifier = Modifier
+                        .weight(ui.dimensions.eventSectionWeight)
+                )
+            }
+        }
     }
 
     if (showDatePicker) {
@@ -81,6 +171,221 @@ fun EventScreen(
                 closeDatePicker()
             }
         )
+    }
+}
+
+@Composable
+fun MonthCalendarSection(
+    selectedDate: LocalDate,
+    eventsByDate: Map<LocalDate, List<CalendarEventUI>>,
+    onDateSelected: (LocalDate) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val ui = LocalUiScale.current
+
+    val firstDayOfMonth = selectedDate.withDayOfMonth(1)
+    val daysInMonth = selectedDate.lengthOfMonth()
+    val startOffset = firstDayOfMonth.dayOfWeek.value - 1
+
+    val monthDays =
+        List(startOffset) { null } +
+                (1..daysInMonth).map { firstDayOfMonth.withDayOfMonth(it) }
+
+    val remainder = monthDays.size % 7
+    val paddedDays =
+        if (remainder == 0) monthDays
+        else monthDays + List(7 - remainder) { null }
+
+    val weeks = paddedDays.chunked(7)
+
+    val weekdays = listOf(
+        stringResource(R.string.mon),
+        stringResource(R.string.tue),
+        stringResource(R.string.wed),
+        stringResource(R.string.thu),
+        stringResource(R.string.fri),
+        stringResource(R.string.sat),
+        stringResource(R.string.sun)
+    )
+
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val availableHeightPerRow = maxHeight / weeks.size
+        val circlePlusSpacerHeight = ui.dimensions.generalTouchTarget + ui.dimensions.smallSpacer
+        val spaceForDots = availableHeightPerRow - circlePlusSpacerHeight
+        val maxDotRows = when {
+            spaceForDots >= ui.dimensions.doubleDotArea -> 2
+            spaceForDots >= ui.dimensions.singleDotArea -> 1
+            else -> 0
+        }
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                weekdays.forEach { day ->
+                    Box(
+                        modifier = Modifier
+                            .weight(ui.dimensions.generalWeight)
+                            .padding(vertical = ui.dimensions.verticalWeekdayPadding),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day,
+                            fontSize = ui.fonts.generalTextSize,
+                            style = ui.typographies.generalTextStyle,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+                }
+            }
+
+            weeks.forEach { week ->
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(ui.dimensions.generalWeight)
+                ) {
+                    week.forEach { date ->
+                        Box(
+                            modifier = Modifier
+                                .weight(ui.dimensions.generalWeight)
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (date != null) {
+                                val isSelected = date == selectedDate
+                                val isToday = date == LocalDate.now()
+                                val events = eventsByDate[date] ?: emptyList()
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(ui.dimensions.generalTouchTarget)
+                                            .clip(CircleShape)
+                                            .clickable { onDateSelected(date) }
+                                            .background(
+                                                when {
+                                                    isSelected -> MaterialTheme.colorScheme.primary
+                                                    isToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                                    else -> Color.Transparent
+                                                }
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = date.dayOfMonth.toString(),
+                                            fontSize = ui.fonts.generalTextSize,
+                                            color = when {
+                                                isSelected -> MaterialTheme.colorScheme.onPrimary
+                                                else -> MaterialTheme.colorScheme.onBackground
+                                            }
+                                        )
+                                    }
+
+                                    val dotAreaHeight = when (maxDotRows) {
+                                        2 -> ui.dimensions.smallSpacer + ui.dimensions.doubleDotArea
+                                        1 -> ui.dimensions.smallSpacer + ui.dimensions.singleDotArea
+                                        else -> 0.dp
+                                    }
+
+                                    if (maxDotRows > 0) {
+                                        Box(
+                                            modifier = Modifier
+                                                .height(dotAreaHeight)
+                                                .fillMaxWidth(),
+                                            contentAlignment = Alignment.TopCenter
+                                        ) {
+                                            if (events.isNotEmpty()) {
+                                                val dotRows = events
+                                                    .take(maxDotRows * 4)
+                                                    .chunked(4)
+                                                Column(
+                                                    modifier = Modifier.padding(top = ui.dimensions.smallSpacer),
+                                                    verticalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByExtraSmall),
+                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                ) {
+                                                    dotRows.forEach { rowEvents ->
+                                                        Row(
+                                                            horizontalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByExtraSmall),
+                                                            verticalAlignment = Alignment.CenterVertically
+                                                        ) {
+                                                            rowEvents.forEach { event ->
+                                                                Box(
+                                                                    modifier = Modifier
+                                                                        .size(ui.dimensions.eventDotSize)
+                                                                        .background(
+                                                                            color = event.color,
+                                                                            shape = CircleShape
+                                                                        )
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DayEventsSection(
+    events: List<CalendarEventUI>,
+    onUpdateEventClick: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+        items(events) { event ->
+
+            EventCard(
+                event = event,
+                onClick = { onUpdateEventClick(event.eventId) }
+            )
+        }
+    }
+}
+
+@Composable
+fun EventCard(
+    event: CalendarEventUI,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+
+            Text(
+                text = event.title,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = event.description,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 

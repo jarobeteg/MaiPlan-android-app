@@ -26,7 +26,15 @@ data class AppDimensions(
     val gridPadding: Dp,
     val topBarIconPadding: Dp,
     val dropdownPadding: Dp,
-    val generalTouchTarget: Dp
+    val verticalWeekdayPadding: Dp,
+    val generalTouchTarget: Dp,
+    val eventDotSize: Dp,
+    val spacedByExtraSmall: Dp,
+    val singleDotArea: Dp,
+    val doubleDotArea: Dp,
+    val generalWeight: Float,
+    val calendarSectionWeight: Float,
+    val eventSectionWeight: Float
 )
 
 @Stable
@@ -94,7 +102,15 @@ val DefaultUiScale = UiScale(
         gridPadding = 8.dp,
         topBarIconPadding = 8.dp,
         dropdownPadding = 4.dp,
-        generalTouchTarget = 36.dp
+        verticalWeekdayPadding = 4.dp,
+        generalTouchTarget = 36.dp,
+        eventDotSize = 4.dp,
+        spacedByExtraSmall = 2.dp,
+        singleDotArea = 8.dp,
+        doubleDotArea = 24.dp,
+        generalWeight = 1f,
+        calendarSectionWeight = 0.8f,
+        eventSectionWeight = 1.2f
     ),
 
     typographies = AppTypographies(
