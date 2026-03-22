@@ -1,6 +1,5 @@
 package com.example.maiplan.home.event.screens
 
-import android.R.attr.maxHeight
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,9 +7,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +25,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -33,10 +35,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -344,18 +349,43 @@ fun DayEventsSection(
     onUpdateEventClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val ui = LocalUiScale.current
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(ui.dimensions.mediumPaddingValue),
+        verticalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByMedium)
     ) {
 
-        items(events) { event ->
+        items(
+            items = events,
+            key = { it.eventId }
+        ) { event ->
 
-            EventCard(
-                event = event,
-                onClick = { onUpdateEventClick(event.eventId) }
+            val dismissState = rememberSwipeToDismissBoxState(
+                confirmValueChange = { value ->
+                    if (value == SwipeToDismissBoxValue.EndToStart) {
+                        onUpdateEventClick(event.eventId)
+                        true
+                    } else {
+                        false
+                    }
+                }
             )
+
+            SwipeToDismissBox(
+                state = dismissState,
+                enableDismissFromStartToEnd = false,
+                enableDismissFromEndToStart = true,
+                backgroundContent = {
+                    DeleteBackground()
+                }
+            ) {
+                EventCard(
+                    event = event,
+                    onClick = { onUpdateEventClick(event.eventId) }
+                )
+            }
         }
     }
 }
@@ -365,27 +395,103 @@ fun EventCard(
     event: CalendarEventUI,
     onClick: () -> Unit
 ) {
+    val ui = LocalUiScale.current
+
     Card(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        shape = MaterialTheme.shapes.small,
+        elevation = CardDefaults.cardElevation(defaultElevation = ui.components.smallCardElevation)
     ) {
-
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Box(
+            modifier = Modifier
+            .fillMaxWidth()
         ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(ui.components.colorStripSize)
+                        .fillMaxHeight()
+                        .background(event.color)
+                )
 
-            Text(
-                text = event.title,
-                style = MaterialTheme.typography.titleMedium
-            )
+                AdjustableSpacer(ui.dimensions.mediumSpacer)
 
-            Spacer(Modifier.height(4.dp))
+                Column(
+                    modifier = Modifier
+                        .weight(ui.dimensions.generalWeight)
+                        .padding(ui.dimensions.smallPaddingValue)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = event.title,
+                            style = ui.typographies.eventCardTitleStyle,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.weight(ui.dimensions.generalWeight)
+                        )
 
-            Text(
-                text = event.description,
-                style = MaterialTheme.typography.bodyMedium
-            )
+                        AdjustableSpacer(ui.dimensions.mediumSpacer)
+
+                        Text(
+                            text = "${event.startTime} - ${event.endTime}",
+                            style = ui.typographies.eventCardTimeStyle,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = event.description,
+                            style = ui.typographies.eventCardDescriptionStyle,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.weight(ui.dimensions.generalWeight)
+                        )
+
+                        AdjustableSpacer(ui.dimensions.mediumSpacer)
+
+                        Icon(
+                            imageVector = event.icon,
+                            contentDescription = null,
+                            tint = event.color,
+                            modifier = Modifier.size(ui.components.cardIconSize)
+                        )
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+fun DeleteBackground() {
+    val ui = LocalUiScale.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(MaterialTheme.shapes.small)
+            .background(Color(0xFFFF1744))
+            .padding(horizontal = ui.dimensions.mediumPaddingValue),
+        contentAlignment = Alignment.CenterEnd
+    ) {
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.size(ui.components.cardIconSize)
+        )
     }
 }
 

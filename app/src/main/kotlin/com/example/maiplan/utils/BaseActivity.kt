@@ -83,6 +83,8 @@ open class BaseActivity : ComponentActivity() {
                         smallSpacer = 4.dp,
                         mediumSpacer = 8.dp,
                         largeSpacer = 12.dp,
+                        smallPaddingValue = 8.dp,
+                        mediumPaddingValue = 12.dp,
                         generalSpacer = 12.dp,
                         generalDividerThickness = 1.dp,
                         generalBorder = 1.dp,
@@ -95,6 +97,7 @@ open class BaseActivity : ComponentActivity() {
                         generalTouchTarget = 32.dp,
                         eventDotSize = 4.dp,
                         spacedByExtraSmall = 2.dp,
+                        spacedByMedium = 8.dp,
                         singleDotArea = 8.dp,
                         doubleDotArea = 24.dp,
                         generalWeight = 1f,
@@ -107,7 +110,10 @@ open class BaseActivity : ComponentActivity() {
                         generalTextStyle = Typography().labelSmall,
                         dropdownTextStyle = Typography().headlineMedium,
                         cardTitleStyle = Typography().titleSmall,
-                        cardBodyStyle = Typography().bodySmall
+                        cardBodyStyle = Typography().bodySmall,
+                        eventCardTitleStyle = Typography().titleMedium,
+                        eventCardDescriptionStyle = Typography().bodyMedium,
+                        eventCardTimeStyle = Typography().bodySmall
                     ),
 
                     fonts = AppFonts (
@@ -138,7 +144,9 @@ open class BaseActivity : ComponentActivity() {
                         dropdownHeight = 40.dp,
                         dropdownItemHeight = 48.dp,
                         iconCardHeight = 128.dp,
-                        cardIconSize = 32.dp
+                        cardIconSize = 32.dp,
+                        colorStripSize = 8.dp,
+                        smallCardElevation = 4.dp
                     )
                 )
             }
@@ -151,6 +159,8 @@ open class BaseActivity : ComponentActivity() {
                         smallSpacer = 4.dp,
                         mediumSpacer = 8.dp,
                         largeSpacer = 12.dp,
+                        smallPaddingValue = 8.dp,
+                        mediumPaddingValue = 12.dp,
                         generalSpacer = 15.dp,
                         generalDividerThickness = 2.dp,
                         generalBorder = 2.dp,
@@ -163,6 +173,7 @@ open class BaseActivity : ComponentActivity() {
                         generalTouchTarget = 40.dp,
                         eventDotSize = 6.dp,
                         spacedByExtraSmall = 2.dp,
+                        spacedByMedium = 8.dp,
                         singleDotArea = 8.dp,
                         doubleDotArea = 24.dp,
                         generalWeight = 1f,
@@ -175,7 +186,10 @@ open class BaseActivity : ComponentActivity() {
                         generalTextStyle = Typography().labelMedium,
                         dropdownTextStyle = Typography().headlineMedium,
                         cardTitleStyle = Typography().titleMedium,
-                        cardBodyStyle = Typography().bodyMedium
+                        cardBodyStyle = Typography().bodyMedium,
+                        eventCardTitleStyle = Typography().titleLarge,
+                        eventCardDescriptionStyle = Typography().bodyMedium,
+                        eventCardTimeStyle = Typography().bodyMedium
                     ),
 
                     fonts = AppFonts (
@@ -206,7 +220,9 @@ open class BaseActivity : ComponentActivity() {
                         dropdownHeight = 45.dp,
                         dropdownItemHeight = 56.dp,
                         iconCardHeight = 134.dp,
-                        cardIconSize = 40.dp
+                        cardIconSize = 40.dp,
+                        colorStripSize = 8.dp,
+                        smallCardElevation = 4.dp
                     )
                 )
             }
@@ -219,6 +235,8 @@ open class BaseActivity : ComponentActivity() {
                         smallSpacer = 4.dp,
                         mediumSpacer = 8.dp,
                         largeSpacer = 12.dp,
+                        smallPaddingValue = 8.dp,
+                        mediumPaddingValue = 12.dp,
                         generalSpacer = 18.dp,
                         generalDividerThickness = 3.dp,
                         generalBorder = 2.dp,
@@ -231,6 +249,7 @@ open class BaseActivity : ComponentActivity() {
                         generalTouchTarget = 48.dp,
                         eventDotSize = 8.dp,
                         spacedByExtraSmall = 2.dp,
+                        spacedByMedium = 8.dp,
                         singleDotArea = 8.dp,
                         doubleDotArea = 24.dp,
                         generalWeight = 1f,
@@ -243,7 +262,10 @@ open class BaseActivity : ComponentActivity() {
                         generalTextStyle = Typography().labelLarge,
                         dropdownTextStyle = Typography().headlineSmall,
                         cardTitleStyle = Typography().titleLarge,
-                        cardBodyStyle = Typography().bodyLarge
+                        cardBodyStyle = Typography().bodyLarge,
+                        eventCardTitleStyle = Typography().headlineMedium,
+                        eventCardDescriptionStyle = Typography().bodyLarge,
+                        eventCardTimeStyle = Typography().bodyMedium
                     ),
 
                     fonts = AppFonts (
@@ -274,7 +296,9 @@ open class BaseActivity : ComponentActivity() {
                         dropdownHeight = 50.dp,
                         dropdownItemHeight = 64.dp,
                         iconCardHeight = 160.dp,
-                        cardIconSize = 48.dp
+                        cardIconSize = 48.dp,
+                        colorStripSize = 8.dp,
+                        smallCardElevation = 4.dp
                     )
                 )
             }

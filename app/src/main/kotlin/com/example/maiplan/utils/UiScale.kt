@@ -18,6 +18,8 @@ data class AppDimensions(
     val smallSpacer: Dp,
     val mediumSpacer: Dp,
     val largeSpacer: Dp,
+    val smallPaddingValue: Dp,
+    val mediumPaddingValue: Dp,
     val generalSpacer: Dp,
     val generalDividerThickness: Dp,
     val generalBorder: Dp,
@@ -30,6 +32,7 @@ data class AppDimensions(
     val generalTouchTarget: Dp,
     val eventDotSize: Dp,
     val spacedByExtraSmall: Dp,
+    val spacedByMedium: Dp,
     val singleDotArea: Dp,
     val doubleDotArea: Dp,
     val generalWeight: Float,
@@ -43,7 +46,10 @@ data class AppTypographies(
     val generalTextStyle: TextStyle,
     val dropdownTextStyle: TextStyle,
     val cardTitleStyle: TextStyle,
-    val cardBodyStyle: TextStyle
+    val cardBodyStyle: TextStyle,
+    val eventCardTitleStyle: TextStyle,
+    val eventCardDescriptionStyle: TextStyle,
+    val eventCardTimeStyle: TextStyle
 )
 
 @Stable
@@ -76,7 +82,9 @@ data class AppComponents(
     val dropdownHeight: Dp,
     val dropdownItemHeight: Dp,
     val iconCardHeight: Dp,
-    val cardIconSize: Dp
+    val cardIconSize: Dp,
+    val colorStripSize: Dp,
+    val smallCardElevation: Dp
 )
 
 @Stable
@@ -94,6 +102,8 @@ val DefaultUiScale = UiScale(
         smallSpacer = 4.dp,
         mediumSpacer = 8.dp,
         largeSpacer = 12.dp,
+        smallPaddingValue = 8.dp,
+        mediumPaddingValue = 12.dp,
         generalSpacer = 12.dp,
         generalDividerThickness = 1.dp,
         generalBorder = 1.dp,
@@ -106,6 +116,7 @@ val DefaultUiScale = UiScale(
         generalTouchTarget = 36.dp,
         eventDotSize = 4.dp,
         spacedByExtraSmall = 2.dp,
+        spacedByMedium = 8.dp,
         singleDotArea = 8.dp,
         doubleDotArea = 24.dp,
         generalWeight = 1f,
@@ -118,7 +129,10 @@ val DefaultUiScale = UiScale(
         generalTextStyle = Typography().labelSmall,
         dropdownTextStyle = Typography().headlineMedium,
         cardTitleStyle = Typography().titleSmall,
-        cardBodyStyle = Typography().bodySmall
+        cardBodyStyle = Typography().bodySmall,
+        eventCardTitleStyle = Typography().titleMedium,
+        eventCardDescriptionStyle = Typography().bodyMedium,
+        eventCardTimeStyle = Typography().bodySmall
     ),
 
     fonts = AppFonts (
@@ -149,7 +163,9 @@ val DefaultUiScale = UiScale(
         dropdownHeight = 40.dp,
         dropdownItemHeight = 48.dp,
         iconCardHeight = 128.dp,
-        cardIconSize = 32.dp
+        cardIconSize = 32.dp,
+        colorStripSize = 8.dp,
+        smallCardElevation = 4.dp
     )
 )
 
