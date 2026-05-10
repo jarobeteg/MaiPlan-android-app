@@ -66,7 +66,6 @@ fun UpdateEventScreen(
     categoryViewModel: CategoryViewModel,
     reminderViewModel: ReminderViewModel,
     onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
-    onDeleteClick: (Int?, Int) -> Unit,
     onBackClick: () -> Unit
 ) {
     val event by eventViewModel
@@ -221,21 +220,6 @@ fun UpdateEventScreen(
                     }
                 }
             })
-
-            SubmitButtonComponent(
-                value = stringResource(R.string.delete),
-                color = MaterialTheme.colorScheme.onError,
-                onButtonClicked = {
-                    val eventId: Int = safeEvent.eventId
-                    val reminderId: Int? = if (safeEvent.reminderId == 0) null else safeEvent.reminderId
-                    onDeleteClick(reminderId, eventId)
-
-                    if (reminderId != null) {
-                        val reminderManager = ReminderManager()
-                        reminderManager.cancelReminder(context, reminderId)
-                    }
-                }
-            )
 
             errorMessage?.let {
                 Box(

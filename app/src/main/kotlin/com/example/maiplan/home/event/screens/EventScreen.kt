@@ -26,6 +26,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -52,6 +53,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +69,7 @@ import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.ReminderManager
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
 
@@ -76,7 +79,8 @@ fun EventScreen(
     rootNavController: NavHostController,
     localNavController: NavHostController, // use this to navigate from view to update or view details screen
     onCreateEventClick: () -> Unit,
-    onUpdateEventClick: (Int) -> Unit
+    onUpdateEventClick: (Int) -> Unit,
+    onDeleteClick: (Int?, Int, LocalDate) -> Unit
 ) {
     val ui = LocalUiScale.current
 
@@ -129,6 +133,8 @@ fun EventScreen(
                 DayEventsSection(
                     events = eventsByDate[selectedDate] ?: emptyList(),
                     onUpdateEventClick = onUpdateEventClick,
+                    onDeleteClick = onDeleteClick,
+                    selectedDate = selectedDate,
                     modifier = Modifier
                         .weight(ui.dimensions.eventSectionWeight)
                         .fillMaxHeight()
@@ -159,6 +165,8 @@ fun EventScreen(
                 DayEventsSection(
                     events = eventsByDate[selectedDate] ?: emptyList(),
                     onUpdateEventClick = onUpdateEventClick,
+                    onDeleteClick = onDeleteClick,
+                    selectedDate = selectedDate,
                     modifier = Modifier
                         .weight(ui.dimensions.eventSectionWeight)
                 )
@@ -347,12 +355,15 @@ fun MonthCalendarSection(
 fun DayEventsSection(
     events: List<CalendarEventUI>,
     onUpdateEventClick: (Int) -> Unit,
+    onDeleteClick: (Int?, Int, LocalDate) -> Unit,
+    selectedDate: LocalDate,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     val ui = LocalUiScale.current
 
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().clipToBounds(),
         contentPadding = PaddingValues(ui.dimensions.mediumPaddingValue),
         verticalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByMedium)
     ) {
@@ -364,26 +375,84 @@ fun DayEventsSection(
 
             val dismissState = rememberSwipeToDismissBoxState(
                 confirmValueChange = { value ->
-                    if (value == SwipeToDismissBoxValue.EndToStart) {
-                        onUpdateEventClick(event.eventId)
-                        true
-                    } else {
-                        false
+                    when (value) {
+                        SwipeToDismissBoxValue.StartToEnd -> {
+                            onUpdateEventClick(event.eventId)
+                            false
+                        }
+
+                        SwipeToDismissBoxValue.EndToStart -> {
+                            val eventId: Int = event.eventId
+                            val reminderId: Int? = if (event.reminderId == 0) null else event.reminderId
+                            onDeleteClick(reminderId, eventId, selectedDate)
+
+                            if (reminderId != null) {
+                                val reminderManager = ReminderManager()
+                                reminderManager.cancelReminder(context, reminderId)
+                            }
+                            false
+                        }
+
+                        SwipeToDismissBoxValue.Settled -> false
                     }
                 }
             )
 
             SwipeToDismissBox(
                 state = dismissState,
-                enableDismissFromStartToEnd = false,
+                enableDismissFromStartToEnd = true,
                 enableDismissFromEndToStart = true,
                 backgroundContent = {
-                    DeleteBackground()
+                    val direction = dismissState.dismissDirection
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(MaterialTheme.shapes.small)
+                            .background(
+                                when (direction) {
+                                    SwipeToDismissBoxValue.StartToEnd ->
+                                        Color(0xFF1DE9B6)
+
+                                    SwipeToDismissBoxValue.EndToStart ->
+                                        Color(0xFFFF1744)
+
+                                    SwipeToDismissBoxValue.Settled ->
+                                        Color.Transparent
+                                }
+                            )
+                            .padding(horizontal = ui.dimensions.mediumPaddingValue),
+
+                        contentAlignment = when (direction) {
+                            SwipeToDismissBoxValue.StartToEnd ->
+                                Alignment.CenterStart
+
+                            else ->
+                                Alignment.CenterEnd
+                        }
+                    ) {
+
+                        Icon(
+                            imageVector = when (direction) {
+
+                                SwipeToDismissBoxValue.StartToEnd ->
+                                    Icons.Default.Edit
+
+                                SwipeToDismissBoxValue.EndToStart ->
+                                    Icons.Default.Delete
+
+                                SwipeToDismissBoxValue.Settled ->
+                                    Icons.Default.Edit
+                            },
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.size(ui.components.cardIconSize)
+                        )
+                    }
                 }
             ) {
                 EventCard(
-                    event = event,
-                    onClick = { onUpdateEventClick(event.eventId) }
+                    event = event
                 )
             }
         }
@@ -392,13 +461,11 @@ fun DayEventsSection(
 
 @Composable
 fun EventCard(
-    event: CalendarEventUI,
-    onClick: () -> Unit
+    event: CalendarEventUI
 ) {
     val ui = LocalUiScale.current
 
     Card(
-        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
@@ -471,27 +538,6 @@ fun EventCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun DeleteBackground() {
-    val ui = LocalUiScale.current
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(MaterialTheme.shapes.small)
-            .background(Color(0xFFFF1744))
-            .padding(horizontal = ui.dimensions.mediumPaddingValue),
-        contentAlignment = Alignment.CenterEnd
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.size(ui.components.cardIconSize)
-        )
     }
 }
 
