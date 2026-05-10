@@ -12,14 +12,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,7 +26,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -37,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
@@ -46,7 +42,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.Typography
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
@@ -67,14 +62,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.utils.common.IconData.allIcons
 import java.time.Instant
@@ -92,6 +86,7 @@ fun DatePickerDialogComponent(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val datePickerState = rememberDatePickerState()
 
     val configuration = LocalConfiguration.current
@@ -117,136 +112,90 @@ fun DatePickerDialogComponent(
         )
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+            modifier = Modifier.fillMaxSize()
         ) {
-            Surface(
-                modifier = Modifier
-                    .width(360.dp)
-                    .scale(scaleFactor),
-                shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.primary,
-                tonalElevation = 6.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    DatePicker(
-                        state = datePickerState,
-                        showModeToggle = false,
-                        colors = DatePickerDefaults.colors(
-                            containerColor = MaterialTheme.colorScheme.primary,
-                            titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                            headlineContentColor = MaterialTheme.colorScheme.onPrimary,
-                            weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            subheadContentColor = MaterialTheme.colorScheme.onPrimary,
-                            yearContentColor = MaterialTheme.colorScheme.onPrimary,
-                            selectedDayContentColor = MaterialTheme.colorScheme.primary,
-                            selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            selectedYearContentColor = MaterialTheme.colorScheme.primary,
-                            selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                            todayDateBorderColor = MaterialTheme.colorScheme.secondary,
-                            todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                            dayContentColor = MaterialTheme.colorScheme.onPrimary,
-                            dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                    )
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(end = 16.dp, bottom = 16.dp),
-                        horizontalArrangement = Arrangement.End
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
                     ) {
-                        TextButton(
-                            onClick = onDismiss,
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                        onDismiss()
+                    }
+            )
+
+            Box(
+                modifier = Modifier.align(Alignment.Center)
+            ) {
+                Surface(
+                    modifier = Modifier
+                        .width(360.dp)
+                        .scale(scaleFactor),
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    tonalElevation = 6.dp
+                ) {
+                    Column(
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        DatePicker(
+                            state = datePickerState,
+                            showModeToggle = false,
+                            colors = DatePickerDefaults.colors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                                headlineContentColor = MaterialTheme.colorScheme.onPrimary,
+                                weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                subheadContentColor = MaterialTheme.colorScheme.onPrimary,
+                                yearContentColor = MaterialTheme.colorScheme.onPrimary,
+                                selectedDayContentColor = MaterialTheme.colorScheme.primary,
+                                selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                selectedYearContentColor = MaterialTheme.colorScheme.primary,
+                                selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                todayDateBorderColor = MaterialTheme.colorScheme.secondary,
+                                todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
+                                dayContentColor = MaterialTheme.colorScheme.onPrimary,
+                                dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
+                            )
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 16.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.End
                         ) {
-                            Text("Cancel")
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        TextButton(
-                            onClick = {
-                                val selectedDateMillis = datePickerState.selectedDateMillis
-                                if (selectedDateMillis != null) {
-                                    val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
-                                        .atZone(ZoneId.systemDefault())
-                                        .toLocalDate()
-                                    onDateSelected(selectedDate)
-                                }
-                                onDismiss()
-                            },
-                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
-                        ) {
-                            Text("OK")
+                            TextButton(
+                                onClick = onDismiss,
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                            ) {
+                                Text("Cancel")
+                            }
+                            AdjustableSpacer(ui.dimensions.mediumSpacer)
+                            TextButton(
+                                onClick = {
+                                    val selectedDateMillis = datePickerState.selectedDateMillis
+                                    if (selectedDateMillis != null) {
+                                        val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
+                                            .atZone(ZoneId.systemDefault())
+                                            .toLocalDate()
+                                        onDateSelected(selectedDate)
+                                    }
+                                    onDismiss()
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
+                            ) {
+                                Text("OK")
+                            }
                         }
                     }
                 }
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun XDatePickerDialogComponent(
-    onDateSelected: (LocalDate) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val datePickerState = rememberDatePickerState()
-
-    DatePickerDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                val selectedDateMillis = datePickerState.selectedDateMillis
-                if (selectedDateMillis != null) {
-                    val selectedDate = Instant.ofEpochMilli(selectedDateMillis)
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate()
-                    onDateSelected(selectedDate)
-                }
-                onDismiss()
-            },
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
-            ) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onPrimary)
-            ) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
-        colors = DatePickerDefaults.colors(
-            containerColor = MaterialTheme.colorScheme.primary
-        )
-    ) {
-        DatePicker(
-            state = datePickerState,
-            colors = DatePickerDefaults.colors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                headlineContentColor = MaterialTheme.colorScheme.onPrimary,
-                weekdayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                subheadContentColor = MaterialTheme.colorScheme.onPrimary,
-                yearContentColor = MaterialTheme.colorScheme.onPrimary,
-                selectedDayContentColor = MaterialTheme.colorScheme.primary,
-                selectedDayContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                selectedYearContentColor = MaterialTheme.colorScheme.primary,
-                selectedYearContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                todayDateBorderColor = MaterialTheme.colorScheme.secondary,
-                todayContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                currentYearContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                dayContentColor = MaterialTheme.colorScheme.onPrimary,
-                dayInSelectionRangeContentColor = MaterialTheme.colorScheme.secondaryContainer
-            )
-        )
     }
 }
 
@@ -257,6 +206,7 @@ fun TimePickerDialogComponent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    val ui = LocalUiScale.current
     val timePickerState = rememberTimePickerState(is24Hour = true)
 
     val configuration = LocalConfiguration.current
@@ -322,7 +272,7 @@ fun TimePickerDialogComponent(
                         )
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    AdjustableSpacer(ui.dimensions.largeSpacer)
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -334,7 +284,7 @@ fun TimePickerDialogComponent(
                         ) {
                             Text("Cancel", fontSize = 16.sp)
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
+                        AdjustableSpacer(ui.dimensions.mediumSpacer)
                         TextButton(onClick = {
                             onTimeSelected(LocalTime.of(timePickerState.hour, timePickerState.minute))
                             onDismiss()
@@ -349,119 +299,57 @@ fun TimePickerDialogComponent(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun XTimePickerDialogComponent(
-    onTimeSelected: (LocalTime) -> Unit,
-    onDismiss: () -> Unit,
-) {
-    val timePickerState = rememberTimePickerState(
-        is24Hour = true
-    )
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surface,
-            tonalElevation = 8.dp,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                TimePicker(
-                    state = timePickerState,
-                    colors = TimePickerDefaults.colors(
-                        clockDialColor = MaterialTheme.colorScheme.primary,
-                        clockDialSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
-                        clockDialUnselectedContentColor = MaterialTheme.colorScheme.secondaryContainer,
-                        selectorColor = MaterialTheme.colorScheme.secondaryContainer,
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        periodSelectorBorderColor = MaterialTheme.colorScheme.secondary,
-                        periodSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        periodSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                        periodSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
-                        periodSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
-                        timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                        timeSelectorSelectedContentColor = MaterialTheme.colorScheme.onPrimary,
-                        timeSelectorUnselectedContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f),
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Row(
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TextButton(onClick = onDismiss) {
-                        Text("Cancel")
-                    }
-                    TextButton(onClick = {
-                        val hour = timePickerState.hour
-                        val minute = timePickerState.minute
-                        onTimeSelected(LocalTime.of(hour, minute))
-                    }) {
-                        Text("OK")
-                    }
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun ColorPickerRow(
     selectedColor: Color,
     onColorSelected: (Color) -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val ui = LocalUiScale.current
     var showColorPicker by remember { mutableStateOf(false) }
-
-    val borderColor = MaterialTheme.colorScheme.onBackground
-    val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
-    val borderShape = OutlinedTextFieldDefaults.shape
-
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 32.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
-    val border = if (isTablet) 2.dp else 1.dp
+    val closeColorPicker = { showColorPicker = false }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(fieldHeight)
             .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { showColorPicker = true }
-            )
-            .border(borderWidth, borderColor, borderShape)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) {
+                showColorPicker = true
+            }
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.category_color),
-                fontSize = fontSize,
-                style = style,
-                modifier = Modifier.weight(1f)
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = {
+                Text(
+                    text = stringResource(R.string.category_color),
+                    fontSize = ui.fonts.generalTextSize,
+                    style = ui.typographies.generalTextStyle
+                )
+            },
+            trailingIcon = {
+                Box(
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(ui.components.generalIconSize)
+                        .background(selectedColor, CircleShape)
+                        .border(ui.dimensions.generalBorder, Color.Gray, CircleShape)
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ui.components.generalFieldHeight),
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+            colors = TextFieldDefaults.colors(
+                disabledContainerColor = MaterialTheme.colorScheme.background,
+                disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                disabledLabelColor = MaterialTheme.colorScheme.onBackground
             )
-
-            Box(
-                modifier = Modifier
-                    .size(iconSize)
-                    .background(selectedColor, CircleShape)
-                    .border(width = border, Color.Gray, CircleShape)
-            )
-        }
+        )
     }
 
     if (showColorPicker) {
@@ -469,9 +357,11 @@ fun ColorPickerRow(
             initialColor = selectedColor,
             onColorSelected = {
                 onColorSelected(it)
-                showColorPicker = false
+                closeColorPicker()
             },
-            onDismiss = { showColorPicker = false }
+            onDismiss = {
+                closeColorPicker()
+            }
         )
     }
 }
@@ -484,11 +374,7 @@ fun CustomSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     trackBrush: Brush
 ) {
-    val isTablet = isTablet()
-
-    val sliderHeight = if (isTablet) 72.dp else 64.dp
-    val thumbSize = if (isTablet) 30.dp else 24.dp
-    val trackHeight = if (isTablet) 18.dp else 12.dp
+    val ui = LocalUiScale.current
 
     Slider(
         value = value,
@@ -501,11 +387,11 @@ fun CustomSlider(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(sliderHeight),
+            .height(ui.components.sliderHeight),
         thumb = {
             Box(
                 modifier = Modifier
-                    .size(thumbSize)
+                    .size(ui.components.thumbSize)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
             )
         },
@@ -513,7 +399,7 @@ fun CustomSlider(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(trackHeight)
+                    .height(ui.components.trackHeight)
                     .background(trackBrush, MaterialTheme.shapes.extraSmall)
             )
         }
@@ -526,12 +412,7 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val isTablet = isTablet()
-
-    val previewSize = if (isTablet) 150.dp else 100.dp
-    val dialogPadding = if (isTablet) 32.dp else 16.dp
-    val textSize = if (isTablet) 24.sp else 16.sp
-    val dialogWidth = if (isTablet) 800.dp else Dp.Unspecified
+    val ui = LocalUiScale.current
 
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
@@ -550,23 +431,23 @@ fun ColorPickerDialog(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier
-                .padding(dialogPadding)
-                .then(if (isTablet) Modifier.width(dialogWidth) else Modifier)
+                .padding(ui.dimensions.dialogPadding)
+                .then(Modifier.width(ui.components.dialogWidth))
         ) {
             Column(
-                modifier = Modifier.padding(dialogPadding),
+                modifier = Modifier.padding(ui.dimensions.dialogPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .size(previewSize)
+                        .size(ui.components.previewSize)
                         .background(color, CircleShape)
                         .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 )
 
-                Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
+                AdjustableSpacer(ui.dimensions.generalSpacer)
 
-                Text(stringResource(R.string.hue), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.hue), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = hue,
                     onValueChange = { hue = it },
@@ -576,7 +457,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.saturation), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.saturation), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = saturation,
                     onValueChange = { saturation = it },
@@ -586,7 +467,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.brightness), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.brightness), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = value,
                     onValueChange = { value = it },
@@ -596,12 +477,12 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Spacer(modifier = Modifier.height(if (isTablet) 24.dp else 16.dp))
+                AdjustableSpacer(ui.dimensions.generalSpacer)
 
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground) }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground) }
                     TextButton(onClick = { onColorSelected(color); onDismiss() }) { Text(
-                        stringResource(R.string.select), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground) }
+                        stringResource(R.string.select), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground) }
                 }
             }
         }
@@ -614,71 +495,70 @@ fun IconPickerRow(
     onIconSelected: (ImageVector) -> Unit,
     onIconSelectedString: (String) -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
+    val ui = LocalUiScale.current
     var showIconPicker by remember { mutableStateOf(false) }
-
-    val borderColor = MaterialTheme.colorScheme.onBackground
-    val borderWidth = OutlinedTextFieldDefaults.UnfocusedBorderThickness
-    val borderShape = OutlinedTextFieldDefaults.shape
-
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
+    val closeIconPicker = { showIconPicker = false }
 
     Box(
         modifier = Modifier
-            .fillMaxWidth().height(fieldHeight)
+            .fillMaxWidth()
             .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { showIconPicker = true }
-            )
-            .border(borderWidth, borderColor, borderShape)
-            .padding(horizontal = 16.dp, vertical = 12.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.category_icon),
-                fontSize = fontSize,
-                style = style,
-                modifier = Modifier.weight(1f)
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(iconSize),
-                contentAlignment = Alignment.Center
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
             ) {
+                showIconPicker = true
+            }
+    ) {
+        OutlinedTextField(
+            value = "",
+            onValueChange = {},
+            readOnly = true,
+            enabled = false,
+            label = {
+                Text(
+                    text = stringResource(R.string.category_icon),
+                    fontSize = ui.fonts.generalTextSize,
+                    style = ui.typographies.generalTextStyle
+                )
+            },
+            trailingIcon = {
                 selectedIcon?.let {
                     Icon(
                         imageVector = it,
                         contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .size(ui.components.generalIconSize),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
-            }
-        }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(ui.components.generalFieldHeight),
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+            colors = TextFieldDefaults.colors(
+                disabledContainerColor = MaterialTheme.colorScheme.background,
+                disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
+                disabledTextColor = MaterialTheme.colorScheme.onBackground,
+                disabledLabelColor = MaterialTheme.colorScheme.onBackground
+            )
+        )
     }
 
     if (showIconPicker) {
         IconPickerDialog(
             onIconSelected = {
                 onIconSelected(it)
-                showIconPicker = false
+                closeIconPicker()
             },
             onIconSelectedString = {
                 onIconSelectedString(it)
-                showIconPicker = false
+                closeIconPicker()
             },
-            onDismiss = { showIconPicker = false }
+            onDismiss = {
+                closeIconPicker()
+            }
         )
     }
 }
@@ -689,36 +569,28 @@ fun IconPickerDialog(
     onIconSelectedString: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val scrollState = rememberLazyGridState()
-
-    val isTablet = isTablet()
-
-    val dialogWidth = if (isTablet) 800.dp else Dp.Unspecified
-    val gridHeight = if (isTablet) 600.dp else 300.dp
-    val iconSize = if (isTablet) 64.dp else 48.dp
-    val padding = if (isTablet) 24.dp else 16.dp
-    val indicatorHeight = if (isTablet) 32.dp else 24.dp
-    val textSize = if (isTablet) 24.sp else 16.sp
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier
-                .padding(padding)
-                .then(if (isTablet) Modifier.width(dialogWidth) else Modifier)
+                .padding(ui.dimensions.iconPickerDialogPadding)
+                .then(Modifier.width(ui.components.dialogWidth))
         ) {
             Column(
-                modifier = Modifier.padding(padding),
+                modifier = Modifier.padding(ui.dimensions.iconPickerDialogPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Box(
                     modifier = Modifier
-                        .height(gridHeight)
+                        .height(ui.components.gridHeight)
                         .fillMaxWidth()
                 ) {
                     LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = iconSize),
+                        columns = GridCells.Adaptive(minSize = ui.components.iconPickerIconSize),
                         contentPadding = PaddingValues(12.dp),
                         state = scrollState,
                         modifier = Modifier.fillMaxSize()
@@ -726,8 +598,8 @@ fun IconPickerDialog(
                         items(allIcons.entries.toList()) { (key, icon) ->
                             Box(
                                 modifier = Modifier
-                                    .size(iconSize)
-                                    .padding(if (isTablet) 12.dp else 8.dp)
+                                    .size(ui.components.iconPickerIconSize)
+                                    .padding(ui.dimensions.gridPadding)
                                     .clickable {
                                         onIconSelected(icon)
                                         onIconSelectedString(key)
@@ -754,7 +626,7 @@ fun IconPickerDialog(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .height(indicatorHeight)
+                                .height(ui.components.generalIconSize)
                                 .background(
                                     Brush.verticalGradient(
                                         colors = listOf(
@@ -768,7 +640,7 @@ fun IconPickerDialog(
                 }
 
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.cancel), fontSize = textSize, color = MaterialTheme.colorScheme.onBackground)
+                    Text(stringResource(R.string.cancel), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
@@ -845,19 +717,13 @@ fun CategoryDropdownComponent(
     selectedCategory: CategoryEntity?,
     onCategorySelected: (CategoryEntity) -> Unit
 ) {
+    val ui = LocalUiScale.current
     var expanded by remember { mutableStateOf(false) }
-
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 18.sp
-    val style = if (isTablet) MaterialTheme.typography.labelLarge else MaterialTheme.typography.labelSmall
-    val iconSize = if (isTablet) 32.dp else 24.dp
-    val fieldHeight = if (isTablet) 72.dp else 64.dp
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.height(fieldHeight)
+        modifier = Modifier.height(ui.components.generalFieldHeight)
     ) {
         OutlinedTextField(
             value = selectedCategory?.name ?: "",
@@ -865,11 +731,11 @@ fun CategoryDropdownComponent(
             readOnly = true,
             label = { Text(
                 text = "Category",
-                fontSize = fontSize,
-                style = style
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.generalTextStyle
             ) },
-            textStyle = TextStyle(fontSize = fontSize),
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, modifier = Modifier.size(iconSize)) },
+            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, modifier = Modifier.size(ui.components.generalIconSize)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -896,17 +762,17 @@ fun CategoryDropdownComponent(
                     text = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.height(fieldHeight)
+                            modifier = Modifier.height(ui.components.generalFieldHeight)
                         ) {
                             Icon(
                                 imageVector = IconData.getIconByKey(category.icon),
                                 contentDescription = null,
-                                modifier = Modifier.size(iconSize).padding(end = 8.dp)
+                                modifier = Modifier.size(ui.components.generalIconSize).padding(end = 8.dp)
                             )
                             Text(
                                 text = category.name,
-                                fontSize = fontSize,
-                                style = style,
+                                fontSize = ui.fonts.generalTextSize,
+                                style = ui.typographies.generalTextStyle,
                                 color = MaterialTheme.colorScheme.onBackground)
                         }
                     },

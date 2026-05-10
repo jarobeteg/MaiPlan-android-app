@@ -47,15 +47,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
-import com.example.maiplan.components.isTablet
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.utils.BaseActivity
+import com.example.maiplan.utils.LocalUiScale
 
 @Composable
 fun MoreScreen(
@@ -89,10 +89,7 @@ fun MoreScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreTopBar() {
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 32.sp else 24.sp
-    val barHeight = if (isTablet) 112.dp else 112.dp
+    val ui = LocalUiScale.current
 
     CenterAlignedTopAppBar(
         title = {
@@ -103,7 +100,7 @@ fun MoreTopBar() {
                 Text(
                     text = stringResource(R.string.more),
                     style = MaterialTheme.typography.titleLarge,
-                    fontSize = fontSize,
+                    fontSize = ui.fonts.generalTopBarTitleSize,
                     color = MaterialTheme.colorScheme.onPrimary,
                     textAlign = TextAlign.Center
                 )
@@ -112,7 +109,7 @@ fun MoreTopBar() {
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(barHeight)
+        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
@@ -123,12 +120,8 @@ fun MoreScreenButton(
     leadingIcon: ImageVector,
     showDivider: Boolean
 ) {
+    val ui = LocalUiScale.current
     val interactionSource = remember { MutableInteractionSource() }
-
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val iconSize = if (isTablet) 32.dp else 24.dp
 
     Column {
         Row(
@@ -147,15 +140,15 @@ fun MoreScreenButton(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             )
 
-            Spacer(modifier = Modifier.width(4.dp))
+            AdjustableSpacer(ui.dimensions.smallSpacer)
 
             Text(
                 text = text,
                 color = MaterialTheme.colorScheme.onTertiary,
-                fontSize = fontSize,
+                fontSize = ui.fonts.generalTextSize,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)
             )
@@ -164,7 +157,7 @@ fun MoreScreenButton(
                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.generalIconSize)
             )
         }
 
@@ -172,7 +165,7 @@ fun MoreScreenButton(
             HorizontalDivider(
                 modifier = Modifier
                     .fillMaxWidth(),
-                thickness = if (isTablet) 3.dp else 1.dp,
+                thickness = ui.dimensions.generalDividerThickness,
                 color = MaterialTheme.colorScheme.onTertiary.copy(alpha = 0.2f)
             )
         }

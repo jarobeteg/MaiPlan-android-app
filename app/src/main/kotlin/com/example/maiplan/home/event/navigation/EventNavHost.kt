@@ -51,7 +51,10 @@ fun NavGraphBuilder.eventNavGraph(
             rootNavController = rootNavController,
             localNavController = localNavController,
             onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) },
-            onUpdateEventClick = { eventId -> localNavController.navigate(EventRoutes.Update.withArgs(eventId)) }
+            onUpdateEventClick = { eventId -> localNavController.navigate(EventRoutes.Update.withArgs(eventId)) },
+            onDeleteClick = { reminderId, eventId, selectedDate->
+                eventViewModel.softDeleteEventWithReminder(reminderId, eventId, userId, selectedDate)
+            },
         )
     }
 
@@ -87,10 +90,6 @@ fun NavGraphBuilder.eventNavGraph(
             reminderViewModel = reminderViewModel,
             onUpdateClick = { reminder, event ->
                 eventViewModel.updateEventWithReminder(reminder, event)
-                localNavController.popBackStack()
-            },
-            onDeleteClick = { reminderId, eventId ->
-                eventViewModel.softDeleteEventWithReminder(reminderId, eventId, userId)
                 localNavController.popBackStack()
             },
             onBackClick = { localNavController.popBackStack() }

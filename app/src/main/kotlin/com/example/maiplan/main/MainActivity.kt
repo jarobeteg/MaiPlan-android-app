@@ -74,7 +74,7 @@ class MainActivity : BaseActivity() {
     }
 
     private fun setupComposeUI() {
-        setAppContent { AppTheme { AuthNavHost(viewModel, this) } }
+        setAppContent { AppTheme { AuthNavHost(viewModel) } }
     }
 
     private fun setupDependencies() {

@@ -49,10 +49,11 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         }
     }
 
-    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userId: Int) {
+    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userId: Int, selectedDate: LocalDate) {
         viewModelScope.launch {
             eventRepository.softDeleteReminder(reminderId, userId)
             eventRepository.softDeleteEvent(eventId, userId)
+            loadMonth(selectedDate)
         }
     }
 
