@@ -1,15 +1,15 @@
 package com.example.maiplan.network
 
+import com.example.maiplan.BuildConfig
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import com.example.maiplan.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
 import java.net.Socket
 
-class NetworkChecker (private val context: Context) {
+class NetworkChecker (context: Context) {
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private fun isOnline(): Boolean {
@@ -21,8 +21,8 @@ class NetworkChecker (private val context: Context) {
     }
 
     private fun isPortOpen(): Boolean {
-        val host = context.getString(R.string.api_host)
-        val port = context.resources.getInteger(R.integer.api_port)
+        val host = BuildConfig.API_HOST
+        val port = BuildConfig.API_PORT
         val timeout = 500
         return try {
             Socket().use { socket ->

@@ -19,6 +19,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig = true
         compose = true
     }
 
@@ -35,6 +36,77 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    flavorDimensions += "environment"
+
+    productFlavors {
+
+        create("dev") {
+            dimension = "environment"
+
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"http://100.70.156.115:8001/\""
+            )
+
+            buildConfigField(
+                "String",
+                "API_HOST",
+                "\"100.70.156.115\""
+            )
+
+            buildConfigField(
+                "int",
+                "API_PORT",
+                "8001"
+            )
+        }
+
+        create("integration") {
+            dimension = "environment"
+
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"http://100.70.156.115:8002/\""
+            )
+
+            buildConfigField(
+                "String",
+                "API_HOST",
+                "\"100.70.156.115\""
+            )
+
+            buildConfigField(
+                "int",
+                "API_PORT",
+                "8002"
+            )
+        }
+
+        create("prod") {
+            dimension = "environment"
+
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"http://100.70.156.115:8000/\""
+            )
+
+            buildConfigField(
+                "String",
+                "API_HOST",
+                "\"100.70.156.115\""
+            )
+
+            buildConfigField(
+                "int",
+                "API_PORT",
+                "8000"
+            )
+        }
     }
 }
 

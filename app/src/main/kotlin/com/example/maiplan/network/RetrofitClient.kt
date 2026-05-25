@@ -1,7 +1,6 @@
 package com.example.maiplan.network
 
-import android.content.Context
-import com.example.maiplan.AppConfig
+import com.example.maiplan.BuildConfig
 import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.CategoryApi
 import com.example.maiplan.network.api.EventApi
@@ -16,8 +15,8 @@ import java.util.concurrent.TimeUnit
 object RetrofitClient {
     private lateinit var BASE_URL: String
 
-    fun init(context: Context) {
-        BASE_URL = AppConfig.apiBaseUrl(context)
+    fun init() {
+        BASE_URL = BuildConfig.API_BASE_URL
     }
 
     private val normalClient = OkHttpClient.Builder()
