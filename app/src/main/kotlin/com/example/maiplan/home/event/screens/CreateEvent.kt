@@ -41,9 +41,9 @@ import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.utils.LocalUiScale
-import com.example.maiplan.utils.ReminderManager
-import com.example.maiplan.utils.ReminderData
+import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
@@ -171,7 +171,6 @@ fun CreateEventScreen(
 
                         onSaveClick(reminder, event)
 
-                        val reminderManager = ReminderManager()
                         reminder?.let {
                             val reminderData = ReminderData(
                                 reminderId = reminder.reminderId,
@@ -179,7 +178,9 @@ fun CreateEventScreen(
                                 reminderTitle = event.title,
                                 reminderMessage = reminder.message ?: ""
                             )
-                            reminderManager.scheduleReminder(context, reminderData)
+                            if (!AlarmScheduler.attemptSchedule(context, reminderData)) {
+                                AlarmScheduler.requestExactAlarmPermission(context)
+                            }
                         }
                     }
                 }

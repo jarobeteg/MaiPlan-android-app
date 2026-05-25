@@ -1,4 +1,4 @@
-package com.example.maiplan.utils
+package com.example.maiplan.utils.notifications
 
 data class ReminderData(
     val reminderId: Int,

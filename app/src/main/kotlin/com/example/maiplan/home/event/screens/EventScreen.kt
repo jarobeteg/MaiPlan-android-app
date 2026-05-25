@@ -69,7 +69,7 @@ import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalUiScale
-import com.example.maiplan.utils.ReminderManager
+import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
 
@@ -387,8 +387,7 @@ fun DayEventsSection(
                             onDeleteClick(reminderId, eventId, selectedDate)
 
                             if (reminderId != null) {
-                                val reminderManager = ReminderManager()
-                                reminderManager.cancelReminder(context, reminderId)
+                                AlarmScheduler.cancelAlarm(context, reminderId)
                             }
                             false
                         }
