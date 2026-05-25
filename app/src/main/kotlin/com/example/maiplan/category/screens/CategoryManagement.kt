@@ -49,12 +49,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.SearchFieldComponent
-import com.example.maiplan.components.isTablet
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.network.api.CategoryResponse
+import com.example.maiplan.utils.LocalUiScale
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
@@ -65,14 +64,16 @@ fun CategoryManagementScreen(
     onCardSwipeEdit: (CategoryEntity) -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
+    val ui = LocalUiScale.current
     val context = LocalContext.current
+
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
     var searchQuery by remember { mutableStateOf("") }
 
     Scaffold (
-        topBar =
-            { CategoryManagementTopBar(
-                text = stringResource(R.string.categories),
+        topBar = {
+            CategoryManagementTopBar(
+                title = stringResource(R.string.categories),
                 onBackClick = { (context as? Activity)?.finish() },
                 onCreateCategoryClick = onCreateCategoryClick
             ) }) { innerPadding ->
@@ -84,7 +85,7 @@ fun CategoryManagementScreen(
         ) {
             SearchFieldComponent(searchQuery, 32) { searchQuery = it }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             val filteredCategories = categoryList.filter {
                 it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true)
@@ -121,7 +122,7 @@ fun CategoryManagementScreen(
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    AdjustableSpacer(ui.dimensions.mediumSpacer)
                 }
             }
         }
@@ -131,14 +132,11 @@ fun CategoryManagementScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryManagementTopBar(
-    text: String,
+    title: String,
     onBackClick: () -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
-    val isTablet = isTablet()
-    val iconSize = if (isTablet) 36.dp else 24.dp
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val barHeight = if (isTablet) 112.dp else 112.dp
+    val ui = LocalUiScale.current
 
     CenterAlignedTopAppBar(
         title = {
@@ -147,8 +145,8 @@ fun CategoryManagementTopBar(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = text,
-                    fontSize = fontSize,
+                    text = title,
+                    fontSize = ui.fonts.generalTopBarTitleSize,
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary,
                     textAlign = TextAlign.Center
@@ -158,12 +156,12 @@ fun CategoryManagementTopBar(
         navigationIcon = {
             IconButton(
                 onClick = onBackClick,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -171,12 +169,12 @@ fun CategoryManagementTopBar(
         actions = {
             IconButton(
                 onClick = onCreateCategoryClick,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -184,7 +182,7 @@ fun CategoryManagementTopBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(barHeight)
+        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
@@ -192,14 +190,7 @@ fun CategoryManagementTopBar(
 fun CategoryCard(category: CategoryEntity) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
-
-    val isTablet = isTablet()
-
-    val fontSize = if (isTablet) 24.sp else 16.sp
-    val iconSize = if (isTablet) 48.dp else 36.dp
-    val titleStyle = if (isTablet) MaterialTheme.typography.titleLarge else MaterialTheme.typography.titleMedium
-    val bodyStyle = if (isTablet) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium
-    val cardHeight = if (isTablet) 160.dp else 128.dp
+    val ui = LocalUiScale.current
 
     val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
     val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
@@ -213,7 +204,7 @@ fun CategoryCard(category: CategoryEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(cardHeight)
+            .height(ui.components.iconCardHeight)
             .padding(top = 4.dp, bottom = 4.dp)
             .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
@@ -223,27 +214,27 @@ fun CategoryCard(category: CategoryEntity) {
                 Icon(
                     imageVector = IconData.getIconByKey(category.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(iconSize),
+                    modifier = Modifier.size(ui.components.cardIconSize),
                     tint = textColor
                 )
 
-                Spacer(modifier = Modifier.width(8.dp))
+                AdjustableSpacer(ui.dimensions.mediumSpacer)
 
                 Text(
                     text = category.name,
-                    fontSize = fontSize,
-                    style = titleStyle,
+                    fontSize = ui.fonts.generalTextSize,
+                    style = ui.typographies.cardTitleStyle,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            AdjustableSpacer(ui.dimensions.smallSpacer)
 
             Text(
                 text = category.description,
-                fontSize = fontSize,
-                style = bodyStyle,
+                fontSize = ui.fonts.generalTextSize,
+                style = ui.typographies.cardBodyStyle,
                 color = textColor.copy(alpha = 0.8f)
             )
         }
@@ -257,10 +248,7 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
         SwipeToDismissBoxValue.EndToStart -> Color(0xFF1DE9B6)
         SwipeToDismissBoxValue.Settled -> Color.Transparent
     }
-
-    val isTablet = isTablet()
-
-    val iconSize = if (isTablet) 48.dp else 32.dp
+    val ui = LocalUiScale.current
 
     Row(
         modifier = Modifier
@@ -280,14 +268,14 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.cardIconSize)
             )
         } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(iconSize)
+                modifier = Modifier.size(ui.components.cardIconSize)
             )
         }
     }

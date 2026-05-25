@@ -1,7 +1,6 @@
 package com.example.maiplan.home
 
 import android.os.Bundle
-import androidx.activity.compose.setContent
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.navigation.HomeNavHost
@@ -12,7 +11,7 @@ class HomeActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContent {
+        setAppContent {
             AppTheme {
                 val rootNavController: NavHostController = rememberNavController()
                 HomeNavHost(rootNavController)
