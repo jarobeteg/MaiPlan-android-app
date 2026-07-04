@@ -17,6 +17,9 @@ interface AuthDAO {
     @Query("SELECT * FROM auth WHERE email = :email")
     suspend fun getUserByEmail(email: String): AuthEntity?
 
+    @Query("SELECT * FROM auth WHERE user_id = :userId")
+    suspend fun getUserById(userId: Int): AuthEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertPseudoAuth(entity: AuthEntity): Long
 

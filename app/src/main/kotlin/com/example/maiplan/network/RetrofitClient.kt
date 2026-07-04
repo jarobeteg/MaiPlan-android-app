@@ -4,6 +4,7 @@ import com.example.maiplan.BuildConfig
 import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.CategoryApi
 import com.example.maiplan.network.api.EventApi
+import com.example.maiplan.network.api.NoteApi
 import com.example.maiplan.network.api.RaspiApi
 import com.example.maiplan.network.api.ReminderApi
 import okhttp3.ConnectionPool
@@ -56,6 +57,7 @@ object RetrofitClient {
     val authApi: AuthApi by lazy { normalRetrofit.create(AuthApi::class.java) }
     val categoryApi: CategoryApi by lazy { normalRetrofit.create(CategoryApi::class.java) }
     val eventApi: EventApi by lazy { normalRetrofit.create(EventApi::class.java) }
+    val noteApi: NoteApi by lazy { normalRetrofit.create(NoteApi::class.java) }
     val reminderApi: ReminderApi by lazy { normalRetrofit.create(ReminderApi::class.java) }
     val raspiApi: RaspiApi by lazy { fastRetrofit.create(RaspiApi::class.java) }
 }

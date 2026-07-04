@@ -44,7 +44,7 @@ class AuthRepository(
 
     suspend fun register(user: UserRegister): Result<AuthResponse> {
         return try {
-            handleRemoteResponse(remote.register(user))
+            handleAuthResponse(handleRemoteResponse(remote.register(user)))
         } catch (e: Exception) {
             Result.Error(e)
         }
@@ -64,7 +64,7 @@ class AuthRepository(
 
     suspend fun resetPassword(user: UserResetPassword): Result<AuthResponse> {
         return try {
-            handleRemoteResponse(remote.resetPassword(user))
+            handleAuthResponse(handleRemoteResponse(remote.resetPassword(user)))
         } catch (e: Exception){
             Result.Error(e)
         }
@@ -80,14 +80,14 @@ class AuthRepository(
 
     suspend fun getProfile(token: String): Result<AuthResponse> {
         return try {
-            handleRemoteResponse(remote.getProfile(token))
+            handleAuthResponse(handleRemoteResponse(remote.getProfile(token)))
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
     suspend fun pseudoAuth(user: UserResponse): Boolean {
-        if (!local.doesUserExist(user.email)) {
+        if (!local.doesUserExist(user.id)) {
             val auth = AuthEntity(
                 userId = user.id,
                 email = user.email,
@@ -99,5 +99,17 @@ class AuthRepository(
         } else {
             return true
         }
+    }
+
+    private suspend fun handleAuthResponse(result: Result<AuthResponse>): Result<AuthResponse> {
+        if (result is Result.Success) {
+            return if (pseudoAuth(result.data.user)) {
+                result
+            } else {
+                Result.Error(IllegalStateException("Could not create local user row"))
+            }
+        }
+
+        return result
     }
 }

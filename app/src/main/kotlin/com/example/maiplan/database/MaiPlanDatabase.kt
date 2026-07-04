@@ -2,19 +2,29 @@ package com.example.maiplan.database
 
 import android.content.Context
 import androidx.room.Database
+import androidx.room.migration.Migration
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.maiplan.database.dao.AuthDAO
 import com.example.maiplan.database.dao.CategoryDAO
 import com.example.maiplan.database.dao.EventDAO
+import com.example.maiplan.database.dao.NoteDAO
 import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.entities.AuthEntity
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
+import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
 
 @Database(
-    entities = [AuthEntity::class, CategoryEntity::class, ReminderEntity::class, EventEntity::class],
+    entities = [
+        AuthEntity::class,
+        CategoryEntity::class,
+        ReminderEntity::class,
+        EventEntity::class,
+        NoteEntity::class
+    ],
     version = 1,
     exportSchema = false
 )
@@ -23,6 +33,7 @@ abstract class MaiPlanDatabase: RoomDatabase() {
     abstract fun categoryDAO(): CategoryDAO
     abstract fun reminderDAO(): ReminderDAO
     abstract fun eventDAO(): EventDAO
+    abstract fun noteDAO(): NoteDAO
 
     companion object {
         @Volatile
@@ -34,7 +45,9 @@ abstract class MaiPlanDatabase: RoomDatabase() {
                     context.applicationContext,
                     MaiPlanDatabase::class.java,
                     "mai_plan_database"
-                ).fallbackToDestructiveMigration(false).build()
+                )
+                    .fallbackToDestructiveMigration(false)
+                    .build()
                 INSTANCE = instance
                 instance
             }

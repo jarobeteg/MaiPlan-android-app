@@ -22,7 +22,7 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
     val items = listOf(
         HomeNavRoutes.Events,
         HomeNavRoutes.Tasks,
-        HomeNavRoutes.Files,
+        HomeNavRoutes.Notes,
         HomeNavRoutes.More
     )
     val ui = LocalUiScale.current
