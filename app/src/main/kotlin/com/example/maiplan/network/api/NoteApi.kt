@@ -19,7 +19,8 @@ data class NoteSync(
     @SerializedName("updated_at") val updatedAt: Long,
     @SerializedName("last_modified") val lastModified: Long,
     @SerializedName("sync_state") val syncState: Int = 0,
-    @SerializedName("is_deleted") val isDeleted: Int = 0
+    @SerializedName("is_deleted") val isDeleted: Int = 0,
+    @SerializedName("is_pinned") val isPinned: Int = 0
 )
 
 interface NoteApi {

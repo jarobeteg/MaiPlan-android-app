@@ -52,7 +52,8 @@ class NoteRepository(
             updatedAt = updatedAt,
             lastModified = lastModified,
             syncState = syncState,
-            isDeleted = isDeleted
+            isDeleted = isDeleted,
+            isPinned = isPinned
         )
     }
 
@@ -71,7 +72,8 @@ class NoteRepository(
             updatedAt = updatedAt,
             lastModified = lastModified,
             syncState = syncState,
-            isDeleted = isDeleted
+            isDeleted = isDeleted,
+            isPinned = isPinned
         )
     }
 

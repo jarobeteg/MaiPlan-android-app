@@ -71,5 +71,8 @@ data class NoteEntity(
     val isDeleted: Int = 0,
 
     @ColumnInfo(name = "server_id")
-    val serverId: Int? = null
+    val serverId: Int? = null,
+
+    @ColumnInfo(name = "is_pinned")
+    val isPinned: Int = 0
 )
