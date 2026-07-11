@@ -1,34 +1,46 @@
 package com.example.maiplan.home.note.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notes
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
@@ -83,47 +95,30 @@ fun NoteListScreen(
     }
 
     Scaffold(
-        topBar = { NotesTopBar(onCreateClick) },
+        topBar = { NotesTopBar() },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onCreateClick,
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(ui.components.generalIconSize)
+                )
+            }
+        },
         bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { if (it.length <= 64) searchQuery = it },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.note_search),
-                        fontSize = ui.fonts.generalTextSize
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Search,
-                        contentDescription = null,
-                        modifier = Modifier.size(ui.components.generalIconSize)
-                    )
-                },
-                singleLine = true,
-                textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(ui.components.generalFieldHeight),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.background,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                    unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground,
-                    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-                    cursorColor = MaterialTheme.colorScheme.primary
-                )
-            )
+            NoteSearchField(searchQuery = searchQuery) { searchQuery = it }
 
             NoteCategoryFilter(
                 categories = categories,
@@ -131,17 +126,16 @@ fun NoteListScreen(
                 onCategorySelected = { selectedCategoryId = it }
             )
 
+            NoteListSummary(
+                count = filteredNotes.size,
+                isFiltered = searchQuery.isNotBlank() || selectedCategoryId != null
+            )
+
             if (filteredNotes.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(R.string.note_empty),
-                        fontSize = ui.fonts.generalTextSize,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                    )
-                }
+                NoteEmptyState(
+                    isFiltered = searchQuery.isNotBlank() || selectedCategoryId != null,
+                    onCreateClick = onCreateClick
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
@@ -163,7 +157,7 @@ fun NoteListScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NotesTopBar(onCreateClick: () -> Unit) {
+private fun NotesTopBar() {
     val ui = LocalUiScale.current
 
     CenterAlignedTopAppBar(
@@ -180,23 +174,56 @@ private fun NotesTopBar(onCreateClick: () -> Unit) {
                 )
             }
         },
-        actions = {
-            IconButton(
-                onClick = onCreateClick,
-                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.height(ui.components.generalTopBarHeight)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NoteSearchField(
+    searchQuery: String,
+    onSearchChange: (String) -> Unit
+) {
+    val ui = LocalUiScale.current
+    val containerColor = notePanelColor()
+
+    OutlinedTextField(
+        value = searchQuery,
+        onValueChange = { if (it.length <= 64) onSearchChange(it) },
+        placeholder = {
+            Text(
+                text = stringResource(R.string.note_search),
+                fontSize = ui.fonts.generalTextSize
+            )
+        },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Search,
+                contentDescription = null,
+                modifier = Modifier.size(ui.components.generalIconSize),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        singleLine = true,
+        shape = RoundedCornerShape(8.dp),
+        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(ui.components.generalFieldHeight),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = containerColor,
+            unfocusedContainerColor = containerColor,
+            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f),
+            focusedTextColor = MaterialTheme.colorScheme.onBackground,
+            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
+            focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
+            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
+            cursorColor = MaterialTheme.colorScheme.primary
+        )
     )
 }
 
@@ -209,23 +236,120 @@ private fun NoteCategoryFilter(
 ) {
     val ui = LocalUiScale.current
 
-    FlowRow(
+    LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        FilterChip(
-            selected = selectedCategoryId == null,
-            onClick = { onCategorySelected(null) },
-            label = { Text(stringResource(R.string.all), fontSize = ui.fonts.generalTextSize) }
-        )
+        item {
+            FilterChip(
+                selected = selectedCategoryId == null,
+                onClick = { onCategorySelected(null) },
+                label = { Text(stringResource(R.string.all), fontSize = ui.fonts.generalTextSize) },
+                shape = RoundedCornerShape(8.dp),
+                colors = neutralFilterChipColors()
+            )
+        }
 
-        categories.forEach { category ->
+        items(categories, key = { it.categoryId }) { category ->
+            val color = category.color.toULongOrNull()?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
             FilterChip(
                 selected = selectedCategoryId == category.categoryId,
                 onClick = { onCategorySelected(category.categoryId) },
-                label = { Text(category.name, fontSize = ui.fonts.generalTextSize) }
+                label = { Text(category.name, fontSize = ui.fonts.generalTextSize) },
+                leadingIcon = {
+                    Box(
+                        modifier = Modifier
+                            .size(10.dp)
+                            .background(color, CircleShape)
+                    )
+                },
+                shape = RoundedCornerShape(8.dp),
+                colors = neutralFilterChipColors()
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun neutralFilterChipColors() = FilterChipDefaults.filterChipColors(
+    containerColor = Color.Transparent,
+    labelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+    iconColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+    selectedLabelColor = MaterialTheme.colorScheme.onBackground,
+    selectedLeadingIconColor = MaterialTheme.colorScheme.primary
+)
+
+@Composable
+private fun NoteListSummary(count: Int, isFiltered: Boolean) {
+    val ui = LocalUiScale.current
+    val label = when {
+        count == 1 && isFiltered -> stringResource(R.string.note_result_single)
+        count == 1 -> stringResource(R.string.note_count_single)
+        isFiltered -> stringResource(R.string.note_result_count, count)
+        else -> stringResource(R.string.note_count, count)
+    }
+
+    Text(
+        text = label,
+        fontSize = ui.fonts.passwordStrengthTextSize,
+        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f),
+        fontWeight = FontWeight.Medium
+    )
+}
+
+@Composable
+private fun NoteEmptyState(
+    isFiltered: Boolean,
+    onCreateClick: () -> Unit
+) {
+    val ui = LocalUiScale.current
+
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Surface(
+                modifier = Modifier.size(58.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Filled.Notes,
+                        contentDescription = null,
+                        modifier = Modifier.size(ui.components.generalIconSize)
+                    )
+                }
+            }
+
+            Text(
+                text = if (isFiltered) stringResource(R.string.note_empty_filtered) else stringResource(R.string.note_empty),
+                fontSize = ui.fonts.generalTextSize,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            if (!isFiltered) {
+                Button(onClick = onCreateClick, shape = RoundedCornerShape(8.dp)) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(ui.components.generalIconSize)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = stringResource(R.string.note_new), fontSize = ui.fonts.generalTextSize)
+                }
+            }
         }
     }
 }
@@ -244,13 +368,18 @@ private fun NoteCard(
             .atZone(ZoneId.systemDefault())
             .format(formatter)
     }
+    val categoryColor = category?.color?.toULongOrNull()?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+    val containerColor = notePanelColor()
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 112.dp)
             .clickable { onClick() },
+        shape = RoundedCornerShape(8.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f)),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = containerColor
         )
     ) {
         Row(
@@ -259,21 +388,20 @@ private fun NoteCard(
                 .padding(14.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(
-                imageVector = Icons.Filled.Notes,
-                contentDescription = null,
-                modifier = Modifier.size(ui.components.cardIconSize),
-                tint = MaterialTheme.colorScheme.primary
+            Box(
+                modifier = Modifier
+                    .size(10.dp)
+                    .background(categoryColor, CircleShape)
             )
 
             AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = note.title,
-                    fontSize = ui.fonts.generalTextSize,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground,
+                        text = note.title,
+                        fontSize = ui.fonts.generalTextSize,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -283,7 +411,7 @@ private fun NoteCard(
                         text = note.content,
                         fontSize = ui.fonts.generalTextSize,
                         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
-                        maxLines = 3,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
@@ -293,12 +421,28 @@ private fun NoteCard(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = category?.name ?: stringResource(R.string.uncategorized),
-                        fontSize = ui.fonts.passwordStrengthTextSize,
-                        color = category?.color?.toULongOrNull()?.let { Color(it) }
-                            ?: MaterialTheme.colorScheme.primary
-                    )
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                        contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f))
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(7.dp)
+                                    .background(categoryColor, CircleShape)
+                            )
+                            Text(
+                                text = category?.name ?: stringResource(R.string.uncategorized),
+                                fontSize = ui.fonts.passwordStrengthTextSize
+                            )
+                        }
+                    }
                     Text(
                         text = updatedAt,
                         fontSize = ui.fonts.passwordStrengthTextSize,
@@ -311,9 +455,18 @@ private fun NoteCard(
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun notePanelColor(): Color {
+    return if (isSystemInDarkTheme()) {
+        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f)
+    } else {
+        MaterialTheme.colorScheme.surface
     }
 }

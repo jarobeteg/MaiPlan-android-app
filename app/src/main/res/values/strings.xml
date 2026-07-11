@@ -155,8 +155,15 @@
     <string name="note_update">Update Note</string>
     <string name="note_save">Save Note</string>
     <string name="note_content">Note</string>
+    <string name="note_title_placeholder">Untitled note</string>
+    <string name="note_body_placeholder">Write your note…</string>
     <string name="note_search">Search notes…</string>
     <string name="note_empty">No notes yet</string>
+    <string name="note_empty_filtered">No matching notes</string>
+    <string name="note_count">%1$d notes</string>
+    <string name="note_count_single">1 note</string>
+    <string name="note_result_count">%1$d results</string>
+    <string name="note_result_single">1 result</string>
     <string name="uncategorized">Uncategorized</string>
     <string name="note_error_1">Title is required</string>
     <string name="note_error_save">Could not save note. Please try again.</string>
