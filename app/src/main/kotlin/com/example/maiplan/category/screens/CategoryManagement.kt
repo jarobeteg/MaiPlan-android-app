@@ -83,7 +83,7 @@ fun CategoryManagementScreen(
                 .padding(innerPadding)
                 .padding(16.dp)
         ) {
-            SearchFieldComponent(searchQuery, 32) { searchQuery = it }
+            SearchFieldComponent(R.string.category_search, searchQuery, 32) { searchQuery = it }
 
             AdjustableSpacer(ui.dimensions.mediumSpacer)
 

@@ -3,10 +3,10 @@ package com.example.maiplan.home.note.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -26,10 +26,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Notes
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -38,16 +36,13 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,13 +51,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
-import com.example.maiplan.components.AdjustableSpacer
+import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.home.navigation.HomeNavigationBar
@@ -118,7 +112,7 @@ fun NoteListScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            NoteSearchField(searchQuery = searchQuery) { searchQuery = it }
+            SearchFieldComponent(R.string.note_search, searchQuery, 32) { searchQuery = it }
 
             NoteCategoryFilter(
                 categories = categories,
@@ -178,52 +172,6 @@ private fun NotesTopBar() {
             containerColor = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.height(ui.components.generalTopBarHeight)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NoteSearchField(
-    searchQuery: String,
-    onSearchChange: (String) -> Unit
-) {
-    val ui = LocalUiScale.current
-    val containerColor = notePanelColor()
-
-    OutlinedTextField(
-        value = searchQuery,
-        onValueChange = { if (it.length <= 64) onSearchChange(it) },
-        placeholder = {
-            Text(
-                text = stringResource(R.string.note_search),
-                fontSize = ui.fonts.generalTextSize
-            )
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = null,
-                modifier = Modifier.size(ui.components.generalIconSize),
-                tint = MaterialTheme.colorScheme.primary
-            )
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(8.dp),
-        textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(ui.components.generalFieldHeight),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = containerColor,
-            unfocusedContainerColor = containerColor,
-            focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-            unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f),
-            focusedTextColor = MaterialTheme.colorScheme.onBackground,
-            unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-            focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
-            unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
-            cursorColor = MaterialTheme.colorScheme.primary
-        )
     )
 }
 
@@ -369,7 +317,6 @@ private fun NoteCard(
             .format(formatter)
     }
     val categoryColor = category?.color?.toULongOrNull()?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
-    val containerColor = notePanelColor()
 
     Card(
         modifier = Modifier
@@ -378,95 +325,90 @@ private fun NoteCard(
             .clickable { onClick() },
         shape = RoundedCornerShape(8.dp),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.12f)),
-        colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
+                .height(IntrinsicSize.Min)
+                .heightIn(min = 112.dp),
             verticalAlignment = Alignment.Top
         ) {
             Box(
                 modifier = Modifier
-                    .size(10.dp)
-                    .background(categoryColor, CircleShape)
+                    .width(4.dp)
+                    .fillMaxHeight()
+                    .background(categoryColor)
             )
 
-            AdjustableSpacer(ui.dimensions.mediumSpacer)
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
+            Row(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 14.dp, top = 14.dp, end = 6.dp, bottom = 14.dp),
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
                         text = note.title,
                         fontSize = ui.fonts.generalTextSize,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (!note.content.isNullOrBlank()) {
-                    Text(
-                        text = note.content,
-                        fontSize = ui.fonts.generalTextSize,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
-                        maxLines = 2,
+                        maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+
+                    if (!note.content.isNullOrBlank()) {
+                        Text(
+                            text = note.content,
+                            fontSize = ui.fonts.generalTextSize,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f))
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(7.dp)
+                                        .background(categoryColor, CircleShape)
+                                )
+                                Text(
+                                    text = category?.name ?: stringResource(R.string.uncategorized),
+                                    fontSize = ui.fonts.passwordStrengthTextSize
+                                )
+                            }
+                        }
+                        Text(
+                            text = updatedAt,
+                            fontSize = ui.fonts.passwordStrengthTextSize,
+                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                        )
+                    }
                 }
 
-                Row(
-                    modifier = Modifier.padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                        contentColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.78f),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.onBackground.copy(alpha = 0.10f))
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(7.dp)
-                                    .background(categoryColor, CircleShape)
-                            )
-                            Text(
-                                text = category?.name ?: stringResource(R.string.uncategorized),
-                                fontSize = ui.fonts.passwordStrengthTextSize
-                            )
-                        }
-                    }
-                    Text(
-                        text = updatedAt,
-                        fontSize = ui.fonts.passwordStrengthTextSize,
-                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
+                IconButton(onClick = onDeleteClick) {
+                    Icon(
+                        imageVector = Icons.Filled.Delete,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                     )
                 }
             }
-
-            IconButton(onClick = onDeleteClick) {
-                Icon(
-                    imageVector = Icons.Filled.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
-                )
-            }
         }
-    }
-}
-
-@Composable
-private fun notePanelColor(): Color {
-    return if (isSystemInDarkTheme()) {
-        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f)
-    } else {
-        MaterialTheme.colorScheme.surface
     }
 }

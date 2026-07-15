@@ -27,7 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -42,10 +41,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableSpacer
+import com.example.maiplan.components.AdjustableTextFieldLengthComponent
+import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.ErrorMessageComponent
 import com.example.maiplan.components.SimpleTopBar
 import com.example.maiplan.components.SubmitButtonComponent
@@ -136,49 +136,10 @@ private fun NoteEditorScreen(
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                color = notePanelColor()
-            ) {
-                Column(
-                    modifier = Modifier.padding(10.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { if (it.length <= 255) title = it },
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.note_title_placeholder),
-                                fontSize = ui.fonts.generalTextSize
-                            )
-                        },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Filled.Title,
-                                contentDescription = null,
-                                modifier = Modifier.size(ui.components.generalIconSize),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        },
-                        singleLine = true,
-                        shape = RoundedCornerShape(8.dp),
-                        textStyle = TextStyle(
-                            fontSize = ui.fonts.generalTextSize,
-                            fontWeight = FontWeight.Bold
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = noteTextFieldColors()
-                    )
 
-                    NoteCategoryDropdown(
-                        categories = categories,
-                        selectedCategory = selectedCategory,
-                        onCategorySelected = { selectedCategory = it }
-                    )
-                }
-            }
+            AdjustableTextFieldLengthComponent(title, stringResource(R.string.title), Icons.Filled.Title, 255) { title = it }
+
+            CategoryDropdownComponent(categories, selectedCategory) { selectedCategory = it }
 
             OutlinedTextField(
                 value = content,

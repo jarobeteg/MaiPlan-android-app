@@ -358,7 +358,7 @@ fun AdjustableTextFieldLengthComponent(value: String, label: String, icon: Image
 }
 
 @Composable
-fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
+fun SearchFieldComponent(placeholderTextId: Int, searchQuery: String, length: Int, onValueChange: (String) -> Unit) {
     val ui = LocalUiScale.current
 
     OutlinedTextField(
@@ -375,7 +375,7 @@ fun SearchFieldComponent(searchQuery: String, length: Int, onValueChange: (Strin
         modifier = Modifier.fillMaxWidth().height(ui.components.generalFieldHeight),
         singleLine = true,
         placeholder = { Text(
-            text = stringResource(R.string.category_search),
+            text = stringResource(placeholderTextId),
             fontSize = ui.fonts.generalTextSize,
             style = ui.typographies.generalTextStyle,
             textAlign = TextAlign.Start
