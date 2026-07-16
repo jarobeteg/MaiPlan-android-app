@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
+import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
@@ -109,8 +110,8 @@ fun NoteListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(horizontal = ui.dimensions.largePaddingValue, vertical = ui.dimensions.mediumPaddingValue),
+            verticalArrangement = Arrangement.spacedBy(ui.dimensions.mediumArrangementSpace)
         ) {
             SearchFieldComponent(R.string.note_search, searchQuery, 32) { searchQuery = it }
 
@@ -133,7 +134,7 @@ fun NoteListScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(ui.dimensions.mediumArrangementSpace)
                 ) {
                     items(filteredNotes, key = { it.noteId }) { note ->
                         NoteCard(
@@ -168,7 +169,7 @@ private fun NotesTopBar() {
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
         modifier = Modifier.height(ui.components.generalTopBarHeight)
@@ -186,14 +187,14 @@ private fun NoteCategoryFilter(
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        horizontalArrangement = Arrangement.spacedBy(ui.dimensions.smallArrangementSpace)
     ) {
         item {
             FilterChip(
                 selected = selectedCategoryId == null,
                 onClick = { onCategorySelected(null) },
                 label = { Text(stringResource(R.string.all), fontSize = ui.fonts.generalTextSize) },
-                shape = RoundedCornerShape(8.dp),
+                shape = MaterialTheme.shapes.small,
                 colors = neutralFilterChipColors()
             )
         }
@@ -211,7 +212,7 @@ private fun NoteCategoryFilter(
                             .background(color, CircleShape)
                     )
                 },
-                shape = RoundedCornerShape(8.dp),
+                shape = MaterialTheme.shapes.small,
                 colors = neutralFilterChipColors()
             )
         }
@@ -263,7 +264,7 @@ private fun NoteEmptyState(
                 .fillMaxWidth()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(ui.dimensions.mediumArrangementSpace)
         ) {
             Surface(
                 modifier = Modifier.size(58.dp),
@@ -288,13 +289,13 @@ private fun NoteEmptyState(
             )
 
             if (!isFiltered) {
-                Button(onClick = onCreateClick, shape = RoundedCornerShape(8.dp)) {
+                Button(onClick = onCreateClick, shape = MaterialTheme.shapes.small) {
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = null,
                         modifier = Modifier.size(ui.components.generalIconSize)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    AdjustableSpacer(ui.dimensions.mediumSpacer)
                     Text(text = stringResource(R.string.note_new), fontSize = ui.fonts.generalTextSize)
                 }
             }
