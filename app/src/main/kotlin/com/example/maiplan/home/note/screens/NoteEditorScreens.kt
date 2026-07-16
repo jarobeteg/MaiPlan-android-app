@@ -1,34 +1,21 @@
 package com.example.maiplan.home.note.screens
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -37,13 +24,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
-import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.AdjustableTextFieldLengthComponent
 import com.example.maiplan.components.CategoryDropdownComponent
 import com.example.maiplan.components.ErrorMessageComponent
@@ -106,13 +93,12 @@ private fun NoteEditorScreen(
     onSaveClick: (String, String, CategoryEntity?) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
     val categories by viewModel.categoryList.observeAsState(emptyList())
     val isLoading = saveResult is Result.Loading
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val bodyMinHeight = if (isLandscape) 132.dp else 220.dp
-    val bodyMinLines = if (isLandscape) 4 else 8
+    val bodyMinLines = if (isLandscape) 2 else 3
+    val bodyMaxLines = if (isLandscape) 5 else 9
     var title by remember { mutableStateOf(initialTitle) }
     var content by remember { mutableStateOf(initialContent) }
     var localError by remember { mutableStateOf<String?>(null) }
@@ -141,45 +127,12 @@ private fun NoteEditorScreen(
 
             CategoryDropdownComponent(categories, selectedCategory) { selectedCategory = it }
 
-            OutlinedTextField(
-                value = content,
-                onValueChange = { if (it.length <= 4000) content = it },
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.note_body_placeholder),
-                        fontSize = ui.fonts.generalTextSize,
-                        style = ui.typographies.generalTextStyle
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Description,
-                        contentDescription = null,
-                        modifier = Modifier.size(ui.components.generalIconSize)
-                    )
-                },
-                textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
-                shape = RoundedCornerShape(8.dp),
+            NoteBodyEditor(
+                content = content,
+                onContentChange = { content = it },
                 minLines = bodyMinLines,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = bodyMinHeight),
-                supportingText = {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        Text(
-                            text = "${content.length}/4000",
-                            fontSize = ui.fonts.passwordStrengthTextSize,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
-                        )
-                    }
-                },
-                colors = noteTextFieldColors()
+                maxLines = bodyMaxLines
             )
-
-            AdjustableSpacer(ui.dimensions.mediumSpacer)
 
             SubmitButtonComponent(
                 value = buttonText,
@@ -222,111 +175,60 @@ private fun NoteEditorScreen(
 }
 
 @Composable
-private fun noteTextFieldColors() = TextFieldDefaults.colors(
-    focusedContainerColor = noteInputColor(),
-    unfocusedContainerColor = noteInputColor(),
-    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-    unfocusedIndicatorColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f),
-    focusedTextColor = MaterialTheme.colorScheme.onBackground,
-    unfocusedTextColor = MaterialTheme.colorScheme.onBackground,
-    focusedLabelColor = MaterialTheme.colorScheme.onBackground,
-    unfocusedLabelColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f),
-    focusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
-    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f),
-    cursorColor = MaterialTheme.colorScheme.primary
-)
-
-@Composable
-private fun notePanelColor(): Color {
-    return if (isSystemInDarkTheme()) {
-        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.45f)
-    } else {
-        MaterialTheme.colorScheme.surface
-    }
-}
-
-@Composable
-private fun noteInputColor(): Color {
-    return if (isSystemInDarkTheme()) {
-        MaterialTheme.colorScheme.background.copy(alpha = 0.65f)
-    } else {
-        MaterialTheme.colorScheme.background
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NoteCategoryDropdown(
-    categories: List<CategoryEntity>,
-    selectedCategory: CategoryEntity?,
-    onCategorySelected: (CategoryEntity?) -> Unit
+private fun NoteBodyEditor(
+    content: String,
+    onContentChange: (String) -> Unit,
+    minLines: Int,
+    maxLines: Int
 ) {
     val ui = LocalUiScale.current
-    var expanded by remember { mutableStateOf(false) }
+    val contentColor = MaterialTheme.colorScheme.onBackground
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
     ) {
-        OutlinedTextField(
-            value = selectedCategory?.name ?: stringResource(R.string.uncategorized),
-            onValueChange = {},
-            readOnly = true,
-            label = {
-                Text(
-                    text = stringResource(R.string.category),
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
-                )
-            },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(
-                    expanded = expanded,
-                    modifier = Modifier.size(ui.components.generalIconSize)
-                )
-            },
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
-            shape = RoundedCornerShape(8.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
-            colors = noteTextFieldColors()
+        Text(
+            text = stringResource(R.string.note_content),
+            fontSize = ui.fonts.passwordStrengthTextSize,
+            fontWeight = FontWeight.Medium,
+            color = contentColor.copy(alpha = 0.62f),
+            modifier = Modifier.padding(horizontal = 2.dp)
         )
 
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(notePanelColor())
-        ) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = stringResource(R.string.uncategorized),
-                        fontSize = ui.fonts.generalTextSize,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                },
-                onClick = {
-                    onCategorySelected(null)
-                    expanded = false
-                }
-            )
+        HorizontalDivider(
+            modifier = Modifier.padding(top = 8.dp),
+            color = contentColor.copy(alpha = 0.12f)
+        )
 
-            categories.forEach { category ->
-                DropdownMenuItem(
-                    text = {
+        BasicTextField(
+            value = content,
+            onValueChange = onContentChange,
+            textStyle = TextStyle(
+                fontSize = ui.fonts.generalTextSize,
+                lineHeight = ui.fonts.generalTextSize * 1.45f,
+                color = contentColor
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            minLines = minLines,
+            maxLines = maxLines,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 2.dp, vertical = 12.dp),
+            decorationBox = { innerTextField ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    if (content.isEmpty()) {
                         Text(
-                            text = category.name,
+                            text = stringResource(R.string.note_body_placeholder),
                             fontSize = ui.fonts.generalTextSize,
-                            color = MaterialTheme.colorScheme.onBackground
+                            lineHeight = ui.fonts.generalTextSize * 1.45f,
+                            color = contentColor.copy(alpha = 0.45f)
                         )
-                    },
-                    onClick = {
-                        onCategorySelected(category)
-                        expanded = false
                     }
-                )
+                    innerTextField()
+                }
             }
-        }
+        )
     }
 }
