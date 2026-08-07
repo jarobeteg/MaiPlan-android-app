@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -27,7 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -39,7 +40,7 @@ fun DateInputComponent(
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var showDatePicker by remember { mutableStateOf(false) }
     val closeDatePicker = { showDatePicker = false }
 
@@ -63,15 +64,14 @@ fun DateInputComponent(
             label = {
                 Text(
                     label,
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             trailingIcon = {
                 Box(
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .size(ui.components.generalIconSize),
+                        .size(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -84,8 +84,8 @@ fun DateInputComponent(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ui.components.generalFieldHeight),
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+                .heightIn(min = 56.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
@@ -114,7 +114,7 @@ fun TimeInputComponent(
     selectedTime: LocalTime?,
     onTimeSelected: (LocalTime) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var showTimePicker by remember { mutableStateOf(false) }
     val closeTimePicker = { showTimePicker = false }
 
@@ -138,15 +138,14 @@ fun TimeInputComponent(
             label = {
                 Text(
                     label,
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             trailingIcon = {
                 Box(
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .size(ui.components.generalIconSize),
+                        .size(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -159,8 +158,8 @@ fun TimeInputComponent(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ui.components.generalFieldHeight),
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+                .heightIn(min = 56.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
@@ -190,7 +189,7 @@ fun LocalDateTimeInputField(
     dateTime: LocalDateTime?,
     onDateTimeSelected: (LocalDateTime) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var showDatePicker by remember { mutableStateOf(false) }
     val closeDatePicker = { showDatePicker = false }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -218,15 +217,14 @@ fun LocalDateTimeInputField(
             label = {
                 Text(
                     label,
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             trailingIcon = {
                 Box(
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .size(ui.components.generalIconSize),
+                        .size(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -239,8 +237,8 @@ fun LocalDateTimeInputField(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ui.components.generalFieldHeight),
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+                .heightIn(min = 56.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,

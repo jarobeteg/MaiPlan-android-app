@@ -2,6 +2,7 @@ package com.example.maiplan.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -14,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
 
 @Composable
 fun SubmitButtonComponent(
@@ -23,12 +24,10 @@ fun SubmitButtonComponent(
     onButtonClicked: () -> Unit,
     isLoading: Boolean = false,
 ) {
-    val ui = LocalUiScale.current
-
     Button(
         onClick = { if (!isLoading) onButtonClicked() },
         enabled = !isLoading,
-        modifier = Modifier.fillMaxWidth().height(ui.components.generalSubmitButtonHeight),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
         shape = MaterialTheme.shapes.extraSmall,
         colors = ButtonDefaults.buttonColors(containerColor = color)
     ) {
@@ -43,7 +42,7 @@ fun SubmitButtonComponent(
         } else {
             Text(
                 text = value,
-                fontSize = ui.fonts.generalTextSize
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
     }
@@ -53,13 +52,10 @@ fun SubmitButtonComponent(
 fun ErrorMessageComponent(
     value: String,
 ) {
-    val ui = LocalUiScale.current
-
     Text(
         text = value,
         color = MaterialTheme.colorScheme.onError,
-        fontSize = ui.fonts.generalTextSize,
         fontWeight = FontWeight.Bold,
-        style = ui.typographies.generalTextStyle
+        style = MaterialTheme.typography.bodyLarge,
     )
 }

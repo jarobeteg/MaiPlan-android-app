@@ -40,7 +40,8 @@ import com.example.maiplan.components.TimeInputComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.AlarmScheduler
@@ -61,8 +62,15 @@ fun CreateEventScreen(
     onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val context = LocalContext.current
+    val blankTitleMessage = stringResource(R.string.blank_event_title)
+    val blankDateMessage = stringResource(R.string.blank_event_date)
+    val dateInPastMessage = stringResource(R.string.event_date_in_past)
+    val blankStartTimeMessage = stringResource(R.string.blank_event_start_time)
+    val blankEndTimeMessage = stringResource(R.string.blank_event_end_time)
+    val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
+    val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
     categoryViewModel.getAllCategories(UserSession.userId!!)
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
@@ -90,6 +98,7 @@ fun CreateEventScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -126,19 +135,19 @@ fun CreateEventScreen(
                 val today = LocalDate.now()
 
                 when {
-                    title.isBlank() -> errorMessage = context.getString(R.string.blank_event_title)
+                    title.isBlank() -> errorMessage = blankTitleMessage
 
-                    date == null -> errorMessage = context.getString(R.string.blank_event_date)
+                    date == null -> errorMessage = blankDateMessage
 
-                    date!!.isBefore(today) -> errorMessage = context.getString(R.string.event_date_in_past)
+                    date!!.isBefore(today) -> errorMessage = dateInPastMessage
 
-                    startTime == null -> errorMessage = context.getString(R.string.blank_event_start_time)
+                    startTime == null -> errorMessage = blankStartTimeMessage
 
-                    endTime == null -> errorMessage = context.getString(R.string.blank_event_end_time)
+                    endTime == null -> errorMessage = blankEndTimeMessage
 
-                    endTime!!.isBefore(startTime) -> errorMessage = context.getString(R.string.event_end_time_before_start_time)
+                    endTime!!.isBefore(startTime) -> errorMessage = invalidTimeRangeMessage
 
-                    selectedCategory == null -> errorMessage = context.getString(R.string.blank_event_category)
+                    selectedCategory == null -> errorMessage = blankCategoryMessage
 
                     else -> {
                         errorMessage = null

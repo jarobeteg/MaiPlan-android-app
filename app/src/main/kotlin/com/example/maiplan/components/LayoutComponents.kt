@@ -1,11 +1,19 @@
 package com.example.maiplan.components
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -18,8 +26,48 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
-import com.example.maiplan.utils.LocalUiScale
+import androidx.compose.ui.unit.dp
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.LocalAdaptiveLayout
+
+@Composable
+fun AuthScreenContainer(
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    val ui = LocalAppDesign.current
+    val adaptiveLayout = LocalAdaptiveLayout.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surfaceContainer,
+                        MaterialTheme.colorScheme.primary,
+                    )
+                )
+            )
+            .imePadding(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier
+                .widthIn(max = adaptiveLayout.formMaxWidth)
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .padding(ui.dimensions.generalPadding)
+                .clip(MaterialTheme.shapes.large)
+                .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.95f))
+                .padding(ui.dimensions.cardPadding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            content = content,
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,22 +75,16 @@ fun SimpleTopBar(
     text: String,
     onBackClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     CenterAlignedTopAppBar(
         title = {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = text,
-                    fontSize = ui.fonts.generalTopBarTitleSize,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center
+            )
         },
         navigationIcon = {
             IconButton(
@@ -52,25 +94,21 @@ fun SimpleTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
 @Composable
 fun SectionTitle(text: String) {
-    val ui = LocalUiScale.current
-
     Text(
         text = text,
-        fontSize = ui.fonts.generalTopBarTitleSize,
         style = MaterialTheme.typography.titleLarge,
         color = MaterialTheme.colorScheme.onBackground,
         modifier = Modifier.fillMaxWidth(),

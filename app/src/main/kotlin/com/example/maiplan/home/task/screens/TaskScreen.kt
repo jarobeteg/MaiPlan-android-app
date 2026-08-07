@@ -10,8 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.maiplan.home.navigation.HomeNavigationBar
 
@@ -31,9 +29,8 @@ fun TaskScreen(
         ) {
             Text(
                 text = "Task",
-                fontSize = 24.sp,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Bold
             )
         }
     }

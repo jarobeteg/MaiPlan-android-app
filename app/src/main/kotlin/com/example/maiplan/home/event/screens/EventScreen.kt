@@ -1,6 +1,5 @@
 package com.example.maiplan.home.event.screens
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -55,7 +54,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -68,7 +66,8 @@ import com.example.maiplan.components.getMonthText
 import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
@@ -82,7 +81,7 @@ fun EventScreen(
     onUpdateEventClick: (Int) -> Unit,
     onDeleteClick: (Int?, Int, LocalDate) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(LocalDate.now())
@@ -96,8 +95,7 @@ fun EventScreen(
     var showDatePicker by remember { mutableStateOf(false) }
     val closeDatePicker = { showDatePicker = false }
 
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val adaptiveLayout = LocalAdaptiveLayout.current
 
     Scaffold(
         topBar = {
@@ -108,7 +106,7 @@ fun EventScreen(
             )},
         bottomBar = { HomeNavigationBar(rootNavController, context) }
     ) { innerPadding ->
-        if (isLandscape) {
+        if (adaptiveLayout.useTwoPaneLayout) {
             Row(
                 modifier = Modifier
                     .padding(innerPadding)
@@ -194,7 +192,7 @@ fun MonthCalendarSection(
     onDateSelected: (LocalDate) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     val firstDayOfMonth = selectedDate.withDayOfMonth(1)
     val daysInMonth = selectedDate.lengthOfMonth()
@@ -243,8 +241,7 @@ fun MonthCalendarSection(
                     ) {
                         Text(
                             text = day,
-                            fontSize = ui.fonts.generalTextSize,
-                            style = ui.typographies.generalTextStyle,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -290,7 +287,7 @@ fun MonthCalendarSection(
                                     ) {
                                         Text(
                                             text = date.dayOfMonth.toString(),
-                                            fontSize = ui.fonts.generalTextSize,
+                                            style = MaterialTheme.typography.bodyLarge,
                                             color = when {
                                                 isSelected -> MaterialTheme.colorScheme.onPrimary
                                                 else -> MaterialTheme.colorScheme.onBackground
@@ -360,7 +357,7 @@ fun DayEventsSection(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     LazyColumn(
         modifier = modifier.fillMaxSize().clipToBounds(),
@@ -445,7 +442,7 @@ fun DayEventsSection(
                             },
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(ui.components.cardIconSize)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
@@ -462,14 +459,14 @@ fun DayEventsSection(
 fun EventCard(
     event: CalendarEventUI
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         shape = MaterialTheme.shapes.small,
-        elevation = CardDefaults.cardElevation(defaultElevation = ui.components.smallCardElevation)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
             modifier = Modifier
@@ -482,7 +479,7 @@ fun EventCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .width(ui.components.colorStripSize)
+                        .width(8.dp)
                         .fillMaxHeight()
                         .background(event.color)
                 )
@@ -500,7 +497,7 @@ fun EventCard(
                     ) {
                         Text(
                             text = event.title,
-                            style = ui.typographies.eventCardTitleStyle,
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.weight(ui.dimensions.generalWeight)
                         )
@@ -509,7 +506,7 @@ fun EventCard(
 
                         Text(
                             text = "${event.startTime} - ${event.endTime}",
-                            style = ui.typographies.eventCardTimeStyle,
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onBackground
                         )
                     }
@@ -520,7 +517,7 @@ fun EventCard(
                     ) {
                         Text(
                             text = event.description,
-                            style = ui.typographies.eventCardDescriptionStyle,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onBackground,
                             modifier = Modifier.weight(ui.dimensions.generalWeight)
                         )
@@ -531,7 +528,7 @@ fun EventCard(
                             imageVector = event.icon,
                             contentDescription = null,
                             tint = event.color,
-                            modifier = Modifier.size(ui.components.cardIconSize)
+                            modifier = Modifier.size(32.dp)
                         )
                     }
                 }
@@ -547,22 +544,16 @@ fun EventTopBar(
     onDatePickerClick: () -> Unit,
     onCreateEventClick: () -> Unit,
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     CenterAlignedTopAppBar(
         title = {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = title,
-                    fontSize = ui.fonts.generalTopBarTitleSize,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center
+            )
         },
         navigationIcon = {
             IconButton(
@@ -572,7 +563,7 @@ fun EventTopBar(
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -585,14 +576,13 @@ fun EventTopBar(
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }

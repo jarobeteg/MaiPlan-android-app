@@ -1,7 +1,5 @@
 package com.example.maiplan.components
 
-import android.annotation.SuppressLint
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,9 +13,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -32,7 +34,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -54,12 +56,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -68,7 +68,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.utils.common.IconData.allIcons
 import java.time.Instant
@@ -79,31 +79,22 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.forEach
 
-@SuppressLint("ConfigurationScreenWidthHeight")
+private val DialogIconSize = 24.dp
+private val PickerPreviewSize = 120.dp
+private val IconPickerCellSize = 48.dp
+private val IconGridMaxHeight = 360.dp
+private val SliderHeight = 64.dp
+private val SliderThumbSize = 24.dp
+private val SliderTrackHeight = 12.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DatePickerDialogComponent(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val datePickerState = rememberDatePickerState()
-
-    val configuration = LocalConfiguration.current
-    val orientation = configuration.orientation
-
-    val baseWidth = 360f
-    val baseHeight = 550f
-
-    val scaleFactor = remember(configuration) {
-        if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            val targetHeight = configuration.screenHeightDp * 0.65f
-            targetHeight / baseHeight
-        } else {
-            val targetWidth = configuration.screenWidthDp * 0.6f
-            targetWidth / baseWidth
-        }
-    }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -112,7 +103,10 @@ fun DatePickerDialogComponent(
         )
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(ui.dimensions.dialogPadding),
+            contentAlignment = Alignment.Center,
         ) {
 
             Box(
@@ -126,19 +120,19 @@ fun DatePickerDialogComponent(
                     }
             )
 
-            Box(
-                modifier = Modifier.align(Alignment.Center)
-            ) {
-                Surface(
+            Surface(
                     modifier = Modifier
-                        .width(360.dp)
-                        .scale(scaleFactor),
+                        .widthIn(max = 360.dp)
+                        .fillMaxWidth()
+                        .heightIn(max = 600.dp),
                     shape = MaterialTheme.shapes.extraLarge,
                     color = MaterialTheme.colorScheme.primary,
                     tonalElevation = 6.dp
                 ) {
                     Column(
-                        modifier = Modifier.padding(bottom = 8.dp),
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(bottom = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         DatePicker(
@@ -193,63 +187,43 @@ fun DatePickerDialogComponent(
                             }
                         }
                     }
-                }
             }
         }
     }
 }
 
-@SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TimePickerDialogComponent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val timePickerState = rememberTimePickerState(is24Hour = true)
-
-    val configuration = LocalConfiguration.current
-    val orientation = configuration.orientation
-    val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    val baseWidth = 360f
-    val baseHeight = 550f
-
-    val scaleFactor = remember(configuration) {
-        if (isLandscape) {
-            val targetHeight = configuration.screenHeightDp * 0.65f
-            targetHeight / baseHeight
-        } else {
-            val targetWidth = configuration.screenWidthDp * 0.6f
-            targetWidth / baseWidth
-        }
-    }
 
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(ui.dimensions.dialogPadding),
             contentAlignment = Alignment.Center
         ) {
             Surface(
-                modifier = if (isLandscape) {
-                    Modifier
-                        .fillMaxWidth(0.45f)
-                        .scale(scaleFactor)
-                } else {
-                    Modifier
-                        .width(baseWidth.dp)
-                        .scale(scaleFactor)
-                },
+                modifier = Modifier
+                    .widthIn(max = 360.dp)
+                    .fillMaxWidth()
+                    .heightIn(max = 600.dp),
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.primary,
                 tonalElevation = 8.dp
             ) {
                 Column(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(ui.dimensions.dialogPadding),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     TimePicker(
@@ -304,7 +278,7 @@ fun ColorPickerRow(
     selectedColor: Color,
     onColorSelected: (Color) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var showColorPicker by remember { mutableStateOf(false) }
     val closeColorPicker = { showColorPicker = false }
 
@@ -326,23 +300,22 @@ fun ColorPickerRow(
             label = {
                 Text(
                     text = stringResource(R.string.category_color),
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             trailingIcon = {
                 Box(
                     modifier = Modifier
                         .padding(end = 16.dp)
-                        .size(ui.components.generalIconSize)
+                        .size(DialogIconSize)
                         .background(selectedColor, CircleShape)
                         .border(ui.dimensions.generalBorder, Color.Gray, CircleShape)
                 )
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ui.components.generalFieldHeight),
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+                .heightIn(min = 56.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
@@ -374,7 +347,7 @@ fun CustomSlider(
     valueRange: ClosedFloatingPointRange<Float>,
     trackBrush: Brush
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     Slider(
         value = value,
@@ -387,11 +360,11 @@ fun CustomSlider(
         ),
         modifier = Modifier
             .fillMaxWidth()
-            .height(ui.components.sliderHeight),
+            .height(SliderHeight),
         thumb = {
             Box(
                 modifier = Modifier
-                    .size(ui.components.thumbSize)
+                    .size(SliderThumbSize)
                     .background(MaterialTheme.colorScheme.primary, CircleShape)
             )
         },
@@ -399,7 +372,7 @@ fun CustomSlider(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(ui.components.trackHeight)
+                    .height(SliderTrackHeight)
                     .background(trackBrush, MaterialTheme.shapes.extraSmall)
             )
         }
@@ -412,7 +385,7 @@ fun ColorPickerDialog(
     onColorSelected: (Color) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
@@ -431,8 +404,8 @@ fun ColorPickerDialog(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier
-                .padding(ui.dimensions.dialogPadding)
-                .then(Modifier.width(ui.components.dialogWidth))
+                .widthIn(max = 560.dp)
+                .fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(ui.dimensions.dialogPadding),
@@ -440,14 +413,14 @@ fun ColorPickerDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(ui.components.previewSize)
+                        .size(PickerPreviewSize)
                         .background(color, CircleShape)
                         .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
                 )
 
                 AdjustableSpacer(ui.dimensions.generalSpacer)
 
-                Text(stringResource(R.string.hue), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.hue), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = hue,
                     onValueChange = { hue = it },
@@ -457,7 +430,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.saturation), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.saturation), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = saturation,
                     onValueChange = { saturation = it },
@@ -467,7 +440,7 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.brightness), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
+                Text(stringResource(R.string.brightness), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
                 CustomSlider(
                     value = value,
                     onValueChange = { value = it },
@@ -480,9 +453,9 @@ fun ColorPickerDialog(
                 AdjustableSpacer(ui.dimensions.generalSpacer)
 
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground) }
+                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground) }
                     TextButton(onClick = { onColorSelected(color); onDismiss() }) { Text(
-                        stringResource(R.string.select), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground) }
+                        stringResource(R.string.select), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground) }
                 }
             }
         }
@@ -495,7 +468,7 @@ fun IconPickerRow(
     onIconSelected: (ImageVector) -> Unit,
     onIconSelectedString: (String) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var showIconPicker by remember { mutableStateOf(false) }
     val closeIconPicker = { showIconPicker = false }
 
@@ -517,8 +490,7 @@ fun IconPickerRow(
             label = {
                 Text(
                     text = stringResource(R.string.category_icon),
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.generalTextStyle
+                    style = MaterialTheme.typography.bodyLarge,
                 )
             },
             trailingIcon = {
@@ -528,15 +500,15 @@ fun IconPickerRow(
                         contentDescription = null,
                         modifier = Modifier
                             .padding(end = 16.dp)
-                            .size(ui.components.generalIconSize),
+                            .size(DialogIconSize),
                         tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(ui.components.generalFieldHeight),
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
+                .heightIn(min = 56.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = TextFieldDefaults.colors(
                 disabledContainerColor = MaterialTheme.colorScheme.background,
                 disabledIndicatorColor = MaterialTheme.colorScheme.onBackground,
@@ -569,7 +541,7 @@ fun IconPickerDialog(
     onIconSelectedString: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val scrollState = rememberLazyGridState()
 
     Dialog(onDismissRequest = onDismiss) {
@@ -577,8 +549,8 @@ fun IconPickerDialog(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.tertiaryContainer,
             modifier = Modifier
-                .padding(ui.dimensions.iconPickerDialogPadding)
-                .then(Modifier.width(ui.components.dialogWidth))
+                .widthIn(max = 560.dp)
+                .fillMaxWidth()
         ) {
             Column(
                 modifier = Modifier.padding(ui.dimensions.iconPickerDialogPadding),
@@ -586,11 +558,11 @@ fun IconPickerDialog(
             ) {
                 Box(
                     modifier = Modifier
-                        .height(ui.components.gridHeight)
+                        .heightIn(max = IconGridMaxHeight)
                         .fillMaxWidth()
                 ) {
                     LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = ui.components.iconPickerIconSize),
+                        columns = GridCells.Adaptive(minSize = IconPickerCellSize),
                         contentPadding = PaddingValues(12.dp),
                         state = scrollState,
                         modifier = Modifier.fillMaxSize()
@@ -598,7 +570,7 @@ fun IconPickerDialog(
                         items(allIcons.entries.toList()) { (key, icon) ->
                             Box(
                                 modifier = Modifier
-                                    .size(ui.components.iconPickerIconSize)
+                                    .size(IconPickerCellSize)
                                     .padding(ui.dimensions.gridPadding)
                                     .clickable {
                                         onIconSelected(icon)
@@ -626,7 +598,7 @@ fun IconPickerDialog(
                             modifier = Modifier
                                 .align(Alignment.BottomCenter)
                                 .fillMaxWidth()
-                                .height(ui.components.generalIconSize)
+                                .height(DialogIconSize)
                                 .background(
                                     Brush.verticalGradient(
                                         colors = listOf(
@@ -640,7 +612,7 @@ fun IconPickerDialog(
                 }
 
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.cancel), fontSize = ui.fonts.generalTextSize, color = MaterialTheme.colorScheme.onBackground)
+                    Text(stringResource(R.string.cancel), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
                 }
             }
         }
@@ -673,7 +645,7 @@ fun PriorityDropdown(
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true),
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -717,13 +689,13 @@ fun CategoryDropdownComponent(
     selectedCategory: CategoryEntity?,
     onCategorySelected: (CategoryEntity) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
         onExpandedChange = { expanded = !expanded },
-        modifier = Modifier.height(ui.components.generalFieldHeight)
+        modifier = Modifier.heightIn(min = 56.dp)
     ) {
         OutlinedTextField(
             value = selectedCategory?.name ?: "",
@@ -731,11 +703,10 @@ fun CategoryDropdownComponent(
             readOnly = true,
             label = { Text(
                 text = "Category",
-                fontSize = ui.fonts.generalTextSize,
-                style = ui.typographies.generalTextStyle
+                style = MaterialTheme.typography.bodyLarge,
             ) },
-            textStyle = TextStyle(fontSize = ui.fonts.generalTextSize),
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, modifier = Modifier.size(ui.components.generalIconSize)) },
+            textStyle = MaterialTheme.typography.bodyLarge,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded, modifier = Modifier.size(DialogIconSize)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.background,
                 unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -748,7 +719,7 @@ fun CategoryDropdownComponent(
             ),
             modifier = Modifier
                 .fillMaxWidth()
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
         )
 
         ExposedDropdownMenu(
@@ -762,17 +733,16 @@ fun CategoryDropdownComponent(
                     text = {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.height(ui.components.generalFieldHeight)
+                            modifier = Modifier.heightIn(min = 56.dp)
                         ) {
                             Icon(
                                 imageVector = IconData.getIconByKey(category.icon),
                                 contentDescription = null,
-                                modifier = Modifier.size(ui.components.generalIconSize).padding(end = 8.dp)
+                                modifier = Modifier.size(DialogIconSize).padding(end = 8.dp)
                             )
                             Text(
                                 text = category.name,
-                                fontSize = ui.fonts.generalTextSize,
-                                style = ui.typographies.generalTextStyle,
+                                style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onBackground)
                         }
                     },

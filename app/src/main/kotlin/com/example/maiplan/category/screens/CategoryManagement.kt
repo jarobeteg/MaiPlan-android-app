@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.size
@@ -53,7 +54,8 @@ import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
@@ -64,7 +66,7 @@ fun CategoryManagementScreen(
     onCardSwipeEdit: (CategoryEntity) -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val context = LocalContext.current
 
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
@@ -81,6 +83,7 @@ fun CategoryManagementScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
                 .padding(16.dp)
         ) {
             SearchFieldComponent(R.string.category_search, searchQuery, 32) { searchQuery = it }
@@ -136,22 +139,16 @@ fun CategoryManagementTopBar(
     onBackClick: () -> Unit,
     onCreateCategoryClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     CenterAlignedTopAppBar(
         title = {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = title,
-                    fontSize = ui.fonts.generalTopBarTitleSize,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center
+            )
         },
         navigationIcon = {
             IconButton(
@@ -161,7 +158,7 @@ fun CategoryManagementTopBar(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
@@ -174,15 +171,14 @@ fun CategoryManagementTopBar(
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalTopBarIconSize),
+                    modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
@@ -190,7 +186,7 @@ fun CategoryManagementTopBar(
 fun CategoryCard(category: CategoryEntity) {
     val backgroundColor = Color(category.color.toULong())
     val isDarkTheme = isSystemInDarkTheme()
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
     val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
@@ -204,7 +200,7 @@ fun CategoryCard(category: CategoryEntity) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(ui.components.iconCardHeight)
+            .heightIn(min = 128.dp)
             .padding(top = 4.dp, bottom = 4.dp)
             .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
         colors = CardDefaults.cardColors(containerColor = backgroundColor)
@@ -214,7 +210,7 @@ fun CategoryCard(category: CategoryEntity) {
                 Icon(
                     imageVector = IconData.getIconByKey(category.icon),
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.cardIconSize),
+                    modifier = Modifier.size(32.dp),
                     tint = textColor
                 )
 
@@ -222,8 +218,7 @@ fun CategoryCard(category: CategoryEntity) {
 
                 Text(
                     text = category.name,
-                    fontSize = ui.fonts.generalTextSize,
-                    style = ui.typographies.cardTitleStyle,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = textColor
                 )
@@ -233,8 +228,7 @@ fun CategoryCard(category: CategoryEntity) {
 
             Text(
                 text = category.description,
-                fontSize = ui.fonts.generalTextSize,
-                style = ui.typographies.cardBodyStyle,
+                style = MaterialTheme.typography.bodyMedium,
                 color = textColor.copy(alpha = 0.8f)
             )
         }
@@ -248,7 +242,7 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
         SwipeToDismissBoxValue.EndToStart -> Color(0xFF1DE9B6)
         SwipeToDismissBoxValue.Settled -> Color.Transparent
     }
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     Row(
         modifier = Modifier
@@ -268,14 +262,14 @@ fun DismissBackground(dismissState: SwipeToDismissBoxState) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(ui.components.cardIconSize)
+                modifier = Modifier.size(32.dp)
             )
         } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
             Icon(
                 imageVector = Icons.Default.Edit,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(ui.components.cardIconSize)
+                modifier = Modifier.size(32.dp)
             )
         }
     }

@@ -1,6 +1,5 @@
 package com.example.maiplan.home.note.screens
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -39,7 +37,9 @@ import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.LocalAdaptiveLayout
+import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.viewmodel.note.NoteViewModel
 
 @Composable
@@ -95,10 +95,9 @@ private fun NoteEditorScreen(
 ) {
     val categories by viewModel.categoryList.observeAsState(emptyList())
     val isLoading = saveResult is Result.Loading
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val bodyMinLines = if (isLandscape) 2 else 3
-    val bodyMaxLines = if (isLandscape) 5 else 9
+    val adaptiveLayout = LocalAdaptiveLayout.current
+    val bodyMinLines = if (adaptiveLayout.isShort) 2 else 3
+    val bodyMaxLines = if (adaptiveLayout.isShort) 5 else 9
     var title by remember { mutableStateOf(initialTitle) }
     var content by remember { mutableStateOf(initialContent) }
     var localError by remember { mutableStateOf<String?>(null) }
@@ -118,6 +117,7 @@ private fun NoteEditorScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -181,7 +181,7 @@ private fun NoteBodyEditor(
     minLines: Int,
     maxLines: Int
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val contentColor = MaterialTheme.colorScheme.onBackground
 
     Column(
@@ -191,7 +191,7 @@ private fun NoteBodyEditor(
     ) {
         Text(
             text = stringResource(R.string.note_content),
-            fontSize = ui.fonts.passwordStrengthTextSize,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Medium,
             color = contentColor.copy(alpha = 0.62f),
             modifier = Modifier.padding(horizontal = 2.dp)
@@ -206,8 +206,8 @@ private fun NoteBodyEditor(
             value = content,
             onValueChange = onContentChange,
             textStyle = TextStyle(
-                fontSize = ui.fonts.generalTextSize,
-                lineHeight = ui.fonts.generalTextSize * 1.45f,
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                lineHeight = MaterialTheme.typography.bodyLarge.lineHeight,
                 color = contentColor
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
@@ -221,8 +221,7 @@ private fun NoteBodyEditor(
                     if (content.isEmpty()) {
                         Text(
                             text = stringResource(R.string.note_body_placeholder),
-                            fontSize = ui.fonts.generalTextSize,
-                            lineHeight = ui.fonts.generalTextSize * 1.45f,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = contentColor.copy(alpha = 0.45f)
                         )
                     }

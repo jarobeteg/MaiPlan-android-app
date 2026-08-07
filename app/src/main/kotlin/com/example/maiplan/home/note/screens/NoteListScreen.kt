@@ -25,7 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.automirrored.filled.Notes
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -61,7 +61,8 @@ import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.home.navigation.HomeNavigationBar
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.viewmodel.note.NoteViewModel
 import java.time.Instant
 import java.time.ZoneId
@@ -75,7 +76,7 @@ fun NoteListScreen(
     onNoteClick: (NoteEntity) -> Unit,
     onDeleteClick: (Int) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val context = LocalContext.current
     val notes by viewModel.noteList.observeAsState(emptyList())
     val categories by viewModel.categoryList.observeAsState(emptyList())
@@ -100,7 +101,7 @@ fun NoteListScreen(
                 Icon(
                     imageVector = Icons.Filled.Add,
                     contentDescription = null,
-                    modifier = Modifier.size(ui.components.generalIconSize)
+                    modifier = Modifier.size(24.dp)
                 )
             }
         },
@@ -110,6 +111,7 @@ fun NoteListScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
                 .padding(horizontal = ui.dimensions.largePaddingValue, vertical = ui.dimensions.mediumPaddingValue),
             verticalArrangement = Arrangement.spacedBy(ui.dimensions.mediumArrangementSpace)
         ) {
@@ -153,26 +155,17 @@ fun NoteListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotesTopBar() {
-    val ui = LocalUiScale.current
-
     CenterAlignedTopAppBar(
         title = {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.notes),
-                    fontSize = ui.fonts.generalTopBarTitleSize,
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
+            Text(
+                text = stringResource(R.string.notes),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
@@ -183,7 +176,7 @@ private fun NoteCategoryFilter(
     selectedCategoryId: Int?,
     onCategorySelected: (Int?) -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
@@ -193,7 +186,7 @@ private fun NoteCategoryFilter(
             FilterChip(
                 selected = selectedCategoryId == null,
                 onClick = { onCategorySelected(null) },
-                label = { Text(stringResource(R.string.all), fontSize = ui.fonts.generalTextSize) },
+                label = { Text(stringResource(R.string.all), style = MaterialTheme.typography.bodyLarge) },
                 shape = MaterialTheme.shapes.small,
                 colors = neutralFilterChipColors()
             )
@@ -204,7 +197,7 @@ private fun NoteCategoryFilter(
             FilterChip(
                 selected = selectedCategoryId == category.categoryId,
                 onClick = { onCategorySelected(category.categoryId) },
-                label = { Text(category.name, fontSize = ui.fonts.generalTextSize) },
+                label = { Text(category.name, style = MaterialTheme.typography.bodyLarge) },
                 leadingIcon = {
                     Box(
                         modifier = Modifier
@@ -232,7 +225,7 @@ private fun neutralFilterChipColors() = FilterChipDefaults.filterChipColors(
 
 @Composable
 private fun NoteListSummary(count: Int, isFiltered: Boolean) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val label = when {
         count == 1 && isFiltered -> stringResource(R.string.note_result_single)
         count == 1 -> stringResource(R.string.note_count_single)
@@ -242,7 +235,7 @@ private fun NoteListSummary(count: Int, isFiltered: Boolean) {
 
     Text(
         text = label,
-        fontSize = ui.fonts.passwordStrengthTextSize,
+        style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.65f),
         fontWeight = FontWeight.Medium
     )
@@ -253,7 +246,7 @@ private fun NoteEmptyState(
     isFiltered: Boolean,
     onCreateClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -274,16 +267,16 @@ private fun NoteEmptyState(
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Filled.Notes,
+                        imageVector = Icons.AutoMirrored.Filled.Notes,
                         contentDescription = null,
-                        modifier = Modifier.size(ui.components.generalIconSize)
+                        modifier = Modifier.size(24.dp)
                     )
                 }
             }
 
             Text(
                 text = if (isFiltered) stringResource(R.string.note_empty_filtered) else stringResource(R.string.note_empty),
-                fontSize = ui.fonts.generalTextSize,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -293,10 +286,10 @@ private fun NoteEmptyState(
                     Icon(
                         imageVector = Icons.Filled.Add,
                         contentDescription = null,
-                        modifier = Modifier.size(ui.components.generalIconSize)
+                        modifier = Modifier.size(24.dp)
                     )
                     AdjustableSpacer(ui.dimensions.mediumSpacer)
-                    Text(text = stringResource(R.string.note_new), fontSize = ui.fonts.generalTextSize)
+                    Text(text = stringResource(R.string.note_new), style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -310,7 +303,7 @@ private fun NoteCard(
     onClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val formatter = remember { DateTimeFormatter.ofPattern("MMM d, HH:mm") }
     val updatedAt = remember(note.updatedAt) {
         Instant.ofEpochMilli(note.updatedAt)
@@ -350,7 +343,7 @@ private fun NoteCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = note.title,
-                        fontSize = ui.fonts.generalTextSize,
+                        style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                         maxLines = 1,
@@ -360,7 +353,7 @@ private fun NoteCard(
                     if (!note.content.isNullOrBlank()) {
                         Text(
                             text = note.content,
-                            fontSize = ui.fonts.generalTextSize,
+                            style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.75f),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -390,13 +383,13 @@ private fun NoteCard(
                                 )
                                 Text(
                                     text = category?.name ?: stringResource(R.string.uncategorized),
-                                    fontSize = ui.fonts.passwordStrengthTextSize
+                                    style = MaterialTheme.typography.labelMedium,
                                 )
                             }
                         }
                         Text(
                             text = updatedAt,
-                            fontSize = ui.fonts.passwordStrengthTextSize,
+                            style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.55f)
                         )
                     }

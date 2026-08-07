@@ -5,9 +5,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Search
@@ -34,7 +37,8 @@ import com.example.maiplan.components.IconPickerRow
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.adaptiveContentWidth
 
 @Composable
 fun CreateCategoryScreen(
@@ -42,7 +46,7 @@ fun CreateCategoryScreen(
     onSaveClick: (String, String, String, String) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     val saveResult by viewModel.createCategoryResult.observeAsState()
     val isLoading = saveResult is Result.Loading
@@ -58,8 +62,10 @@ fun CreateCategoryScreen(
     ) }) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxHeight()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {

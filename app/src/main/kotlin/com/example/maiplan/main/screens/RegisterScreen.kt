@@ -1,26 +1,15 @@
 package com.example.maiplan.main.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.example.maiplan.R
 import com.example.maiplan.components.AdjustableSpacer
+import com.example.maiplan.components.AuthScreenContainer
 import com.example.maiplan.components.ClickableTextComponent
 import com.example.maiplan.components.EmailTextComponent
 import com.example.maiplan.components.ErrorMessageComponent
@@ -29,17 +18,16 @@ import com.example.maiplan.components.HeadingTextComponent
 import com.example.maiplan.components.PasswordTextComponent
 import com.example.maiplan.components.SubmitButtonComponent
 import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 fun RegisterScreen(
     viewModel: AuthViewModel,
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
 
     val registerResult by viewModel.registerResult.observeAsState()
     val isLoading = registerResult is Result.Loading
@@ -50,25 +38,7 @@ fun RegisterScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var passwordAgainVisible by remember { mutableStateOf(false) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(MaterialTheme.colorScheme.surfaceContainer, MaterialTheme.colorScheme.primary)
-                )
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .then(ui.components.contentWidth)
-                .padding(ui.dimensions.generalPadding)
-                .clip(MaterialTheme.shapes.large)
-                .background(Color.White.copy(alpha = 0.95f))
-                .padding(ui.dimensions.cardPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    AuthScreenContainer {
             HeadingTextComponent(
                 text = stringResource(R.string.create_an_account)
             )
@@ -149,6 +119,5 @@ fun RegisterScreen(
                     onBackToLogin()
                 }
             )
-        }
     }
 }

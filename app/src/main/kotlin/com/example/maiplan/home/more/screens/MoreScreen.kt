@@ -55,7 +55,8 @@ import com.example.maiplan.components.AdjustableSpacer
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.utils.BaseActivity
-import com.example.maiplan.utils.LocalUiScale
+import com.example.maiplan.utils.LocalAppDesign
+import com.example.maiplan.utils.adaptiveContentWidth
 
 @Composable
 fun MoreScreen(
@@ -73,6 +74,7 @@ fun MoreScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .adaptiveContentWidth()
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.Start
@@ -89,27 +91,18 @@ fun MoreScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreTopBar() {
-    val ui = LocalUiScale.current
-
     CenterAlignedTopAppBar(
         title = {
-            Box(
-                modifier = Modifier.fillMaxHeight(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.more),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontSize = ui.fonts.generalTopBarTitleSize,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
+            Text(
+                text = stringResource(R.string.more),
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onPrimary,
+                textAlign = TextAlign.Center
+            )
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary
         ),
-        modifier = Modifier.height(ui.components.generalTopBarHeight)
     )
 }
 
@@ -120,7 +113,7 @@ fun MoreScreenButton(
     leadingIcon: ImageVector,
     showDivider: Boolean
 ) {
-    val ui = LocalUiScale.current
+    val ui = LocalAppDesign.current
     val interactionSource = remember { MutableInteractionSource() }
 
     Column {
@@ -140,7 +133,7 @@ fun MoreScreenButton(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(ui.components.generalIconSize)
+                modifier = Modifier.size(24.dp)
             )
 
             AdjustableSpacer(ui.dimensions.smallSpacer)
@@ -148,7 +141,7 @@ fun MoreScreenButton(
             Text(
                 text = text,
                 color = MaterialTheme.colorScheme.onTertiary,
-                fontSize = ui.fonts.generalTextSize,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.weight(1f)
             )
@@ -157,7 +150,7 @@ fun MoreScreenButton(
                 imageVector = Icons.AutoMirrored.Filled.ArrowRight,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onTertiary,
-                modifier = Modifier.size(ui.components.generalIconSize)
+                modifier = Modifier.size(24.dp)
             )
         }
 
