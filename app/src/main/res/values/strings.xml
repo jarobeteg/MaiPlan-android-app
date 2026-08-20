@@ -12,24 +12,37 @@
     <string name="all">All</string>
 
     <!-- main screens -->
-    <string name="welcome_login">Welcome To MaiPlan!</string>
-    <string name="create_an_account">Create an account</string>
     <string name="forgot_password">Forgot Password?</string>
-    <string name="reset_password">Reset your password</string>
-    <string name="no_account">Don\'t have an account? Sign up</string>
-    <string name="have_account">Already have an account? Log in</string>
-    <string name="return_to_login">Return to login screen</string>
     <string name="email">Email</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="password_again">Password Again</string>
-    <string name="login">Login</string>
-    <string name="register">Register</string>
-    <string name="reset">Reset</string>
     <string name="login_success">You are now logged in.</string>
     <string name="register_success">Registration successful! You are now logged in.</string>
     <string name="reset_password_success">Password reset successful! You are now logged in.</string>
     <string name="welcome_back">Welcome back to MaiPlan!</string>
+
+    <!-- authentication experience -->
+    <string name="auth_login_title">Welcome back</string>
+    <string name="auth_login_subtitle">Sign in to keep your plans, priorities, and progress moving.</string>
+    <string name="auth_register_title">Create your account</string>
+    <string name="auth_register_subtitle">Bring your schedule, tasks, and ideas together in one calm workspace.</string>
+    <string name="auth_reset_title">Choose a new password</string>
+    <string name="auth_reset_subtitle">Enter your account email and set a secure new password.</string>
+    <string name="auth_login_action">Sign in</string>
+    <string name="auth_register_action">Create account</string>
+    <string name="auth_reset_action">Update password</string>
+    <string name="auth_confirm_password">Confirm password</string>
+    <string name="auth_new_password">New password</string>
+    <string name="auth_confirm_new_password">Confirm new password</string>
+    <string name="auth_no_account_prompt">New to MaiPlan?</string>
+    <string name="auth_create_account_action">Create account</string>
+    <string name="auth_have_account_prompt">Already a member?</string>
+    <string name="auth_sign_in_action">Sign in</string>
+    <string name="auth_remembered_prompt">Remembered your password?</string>
+    <string name="auth_back_to_sign_in">Back to sign in</string>
+    <string name="auth_secure_note">Your information is securely protected</string>
+    <string name="password_strength">Password strength: %1$s</string>
+    <string name="back">Back</string>
 
     <!-- content descriptions -->
     <string name="email_icon">Email Icon</string>
