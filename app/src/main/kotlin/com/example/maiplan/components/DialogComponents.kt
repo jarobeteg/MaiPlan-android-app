@@ -3,6 +3,7 @@ package com.example.maiplan.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,7 +81,7 @@ import kotlin.collections.component2
 import kotlin.collections.forEach
 
 private val DialogIconSize = 24.dp
-private val PickerPreviewSize = 120.dp
+private val PickerPreviewSize = 88.dp
 private val IconPickerCellSize = 48.dp
 private val IconGridMaxHeight = 360.dp
 private val SliderHeight = 64.dp
@@ -386,6 +387,10 @@ fun ColorPickerDialog(
     onDismiss: () -> Unit
 ) {
     val ui = LocalAppDesign.current
+    val dark = isSystemInDarkTheme()
+    val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
+    val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
+    val muted = if (dark) Color(0xFFAEB7C9) else Color(0xFF667085)
 
     val hsv = FloatArray(3)
     android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
@@ -401,8 +406,9 @@ fun ColorPickerDialog(
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.tertiaryContainer,
+            shape = MaterialTheme.shapes.extraLarge,
+            color = dialogSurface,
+            shadowElevation = if (dark) 0.dp else 12.dp,
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
@@ -411,16 +417,35 @@ fun ColorPickerDialog(
                 modifier = Modifier.padding(ui.dimensions.dialogPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(
+                    text = stringResource(R.string.category_choose_color_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = foreground,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.category_choose_color_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = muted,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(20.dp))
                 Box(
                     modifier = Modifier
                         .size(PickerPreviewSize)
                         .background(color, CircleShape)
-                        .border(2.dp, MaterialTheme.colorScheme.onPrimary, CircleShape)
+                        .border(3.dp, dialogSurface, CircleShape)
                 )
 
-                AdjustableSpacer(ui.dimensions.generalSpacer)
+                Spacer(Modifier.height(18.dp))
 
-                Text(stringResource(R.string.hue), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    stringResource(R.string.hue),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = foreground,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 CustomSlider(
                     value = hue,
                     onValueChange = { hue = it },
@@ -430,7 +455,12 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.saturation), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    stringResource(R.string.saturation),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = foreground,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 CustomSlider(
                     value = saturation,
                     onValueChange = { saturation = it },
@@ -440,7 +470,12 @@ fun ColorPickerDialog(
                     )
                 )
 
-                Text(stringResource(R.string.brightness), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+                Text(
+                    stringResource(R.string.brightness),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = foreground,
+                    modifier = Modifier.fillMaxWidth(),
+                )
                 CustomSlider(
                     value = value,
                     onValueChange = { value = it },
@@ -450,12 +485,23 @@ fun ColorPickerDialog(
                     )
                 )
 
-                AdjustableSpacer(ui.dimensions.generalSpacer)
+                Spacer(Modifier.height(12.dp))
 
                 Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground) }
-                    TextButton(onClick = { onColorSelected(color); onDismiss() }) { Text(
-                        stringResource(R.string.select), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground) }
+                    TextButton(onClick = onDismiss) {
+                        Text(
+                            stringResource(R.string.cancel),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = muted,
+                        )
+                    }
+                    TextButton(onClick = { onColorSelected(color); onDismiss() }) {
+                        Text(
+                            stringResource(R.string.select),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }
@@ -543,11 +589,17 @@ fun IconPickerDialog(
 ) {
     val ui = LocalAppDesign.current
     val scrollState = rememberLazyGridState()
+    val dark = isSystemInDarkTheme()
+    val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
+    val cellSurface = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
+    val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
+    val muted = if (dark) Color(0xFFAEB7C9) else Color(0xFF667085)
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.tertiaryContainer,
+            shape = MaterialTheme.shapes.extraLarge,
+            color = dialogSurface,
+            shadowElevation = if (dark) 0.dp else 12.dp,
             modifier = Modifier
                 .widthIn(max = 560.dp)
                 .fillMaxWidth()
@@ -556,6 +608,19 @@ fun IconPickerDialog(
                 modifier = Modifier.padding(ui.dimensions.iconPickerDialogPadding),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                Text(
+                    text = stringResource(R.string.category_choose_icon_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = foreground,
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.category_choose_icon_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = muted,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+                Spacer(Modifier.height(16.dp))
                 Box(
                     modifier = Modifier
                         .heightIn(max = IconGridMaxHeight)
@@ -568,7 +633,7 @@ fun IconPickerDialog(
                         modifier = Modifier.fillMaxSize()
                     ) {
                         items(allIcons.entries.toList()) { (key, icon) ->
-                            Box(
+                            Surface(
                                 modifier = Modifier
                                     .size(IconPickerCellSize)
                                     .padding(ui.dimensions.gridPadding)
@@ -577,14 +642,17 @@ fun IconPickerDialog(
                                         onIconSelectedString(key)
                                         onDismiss()
                                     },
-                                contentAlignment = Alignment.Center
+                                shape = MaterialTheme.shapes.small,
+                                color = cellSurface,
                             ) {
-                                Icon(
-                                    imageVector = icon,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.fillMaxSize()
-                                )
+                                Box(contentAlignment = Alignment.Center) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.padding(5.dp).fillMaxSize()
+                                    )
+                                }
                             }
 
                         }
@@ -612,7 +680,11 @@ fun IconPickerDialog(
                 }
 
                 TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(stringResource(R.string.cancel), style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onBackground)
+                    Text(
+                        stringResource(R.string.cancel),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = muted,
+                    )
                 }
             }
         }

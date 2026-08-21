@@ -2,60 +2,50 @@ package com.example.maiplan.category.screens
 
 import android.app.Activity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.*
+import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.maiplan.R
-import com.example.maiplan.components.AdjustableSpacer
-import com.example.maiplan.components.SearchFieldComponent
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.utils.LocalAppDesign
-import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
@@ -64,212 +54,142 @@ fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
     onCardSwipeDelete: (Int) -> Unit,
     onCardSwipeEdit: (CategoryEntity) -> Unit,
-    onCreateCategoryClick: () -> Unit
+    onCreateCategoryClick: () -> Unit,
 ) {
-    val ui = LocalAppDesign.current
     val context = LocalContext.current
-
     val categoryList by viewModel.categoryList.observeAsState(emptyList())
     var searchQuery by remember { mutableStateOf("") }
+    val filteredCategories = categoryList.filter {
+        it.name.contains(searchQuery, ignoreCase = true) ||
+            it.description.contains(searchQuery, ignoreCase = true)
+    }
 
-    Scaffold (
-        topBar = {
-            CategoryManagementTopBar(
-                title = stringResource(R.string.categories),
-                onBackClick = { (context as? Activity)?.finish() },
-                onCreateCategoryClick = onCreateCategoryClick
-            ) }) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .adaptiveContentWidth()
-                .padding(16.dp)
-        ) {
-            SearchFieldComponent(R.string.category_search, searchQuery, 32) { searchQuery = it }
-
-            AdjustableSpacer(ui.dimensions.mediumSpacer)
-
-            val filteredCategories = categoryList.filter {
-                it.name.contains(searchQuery, ignoreCase = true) || it.description.contains(searchQuery, ignoreCase = true)
-            }
-
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(filteredCategories, key = { it.categoryId }) { category ->
-                    val density = LocalDensity.current
-                    val dismissState = remember(categoryList) {
-                        SwipeToDismissBoxState(
-                            initialValue = SwipeToDismissBoxValue.Settled,
-                            confirmValueChange = {
-                                when (it) {
-                                    SwipeToDismissBoxValue.StartToEnd -> {
-                                        onCardSwipeDelete(category.categoryId)
-                                    }
-                                    SwipeToDismissBoxValue.EndToStart -> {
-                                        onCardSwipeEdit(category)
-                                    }
-                                    SwipeToDismissBoxValue.Settled -> return@SwipeToDismissBoxState false
-                                }
-                                return@SwipeToDismissBoxState true
-                            },
-                            density = density,
-                            positionalThreshold = { it * 0.9f }
-                        )
-                    }
-
-                    SwipeToDismissBox(
-                        state = dismissState,
-                        backgroundContent = { DismissBackground(dismissState) },
-                        content = {
-                            CategoryCard(category = category)
-                        }
+    CategoryScreenBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                CategoryTopBar(
+                    title = stringResource(R.string.categories),
+                    onBackClick = { (context as? Activity)?.finish() },
+                )
+            },
+            floatingActionButton = {
+                CategoryAddFloatingButton(onClick = onCreateCategoryClick)
+            },
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Column(
+                    modifier = Modifier
+                        .widthIn(max = 760.dp)
+                        .fillMaxWidth()
+                        .weight(1f),
+                ) {
+                    Spacer(Modifier.height(22.dp))
+                    CategoryListHeader(count = categoryList.size)
+                    Spacer(Modifier.height(18.dp))
+                    CategorySearchField(
+                        value = searchQuery,
+                        onValueChange = { searchQuery = it },
                     )
+                    Spacer(Modifier.height(11.dp))
+                    Text(
+                        text = stringResource(R.string.category_gesture_hint),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isSystemInDarkTheme()) Color(0xFFAEB7C9) else CategoryMuted,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                    Spacer(Modifier.height(8.dp))
 
-                    AdjustableSpacer(ui.dimensions.mediumSpacer)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 104.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        if (filteredCategories.isEmpty()) {
+                            item {
+                                CategoryEmptyState(isSearching = searchQuery.isNotBlank())
+                            }
+                        } else {
+                            items(filteredCategories, key = { it.categoryId }) { category ->
+                                val dismissState = rememberSwipeToDismissBoxState(
+                                    positionalThreshold = { it * 0.45f },
+                                )
+                                LaunchedEffect(dismissState) {
+                                    snapshotFlow { dismissState.currentValue }.collect { value ->
+                                        when (value) {
+                                            SwipeToDismissBoxValue.StartToEnd -> {
+                                                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                                                onCardSwipeDelete(category.categoryId)
+                                            }
+                                            SwipeToDismissBoxValue.EndToStart -> {
+                                                dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                                                onCardSwipeEdit(category)
+                                            }
+                                            SwipeToDismissBoxValue.Settled -> Unit
+                                        }
+                                    }
+                                }
+
+                                SwipeToDismissBox(
+                                    state = dismissState,
+                                    backgroundContent = { CategoryDismissBackground(dismissState) },
+                                ) {
+                                    CategoryListCard(
+                                        name = category.name,
+                                        description = category.description,
+                                        color = Color(category.color.toULong()),
+                                        icon = IconData.getIconByKey(category.icon),
+                                        onEditClick = { onCardSwipeEdit(category) },
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CategoryManagementTopBar(
-    title: String,
-    onBackClick: () -> Unit,
-    onCreateCategoryClick: () -> Unit
-) {
-    val ui = LocalAppDesign.current
-
-    CenterAlignedTopAppBar(
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Center
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = onBackClick,
-                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        },
-        actions = {
-            IconButton(
-                onClick = onCreateCategoryClick,
-                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
-    )
-}
-
-@Composable
-fun CategoryCard(category: CategoryEntity) {
-    val backgroundColor = Color(category.color.toULong())
-    val isDarkTheme = isSystemInDarkTheme()
-    val ui = LocalAppDesign.current
-
-    val textColor = if (backgroundColor.luminance() > 0.5f) Color.Black else Color.White
-    val borderColor = if (isDarkTheme && backgroundColor.luminance() < 0.5f) {
-        Color.LightGray
-    } else if (!isDarkTheme && backgroundColor.luminance() > 0.5f) {
-        Color.DarkGray
-    } else {
-        MaterialTheme.colorScheme.tertiaryContainer
+private fun CategoryDismissBackground(dismissState: SwipeToDismissBoxState) {
+    val deleting = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+    val editing = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+    val color = when {
+        deleting -> Color(0xFFE5484D)
+        editing -> CategoryTeal
+        else -> Color.Transparent
     }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 128.dp)
-            .padding(top = 4.dp, bottom = 4.dp)
-            .border(2.dp, borderColor, shape = MaterialTheme.shapes.medium),
-        colors = CardDefaults.cardColors(containerColor = backgroundColor)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = IconData.getIconByKey(category.icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(32.dp),
-                    tint = textColor
-                )
-
-                AdjustableSpacer(ui.dimensions.mediumSpacer)
-
-                Text(
-                    text = category.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
-            }
-
-            AdjustableSpacer(ui.dimensions.smallSpacer)
-
-            Text(
-                text = category.description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = textColor.copy(alpha = 0.8f)
-            )
-        }
-    }
-}
-
-@Composable
-fun DismissBackground(dismissState: SwipeToDismissBoxState) {
-    val color = when (dismissState.dismissDirection) {
-        SwipeToDismissBoxValue.StartToEnd -> Color(0xFFFF1744)
-        SwipeToDismissBoxValue.EndToStart -> Color(0xFF1DE9B6)
-        SwipeToDismissBoxValue.Settled -> Color.Transparent
-    }
-    val ui = LocalAppDesign.current
 
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .clip(MaterialTheme.shapes.medium)
+            .clip(RoundedCornerShape(20.dp))
             .background(color)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
-            Arrangement.Start
-        } else {
-            Arrangement.End
-        }
+        horizontalArrangement = if (deleting) Arrangement.Start else Arrangement.End,
     ) {
-        if (dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd) {
+        if (deleting || editing) {
             Icon(
-                imageVector = Icons.Default.Delete,
+                imageVector = if (deleting) Icons.Rounded.DeleteOutline else Icons.Rounded.Edit,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(32.dp)
+                tint = Color.White,
             )
-        } else if (dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart) {
-            Icon(
-                imageVector = Icons.Default.Edit,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.size(32.dp)
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(
+                    if (deleting) R.string.delete else R.string.category_edit,
+                ),
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
             )
         }
     }

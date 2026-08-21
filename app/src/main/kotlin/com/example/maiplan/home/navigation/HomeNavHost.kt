@@ -5,7 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraphBuilder
@@ -22,9 +27,19 @@ import com.example.maiplan.utils.LocalAdaptiveLayout
 fun HomeNavHost(rootNavController: NavHostController) {
     val adaptiveLayout = LocalAdaptiveLayout.current
     val context = LocalContext.current
+    val useRail = adaptiveLayout.useHomeNavigationRail
+    val safeInsets = if (useRail) {
+        WindowInsets.safeDrawing
+    } else {
+        WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+    }
 
-    Row(modifier = Modifier.fillMaxSize()) {
-        if (adaptiveLayout.useNavigationRail) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(safeInsets),
+    ) {
+        if (useRail) {
             HomeNavigationRail(rootNavController, context)
         }
 
@@ -32,10 +47,10 @@ fun HomeNavHost(rootNavController: NavHostController) {
             navController = rootNavController,
             startDestination = HomeNavRoutes.Events.route,
             modifier = Modifier.weight(1f),
-            enterTransition = { fadeIn(animationSpec = tween(0)) },
-            exitTransition = { fadeOut(animationSpec = tween(0)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(0)) },
-            popExitTransition = { fadeOut(animationSpec = tween(0)) }
+            enterTransition = { fadeIn(animationSpec = tween(180)) },
+            exitTransition = { fadeOut(animationSpec = tween(120)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(180)) },
+            popExitTransition = { fadeOut(animationSpec = tween(120)) }
         ) {
             homeNavGraph(rootNavController)
         }

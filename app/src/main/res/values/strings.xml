@@ -147,12 +147,12 @@
 
     <!-- category management screen -->
     <string name="categories">Categories</string>
-    <string name="category_new">New Category</string>
-    <string name="category_modify">Modify Category</string>
-    <string name="category_save">Save Category</string>
-    <string name="category_update">Update Category</string>
-    <string name="category_color">Select a Color</string>
-    <string name="category_icon">Select an Icon</string>
+    <string name="category_new">New category</string>
+    <string name="category_modify">Edit category</string>
+    <string name="category_save">Save category</string>
+    <string name="category_update">Save changes</string>
+    <string name="category_color">Category color</string>
+    <string name="category_icon">Category icon</string>
     <string name="category_created_success">Category added successfully.</string>
     <string name="category_updated_success">Category updated successfully.</string>
     <string name="category_search">Search categories…</string>
@@ -162,6 +162,33 @@
     <string name="hue">Hue</string>
     <string name="saturation">Saturation</string>
     <string name="brightness">Brightness</string>
+    <string name="category_add">Add category</string>
+    <string name="category_edit">Edit</string>
+    <string name="category_collection_title">Your categories</string>
+    <string name="category_collection_subtitle">Keep every part of your life organized.</string>
+    <string name="category_total">%1$d total</string>
+    <string name="category_gesture_hint">Tap to edit · Swipe right to delete · Swipe left to edit</string>
+    <string name="category_empty_title">No categories yet</string>
+    <string name="category_empty_subtitle">Create your first category to organize related events, tasks, and notes.</string>
+    <string name="category_empty_search_title">No matching categories</string>
+    <string name="category_empty_search_subtitle">Try a different name or description.</string>
+    <string name="category_create_heading">Create a category</string>
+    <string name="category_create_subtitle">Give related plans a clear visual identity.</string>
+    <string name="category_update_heading">Refine your category</string>
+    <string name="category_update_subtitle">Update how this category looks and appears across MaiPlan.</string>
+    <string name="category_details_title">Category details</string>
+    <string name="category_details_subtitle">Choose a concise name and a helpful description.</string>
+    <string name="category_appearance_title">Appearance</string>
+    <string name="category_appearance_subtitle">Make the category easy to recognize at a glance.</string>
+    <string name="category_color_subtitle">Choose an accent for this category</string>
+    <string name="category_icon_subtitle">Choose a symbol that fits</string>
+    <string name="category_preview_name">Category name</string>
+    <string name="category_preview_description">Your description will appear here.</string>
+    <string name="category_live_preview">Preview</string>
+    <string name="category_choose_color_title">Choose a color</string>
+    <string name="category_choose_color_subtitle">Adjust the sliders to create your accent.</string>
+    <string name="category_choose_icon_title">Choose an icon</string>
+    <string name="category_choose_icon_subtitle">Select the symbol that best represents this category.</string>
 
     <!-- note screen -->
     <string name="note_new">New Note</string>
