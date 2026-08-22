@@ -4,7 +4,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -21,16 +20,15 @@ fun MoreNavHost(rootNavController: NavHostController, localNavController: NavHos
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
-        moreNavGraph(localNavController, rootNavController)
+        moreNavGraph(rootNavController)
     }
 }
 
 fun NavGraphBuilder.moreNavGraph(
-    localNavController: NavController,
     rootNavController: NavHostController
 ) {
     // --- Main More Screen ---
     composable(MoreRoutes.MoreMain.route) {
-        MoreScreen(localNavController, rootNavController)
+        MoreScreen(rootNavController)
     }
 }

@@ -143,7 +143,19 @@
     <string name="help">Help</string>
     <string name="sync">Sync</string>
     <string name="logout">Logout</string>
-    <string name="logout_dialog">Are you sure you want to logout?</string>
+    <string name="more_heading">Your MaiPlan</string>
+    <string name="more_subtitle">Manage your workspace, data, and account.</string>
+    <string name="more_workspace_section">WORKSPACE</string>
+    <string name="more_account_section">ACCOUNT</string>
+    <string name="more_categories_subtitle">Organize the colors and icons used across your plans</string>
+    <string name="more_sync_subtitle">Keep your latest changes safely up to date</string>
+    <string name="more_logout_subtitle">Sign out of this account on this device</string>
+    <string name="more_default_user">MaiPlan user</string>
+    <string name="more_email_unavailable">Signed in to MaiPlan</string>
+    <string name="more_signed_in">Signed in securely</string>
+    <string name="more_version">MaiPlan · Version %1$s</string>
+    <string name="more_logout_dialog_title">Log out of MaiPlan?</string>
+    <string name="more_logout_dialog_message">You’ll need to sign in again to access your workspace on this device.</string>
 
     <!-- category management screen -->
     <string name="categories">Categories</string>
