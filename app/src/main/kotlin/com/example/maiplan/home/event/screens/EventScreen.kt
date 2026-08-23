@@ -484,7 +484,9 @@ private fun SwipeableEventCard(
     onDelete: (Int?, Int, LocalDate) -> Unit,
 ) {
     val context = LocalContext.current
-    val dismissState = rememberSwipeToDismissBoxState()
+    val dismissState = rememberSwipeToDismissBoxState(
+        positionalThreshold = { it * 0.45f },
+    )
 
     LaunchedEffect(dismissState, event.eventId) {
         snapshotFlow { dismissState.currentValue }.collectLatest { value ->
@@ -507,20 +509,36 @@ private fun SwipeableEventCard(
     SwipeToDismissBox(
         state = dismissState,
         backgroundContent = {
-            val edit = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
-            Box(
+            val editing = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+            val deleting = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+            val backgroundColor = when {
+                deleting -> Color(0xFFE5484D)
+                editing -> EventTeal
+                else -> Color.Transparent
+            }
+            Row(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(RoundedCornerShape(17.dp))
-                    .background(if (edit) EventTeal else EventDanger)
+                    .background(backgroundColor)
                     .padding(horizontal = 20.dp),
-                contentAlignment = if (edit) Alignment.CenterStart else Alignment.CenterEnd,
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = if (editing) Arrangement.Start else Arrangement.End,
             ) {
-                Icon(
-                    imageVector = if (edit) Icons.Rounded.Edit else Icons.Rounded.DeleteOutline,
-                    contentDescription = null,
-                    tint = Color.White,
-                )
+                if (deleting || editing) {
+                    Icon(
+                        imageVector = if (deleting) Icons.Rounded.DeleteOutline else Icons.Rounded.Edit,
+                        contentDescription = null,
+                        tint = Color.White,
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(if (deleting) R.string.delete else R.string.edit),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
             }
         },
     ) {

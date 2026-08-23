@@ -125,11 +125,11 @@ fun CategoryManagementScreen(
                                         when (value) {
                                             SwipeToDismissBoxValue.StartToEnd -> {
                                                 dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                                                onCardSwipeDelete(category.categoryId)
+                                                onCardSwipeEdit(category)
                                             }
                                             SwipeToDismissBoxValue.EndToStart -> {
                                                 dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                                                onCardSwipeEdit(category)
+                                                onCardSwipeDelete(category.categoryId)
                                             }
                                             SwipeToDismissBoxValue.Settled -> Unit
                                         }
@@ -159,8 +159,8 @@ fun CategoryManagementScreen(
 
 @Composable
 private fun CategoryDismissBackground(dismissState: SwipeToDismissBoxState) {
-    val deleting = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
-    val editing = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+    val editing = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+    val deleting = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
     val color = when {
         deleting -> Color(0xFFE5484D)
         editing -> CategoryTeal
@@ -174,7 +174,7 @@ private fun CategoryDismissBackground(dismissState: SwipeToDismissBoxState) {
             .background(color)
             .padding(horizontal = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = if (deleting) Arrangement.Start else Arrangement.End,
+        horizontalArrangement = if (editing) Arrangement.Start else Arrangement.End,
     ) {
         if (deleting || editing) {
             Icon(
@@ -185,7 +185,7 @@ private fun CategoryDismissBackground(dismissState: SwipeToDismissBoxState) {
             Spacer(Modifier.width(8.dp))
             Text(
                 text = stringResource(
-                    if (deleting) R.string.delete else R.string.category_edit,
+                    if (deleting) R.string.delete else R.string.edit,
                 ),
                 color = Color.White,
                 fontWeight = FontWeight.Bold,

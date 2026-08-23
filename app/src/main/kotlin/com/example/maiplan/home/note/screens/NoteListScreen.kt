@@ -27,6 +27,7 @@ import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -42,16 +43,23 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -72,6 +80,7 @@ import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.note.NoteViewModel
+import kotlinx.coroutines.flow.collectLatest
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -186,17 +195,95 @@ fun NoteListScreen(
                         verticalArrangement = Arrangement.spacedBy(if (compactLandscape) 8.dp else 12.dp),
                     ) {
                         items(filteredNotes, key = { it.noteId }) { note ->
-                            NoteCard(
+                            SwipeableNoteCard(
                                 note = note,
                                 category = categories.find { it.categoryId == note.categoryId },
-                                onClick = { onNoteClick(note) },
-                                onDeleteClick = { onDeleteClick(note) },
+                                onEdit = { onNoteClick(note) },
+                                onDelete = { onDeleteClick(note) },
                                 compact = compactLandscape,
                             )
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SwipeableNoteCard(
+    note: NoteEntity,
+    category: CategoryEntity?,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
+    compact: Boolean,
+) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        positionalThreshold = { it * 0.45f },
+    )
+
+    LaunchedEffect(dismissState, note.noteId) {
+        snapshotFlow { dismissState.currentValue }.collectLatest { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                    onEdit()
+                }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                    onDelete()
+                }
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = { NoteDismissBackground(dismissState) },
+    ) {
+        NoteCard(
+            note = note,
+            category = category,
+            onClick = onEdit,
+            onDeleteClick = onDelete,
+            compact = compact,
+        )
+    }
+}
+
+@Composable
+private fun NoteDismissBackground(dismissState: SwipeToDismissBoxState) {
+    val editing = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+    val deleting = dismissState.dismissDirection == SwipeToDismissBoxValue.EndToStart
+    val color = when {
+        deleting -> Color(0xFFE5484D)
+        editing -> NoteTeal
+        else -> Color.Transparent
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(20.dp))
+            .background(color)
+            .padding(horizontal = 20.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = if (editing) Arrangement.Start else Arrangement.End,
+    ) {
+        if (deleting || editing) {
+            Icon(
+                imageVector = if (deleting) Icons.Rounded.DeleteOutline else Icons.Rounded.Edit,
+                contentDescription = null,
+                tint = Color.White,
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = stringResource(if (deleting) R.string.delete else R.string.edit),
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.labelLarge,
+            )
         }
     }
 }
