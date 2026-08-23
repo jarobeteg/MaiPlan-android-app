@@ -1,11 +1,17 @@
 package com.example.maiplan.utils.notifications
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
+import com.example.maiplan.R
 import com.example.maiplan.main.MainActivity
 
 object NotificationHelper {
@@ -15,7 +21,7 @@ object NotificationHelper {
     fun createNotificationChannel(context: Context) {
         val importance = NotificationManager.IMPORTANCE_HIGH
         val channel = NotificationChannel(CHANNEL_ID, CHANNEL_NAME, importance).apply {
-            description = "Channel for exact time reminders"
+            description = "Notifications for scheduled reminders"
             enableVibration(true)
         }
 
@@ -24,7 +30,19 @@ object NotificationHelper {
         notificationManager.createNotificationChannel(channel)
     }
 
+    fun canPostNotifications(context: Context): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS,
+            ) == PackageManager.PERMISSION_GRANTED
+
     fun showNotification(context: Context, title: String, message: String, notificationId: Int) {
+        if (!canPostNotifications(context)) {
+            Log.w("NotificationHelper", "Notification permission is not granted.")
+            return
+        }
+
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -33,7 +51,7 @@ object NotificationHelper {
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(context.applicationInfo.icon)
+            .setSmallIcon(R.drawable.ic_notification_reminder)
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
@@ -47,7 +65,7 @@ object NotificationHelper {
         try {
             notificationManager.notify(notificationId, builder.build())
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            Log.e("NotificationHelper", "Unable to post reminder notification.", e)
         }
     }
 }

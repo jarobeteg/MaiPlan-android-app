@@ -15,6 +15,24 @@ interface ReminderDAO {
     @Upsert
     suspend fun reminderUpsert(reminder: ReminderEntity)
 
+    @Query("""
+        UPDATE reminder
+        SET reminder_time = :reminderTime,
+            message = :message,
+            updated_at = :updatedAt,
+            last_modified = :updatedAt,
+            sync_state = 2,
+            is_deleted = 0
+        WHERE reminder_id = :reminderId AND user_id = :userId
+    """)
+    suspend fun reminderUpdate(
+        reminderId: Int,
+        userId: Int,
+        reminderTime: Long,
+        message: String?,
+        updatedAt: Long = System.currentTimeMillis(),
+    )
+
     @Delete
     suspend fun deleteReminder(reminder: ReminderEntity)
 

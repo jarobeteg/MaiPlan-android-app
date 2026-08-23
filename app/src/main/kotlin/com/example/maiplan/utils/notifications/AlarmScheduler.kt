@@ -1,6 +1,5 @@
 package com.example.maiplan.utils.notifications
 
-import android.annotation.SuppressLint
 import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
@@ -8,22 +7,23 @@ import android.content.Intent
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
-import com.example.maiplan.utils.notifications.ReminderData
 import androidx.core.net.toUri
-import java.time.LocalDateTime
 
 object AlarmScheduler {
 
     fun attemptSchedule(context: Context, reminder: ReminderData): Boolean {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            Log.e("AlarmScheduler", "Permission missing. Cannot schedule.")
+        if (reminder.reminderTime <= System.currentTimeMillis()) {
+            Log.e("AlarmScheduler", "Cannot schedule a reminder in the past.")
             return false
         }
 
-        scheduleAlarm(context, reminder)
-        return true
+        return scheduleAlarm(context, reminder)
+    }
+
+    fun canScheduleExactAlarms(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return alarmManager.canScheduleExactAlarms()
     }
 
     fun requestExactAlarmPermission(context: Context) {
@@ -38,40 +38,51 @@ object AlarmScheduler {
         }
     }
 
-    fun scheduleAlarm(context: Context, reminder: ReminderData) {
+    fun scheduleAlarm(context: Context, reminder: ReminderData): Boolean {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-        val triggerAtMillis = reminder.reminderTime
+        if (!canScheduleExactAlarms(context)) {
+            scheduleInexactAlarm(context, reminder)
+            Log.w("AlarmScheduler", "Exact alarm access unavailable; scheduled an inexact fallback.")
+            return false
+        }
 
+        return try {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                reminder.reminderTime,
+                reminderPendingIntent(context, reminder),
+            )
+            Log.d("AlarmScheduler", "Scheduled exact reminder ${reminder.reminderId}.")
+            true
+        } catch (e: SecurityException) {
+            Log.w("AlarmScheduler", "Exact alarm rejected; scheduling fallback.", e)
+            scheduleInexactAlarm(context, reminder)
+            false
+        }
+    }
+
+    private fun scheduleInexactAlarm(context: Context, reminder: ReminderData) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            reminder.reminderTime,
+            reminderPendingIntent(context, reminder),
+        )
+    }
+
+    private fun reminderPendingIntent(context: Context, reminder: ReminderData): PendingIntent {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("reminder_id", reminder.reminderId)
             putExtra("reminder_title", reminder.reminderTitle)
             putExtra("reminder_message", reminder.reminderMessage)
         }
-
-        val pendingIntent = PendingIntent.getBroadcast(
+        return PendingIntent.getBroadcast(
             context,
             reminder.reminderId,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (!alarmManager.canScheduleExactAlarms()) {
-                Log.e("AlarmScheduler", "Exact alarm permission revoked")
-                return
-            }
-        }
-
-        try {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerAtMillis,
-                pendingIntent
-            )
-        } catch (e: SecurityException) {
-            Log.e("AlarmScheduler", "Failed to schedule alarm: ${e.message}")
-        }
     }
 
     fun cancelAlarm(context: Context, reminderId: Int) {

@@ -36,6 +36,7 @@ interface NoteDAO {
             title = :title,
             content = :content,
             category_id = :categoryId,
+            reminder_id = :reminderId,
             updated_at = :updatedAt,
             last_modified = :updatedAt,
             sync_state = 2
@@ -47,6 +48,7 @@ interface NoteDAO {
         title: String,
         content: String?,
         categoryId: Int?,
+        reminderId: Int?,
         updatedAt: Long = System.currentTimeMillis()
     )
 

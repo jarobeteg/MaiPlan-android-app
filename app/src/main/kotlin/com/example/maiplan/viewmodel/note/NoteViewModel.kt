@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
+import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.note.NoteRepository
+import com.example.maiplan.repository.note.NoteSaveOutcome
 import com.example.maiplan.repository.orEmptyList
 import kotlinx.coroutines.launch
 
@@ -18,14 +20,17 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     private val _categoryList = MutableLiveData<List<CategoryEntity>>()
     val categoryList: LiveData<List<CategoryEntity>> get() = _categoryList
 
-    private val _createNoteResult = MutableLiveData<Result<Unit>>(Result.Idle)
-    val createNoteResult: LiveData<Result<Unit>> get() = _createNoteResult
+    private val _createNoteResult = MutableLiveData<Result<NoteSaveOutcome>>(Result.Idle)
+    val createNoteResult: LiveData<Result<NoteSaveOutcome>> get() = _createNoteResult
 
-    private val _updateNoteResult = MutableLiveData<Result<Unit>>(Result.Idle)
-    val updateNoteResult: LiveData<Result<Unit>> get() = _updateNoteResult
+    private val _updateNoteResult = MutableLiveData<Result<NoteSaveOutcome>>(Result.Idle)
+    val updateNoteResult: LiveData<Result<NoteSaveOutcome>> get() = _updateNoteResult
 
     private val _deleteNoteResult = MutableLiveData<Result<Unit>>(Result.Idle)
     val deleteNoteResult: LiveData<Result<Unit>> get() = _deleteNoteResult
+
+    private val _selectedReminder = MutableLiveData<ReminderEntity?>(null)
+    val selectedReminder: LiveData<ReminderEntity?> get() = _selectedReminder
 
     fun loadNotes(userId: Int, categoryId: Int? = null) {
         viewModelScope.launch {
@@ -46,7 +51,7 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     fun createNote(note: NoteEntity) {
         viewModelScope.launch {
             _createNoteResult.postValue(Result.Loading)
-            val result = noteRepository.createNote(note)
+            val result = noteRepository.createNoteWithReminder(null, note)
             if (result is Result.Success) refreshNotes(note.userId)
             _createNoteResult.postValue(result)
         }
@@ -55,9 +60,36 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     fun updateNote(note: NoteEntity) {
         viewModelScope.launch {
             _updateNoteResult.postValue(Result.Loading)
-            val result = noteRepository.updateNote(note)
+            val result = noteRepository.updateNoteWithReminder(null, note)
             if (result is Result.Success) refreshNotes(note.userId)
             _updateNoteResult.postValue(result)
+        }
+    }
+
+    fun createNoteWithReminder(reminder: ReminderEntity?, note: NoteEntity) {
+        viewModelScope.launch {
+            _createNoteResult.postValue(Result.Loading)
+            val result = noteRepository.createNoteWithReminder(reminder, note)
+            if (result is Result.Success) refreshNotes(note.userId)
+            _createNoteResult.postValue(result)
+        }
+    }
+
+    fun updateNoteWithReminder(reminder: ReminderEntity?, note: NoteEntity) {
+        viewModelScope.launch {
+            _updateNoteResult.postValue(Result.Loading)
+            val result = noteRepository.updateNoteWithReminder(reminder, note)
+            if (result is Result.Success) refreshNotes(note.userId)
+            _updateNoteResult.postValue(result)
+        }
+    }
+
+    fun loadNoteReminder(reminderId: Int?) {
+        viewModelScope.launch {
+            when (val result = noteRepository.getReminder(reminderId)) {
+                is Result.Success -> _selectedReminder.postValue(result.data)
+                else -> _selectedReminder.postValue(null)
+            }
         }
     }
 

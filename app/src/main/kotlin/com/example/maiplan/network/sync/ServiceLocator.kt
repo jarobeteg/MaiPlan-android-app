@@ -49,6 +49,7 @@ object ServiceLocator {
         val remote = NoteRemoteDataSource(RetrofitClient.noteApi)
         val local = NoteLocalDataSource(context)
         val localCategory = CategoryLocalDataSource(context)
-        return NoteRepository(remote, local, localCategory)
+        val localReminder = ReminderLocalDataSource(context)
+        return NoteRepository(remote, local, localCategory, localReminder)
     }
 }
