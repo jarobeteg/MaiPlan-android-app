@@ -1,14 +1,16 @@
 package com.example.maiplan.home.event.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,32 +18,33 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.CalendarMonth
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.rounded.DeleteOutline
+import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.EventAvailable
+import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
-import androidx.compose.runtime.Composable
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -49,40 +52,38 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
-import com.example.maiplan.components.AdjustableSpacer
-import com.example.maiplan.components.DatePickerDialogComponent
-import com.example.maiplan.components.getMonthText
 import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
-import com.example.maiplan.utils.LocalAppDesign
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.viewmodel.event.EventViewModel
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 
 @Composable
 fun EventScreen(
     eventViewModel: EventViewModel,
     rootNavController: NavHostController,
-    localNavController: NavHostController, // use this to navigate from view to update or view details screen
+    localNavController: NavHostController,
     onCreateEventClick: () -> Unit,
     onUpdateEventClick: (Int) -> Unit,
-    onDeleteClick: (Int?, Int, LocalDate) -> Unit
+    onDeleteClick: (Int?, Int, LocalDate) -> Unit,
 ) {
-    val ui = LocalAppDesign.current
-
     var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(LocalDate.now())
     }
@@ -92,95 +93,99 @@ fun EventScreen(
 
     val context = LocalContext.current
     val eventsByDate by eventViewModel.monthlyEvents.collectAsState()
-    var showDatePicker by remember { mutableStateOf(false) }
-    val closeDatePicker = { showDatePicker = false }
-
     val adaptiveLayout = LocalAdaptiveLayout.current
+    var showDatePicker by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            EventTopBar(
-                title = getMonthText(selectedDate.month.value),
-                onDatePickerClick = { showDatePicker = true },
-                onCreateEventClick = onCreateEventClick
-            )},
-        bottomBar = { HomeNavigationBar(rootNavController, context) }
-    ) { innerPadding ->
-        if (adaptiveLayout.useTwoPaneLayout) {
-            Row(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-                MonthCalendarSection(
-                    selectedDate = selectedDate,
-                    eventsByDate = eventsByDate,
-                    onDateSelected = { selectedDate = it },
-                    modifier = Modifier
-                        .weight(ui.dimensions.calendarSectionWeight)
-                        .wrapContentSize()
+    EventScreenBackground {
+        Scaffold(
+            containerColor = Color.Transparent,
+            topBar = {
+                EventTopBar(
+                    monthTitle = selectedDate.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                    onDatePickerClick = { showDatePicker = true },
                 )
-
-                VerticalDivider(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(ui.dimensions.generalDividerThickness)
+            },
+            bottomBar = { HomeNavigationBar(rootNavController, context) },
+            floatingActionButton = {
+                ExtendedFloatingActionButton(
+                    onClick = onCreateEventClick,
+                    modifier = Modifier.padding(end = 14.dp, bottom = 12.dp),
+                    containerColor = EventPrimary,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(17.dp),
+                    icon = { Icon(Icons.Rounded.Add, contentDescription = null) },
+                    text = {
+                        Text(
+                            text = stringResource(R.string.event_new_action),
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    },
                 )
-
-
-                DayEventsSection(
-                    events = eventsByDate[selectedDate] ?: emptyList(),
-                    onUpdateEventClick = onUpdateEventClick,
-                    onDeleteClick = onDeleteClick,
-                    selectedDate = selectedDate,
+            },
+        ) { innerPadding ->
+            if (adaptiveLayout.useTwoPaneLayout) {
+                Row(
                     modifier = Modifier
-                        .weight(ui.dimensions.eventSectionWeight)
-                        .fillMaxHeight()
-                )
-            }
-        } else {
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-            ) {
-
-                MonthCalendarSection(
-                    selectedDate = selectedDate,
-                    eventsByDate = eventsByDate,
-                    onDateSelected = { selectedDate = it },
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .padding(horizontal = 18.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    MonthCalendarSection(
+                        selectedDate = selectedDate,
+                        eventsByDate = eventsByDate,
+                        onDateSelected = { selectedDate = it },
+                        onPreviousMonth = { selectedDate = selectedDate.withDayOfMonth(1).minusMonths(1) },
+                        onNextMonth = { selectedDate = selectedDate.withDayOfMonth(1).plusMonths(1) },
+                        modifier = Modifier
+                            .weight(1.05f)
+                            .fillMaxHeight(),
+                    )
+                    DayEventsSection(
+                        events = eventsByDate[selectedDate].orEmpty(),
+                        onUpdateEventClick = onUpdateEventClick,
+                        onDeleteClick = onDeleteClick,
+                        selectedDate = selectedDate,
+                        modifier = Modifier
+                            .weight(0.95f)
+                            .fillMaxHeight(),
+                    )
+                }
+            } else {
+                Column(
                     modifier = Modifier
-                        .weight(ui.dimensions.calendarSectionWeight)
-                        .wrapContentSize()
-                )
-
-                HorizontalDivider(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(ui.dimensions.generalDividerThickness)
-                )
-
-                DayEventsSection(
-                    events = eventsByDate[selectedDate] ?: emptyList(),
-                    onUpdateEventClick = onUpdateEventClick,
-                    onDeleteClick = onDeleteClick,
-                    selectedDate = selectedDate,
-                    modifier = Modifier
-                        .weight(ui.dimensions.eventSectionWeight)
-                )
+                        .padding(innerPadding)
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp),
+                ) {
+                    MonthCalendarSection(
+                        selectedDate = selectedDate,
+                        eventsByDate = eventsByDate,
+                        onDateSelected = { selectedDate = it },
+                        onPreviousMonth = { selectedDate = selectedDate.withDayOfMonth(1).minusMonths(1) },
+                        onNextMonth = { selectedDate = selectedDate.withDayOfMonth(1).plusMonths(1) },
+                        modifier = Modifier.weight(0.94f),
+                    )
+                    DayEventsSection(
+                        events = eventsByDate[selectedDate].orEmpty(),
+                        onUpdateEventClick = onUpdateEventClick,
+                        onDeleteClick = onDeleteClick,
+                        selectedDate = selectedDate,
+                        modifier = Modifier.weight(1.06f),
+                    )
+                }
             }
         }
     }
 
     if (showDatePicker) {
-        DatePickerDialogComponent(
-            onDateSelected = { date ->
-                selectedDate = date
-                closeDatePicker()
+        EventDatePickerDialog(
+            onDateSelected = {
+                selectedDate = it
+                showDatePicker = false
             },
-            onDismiss = {
-                closeDatePicker()
-            }
+            onDismiss = { showDatePicker = false },
         )
     }
 }
@@ -190,157 +195,150 @@ fun MonthCalendarSection(
     selectedDate: LocalDate,
     eventsByDate: Map<LocalDate, List<CalendarEventUI>>,
     onDateSelected: (LocalDate) -> Unit,
-    modifier: Modifier = Modifier
+    onPreviousMonth: () -> Unit,
+    onNextMonth: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    val ui = LocalAppDesign.current
-
+    val dark = isSystemInDarkTheme()
+    val surface = if (dark) Color(0xFF181C2B) else Color.White
+    val ink = if (dark) Color(0xFFF3F5FA) else EventInk
+    val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
     val firstDayOfMonth = selectedDate.withDayOfMonth(1)
-    val daysInMonth = selectedDate.lengthOfMonth()
-    val startOffset = firstDayOfMonth.dayOfWeek.value - 1
-
-    val monthDays =
-        List(startOffset) { null } +
-                (1..daysInMonth).map { firstDayOfMonth.withDayOfMonth(it) }
-
-    val remainder = monthDays.size % 7
-    val paddedDays =
-        if (remainder == 0) monthDays
-        else monthDays + List(7 - remainder) { null }
-
+    val days = List(firstDayOfMonth.dayOfWeek.value - 1) { null } +
+        (1..selectedDate.lengthOfMonth()).map { firstDayOfMonth.withDayOfMonth(it) }
+    val paddedDays = days + List((7 - days.size % 7) % 7) { null }
     val weeks = paddedDays.chunked(7)
+    val weekdays = listOf(R.string.mon, R.string.tue, R.string.wed, R.string.thu, R.string.fri, R.string.sat, R.string.sun)
 
-    val weekdays = listOf(
-        stringResource(R.string.mon),
-        stringResource(R.string.tue),
-        stringResource(R.string.wed),
-        stringResource(R.string.thu),
-        stringResource(R.string.fri),
-        stringResource(R.string.sat),
-        stringResource(R.string.sun)
-    )
-
-    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
-        val availableHeightPerRow = maxHeight / weeks.size
-        val circlePlusSpacerHeight = ui.dimensions.generalTouchTarget + ui.dimensions.smallSpacer
-        val spaceForDots = availableHeightPerRow - circlePlusSpacerHeight
-        val maxDotRows = when {
-            spaceForDots >= ui.dimensions.doubleDotArea -> 2
-            spaceForDots >= ui.dimensions.singleDotArea -> 1
-            else -> 0
-        }
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = surface,
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, if (dark) Color.White.copy(alpha = 0.08f) else EventBorder),
+        shadowElevation = if (dark) 0.dp else 2.dp,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.event_calendar_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = ink,
+                    )
+                    Text(
+                        text = stringResource(R.string.event_calendar_subtitle),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
+                    )
+                }
+                IconButton(onClick = onPreviousMonth) {
+                    Icon(Icons.Rounded.ChevronLeft, contentDescription = null, tint = EventPrimary)
+                }
+                IconButton(onClick = onNextMonth) {
+                    Icon(Icons.Rounded.ChevronRight, contentDescription = null, tint = EventPrimary)
+                }
+            }
+            Spacer(Modifier.height(6.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 weekdays.forEach { day ->
-                    Box(
-                        modifier = Modifier
-                            .weight(ui.dimensions.generalWeight)
-                            .padding(vertical = ui.dimensions.verticalWeekdayPadding),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = day,
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                    Text(
+                        text = stringResource(day),
+                        modifier = Modifier.weight(1f),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = muted,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
+                }
+            }
+            Spacer(Modifier.height(4.dp))
+            BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                val cellHeight = maxHeight / weeks.size
+                Column(Modifier.fillMaxSize()) {
+                    weeks.forEach { week ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(cellHeight),
+                        ) {
+                            week.forEach { date ->
+                                CalendarDayCell(
+                                    date = date,
+                                    selectedDate = selectedDate,
+                                    events = date?.let { eventsByDate[it] }.orEmpty(),
+                                    onDateSelected = onDateSelected,
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+}
 
-            weeks.forEach { week ->
+@Composable
+private fun CalendarDayCell(
+    date: LocalDate?,
+    selectedDate: LocalDate,
+    events: List<CalendarEventUI>,
+    onDateSelected: (LocalDate) -> Unit,
+    modifier: Modifier,
+) {
+    if (date == null) {
+        Spacer(modifier)
+        return
+    }
+    val dark = isSystemInDarkTheme()
+    val selected = date == selectedDate
+    val today = date == LocalDate.now()
+    val ink = if (dark) Color(0xFFF3F5FA) else EventInk
+
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .padding(2.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onDateSelected(date) }
+            .background(
+                when {
+                    selected -> EventPrimary
+                    today -> EventPrimary.copy(alpha = if (dark) 0.24f else 0.10f)
+                    else -> Color.Transparent
+                },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (selected || today) FontWeight.Bold else FontWeight.Medium,
+                color = if (selected) Color.White else ink,
+            )
+            if (events.isNotEmpty()) {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(ui.dimensions.generalWeight)
+                    modifier = Modifier.padding(top = 3.dp),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    week.forEach { date ->
+                    events.take(3).forEach { event ->
                         Box(
-                            modifier = Modifier
-                                .weight(ui.dimensions.generalWeight)
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (date != null) {
-                                val isSelected = date == selectedDate
-                                val isToday = date == LocalDate.now()
-                                val events = eventsByDate[date] ?: emptyList()
-
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(ui.dimensions.generalTouchTarget)
-                                            .clip(CircleShape)
-                                            .clickable { onDateSelected(date) }
-                                            .background(
-                                                when {
-                                                    isSelected -> MaterialTheme.colorScheme.primary
-                                                    isToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                                    else -> Color.Transparent
-                                                }
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = date.dayOfMonth.toString(),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = when {
-                                                isSelected -> MaterialTheme.colorScheme.onPrimary
-                                                else -> MaterialTheme.colorScheme.onBackground
-                                            }
-                                        )
-                                    }
-
-                                    val dotAreaHeight = when (maxDotRows) {
-                                        2 -> ui.dimensions.smallSpacer + ui.dimensions.doubleDotArea
-                                        1 -> ui.dimensions.smallSpacer + ui.dimensions.singleDotArea
-                                        else -> 0.dp
-                                    }
-
-                                    if (maxDotRows > 0) {
-                                        Box(
-                                            modifier = Modifier
-                                                .height(dotAreaHeight)
-                                                .fillMaxWidth(),
-                                            contentAlignment = Alignment.TopCenter
-                                        ) {
-                                            if (events.isNotEmpty()) {
-                                                val dotRows = events
-                                                    .take(maxDotRows * 4)
-                                                    .chunked(4)
-                                                Column(
-                                                    modifier = Modifier.padding(top = ui.dimensions.smallSpacer),
-                                                    verticalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByExtraSmall),
-                                                    horizontalAlignment = Alignment.CenterHorizontally
-                                                ) {
-                                                    dotRows.forEach { rowEvents ->
-                                                        Row(
-                                                            horizontalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByExtraSmall),
-                                                            verticalAlignment = Alignment.CenterVertically
-                                                        ) {
-                                                            rowEvents.forEach { event ->
-                                                                Box(
-                                                                    modifier = Modifier
-                                                                        .size(ui.dimensions.eventDotSize)
-                                                                        .background(
-                                                                            color = event.color,
-                                                                            shape = CircleShape
-                                                                        )
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                            Modifier
+                                .size(4.dp)
+                                .background(
+                                    if (selected) Color.White.copy(alpha = 0.9f) else event.color,
+                                    CircleShape,
+                                ),
+                        )
                     }
                 }
             }
@@ -354,184 +352,243 @@ fun DayEventsSection(
     onUpdateEventClick: (Int) -> Unit,
     onDeleteClick: (Int?, Int, LocalDate) -> Unit,
     selectedDate: LocalDate,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val ui = LocalAppDesign.current
+    val dark = isSystemInDarkTheme()
+    val surface = if (dark) Color(0xFF181C2B) else Color.White
+    val ink = if (dark) Color(0xFFF3F5FA) else EventInk
+    val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize().clipToBounds(),
-        contentPadding = PaddingValues(ui.dimensions.mediumPaddingValue),
-        verticalArrangement = Arrangement.spacedBy(ui.dimensions.spacedByMedium)
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = surface,
+        shape = RoundedCornerShape(22.dp),
+        border = BorderStroke(1.dp, if (dark) Color.White.copy(alpha = 0.08f) else EventBorder),
+        shadowElevation = if (dark) 0.dp else 2.dp,
     ) {
-
-        items(
-            items = events,
-            key = { it.eventId }
-        ) { event ->
-
-            val dismissState = rememberSwipeToDismissBoxState(
-                confirmValueChange = { value ->
-                    when (value) {
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            onUpdateEventClick(event.eventId)
-                            false
-                        }
-
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            val eventId: Int = event.eventId
-                            val reminderId: Int? = if (event.reminderId == 0) null else event.reminderId
-                            onDeleteClick(reminderId, eventId, selectedDate)
-
-                            if (reminderId != null) {
-                                AlarmScheduler.cancelAlarm(context, reminderId)
-                            }
-                            false
-                        }
-
-                        SwipeToDismissBoxValue.Settled -> false
-                    }
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.event_agenda_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = ink,
+                    )
+                    Text(
+                        text = selectedDate.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
+                    )
                 }
-            )
+                Surface(
+                    color = EventPrimary.copy(alpha = if (dark) 0.24f else 0.10f),
+                    shape = RoundedCornerShape(20.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.event_agenda_count, events.size),
+                        modifier = Modifier.padding(horizontal = 11.dp, vertical = 6.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (dark) Color(0xFFD7E5F5) else EventPrimary,
+                    )
+                }
+            }
 
-            SwipeToDismissBox(
-                state = dismissState,
-                enableDismissFromStartToEnd = true,
-                enableDismissFromEndToStart = true,
-                backgroundContent = {
-                    val direction = dismissState.dismissDirection
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clip(MaterialTheme.shapes.small)
-                            .background(
-                                when (direction) {
-                                    SwipeToDismissBoxValue.StartToEnd ->
-                                        Color(0xFF1DE9B6)
-
-                                    SwipeToDismissBoxValue.EndToStart ->
-                                        Color(0xFFFF1744)
-
-                                    SwipeToDismissBoxValue.Settled ->
-                                        Color.Transparent
-                                }
-                            )
-                            .padding(horizontal = ui.dimensions.mediumPaddingValue),
-
-                        contentAlignment = when (direction) {
-                            SwipeToDismissBoxValue.StartToEnd ->
-                                Alignment.CenterStart
-
-                            else ->
-                                Alignment.CenterEnd
-                        }
-                    ) {
-
-                        Icon(
-                            imageVector = when (direction) {
-
-                                SwipeToDismissBoxValue.StartToEnd ->
-                                    Icons.Default.Edit
-
-                                SwipeToDismissBoxValue.EndToStart ->
-                                    Icons.Default.Delete
-
-                                SwipeToDismissBoxValue.Settled ->
-                                    Icons.Default.Edit
-                            },
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.size(32.dp)
+            if (events.isEmpty()) {
+                EventEmptyState(Modifier.weight(1f))
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(start = 14.dp, end = 14.dp, bottom = 92.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    items(events, key = { it.eventId }) { event ->
+                        SwipeableEventCard(
+                            event = event,
+                            selectedDate = selectedDate,
+                            onEdit = onUpdateEventClick,
+                            onDelete = onDeleteClick,
+                        )
+                    }
+                    item {
+                        Text(
+                            text = stringResource(R.string.event_swipe_hint),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = muted,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
                     }
                 }
-            ) {
-                EventCard(
-                    event = event
-                )
             }
         }
     }
 }
 
 @Composable
-fun EventCard(
-    event: CalendarEventUI
-) {
-    val ui = LocalAppDesign.current
-
-    Card(
-        modifier = Modifier
+private fun EventEmptyState(modifier: Modifier = Modifier) {
+    val dark = isSystemInDarkTheme()
+    val ink = if (dark) Color(0xFFF3F5FA) else EventInk
+    val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
+    Column(
+        modifier = modifier
             .fillMaxWidth()
-            .wrapContentHeight(),
-        shape = MaterialTheme.shapes.small,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Box(
-            modifier = Modifier
-            .fillMaxWidth()
+        Surface(
+            modifier = Modifier.size(58.dp),
+            color = EventPrimary.copy(alpha = if (dark) 0.22f else 0.09f),
+            shape = CircleShape,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .width(8.dp)
-                        .fillMaxHeight()
-                        .background(event.color)
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    Icons.Rounded.EventAvailable,
+                    contentDescription = null,
+                    tint = EventPrimaryLight,
+                    modifier = Modifier.size(28.dp),
                 )
+            }
+        }
+        Spacer(Modifier.height(13.dp))
+        Text(
+            text = stringResource(R.string.event_empty_title),
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = ink,
+        )
+        Spacer(Modifier.height(5.dp))
+        Text(
+            text = stringResource(R.string.event_empty_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            color = muted,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+    }
+}
 
-                AdjustableSpacer(ui.dimensions.mediumSpacer)
+@Composable
+private fun SwipeableEventCard(
+    event: CalendarEventUI,
+    selectedDate: LocalDate,
+    onEdit: (Int) -> Unit,
+    onDelete: (Int?, Int, LocalDate) -> Unit,
+) {
+    val context = LocalContext.current
+    val dismissState = rememberSwipeToDismissBoxState()
 
-                Column(
-                    modifier = Modifier
-                        .weight(ui.dimensions.generalWeight)
-                        .padding(ui.dimensions.smallPaddingValue)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = event.title,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.weight(ui.dimensions.generalWeight)
-                        )
-
-                        AdjustableSpacer(ui.dimensions.mediumSpacer)
-
-                        Text(
-                            text = "${event.startTime} - ${event.endTime}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = event.description,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.weight(ui.dimensions.generalWeight)
-                        )
-
-                        AdjustableSpacer(ui.dimensions.mediumSpacer)
-
-                        Icon(
-                            imageVector = event.icon,
-                            contentDescription = null,
-                            tint = event.color,
-                            modifier = Modifier.size(32.dp)
-                        )
-                    }
+    LaunchedEffect(dismissState, event.eventId) {
+        snapshotFlow { dismissState.currentValue }.collectLatest { value ->
+            when (value) {
+                SwipeToDismissBoxValue.StartToEnd -> {
+                    dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                    onEdit(event.eventId)
                 }
+                SwipeToDismissBoxValue.EndToStart -> {
+                    dismissState.snapTo(SwipeToDismissBoxValue.Settled)
+                    val reminderId = event.reminderId.takeIf { it != 0 }
+                    onDelete(reminderId, event.eventId, selectedDate)
+                    reminderId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                }
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+        }
+    }
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            val edit = dismissState.dismissDirection == SwipeToDismissBoxValue.StartToEnd
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(17.dp))
+                    .background(if (edit) EventTeal else EventDanger)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = if (edit) Alignment.CenterStart else Alignment.CenterEnd,
+            ) {
+                Icon(
+                    imageVector = if (edit) Icons.Rounded.Edit else Icons.Rounded.DeleteOutline,
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            }
+        },
+    ) {
+        EventCard(event = event, onClick = { onEdit(event.eventId) })
+    }
+}
+
+@Composable
+fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
+    val dark = isSystemInDarkTheme()
+    val cardColor = if (dark) Color(0xFF212638) else Color(0xFFF8FAFD)
+    val ink = if (dark) Color(0xFFF3F5FA) else EventInk
+    val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
+
+    Surface(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        color = cardColor,
+        shape = RoundedCornerShape(17.dp),
+        border = BorderStroke(1.dp, if (dark) Color.White.copy(alpha = 0.07f) else EventBorder),
+    ) {
+        Row(
+            modifier = Modifier.padding(13.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Surface(
+                modifier = Modifier.size(46.dp),
+                color = event.color.copy(alpha = if (dark) 0.28f else 0.13f),
+                shape = RoundedCornerShape(14.dp),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(event.icon, contentDescription = null, tint = event.color, modifier = Modifier.size(24.dp))
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = event.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                if (event.description.isNotBlank()) {
+                    Text(
+                        text = event.description,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = muted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "${event.startTime} – ${event.endTime}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = EventPrimaryLight,
+                )
+            }
+            if (event.reminderTime != 0L) {
+                Icon(
+                    Icons.Rounded.NotificationsNone,
+                    contentDescription = null,
+                    tint = muted,
+                    modifier = Modifier.size(19.dp),
+                )
             }
         }
     }
@@ -539,50 +596,33 @@ fun EventCard(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventTopBar(
-    title: String,
-    onDatePickerClick: () -> Unit,
-    onCreateEventClick: () -> Unit,
-) {
-    val ui = LocalAppDesign.current
-
+fun EventTopBar(monthTitle: String, onDatePickerClick: () -> Unit) {
+    val dark = isSystemInDarkTheme()
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Center
-            )
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = onDatePickerClick,
-                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CalendarMonth,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = monthTitle,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = if (dark) Color(0xFFF3F5FA) else EventInk,
+                )
+                Text(
+                    text = stringResource(R.string.event_calendar_title),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (dark) Color(0xFFAEB7C8) else EventMuted,
                 )
             }
         },
         actions = {
-            IconButton(
-                onClick = onCreateEventClick,
-                modifier = Modifier.size(ui.dimensions.generalTouchTarget)
-            ) {
+            IconButton(onClick = onDatePickerClick) {
                 Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.onPrimary
+                    Icons.Rounded.CalendarMonth,
+                    contentDescription = stringResource(R.string.event_open_calendar),
+                    tint = EventPrimaryLight,
                 )
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
     )
 }

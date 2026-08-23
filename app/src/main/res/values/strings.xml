@@ -51,6 +51,10 @@
     <string name="toggle_password_visibility">Toggle Password Visibility</string>
     <string name="cancel">Cancel</string>
     <string name="select">Select</string>
+    <string name="picker_date_title">Choose a date</string>
+    <string name="picker_date_subtitle">Select the day for your schedule</string>
+    <string name="picker_time_title">Choose a time</string>
+    <string name="picker_time_subtitle">Set the hour and minute</string>
 
     <!-- general error messages -->
     <string name="general_error_1">Email field cannot be empty!</string>
@@ -106,6 +110,34 @@
     <string name="event_new">New Event</string>
     <string name="event_update">Update Event</string>
     <string name="event_save">Save Event</string>
+    <string name="event_create_heading">Plan something meaningful</string>
+    <string name="event_create_subtitle">Add the details, timing, and category for your new event.</string>
+    <string name="event_update_heading">Refine your event</string>
+    <string name="event_update_subtitle">Keep the schedule and reminder details up to date.</string>
+    <string name="event_details_title">Event details</string>
+    <string name="event_details_subtitle">Give the event a clear name and useful context.</string>
+    <string name="event_schedule_title">Schedule</string>
+    <string name="event_schedule_subtitle">Choose when this event starts and finishes.</string>
+    <string name="event_organization_title">Organization</string>
+    <string name="event_organization_subtitle">Use a category to keep your calendar easy to scan.</string>
+    <string name="event_reminder_title">Reminder</string>
+    <string name="event_reminder_subtitle">Optional · receive a notification before the event.</string>
+    <string name="event_preview_title">Your event title</string>
+    <string name="event_preview_date">Date not selected</string>
+    <string name="event_preview_time">Time not selected</string>
+    <string name="event_select_date">Choose a date</string>
+    <string name="event_select_time">Choose a time</string>
+    <string name="event_reminder_optional">Add a reminder</string>
+    <string name="event_no_categories">No categories available</string>
+    <string name="event_new_action">New event</string>
+    <string name="event_calendar_title">Calendar</string>
+    <string name="event_calendar_subtitle">Select a day to see its schedule</string>
+    <string name="event_agenda_title">Your day</string>
+    <string name="event_agenda_count">Scheduled · %1$d</string>
+    <string name="event_empty_title">Nothing planned yet</string>
+    <string name="event_empty_subtitle">This day is open. Add an event whenever you are ready.</string>
+    <string name="event_swipe_hint">Swipe right to edit or left to delete</string>
+    <string name="event_open_calendar">Choose another date</string>
     <string name="date">Date</string>
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>
