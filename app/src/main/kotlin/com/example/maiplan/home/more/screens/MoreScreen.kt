@@ -6,7 +6,7 @@ import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -67,11 +68,12 @@ import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
+import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.BaseActivity
 import com.example.maiplan.utils.common.UserSession
 
-private val MorePrimary = Color(0xFF4A6583)
-private val MorePrimaryLight = Color(0xFF7089A5)
+private val MorePrimary: Color get() = AppThemeManager.selectedTheme.primary
+private val MorePrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
 private val MoreTeal = Color(0xFF14B8A6)
 private val MoreInk = Color(0xFF172033)
 private val MoreMuted = Color(0xFF667085)
@@ -79,7 +81,10 @@ private val MoreBorder = Color(0xFFDDE3EC)
 private val MoreDanger = Color(0xFFD92D3A)
 
 @Composable
-fun MoreScreen(rootNavController: NavHostController) {
+fun MoreScreen(
+    rootNavController: NavHostController,
+    onThemeClick: () -> Unit,
+) {
     val context = LocalContext.current
     val onLogoutClick = rememberLogoutHandler()
 
@@ -123,6 +128,15 @@ fun MoreScreen(rootNavController: NavHostController) {
                         )
                     }
 
+                    MoreSection(title = stringResource(R.string.more_preferences_section)) {
+                        MoreActionRow(
+                            title = stringResource(R.string.app_theme),
+                            subtitle = stringResource(R.string.more_theme_subtitle),
+                            icon = Icons.Rounded.Palette,
+                            onClick = onThemeClick,
+                        )
+                    }
+
                     MoreSection(title = stringResource(R.string.more_account_section)) {
                         MoreActionRow(
                             title = stringResource(R.string.logout),
@@ -144,7 +158,7 @@ fun MoreScreen(rootNavController: NavHostController) {
 
 @Composable
 private fun MoreScreenBackground(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
 
     Box(
@@ -181,7 +195,7 @@ private fun MoreScreenBackground(content: @Composable () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreTopBar() {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     CenterAlignedTopAppBar(
         title = {
             Text(
@@ -201,7 +215,7 @@ fun MoreTopBar() {
 
 @Composable
 private fun MoreIntro() {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Column {
         Text(
             text = stringResource(R.string.more_heading),
@@ -222,7 +236,7 @@ private fun MoreIntro() {
 
 @Composable
 private fun MoreProfileCard() {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else MoreInk
     val muted = if (dark) Color(0xFFAEB7C9) else MoreMuted
@@ -298,7 +312,7 @@ private fun MoreSection(
     title: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Text(
             text = title,
@@ -327,7 +341,7 @@ private fun MoreActionRow(
     accent: Color = MorePrimary,
     destructive: Boolean = false,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val titleColor = when {
         destructive && dark -> Color(0xFFFFB4B8)
         destructive -> MoreDanger
@@ -389,7 +403,7 @@ private fun MoreActionRow(
 
 @Composable
 private fun MoreSectionDivider() {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     HorizontalDivider(
         modifier = Modifier.padding(start = 74.dp, end = 16.dp),
         color = if (dark) Color(0xFF30374D) else MoreBorder.copy(alpha = 0.80f),
@@ -402,7 +416,7 @@ private fun MoreVersionFooter() {
         text = stringResource(R.string.more_version, BuildConfig.VERSION_NAME),
         modifier = Modifier.fillMaxWidth(),
         style = MaterialTheme.typography.labelSmall,
-        color = if (isSystemInDarkTheme()) Color(0xFF818AA0) else MoreMuted,
+        color = if (LocalAppDarkTheme.current) Color(0xFF818AA0) else MoreMuted,
         textAlign = TextAlign.Center,
     )
 }
@@ -411,7 +425,7 @@ private fun MoreVersionFooter() {
 private fun rememberLogoutHandler(): () -> Unit {
     val context = LocalContext.current
     var showDialog by remember { mutableStateOf(false) }
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
 
     if (showDialog) {
         AlertDialog(

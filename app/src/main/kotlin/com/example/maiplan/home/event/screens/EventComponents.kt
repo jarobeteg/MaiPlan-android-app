@@ -4,7 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,6 +88,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.common.IconData
 import java.time.Instant
 import java.time.LocalDate
@@ -96,8 +97,8 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-internal val EventPrimary = Color(0xFF4A6583)
-internal val EventPrimaryLight = Color(0xFF7089A5)
+internal val EventPrimary: Color get() = AppThemeManager.selectedTheme.primary
+internal val EventPrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
 internal val EventTeal = Color(0xFF14B8A6)
 internal val EventInk = Color(0xFF172033)
 internal val EventMuted = Color(0xFF667085)
@@ -119,7 +120,7 @@ internal data class EventEditorState(
 
 @Composable
 internal fun EventScreenBackground(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
 
     Box(
@@ -156,7 +157,7 @@ internal fun EventScreenBackground(content: @Composable () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EventEditorTopBar(title: String, onBackClick: () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     CenterAlignedTopAppBar(
         title = {
@@ -336,7 +337,7 @@ internal fun EventEditorLayout(
 
 @Composable
 private fun EventEditorHeading(heading: String, subtitle: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Column {
         Text(
             text = heading,
@@ -357,7 +358,7 @@ private fun EventEditorHeading(heading: String, subtitle: String) {
 
 @Composable
 private fun EventPreview(state: EventEditorState) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -445,7 +446,7 @@ private fun EventEditorSection(
     subtitle: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -483,7 +484,7 @@ private fun EventEditorTextField(
     singleLine: Boolean,
     imeAction: ImeAction,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -603,7 +604,7 @@ private fun EventSelectionField(
     icon: ImageVector,
     onClick: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -674,7 +675,7 @@ private fun EventCategoryDropdown(
     selectedCategory: CategoryEntity?,
     onCategorySelected: (CategoryEntity) -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -770,7 +771,7 @@ private fun EventCategoryDropdown(
 
 @Composable
 private fun EventEditorError(message: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(13.dp),
@@ -831,7 +832,7 @@ internal fun EventDatePickerDialog(
     onDismiss: () -> Unit,
 ) {
     val state = rememberDatePickerState()
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -894,7 +895,7 @@ internal fun EventTimePickerDialog(
     onDismiss: () -> Unit,
 ) {
     val state = rememberTimePickerState(is24Hour = true)
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF252B40) else Color(0xFFF2F5F9)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
@@ -946,7 +947,7 @@ private fun EventPickerDialogSurface(
     onDismiss: () -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -990,7 +991,7 @@ private fun EventPickerHeader(
     subtitle: String,
     icon: ImageVector,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1033,7 +1034,7 @@ private fun EventPickerActions(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Row(
         modifier = Modifier
             .fillMaxWidth()

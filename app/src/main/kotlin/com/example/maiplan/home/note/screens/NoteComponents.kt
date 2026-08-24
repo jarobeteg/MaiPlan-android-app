@@ -3,7 +3,7 @@ package com.example.maiplan.home.note.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -77,14 +77,15 @@ import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.home.event.screens.EventDatePickerDialog
 import com.example.maiplan.home.event.screens.EventTimePickerDialog
+import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.common.IconData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-internal val NotePrimary = Color(0xFF4A6583)
-internal val NotePrimaryLight = Color(0xFF7089A5)
+internal val NotePrimary: Color get() = AppThemeManager.selectedTheme.primary
+internal val NotePrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
 internal val NoteTeal = Color(0xFF14B8A6)
 internal val NoteInk = Color(0xFF172033)
 internal val NoteMuted = Color(0xFF667085)
@@ -104,7 +105,7 @@ internal data class NoteEditorState(
 
 @Composable
 internal fun NoteScreenBackground(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -139,7 +140,7 @@ internal fun NoteScreenBackground(content: @Composable () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NoteEditorTopBar(title: String, onBackClick: () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     CenterAlignedTopAppBar(
         title = {
@@ -360,7 +361,7 @@ private fun NoteEditorForm(
 
 @Composable
 private fun NoteEditorHeading(heading: String, subtitle: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Column {
         Text(
             text = heading,
@@ -381,7 +382,7 @@ private fun NoteEditorHeading(heading: String, subtitle: String) {
 
 @Composable
 private fun NotePreview(state: NoteEditorState, compact: Boolean = false) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
@@ -469,7 +470,7 @@ private fun NoteEditorSection(
     compact: Boolean = false,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = if (dark) Color(0xFF191D2E) else Color.White,
@@ -508,7 +509,7 @@ private fun NoteEditorTextField(
     maxLines: Int,
     imeAction: ImeAction,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
@@ -553,7 +554,7 @@ private fun NoteReminderDateTimeSelector(
     onValueChange: (LocalDateTime) -> Unit,
     onClear: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
@@ -653,7 +654,7 @@ private fun NoteCategoryDropdown(
     selectedCategory: CategoryEntity?,
     onCategorySelected: (CategoryEntity?) -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
@@ -743,7 +744,7 @@ private fun NoteCategoryDropdown(
 
 @Composable
 private fun NoteEditorError(message: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = if (dark) Color(0xFF3B2027) else Color(0xFFFFF1F2),

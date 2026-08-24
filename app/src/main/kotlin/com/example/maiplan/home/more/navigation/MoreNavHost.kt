@@ -20,15 +20,22 @@ fun MoreNavHost(rootNavController: NavHostController, localNavController: NavHos
         popEnterTransition = { fadeIn(animationSpec = tween(0)) },
         popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
-        moreNavGraph(rootNavController)
+        moreNavGraph(rootNavController, localNavController)
     }
 }
 
 fun NavGraphBuilder.moreNavGraph(
-    rootNavController: NavHostController
+    rootNavController: NavHostController,
+    localNavController: NavHostController,
 ) {
     // --- Main More Screen ---
     composable(MoreRoutes.MoreMain.route) {
-        MoreScreen(rootNavController)
+        MoreScreen(
+            rootNavController = rootNavController,
+            onThemeClick = { localNavController.navigate(MoreRoutes.Theme.route) },
+        )
+    }
+    composable(MoreRoutes.Theme.route) {
+        ThemeSelectionScreen(onBackClick = { localNavController.popBackStack() })
     }
 }

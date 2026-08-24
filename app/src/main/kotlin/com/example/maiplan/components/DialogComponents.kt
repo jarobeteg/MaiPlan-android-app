@@ -3,7 +3,7 @@ package com.example.maiplan.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -387,7 +387,7 @@ fun ColorPickerDialog(
     onDismiss: () -> Unit
 ) {
     val ui = LocalAppDesign.current
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
     val muted = if (dark) Color(0xFFAEB7C9) else Color(0xFF667085)
@@ -589,7 +589,7 @@ fun IconPickerDialog(
 ) {
     val ui = LocalAppDesign.current
     val scrollState = rememberLazyGridState()
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
     val cellSurface = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)

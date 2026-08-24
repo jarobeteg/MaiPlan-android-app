@@ -3,7 +3,7 @@ package com.example.maiplan.home.event.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -199,7 +199,7 @@ fun MonthCalendarSection(
     onNextMonth: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF181C2B) else Color.White
     val ink = if (dark) Color(0xFFF3F5FA) else EventInk
     val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
@@ -298,7 +298,7 @@ private fun CalendarDayCell(
         Spacer(modifier)
         return
     }
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val selected = date == selectedDate
     val today = date == LocalDate.now()
     val ink = if (dark) Color(0xFFF3F5FA) else EventInk
@@ -354,7 +354,7 @@ fun DayEventsSection(
     selectedDate: LocalDate,
     modifier: Modifier = Modifier,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF181C2B) else Color.White
     val ink = if (dark) Color(0xFFF3F5FA) else EventInk
     val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
@@ -435,7 +435,7 @@ fun DayEventsSection(
 
 @Composable
 private fun EventEmptyState(modifier: Modifier = Modifier) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val ink = if (dark) Color(0xFFF3F5FA) else EventInk
     val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
     Column(
@@ -548,7 +548,7 @@ private fun SwipeableEventCard(
 
 @Composable
 fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val cardColor = if (dark) Color(0xFF212638) else Color(0xFFF8FAFD)
     val ink = if (dark) Color(0xFFF3F5FA) else EventInk
     val muted = if (dark) Color(0xFFAEB7C8) else EventMuted
@@ -615,7 +615,7 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EventTopBar(monthTitle: String, onDatePickerClick: () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     CenterAlignedTopAppBar(
         title = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {

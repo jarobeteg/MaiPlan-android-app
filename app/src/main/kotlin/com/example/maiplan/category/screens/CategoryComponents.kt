@@ -5,7 +5,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,9 +76,10 @@ import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.components.ColorPickerDialog
 import com.example.maiplan.components.IconPickerDialog
+import com.example.maiplan.theme.AppThemeManager
 
-internal val CategoryPrimary = Color(0xFF4A6583)
-internal val CategoryPrimaryLight = Color(0xFF7089A5)
+internal val CategoryPrimary: Color get() = AppThemeManager.selectedTheme.primary
+internal val CategoryPrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
 internal val CategoryTeal = Color(0xFF14B8A6)
 internal val CategoryInk = Color(0xFF172033)
 internal val CategoryMuted = Color(0xFF667085)
@@ -86,7 +87,7 @@ internal val CategoryBorder = Color(0xFFDDE3EC)
 
 @Composable
 internal fun CategoryScreenBackground(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
 
     Box(
@@ -126,7 +127,7 @@ internal fun CategoryTopBar(
     title: String,
     onBackClick: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
 
@@ -188,7 +189,7 @@ internal fun CategorySearchField(
     value: String,
     onValueChange: (String) -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -229,8 +230,8 @@ internal fun CategorySearchField(
 
 @Composable
 internal fun CategoryListHeader(count: Int) {
-    val foreground = if (isSystemInDarkTheme()) Color(0xFFF5F7FB) else CategoryInk
-    val muted = if (isSystemInDarkTheme()) Color(0xFFAEB7C9) else CategoryMuted
+    val foreground = if (LocalAppDarkTheme.current) Color(0xFFF5F7FB) else CategoryInk
+    val muted = if (LocalAppDarkTheme.current) Color(0xFFAEB7C9) else CategoryMuted
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -253,13 +254,13 @@ internal fun CategoryListHeader(count: Int) {
         }
         Surface(
             shape = RoundedCornerShape(999.dp),
-            color = CategoryPrimary.copy(alpha = if (isSystemInDarkTheme()) 0.22f else 0.10f),
+            color = CategoryPrimary.copy(alpha = if (LocalAppDarkTheme.current) 0.22f else 0.10f),
         ) {
             Text(
                 text = stringResource(R.string.category_total, count),
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
                 style = MaterialTheme.typography.labelMedium,
-                color = if (isSystemInDarkTheme()) Color(0xFFC9D7E5) else CategoryPrimary,
+                color = if (LocalAppDarkTheme.current) Color(0xFFC9D7E5) else CategoryPrimary,
                 fontWeight = FontWeight.Bold,
             )
         }
@@ -274,7 +275,7 @@ internal fun CategoryListCard(
     icon: ImageVector,
     onEditClick: () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -347,7 +348,7 @@ internal fun CategoryListCard(
 
 @Composable
 internal fun CategoryEmptyState(isSearching: Boolean) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -497,8 +498,8 @@ internal fun CategoryEditorLayout(
 
 @Composable
 private fun CategoryEditorHeading(heading: String, subtitle: String) {
-    val foreground = if (isSystemInDarkTheme()) Color(0xFFF5F7FB) else CategoryInk
-    val muted = if (isSystemInDarkTheme()) Color(0xFFAEB7C9) else CategoryMuted
+    val foreground = if (LocalAppDarkTheme.current) Color(0xFFF5F7FB) else CategoryInk
+    val muted = if (LocalAppDarkTheme.current) Color(0xFFAEB7C9) else CategoryMuted
     Column {
         Text(
             text = heading,
@@ -524,7 +525,7 @@ private fun CategoryPreview(
     color: Color,
     icon: ImageVector,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -596,7 +597,7 @@ private fun CategoryEditorSection(
     subtitle: String,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -635,7 +636,7 @@ private fun CategoryEditorTextField(
     singleLine: Boolean,
     imeAction: ImeAction,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -745,7 +746,7 @@ private fun CategorySelectionRow(
     onClick: () -> Unit,
     selection: @Composable () -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
     val muted = if (dark) Color(0xFFAEB7C9) else CategoryMuted
@@ -856,7 +857,7 @@ private fun CategoryEditorButton(
 
 @Composable
 private fun CategoryEditorError(message: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(13.dp),

@@ -2,7 +2,7 @@ package com.example.maiplan.home.note.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -291,7 +291,7 @@ private fun NoteDismissBackground(dismissState: SwipeToDismissBoxState) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotesTopBar(compact: Boolean) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     CenterAlignedTopAppBar(
         title = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -316,7 +316,7 @@ private fun NotesTopBar(compact: Boolean) {
 
 @Composable
 private fun NoteSearchField(value: String, onValueChange: (String) -> Unit) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
@@ -355,7 +355,7 @@ private fun NoteCategoryFilter(
     selectedCategoryId: Int?,
     onCategorySelected: (Int?) -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -421,7 +421,7 @@ private fun NoteFilterChip(
 
 @Composable
 private fun NoteListHeader(count: Int, isFiltered: Boolean, compact: Boolean) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val countText = when {
         count == 1 && isFiltered -> stringResource(R.string.note_result_single)
         count == 1 -> stringResource(R.string.note_count_single)
@@ -468,7 +468,7 @@ private fun NoteEmptyState(
     onCreateClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = if (dark) Color(0xFF181C2B) else Color.White,
@@ -542,7 +542,7 @@ private fun NoteCard(
     onDeleteClick: () -> Unit,
     compact: Boolean,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
     val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
     val categoryColor = category?.color?.toULongOrNull()?.let(::Color) ?: NotePrimary

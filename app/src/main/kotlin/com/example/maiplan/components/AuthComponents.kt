@@ -6,7 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -71,9 +71,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.theme.AppThemeManager
 
-private val AuthPrimary = Color(0xFF4A6583)
-private val AuthPrimaryLight = Color(0xFF7089A5)
+private val AuthPrimary: Color get() = AppThemeManager.selectedTheme.primary
+private val AuthPrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
 private val AuthTeal = Color(0xFF14B8A6)
 private val AuthInk = Color(0xFF172033)
 private val AuthMuted = Color(0xFF667085)
@@ -89,7 +90,7 @@ fun AuthPage(
     onBackClick: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
     val card = if (dark) Color(0xFF191D2E) else Color.White
     val titleColor = if (dark) Color(0xFFF6F7FB) else AuthInk
@@ -340,7 +341,7 @@ private fun AuthTextField(
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     val fieldColor = if (dark) Color(0xFF20263A) else AuthField
     val borderColor = if (dark) Color(0xFF3A435C) else AuthBorder
     val textColor = if (dark) Color(0xFFF4F6FA) else AuthInk
@@ -484,7 +485,7 @@ fun AuthPrimaryButton(
 
 @Composable
 fun AuthErrorMessage(message: String) {
-    val dark = isSystemInDarkTheme()
+    val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(13.dp),
@@ -538,7 +539,7 @@ fun AuthFooterAction(
         Text(
             text = prompt,
             style = MaterialTheme.typography.bodyMedium,
-            color = if (isSystemInDarkTheme()) Color(0xFFAEB7C9) else AuthMuted,
+            color = if (LocalAppDarkTheme.current) Color(0xFFAEB7C9) else AuthMuted,
         )
         TextButton(onClick = onClick) {
             Text(

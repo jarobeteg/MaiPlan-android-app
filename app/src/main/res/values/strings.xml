@@ -178,6 +178,7 @@
     <string name="logout">Logout</string>
     <string name="more_heading">Your MaiPlan</string>
     <string name="more_subtitle">Manage your workspace, data, and account.</string>
+    <string name="more_preferences_section">PREFERENCES</string>
     <string name="more_workspace_section">WORKSPACE</string>
     <string name="more_account_section">ACCOUNT</string>
     <string name="more_categories_subtitle">Organize the colors and icons used across your plans</string>
@@ -189,6 +190,34 @@
     <string name="more_version">MaiPlan · Version %1$s</string>
     <string name="more_logout_dialog_title">Log out of MaiPlan?</string>
     <string name="more_logout_dialog_message">You’ll need to sign in again to access your workspace on this device.</string>
+    <string name="app_theme">App theme</string>
+    <string name="more_theme_subtitle">Choose MaiPlan’s appearance mode and color palette</string>
+    <string name="theme_screen_title">Choose a theme</string>
+    <string name="theme_screen_heading">Make MaiPlan feel like yours</string>
+    <string name="theme_screen_subtitle">Your selection is applied instantly across the app and remembered on this device.</string>
+    <string name="theme_mode_title">Appearance mode</string>
+    <string name="theme_mode_subtitle">Choose whether MaiPlan follows your device or always uses a light or dark appearance.</string>
+    <string name="theme_mode_system">System</string>
+    <string name="theme_mode_light">Light</string>
+    <string name="theme_mode_dark">Dark</string>
+    <string name="theme_color_palette_title">Color palette</string>
+    <string name="theme_selected">Selected</string>
+    <string name="theme_blue_grey">Blue Grey</string>
+    <string name="theme_blue_grey_description">Calm and balanced</string>
+    <string name="theme_ocean">Ocean</string>
+    <string name="theme_ocean_description">Clear and focused</string>
+    <string name="theme_indigo">Indigo</string>
+    <string name="theme_indigo_description">Structured and thoughtful</string>
+    <string name="theme_forest">Forest</string>
+    <string name="theme_forest_description">Grounded and productive</string>
+    <string name="theme_sage">Sage</string>
+    <string name="theme_sage_description">Soft and restorative</string>
+    <string name="theme_terracotta">Terracotta</string>
+    <string name="theme_terracotta_description">Warm and purposeful</string>
+    <string name="theme_plum">Dusty Rose</string>
+    <string name="theme_plum_description">Warm, soft, and composed</string>
+    <string name="theme_amber">Amber</string>
+    <string name="theme_amber_description">Energetic and confident</string>
 
     <!-- category management screen -->
     <string name="categories">Categories</string>
@@ -212,7 +241,7 @@
     <string name="category_collection_title">Your categories</string>
     <string name="category_collection_subtitle">Keep every part of your life organized.</string>
     <string name="category_total">%1$d total</string>
-    <string name="category_gesture_hint">Tap to edit · Swipe right to delete · Swipe left to edit</string>
+    <string name="category_gesture_hint">Tap to edit · Swipe right to edit · Swipe left to delete</string>
     <string name="category_empty_title">No categories yet</string>
     <string name="category_empty_subtitle">Create your first category to organize related events, tasks, and notes.</string>
     <string name="category_empty_search_title">No matching categories</string>

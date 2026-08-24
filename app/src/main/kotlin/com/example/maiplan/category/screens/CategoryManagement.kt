@@ -39,7 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.foundation.isSystemInDarkTheme
+import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -101,7 +101,7 @@ fun CategoryManagementScreen(
                     Text(
                         text = stringResource(R.string.category_gesture_hint),
                         style = MaterialTheme.typography.labelSmall,
-                        color = if (isSystemInDarkTheme()) Color(0xFFAEB7C9) else CategoryMuted,
+                        color = if (LocalAppDarkTheme.current) Color(0xFFAEB7C9) else CategoryMuted,
                         modifier = Modifier.padding(horizontal = 4.dp),
                     )
                     Spacer(Modifier.height(8.dp))
