@@ -215,8 +215,8 @@
     <string name="theme_sage_description">Soft and restorative</string>
     <string name="theme_terracotta">Terracotta</string>
     <string name="theme_terracotta_description">Warm and purposeful</string>
-    <string name="theme_plum">Dusty Rose</string>
-    <string name="theme_plum_description">Warm, soft, and composed</string>
+    <string name="theme_dusty_rose">Dusty Rose</string>
+    <string name="theme_dusty_rose_description">Warm, soft, and composed</string>
     <string name="theme_amber">Amber</string>
     <string name="theme_amber_description">Energetic and confident</string>
     <string name="home_clock">Home clock</string>

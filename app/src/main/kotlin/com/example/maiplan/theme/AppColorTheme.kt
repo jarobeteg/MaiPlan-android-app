@@ -7,6 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.example.maiplan.R
+import androidx.core.content.edit
 
 enum class AppColorTheme(
     val storageKey: String,
@@ -64,10 +65,10 @@ enum class AppColorTheme(
         primaryLight = Color(0xFFC38270),
         primaryDark = Color(0xFF743F32),
     ),
-    PLUM(
-        storageKey = "plum",
-        nameRes = R.string.theme_plum,
-        descriptionRes = R.string.theme_plum_description,
+    DUSTY_ROSE(
+        storageKey = "dusty_rose",
+        nameRes = R.string.theme_dusty_rose,
+        descriptionRes = R.string.theme_dusty_rose_description,
         primary = Color(0xFFA66F7F),
         primaryLight = Color(0xFFC493A1),
         primaryDark = Color(0xFF744B58),
@@ -128,17 +129,17 @@ object AppThemeManager {
         if (theme == selectedTheme) return
         selectedTheme = theme
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(THEME_KEY, theme.storageKey)
-            .apply()
+            .edit {
+                putString(THEME_KEY, theme.storageKey)
+            }
     }
 
     fun selectMode(context: Context, mode: AppThemeMode) {
         if (mode == selectedMode) return
         selectedMode = mode
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(MODE_KEY, mode.storageKey)
-            .apply()
+            .edit {
+                putString(MODE_KEY, mode.storageKey)
+            }
     }
 }
