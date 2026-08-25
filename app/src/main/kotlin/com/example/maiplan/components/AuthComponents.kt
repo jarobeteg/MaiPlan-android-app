@@ -81,7 +81,6 @@ private val AuthMuted = Color(0xFF667085)
 private val AuthField = Color(0xFFF8FAFC)
 private val AuthBorder = Color(0xFFDDE3EC)
 
-/** A self-contained visual system for the authentication journey. */
 @Composable
 fun AuthPage(
     title: String,
