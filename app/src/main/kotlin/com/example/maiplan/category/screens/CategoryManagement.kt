@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import com.example.maiplan.theme.LocalAppDarkTheme
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -64,7 +65,9 @@ fun CategoryManagementScreen(
             it.description.contains(searchQuery, ignoreCase = true)
     }
 
-    CategoryScreenBackground {
+    CategoryScreenBackground(
+        showDecorations = LocalConfiguration.current.smallestScreenWidthDp < 600,
+    ) {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = {

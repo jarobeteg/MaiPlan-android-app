@@ -86,7 +86,10 @@ internal val CategoryMuted = Color(0xFF667085)
 internal val CategoryBorder = Color(0xFFDDE3EC)
 
 @Composable
-internal fun CategoryScreenBackground(content: @Composable () -> Unit) {
+internal fun CategoryScreenBackground(
+    showDecorations: Boolean = true,
+    content: @Composable () -> Unit,
+) {
     val dark = LocalAppDarkTheme.current
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
 
@@ -95,27 +98,29 @@ internal fun CategoryScreenBackground(content: @Composable () -> Unit) {
             .fillMaxSize()
             .background(background),
     ) {
-        Canvas(Modifier.fillMaxSize()) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(
-                        CategoryPrimary.copy(alpha = if (dark) 0.18f else 0.09f),
-                        Color.Transparent,
+        if (showDecorations) {
+            Canvas(Modifier.fillMaxSize()) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            CategoryPrimary.copy(alpha = if (dark) 0.18f else 0.09f),
+                            Color.Transparent,
+                        ),
                     ),
-                ),
-                center = Offset(size.width * 0.05f, size.height * 0.03f),
-                radius = size.minDimension * 0.68f,
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(
-                        CategoryTeal.copy(alpha = if (dark) 0.10f else 0.06f),
-                        Color.Transparent,
+                    center = Offset(size.width * 0.05f, size.height * 0.03f),
+                    radius = size.minDimension * 0.68f,
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            CategoryTeal.copy(alpha = if (dark) 0.10f else 0.06f),
+                            Color.Transparent,
+                        ),
                     ),
-                ),
-                center = Offset(size.width, size.height),
-                radius = size.minDimension * 0.52f,
-            )
+                    center = Offset(size.width, size.height),
+                    radius = size.minDimension * 0.52f,
+                )
+            }
         }
         content()
     }
