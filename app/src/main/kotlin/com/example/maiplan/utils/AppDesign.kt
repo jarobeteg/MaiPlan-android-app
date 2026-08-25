@@ -5,7 +5,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-/** Static design tokens shared by the application. */
 @Stable
 data class AppDimensions(
     val generalPadding: Dp = 16.dp,
@@ -45,7 +44,4 @@ data class AppDesign(
 
 private val DefaultAppDesign = AppDesign()
 
-/**
- * Static visual tokens only. Dynamic window information lives in [LocalAdaptiveLayout].
- */
 val LocalAppDesign = staticCompositionLocalOf { DefaultAppDesign }

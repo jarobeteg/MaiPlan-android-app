@@ -63,7 +63,6 @@ internal fun adaptiveLayoutFor(
     },
 )
 
-/** Keeps the existing phone layout while allowing tablet destinations to use the full window. */
 @Composable
 fun Modifier.adaptiveContentWidth(): Modifier {
     val adaptiveLayout = LocalAdaptiveLayout.current

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.example.maiplan.R
+import androidx.core.content.edit
 
 enum class HomeClockStyle(
     val storageKey: String,
@@ -66,17 +67,17 @@ object HomeClockPreferences {
         if (style == selectedStyle) return
         selectedStyle = style
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(STYLE_KEY, style.storageKey)
-            .apply()
+            .edit {
+                putString(STYLE_KEY, style.storageKey)
+            }
     }
 
     fun selectHourFormat(context: Context, format: HomeClockHourFormat) {
         if (format == selectedHourFormat) return
         selectedHourFormat = format
         context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE)
-            .edit()
-            .putString(HOUR_FORMAT_KEY, format.storageKey)
-            .apply()
+            .edit {
+                putString(HOUR_FORMAT_KEY, format.storageKey)
+            }
     }
 }
