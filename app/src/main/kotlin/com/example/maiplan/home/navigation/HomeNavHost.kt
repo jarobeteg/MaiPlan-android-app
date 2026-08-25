@@ -18,6 +18,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.maiplan.home.event.EventScreenManager
+import com.example.maiplan.home.screens.HomeScreen
 import com.example.maiplan.home.task.TaskScreenManager
 import com.example.maiplan.home.more.MoreScreenManager
 import com.example.maiplan.home.note.NoteScreenManager
@@ -68,6 +69,9 @@ fun NavGraphBuilder.homeNavGraph(
     }
     composable(HomeNavRoutes.Notes.route) {
         NoteScreenManager(rootNavController)
+    }
+    composable(HomeNavRoutes.Home.route) {
+        HomeScreen(rootNavController)
     }
     composable(HomeNavRoutes.More.route) {
         MoreScreenManager(rootNavController)

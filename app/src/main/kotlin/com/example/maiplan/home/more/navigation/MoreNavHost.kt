@@ -33,9 +33,13 @@ fun NavGraphBuilder.moreNavGraph(
         MoreScreen(
             rootNavController = rootNavController,
             onThemeClick = { localNavController.navigate(MoreRoutes.Theme.route) },
+            onClockClick = { localNavController.navigate(MoreRoutes.Clock.route) },
         )
     }
     composable(MoreRoutes.Theme.route) {
         ThemeSelectionScreen(onBackClick = { localNavController.popBackStack() })
+    }
+    composable(MoreRoutes.Clock.route) {
+        ClockSelectionScreen(onBackClick = { localNavController.popBackStack() })
     }
 }

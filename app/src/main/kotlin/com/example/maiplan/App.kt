@@ -1,6 +1,7 @@
 package com.example.maiplan
 
 import android.app.Application
+import com.example.maiplan.home.clock.HomeClockPreferences
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
@@ -10,6 +11,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         AppThemeManager.initialize(this)
+        HomeClockPreferences.initialize(this)
         NotificationHelper.createNotificationChannel(this)
         RetrofitClient.init()
         SyncScheduler.schedulePeriodicSync(this)

@@ -50,6 +50,7 @@ private val HomeBorder = Color(0xFFDDE3EC)
 private val homeNavigationItems = listOf(
     HomeNavRoutes.Events,
     HomeNavRoutes.Tasks,
+    HomeNavRoutes.Home,
     HomeNavRoutes.Notes,
     HomeNavRoutes.More,
 )

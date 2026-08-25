@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.CloudSync
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.Palette
+import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -55,6 +56,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,6 +68,7 @@ import androidx.navigation.NavHostController
 import com.example.maiplan.BuildConfig
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
+import com.example.maiplan.home.clock.HomeClockPreferences
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
@@ -84,6 +87,7 @@ private val MoreDanger = Color(0xFFD92D3A)
 fun MoreScreen(
     rootNavController: NavHostController,
     onThemeClick: () -> Unit,
+    onClockClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val onLogoutClick = rememberLogoutHandler()
@@ -135,6 +139,17 @@ fun MoreScreen(
                             icon = Icons.Rounded.Palette,
                             onClick = onThemeClick,
                         )
+                        MoreSectionDivider()
+                        MoreActionRow(
+                            title = stringResource(R.string.home_clock),
+                            subtitle = stringResource(
+                                R.string.more_clock_subtitle,
+                                stringResource(HomeClockPreferences.selectedStyle.nameRes),
+                                stringResource(HomeClockPreferences.selectedHourFormat.nameRes),
+                            ),
+                            icon = Icons.Rounded.Schedule,
+                            onClick = onClockClick,
+                        )
                     }
 
                     MoreSection(title = stringResource(R.string.more_account_section)) {
@@ -159,6 +174,7 @@ fun MoreScreen(
 @Composable
 private fun MoreScreenBackground(content: @Composable () -> Unit) {
     val dark = LocalAppDarkTheme.current
+    val isTablet = LocalConfiguration.current.smallestScreenWidthDp >= 600
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
 
     Box(
@@ -166,27 +182,29 @@ private fun MoreScreenBackground(content: @Composable () -> Unit) {
             .fillMaxSize()
             .background(background),
     ) {
-        Canvas(Modifier.fillMaxSize()) {
-            drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(
-                        MorePrimary.copy(alpha = if (dark) 0.18f else 0.09f),
-                        Color.Transparent,
+        if (!(isTablet && dark)) {
+            Canvas(Modifier.fillMaxSize()) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            MorePrimary.copy(alpha = if (dark) 0.18f else 0.09f),
+                            Color.Transparent,
+                        ),
                     ),
-                ),
-                center = Offset(size.width * 0.06f, size.height * 0.02f),
-                radius = size.minDimension * 0.68f,
-            )
-            drawCircle(
-                brush = Brush.radialGradient(
-                    listOf(
-                        MoreTeal.copy(alpha = if (dark) 0.10f else 0.06f),
-                        Color.Transparent,
+                    center = Offset(size.width * 0.06f, size.height * 0.02f),
+                    radius = size.minDimension * 0.68f,
+                )
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            MoreTeal.copy(alpha = if (dark) 0.10f else 0.06f),
+                            Color.Transparent,
+                        ),
                     ),
-                ),
-                center = Offset(size.width, size.height),
-                radius = size.minDimension * 0.50f,
-            )
+                    center = Offset(size.width, size.height),
+                    radius = size.minDimension * 0.50f,
+                )
+            }
         }
         content()
     }

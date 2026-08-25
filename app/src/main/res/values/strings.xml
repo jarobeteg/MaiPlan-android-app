@@ -100,6 +100,7 @@
     <string name="event">Events</string>
     <string name="task">Tasks</string>
     <string name="notes">Notes</string>
+    <string name="home">Home</string>
     <string name="file">Files</string>
     <string name="more">More</string>
 
@@ -218,6 +219,21 @@
     <string name="theme_plum_description">Warm, soft, and composed</string>
     <string name="theme_amber">Amber</string>
     <string name="theme_amber_description">Energetic and confident</string>
+    <string name="home_clock">Home clock</string>
+    <string name="more_clock_subtitle">%1$s · %2$s</string>
+    <string name="clock_screen_title">Home clock</string>
+    <string name="clock_screen_heading">Choose how time appears</string>
+    <string name="clock_screen_subtitle">Personalize the clock shown at the top of your Home screen.</string>
+    <string name="clock_style_title">Clock style</string>
+    <string name="clock_style_subtitle">Switch between a modern digital display and a classic clock face.</string>
+    <string name="clock_style_digital">Digital</string>
+    <string name="clock_style_analog">Analog</string>
+    <string name="clock_format_title">Digital time format</string>
+    <string name="clock_format_subtitle">Choose how hours are displayed when using the digital clock.</string>
+    <string name="clock_format_12_hour">12-hour</string>
+    <string name="clock_format_24_hour">24-hour</string>
+    <string name="clock_format_12_preview">2:35 PM</string>
+    <string name="clock_format_24_preview">14:35</string>
 
     <!-- category management screen -->
     <string name="categories">Categories</string>
