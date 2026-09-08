@@ -1,25 +1,36 @@
 package com.example.maiplan.utils.common
 
-import com.example.maiplan.network.api.UserResponse
+import com.example.maiplan.database.entities.UserEntity
+import java.util.UUID
 
 object UserSession {
-    var userId: Int? = null
-    var email: String? = null
-    var username: String? = null
+    var userLocalId: Long? = null
+        private set
 
-    fun setup(user: UserResponse) {
-        userId = user.id
+    var userSyncId: UUID? = null
+        private set
+
+    var email: String? = null
+        private set
+
+    var username: String? = null
+        private set
+
+    fun setup(user: UserEntity) {
+        userLocalId = user.userLocalId
+        userSyncId = user.syncId
         email = user.email
         username = user.username
     }
 
     fun clear() {
-        userId = null
+        userLocalId = null
+        userSyncId = null
         email = null
         username = null
     }
 
     fun isLoggedIn(): Boolean {
-        return userId != null && email != null && username != null
+        return userLocalId != null && userSyncId != null
     }
 }

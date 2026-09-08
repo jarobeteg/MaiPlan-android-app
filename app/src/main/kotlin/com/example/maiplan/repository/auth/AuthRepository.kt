@@ -1,115 +1,161 @@
 package com.example.maiplan.repository.auth
 
-import com.example.maiplan.database.entities.AuthEntity
-import com.example.maiplan.database.entities.AuthEntityResponse
-import com.example.maiplan.database.entities.toAuthEntity
-import com.example.maiplan.database.entities.toAuthSync
+import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.network.api.AuthResponse
-import com.example.maiplan.network.api.AuthSync
-import com.example.maiplan.network.api.Token
-import com.example.maiplan.network.api.UserLogin
-import com.example.maiplan.network.api.UserRegister
-import com.example.maiplan.network.api.UserResetPassword
-import com.example.maiplan.network.api.UserResponse
-import com.example.maiplan.network.sync.SyncRequest
-import com.example.maiplan.network.sync.Syncable
+import com.example.maiplan.network.api.UserLoginRequest
+import com.example.maiplan.network.api.UserRegisterRequest
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleRemoteResponse
-import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.SessionManager
+import kotlinx.coroutines.CancellationException
+import java.util.UUID
 
 class AuthRepository(
     private val remote: AuthRemoteDataSource,
-    private val local: AuthLocalDataSource
-) : Syncable {
-
-    override suspend fun sync() {
-        try {
-            val pendingUser: AuthEntity? = local.getPendingUser(UserSession.userId!!)
-            val changes: MutableList<AuthSync> = mutableListOf()
-            if (pendingUser != null) changes.add(pendingUser.toAuthSync())
-            val request: SyncRequest<AuthSync> = SyncRequest(UserSession.userId!!, changes)
-            val response = remote.authSync(request)
-
-            if (response.isSuccessful) {
-                val body = response.body()
-                if (body != null) {
-                    if (body.acknowledged.isNotEmpty()) local.authSync(body.acknowledged.first().toAuthEntity())
-                    if (body.rejected.isNotEmpty()) local.deleteUser(body.rejected.first().toAuthEntity())
-                }
+    private val local: UserLocalDataSource,
+    private val session: SessionManager
+) {
+    private suspend fun completeAuthentication(
+        result: Result<AuthResponse>
+    ): Result<UserEntity> {
+        if (result !is Result.Success) {
+            return when (result) {
+                is Result.Failure -> result
+                is Result.Error -> result
+                is Result.Idle -> result
+                is Result.Loading -> result
+                is Result.Success -> error("Handled above")
             }
-        } catch (e: Exception) {
-            Result.Error(e)
         }
-    }
 
-    suspend fun register(user: UserRegister): Result<AuthResponse> {
-        return try {
-            handleAuthResponse(handleRemoteResponse(remote.register(user)))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun login(user: UserLogin): Result<AuthResponse> {
-        return try {
-            handleRemoteResponse(remote.login(user))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun localLogin(user: UserLogin): AuthEntityResponse? {
-        return local.login(user)
-    }
-
-    suspend fun resetPassword(user: UserResetPassword): Result<AuthResponse> {
-        return try {
-            handleAuthResponse(handleRemoteResponse(remote.resetPassword(user)))
-        } catch (e: Exception){
-            Result.Error(e)
-        }
-    }
-
-    suspend fun tokenRefresh(token: String): Result<Token> {
-        return try {
-            handleRemoteResponse(remote.tokenRefresh(token))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun getProfile(token: String): Result<AuthResponse> {
-        return try {
-            handleAuthResponse(handleRemoteResponse(remote.getProfile(token)))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun pseudoAuth(user: UserResponse): Boolean {
-        if (!local.doesUserExist(user.id)) {
-            val auth = AuthEntity(
-                userId = user.id,
-                email = user.email,
-                username = user.username,
-                passwordHash = "pseudo",
-                syncState = 4
+        if (result.data.accessToken.isBlank()) {
+            return Result.Error(
+                IllegalStateException("The server returned a blank access token")
             )
-            return local.insertPseudoAuth(auth)
-        } else {
-            return true
+        }
+
+        if (!result.data.tokenType.equals("bearer", ignoreCase = true)) {
+            return Result.Error(
+                IllegalStateException("The server returned an unsupported token type")
+            )
+        }
+
+        val localUser: UserEntity = local.reconcileServerUser(result.data.user)
+
+        check(localUser.deletedAt == null) {
+            "Cannot establish a session for a deleted user"
+        }
+
+        session.saveSession(
+            accessToken = result.data.accessToken,
+            refreshToken = result.data.refreshToken,
+            userSyncId = localUser.syncId
+        )
+
+        return Result.Success(localUser)
+    }
+
+    suspend fun register(request: UserRegisterRequest): Result<UserEntity> {
+        return try {
+            val result = handleRemoteResponse(remote.register(request))
+
+            completeAuthentication(result)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.Error(exception)
         }
     }
 
-    private suspend fun handleAuthResponse(result: Result<AuthResponse>): Result<AuthResponse> {
-        if (result is Result.Success) {
-            return if (pseudoAuth(result.data.user)) {
-                result
-            } else {
-                Result.Error(IllegalStateException("Could not create local user row"))
-            }
-        }
+    suspend fun login(request: UserLoginRequest): Result<UserEntity> {
+        return try {
+            val result = handleRemoteResponse(remote.login(request))
 
-        return result
+            completeAuthentication(result)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.Error(exception)
+        }
+    }
+
+    suspend fun getCachedSessionUser(): Result<UserEntity?> {
+        return try {
+            if (!session.hasSession()) {
+                session.clearSession()
+                return Result.Success(null)
+            }
+
+            val userSyncId = session.getActiveUserSyncId()
+                ?: return Result.Success(null)
+
+            val localUser = local.getActiveUserBySyncId(userSyncId)
+
+            if (localUser == null) {
+                session.clearSession()
+            }
+
+            Result.Success(localUser)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.Error(exception)
+        }
+    }
+
+    suspend fun refreshProfile(): Result<UserEntity> {
+        return try {
+            val expectedSyncId = session.getActiveUserSyncId()
+                ?: run {
+                    session.clearSession()
+                    return Result.Error(IllegalStateException("No active user in the session"))
+                }
+
+            if (session.getAccessToken().isNullOrBlank()) {
+                session.clearSession()
+                return Result.Error(IllegalStateException("No access token in the session"))
+            }
+
+            when (
+                val result = handleRemoteResponse(remote.getProfile())
+            ) {
+                is Result.Success -> {
+                    val returnedSyncId = UUID.fromString(result.data.syncId)
+
+                    if (returnedSyncId != expectedSyncId) {
+                        session.clearSession()
+
+                        return Result.Error(
+                            IllegalStateException("The server returned a different user")
+                        )
+                    }
+
+                    val localUser = local.reconcileServerUser(result.data)
+
+                    if (localUser.deletedAt != null) {
+                        session.clearSession()
+
+                        Result.Error(IllegalStateException("The current user account has been deleted"))
+                    } else {
+                        Result.Success(localUser)
+                    }
+                }
+
+                is Result.Failure -> {
+                    if (result.httpStatus == 401 || result.httpStatus == 403) {
+                        session.clearSession()
+                    }
+
+                    result
+                }
+                is Result.Error -> result
+                is Result.Idle -> result
+                is Result.Loading -> result
+            }
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.Error(exception)
+        }
     }
 }

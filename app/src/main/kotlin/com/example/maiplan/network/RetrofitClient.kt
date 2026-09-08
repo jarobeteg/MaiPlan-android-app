@@ -1,5 +1,6 @@
 package com.example.maiplan.network
 
+import android.content.Context
 import com.example.maiplan.BuildConfig
 import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.CategoryApi
@@ -7,6 +8,7 @@ import com.example.maiplan.network.api.EventApi
 import com.example.maiplan.network.api.NoteApi
 import com.example.maiplan.network.api.RaspiApi
 import com.example.maiplan.network.api.ReminderApi
+import com.example.maiplan.utils.SessionManager
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -14,20 +16,33 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
+    private lateinit var sessionManager: SessionManager
     private lateinit var BASE_URL: String
 
-    fun init() {
+    fun init(context: Context) {
+        sessionManager = SessionManager(context.applicationContext)
         BASE_URL = BuildConfig.API_BASE_URL
     }
 
-    private val normalClient = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(15, TimeUnit.SECONDS)
-        .writeTimeout(15, TimeUnit.SECONDS)
-        .callTimeout(30, TimeUnit.SECONDS)
-        .retryOnConnectionFailure(true)
-        .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
-        .build()
+    private fun standardClientBuilder(): OkHttpClient.Builder {
+        return OkHttpClient.Builder()
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .callTimeout(30, TimeUnit.SECONDS)
+            .retryOnConnectionFailure(true)
+            .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
+    }
+
+    private val publicClient: OkHttpClient by lazy {
+        standardClientBuilder().build()
+    }
+
+    private val authenticatedClient: OkHttpClient by lazy {
+        standardClientBuilder()
+            .addInterceptor(AuthInterceptor(sessionManager))
+            .build()
+    }
 
     private val fastClient = OkHttpClient.Builder()
         .connectTimeout(1, TimeUnit.SECONDS)
@@ -38,10 +53,18 @@ object RetrofitClient {
         .connectionPool(ConnectionPool(0, 1, TimeUnit.NANOSECONDS))
         .build()
 
+    private val publicRetrofit: Retrofit by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(publicClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+
     val normalRetrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
-            .client(normalClient)
+            .client(authenticatedClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
@@ -54,7 +77,8 @@ object RetrofitClient {
             .build()
     }
 
-    val authApi: AuthApi by lazy { normalRetrofit.create(AuthApi::class.java) }
+    val publicAuthApi: AuthApi by lazy { publicRetrofit.create(AuthApi::class.java) }
+    val authenticatedAuthApi: AuthApi by lazy { normalRetrofit.create(AuthApi::class.java) }
     val categoryApi: CategoryApi by lazy { normalRetrofit.create(CategoryApi::class.java) }
     val eventApi: EventApi by lazy { normalRetrofit.create(EventApi::class.java) }
     val noteApi: NoteApi by lazy { normalRetrofit.create(NoteApi::class.java) }

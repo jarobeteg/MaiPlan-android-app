@@ -10,7 +10,7 @@ import retrofit2.http.POST
 data class NoteSync(
     @SerializedName("note_id") val noteId: Int,
     @SerializedName("server_id") val serverId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     @SerializedName("category_id") val categoryId: Int,
     @SerializedName("reminder_id") val reminderId: Int,
     val title: String,

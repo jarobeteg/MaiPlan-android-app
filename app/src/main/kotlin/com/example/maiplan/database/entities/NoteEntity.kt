@@ -10,9 +10,9 @@ import androidx.room.PrimaryKey
     tableName = "note",
     foreignKeys = [
         ForeignKey(
-            entity = AuthEntity::class,
-            parentColumns = ["user_id"],
-            childColumns = ["user_id"],
+            entity = UserEntity::class,
+            parentColumns = ["user_local_id"],
+            childColumns = ["user_local_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -29,7 +29,7 @@ import androidx.room.PrimaryKey
         )
     ],
     indices = [
-        Index(value = ["user_id"]),
+        Index(value = ["user_local_id"]),
         Index(value = ["category_id"]),
         Index(value = ["reminder_id"]),
         Index(value = ["last_modified"]),
@@ -42,8 +42,8 @@ data class NoteEntity(
     @ColumnInfo(name = "note_id")
     val noteId: Int = 0,
 
-    @ColumnInfo(name = "user_id")
-    val userId: Int,
+    @ColumnInfo(name = "user_local_id")
+    val userLocalId: Long,
 
     @ColumnInfo(name = "category_id")
     val categoryId: Int? = null,

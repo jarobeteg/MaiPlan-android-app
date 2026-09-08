@@ -12,7 +12,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 
 data class CategoryCreate(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     val name: String,
     val description: String,
     val color: String,
@@ -30,7 +30,7 @@ data class CategoryResponse(
 data class CategorySync(
     @SerializedName("category_id") val categoryId: Int,
     @SerializedName("server_id") val serverId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     val name: String,
     val description: String,
     val color: String,
@@ -47,7 +47,7 @@ interface CategoryApi {
     suspend fun createCategory(@Body categoryCreate: CategoryCreate): Response<Unit>
 
     @GET("categories/get-all-category")
-    suspend fun getAllCategories(@Query("user_id") userId: Int): Response<List<CategoryResponse>>
+    suspend fun getAllCategories(@Query("user_local_id") userLocalId: Int): Response<List<CategoryResponse>>
 
     @POST("categories/update-category")
     suspend fun updateCategory(@Body category: CategoryResponse): Response<Unit>

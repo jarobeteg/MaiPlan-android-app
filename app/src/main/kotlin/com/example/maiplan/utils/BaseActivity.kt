@@ -13,6 +13,7 @@ import androidx.core.view.WindowCompat.getInsetsController
 import androidx.core.view.WindowCompat.setDecorFitsSystemWindows
 import com.example.maiplan.main.MainActivity
 import com.example.maiplan.network.NetworkChecker
+import com.example.maiplan.utils.common.UserSession
 
 open class BaseActivity : ComponentActivity() {
     lateinit var networkChecker: NetworkChecker
@@ -49,7 +50,8 @@ open class BaseActivity : ComponentActivity() {
     }
 
     fun logout() {
-        sessionManager.clearAll()
+        sessionManager.clearSession()
+        UserSession.clear()
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this,

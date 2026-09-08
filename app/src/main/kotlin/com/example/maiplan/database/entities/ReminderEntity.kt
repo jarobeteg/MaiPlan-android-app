@@ -11,14 +11,14 @@ import com.example.maiplan.network.api.ReminderSync
     tableName = "reminder",
     foreignKeys = [
         ForeignKey(
-            entity = AuthEntity::class,
-            parentColumns = ["user_id"],
-            childColumns = ["user_id"],
+            entity = UserEntity::class,
+            parentColumns = ["user_local_id"],
+            childColumns = ["user_local_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["user_id"]),
+        Index(value = ["user_local_id"]),
         Index(value = ["last_modified"]),
         Index(value = ["sync_state"]),
         Index(value = ["server_id"])
@@ -29,8 +29,8 @@ data class ReminderEntity(
     @ColumnInfo(name = "reminder_id")
     val reminderId: Int = 0,
 
-    @ColumnInfo(name = "user_id")
-    val userId: Int,
+    @ColumnInfo(name = "user_local_id")
+    val userLocalId: Long,
 
     @ColumnInfo(name = "reminder_time")
     val reminderTime: Long,
@@ -64,7 +64,7 @@ fun ReminderEntity.toReminderSync(): ReminderSync {
     return ReminderSync(
         reminderId = this.reminderId,
         serverId = this.serverId ?: 0,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         reminderTime = this.reminderTime,
         frequency = this.frequency,
         status = this.status,
@@ -81,7 +81,7 @@ fun ReminderSync.toReminderEntity(): ReminderEntity {
     return ReminderEntity(
         reminderId = this.reminderId,
         serverId = this.serverId,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         reminderTime = this.reminderTime,
         frequency = this.frequency,
         status = this.status,

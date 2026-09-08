@@ -10,7 +10,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 data class EventCreate(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     @SerializedName("category_id") val categoryId: Int?,
     @SerializedName("reminder_id") val reminderId: Int?,
     val title: String,
@@ -38,7 +38,7 @@ data class EventResponse(
 data class EventSync(
     @SerializedName("event_id") val eventId: Int,
     @SerializedName("server_id") val serverId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     @SerializedName("category_id") val categoryId: Int,
     @SerializedName("reminder_id") val reminderId: Int,
     val title: String,
@@ -63,7 +63,7 @@ interface EventApi {
     suspend fun getEvent(@Query("event_id") eventId: Int): Response<EventResponse>
 
     @GET("events/get-all-event")
-    suspend fun getAllEvents(@Query("user_id") userId: Int): Response<List<EventResponse>>
+    suspend fun getAllEvents(@Query("user_local_id") userLocalId: Int): Response<List<EventResponse>>
 
     @POST("events/sync")
     suspend fun eventSync(@Body request: SyncRequest<EventSync>): Response<SyncResponse<EventSync>>

@@ -10,7 +10,7 @@ import retrofit2.http.POST
 import retrofit2.http.Query
 
 data class ReminderCreate(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Int,
     @SerializedName("reminder_time") val reminderTime: String,
     val frequency: Int,
     val status: Int,
@@ -28,7 +28,7 @@ data class ReminderResponse(
 data class ReminderSync(
     @SerializedName("reminder_id") val reminderId: Int,
     @SerializedName("server_id") val serverId: Int,
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     @SerializedName("reminder_time") val reminderTime: Long,
     val frequency: Int,
     val status: Int,
@@ -48,7 +48,7 @@ interface ReminderApi {
     suspend fun getReminder(@Query("reminder_id") reminderId: Int): Response<ReminderResponse>
 
     @GET("reminders/get-all-reminder")
-    suspend fun getAllReminders(@Query("user_id") userId: Int): Response<List<ReminderResponse>>
+    suspend fun getAllReminders(@Query("user_local_id") userLocalId: Int): Response<List<ReminderResponse>>
 
     @POST("reminders/sync")
     suspend fun reminderSync(@Body request: SyncRequest<ReminderSync>): Response<SyncResponse<ReminderSync>>

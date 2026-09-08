@@ -18,11 +18,11 @@ interface EventDAO {
     @Delete
     suspend fun deleteEvent(event: EventEntity)
 
-    @Query("UPDATE event SET sync_state = 98, is_deleted = 1 WHERE event_id = :eventId AND user_id = :userId")
-    suspend fun softDeleteEvent(eventId: Int, userId: Int)
+    @Query("UPDATE event SET sync_state = 98, is_deleted = 1 WHERE event_id = :eventId AND user_local_id = :userLocalId")
+    suspend fun softDeleteEvent(eventId: Int, userLocalId: Long)
 
-    @Query("SELECT * FROM event WHERE user_id = :userId AND sync_state != 0")
-    suspend fun getPendingEvents(userId: Int): List <EventEntity>
+    @Query("SELECT * FROM event WHERE user_local_id = :userLocalId AND sync_state != 0")
+    suspend fun getPendingEvents(userLocalId: Long): List <EventEntity>
 
     @Query("SELECT * FROM event WHERE event_id = :eventId")
     suspend fun getEvent(eventId: Int): EventEntity
@@ -30,11 +30,11 @@ interface EventDAO {
     @Query("""
         SELECT * FROM event
         WHERE date BETWEEN :startMillis AND :endMillis
-        AND is_deleted = 0 AND user_id = :userId
+        AND is_deleted = 0 AND user_local_id = :userLocalId
     """)
     suspend fun getEventsForRange(
         startMillis: Long,
         endMillis: Long,
-        userId: Int
+        userLocalId: Long
     ): List<EventEntity>
 }

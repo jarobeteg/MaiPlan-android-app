@@ -11,9 +11,9 @@ import com.example.maiplan.network.api.EventSync
     tableName = "event",
     foreignKeys = [
         ForeignKey(
-            entity = AuthEntity::class,
-            parentColumns = ["user_id"],
-            childColumns = ["user_id"],
+            entity = UserEntity::class,
+            parentColumns = ["user_local_id"],
+            childColumns = ["user_local_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
@@ -30,11 +30,11 @@ import com.example.maiplan.network.api.EventSync
         )
     ],
     indices = [
-        Index(value = ["user_id"]),
+        Index(value = ["user_local_id"]),
         Index(value = ["category_id"]),
         Index(value = ["reminder_id"]),
         Index(value = ["date"]),
-        Index(value = ["user_id", "date"]),
+        Index(value = ["user_local_id", "date"]),
         Index(value = ["last_modified"]),
         Index(value = ["sync_state"]),
         Index(value = ["server_id"])
@@ -45,8 +45,8 @@ data class EventEntity(
     @ColumnInfo(name = "event_id")
     val eventId: Int = 0,
 
-    @ColumnInfo(name = "user_id")
-    val userId: Int,
+    @ColumnInfo(name = "user_local_id")
+    val userLocalId: Long,
 
     @ColumnInfo(name = "category_id")
     val categoryId: Int? = null,
@@ -93,7 +93,7 @@ fun EventEntity.toEventSync(): EventSync {
     return EventSync(
         eventId = this.eventId,
         serverId = this.serverId ?: 0,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         categoryId = this.categoryId ?: 0,
         reminderId = this.reminderId ?: 0,
         title = this.title,
@@ -115,7 +115,7 @@ fun EventSync.toEventEntity(): EventEntity {
     return EventEntity(
         eventId = this.eventId,
         serverId = this.serverId,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         categoryId = this.categoryId,
         reminderId = this.reminderId,
         title = this.title,

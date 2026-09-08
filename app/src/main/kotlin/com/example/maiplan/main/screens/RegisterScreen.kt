@@ -28,11 +28,11 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @Composable
 fun RegisterScreen(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     onRegisterClick: (String, String, String, String) -> Unit,
     onBackToLogin: () -> Unit,
 ) {
-    val registerResult by viewModel.registerResult.observeAsState()
+    val registerResult by authViewModel.registerResult.observeAsState()
     val isLoading = registerResult is Result.Loading
     var email by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -45,7 +45,7 @@ fun RegisterScreen(
         title = stringResource(R.string.auth_register_title),
         subtitle = stringResource(R.string.auth_register_subtitle),
         onBackClick = {
-            viewModel.cancelRegister()
+            authViewModel.cancelRegister()
             onBackToLogin()
         },
     ) {
@@ -100,7 +100,7 @@ fun RegisterScreen(
                 prompt = stringResource(R.string.auth_have_account_prompt),
                 action = stringResource(R.string.auth_sign_in_action),
                 onClick = {
-                    viewModel.cancelRegister()
+                    authViewModel.cancelRegister()
                     onBackToLogin()
                 },
             )

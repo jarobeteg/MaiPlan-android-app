@@ -3,7 +3,6 @@ package com.example.maiplan.repository.note
 import android.content.Context
 import androidx.room.withTransaction
 import com.example.maiplan.database.MaiPlanDatabase
-import com.example.maiplan.database.dao.AuthDAO
 import com.example.maiplan.database.dao.NoteDAO
 import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.entities.AuthEntity
@@ -24,10 +23,6 @@ class NoteLocalDataSource(private val context: Context) {
 
     private val noteDao: NoteDAO by lazy {
         database.noteDAO()
-    }
-
-    private val authDao: AuthDAO by lazy {
-        database.authDAO()
     }
 
     private val reminderDao: ReminderDAO by lazy {

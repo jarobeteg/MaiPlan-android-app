@@ -23,11 +23,11 @@ interface ReminderDAO {
             last_modified = :updatedAt,
             sync_state = 2,
             is_deleted = 0
-        WHERE reminder_id = :reminderId AND user_id = :userId
+        WHERE reminder_id = :reminderId AND user_local_id = :userLocalId
     """)
     suspend fun reminderUpdate(
         reminderId: Int,
-        userId: Int,
+        userLocalId: Long,
         reminderTime: Long,
         message: String?,
         updatedAt: Long = System.currentTimeMillis(),
@@ -36,11 +36,11 @@ interface ReminderDAO {
     @Delete
     suspend fun deleteReminder(reminder: ReminderEntity)
 
-    @Query("UPDATE reminder SET sync_state = 98, is_deleted = 1 WHERE reminder_id = :reminderId AND user_id = :userId")
-    suspend fun softDeleteReminder(reminderId: Int, userId: Int)
+    @Query("UPDATE reminder SET sync_state = 98, is_deleted = 1 WHERE reminder_id = :reminderId AND user_local_id = :userLocalId")
+    suspend fun softDeleteReminder(reminderId: Int, userLocalId: Long)
 
-    @Query("SELECT * FROM reminder WHERE user_id = :userId AND sync_state != 0")
-    suspend fun getPendingReminders(userId: Int): List<ReminderEntity>
+    @Query("SELECT * FROM reminder WHERE user_local_id = :userLocalId AND sync_state != 0")
+    suspend fun getPendingReminders(userLocalId: Long): List<ReminderEntity>
 
     @Query("SELECT reminder_id FROM reminder WHERE server_id = :serverId")
     suspend fun getReminderId(serverId: Int): Int?

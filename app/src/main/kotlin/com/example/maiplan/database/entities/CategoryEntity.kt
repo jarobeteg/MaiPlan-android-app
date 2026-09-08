@@ -13,14 +13,14 @@ import com.example.maiplan.network.api.CategorySync
     tableName = "category",
     foreignKeys = [
         ForeignKey(
-            entity = AuthEntity::class,
-            parentColumns = ["user_id"],
-            childColumns = ["user_id"],
+            entity = UserEntity::class,
+            parentColumns = ["user_local_id"],
+            childColumns = ["user_local_id"],
             onDelete = ForeignKey.CASCADE
         )
     ],
     indices = [
-        Index(value = ["user_id"]),
+        Index(value = ["user_local_id"]),
         Index(value = ["last_modified"]),
         Index(value = ["sync_state"]),
         Index(value = ["server_id"])
@@ -31,8 +31,8 @@ data class CategoryEntity(
     @ColumnInfo(name = "category_id")
     val categoryId: Int = 0,
 
-    @ColumnInfo(name = "user_id")
-    val userId: Int,
+    @ColumnInfo(name = "user_local_id")
+    val userLocalId: Long,
 
     val name: String,
 
@@ -65,7 +65,7 @@ fun CategoryEntity.toCategorySync(): CategorySync {
     return CategorySync(
         categoryId = this.categoryId,
         serverId = this.serverId ?: 0,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         name = this.name,
         description = this.description,
         color = this.color,
@@ -81,7 +81,7 @@ fun CategoryEntity.toCategorySync(): CategorySync {
 fun CategorySync.toCategoryEntity(): CategoryEntity {
     return CategoryEntity(
         categoryId = this.categoryId,
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         name = this.name,
         description = this.description,
         color = this.color,
@@ -97,7 +97,7 @@ fun CategorySync.toCategoryEntity(): CategoryEntity {
 
 fun CategoryCreate.toCategoryEntity(): CategoryEntity {
     return CategoryEntity (
-        userId = this.userId,
+        userLocalId = this.userLocalId,
         name = this.name,
         description = this.description,
         color = this.color,

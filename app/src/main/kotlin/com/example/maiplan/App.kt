@@ -13,7 +13,7 @@ class App : Application() {
         AppThemeManager.initialize(this)
         HomeClockPreferences.initialize(this)
         NotificationHelper.createNotificationChannel(this)
-        RetrofitClient.init()
+        RetrofitClient.init(this)
         SyncScheduler.schedulePeriodicSync(this)
     }
 }

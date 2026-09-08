@@ -2,7 +2,6 @@ package com.example.maiplan.main.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,7 +11,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -21,7 +19,6 @@ import com.example.maiplan.R
 import com.example.maiplan.components.AuthEmailField
 import com.example.maiplan.components.AuthErrorMessage
 import com.example.maiplan.components.AuthFooterAction
-import com.example.maiplan.components.AuthInlineAction
 import com.example.maiplan.components.AuthPage
 import com.example.maiplan.components.AuthPasswordField
 import com.example.maiplan.components.AuthPrimaryButton
@@ -30,12 +27,11 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 
 @Composable
 fun LoginScreen(
-    viewModel: AuthViewModel,
+    authViewModel: AuthViewModel,
     onLoginClick: (String, String) -> Unit,
-    toRegisterClick: () -> Unit,
-    toForgotPasswordClick: () -> Unit,
+    toRegisterClick: () -> Unit
 ) {
-    val loginResult by viewModel.loginResult.observeAsState()
+    val loginResult by authViewModel.loginResult.observeAsState()
     val isLoading = loginResult is Result.Loading
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -58,20 +54,6 @@ fun LoginScreen(
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
                 imeAction = ImeAction.Done,
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                AuthInlineAction(
-                    text = stringResource(R.string.forgot_password),
-                    onClick = {
-                        viewModel.cancelLogin()
-                        toForgotPasswordClick()
-                    },
-                )
-            }
 
             AuthPrimaryButton(
                 text = stringResource(R.string.auth_login_action),
@@ -97,7 +79,7 @@ fun LoginScreen(
                 prompt = stringResource(R.string.auth_no_account_prompt),
                 action = stringResource(R.string.auth_create_account_action),
                 onClick = {
-                    viewModel.cancelLogin()
+                    authViewModel.cancelLogin()
                     toRegisterClick()
                 },
             )
