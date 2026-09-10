@@ -296,7 +296,7 @@ fun AuthPasswordField(
         AuthTextField(
             value = value,
             onValueChange = { newValue ->
-                if (newValue.length <= 64) onValueChange(newValue.filterNot(Char::isWhitespace))
+                if (newValue.length <= 64) onValueChange(newValue)
             },
             label = label,
             icon = Icons.Rounded.Lock,

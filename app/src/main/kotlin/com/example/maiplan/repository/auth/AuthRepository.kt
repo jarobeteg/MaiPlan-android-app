@@ -15,9 +15,7 @@ class AuthRepository(
     private val local: UserLocalDataSource,
     private val session: SessionManager
 ) {
-    private suspend fun completeAuthentication(
-        result: Result<AuthResponse>
-    ): Result<UserEntity> {
+    private suspend fun completeAuthentication(result: Result<AuthResponse>): Result<UserEntity> {
         if (result !is Result.Success) {
             return when (result) {
                 is Result.Failure -> result
