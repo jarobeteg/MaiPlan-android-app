@@ -29,10 +29,10 @@ class NoteRepository(
 
     override suspend fun sync() {
         try {
-            val pendingNotesResult = local.getPendingNotes(UserSession.userId!!)
+            val pendingNotesResult = local.getPendingNotes(UserSession.userLocalId!!)
             if (pendingNotesResult is Result.Success) {
                 val changes = pendingNotesResult.data.map { it.toNoteSyncResolved() }
-                val request = SyncRequest(UserSession.userId!!, changes)
+                val request = SyncRequest(UserSession.userLocalId!!, changes)
                 val response = remote.noteSync(request)
 
                 if (response.isSuccessful) {
@@ -55,7 +55,7 @@ class NoteRepository(
         return NoteSync(
             noteId = noteId,
             serverId = serverId ?: 0,
-            userId = userId,
+            userLocalId = userLocalId,
             categoryId = categoryServerId ?: 0,
             reminderId = reminderServerId ?: 0,
             title = title,
@@ -76,7 +76,7 @@ class NoteRepository(
         return NoteEntity(
             noteId = noteId,
             serverId = serverId,
-            userId = userId,
+            userLocalId = userLocalId,
             categoryId = localCategoryId,
             reminderId = localReminderId,
             title = title,
@@ -126,8 +126,8 @@ class NoteRepository(
         }
     }
 
-    suspend fun softDeleteNote(noteId: Int, userId: Int): Result<Unit> {
-        return local.softDeleteNoteWithReminder(noteId, userId)
+    suspend fun softDeleteNote(noteId: Int, userLocalId: Long): Result<Unit> {
+        return local.softDeleteNoteWithReminder(noteId, userLocalId)
     }
 
     suspend fun getReminder(reminderId: Int?): Result<ReminderEntity?> {
@@ -139,11 +139,11 @@ class NoteRepository(
         }
     }
 
-    suspend fun getNotes(userId: Int, categoryId: Int? = null): Result<List<NoteEntity>> {
-        return local.getNotes(userId, categoryId)
+    suspend fun getNotes(userLocalId: Long, categoryId: Int? = null): Result<List<NoteEntity>> {
+        return local.getNotes(userLocalId, categoryId)
     }
 
-    suspend fun getCategories(userId: Int): List<CategoryEntity> {
-        return localCategory.getCategories(userId).orEmptyList()
+    suspend fun getCategories(userLocalId: Long): List<CategoryEntity> {
+        return localCategory.getCategories(userLocalId).orEmptyList()
     }
 }

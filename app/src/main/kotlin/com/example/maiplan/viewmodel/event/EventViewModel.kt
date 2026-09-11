@@ -49,10 +49,10 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         }
     }
 
-    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userId: Int, selectedDate: LocalDate) {
+    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userLocalId: Long, selectedDate: LocalDate) {
         viewModelScope.launch {
-            eventRepository.softDeleteReminder(reminderId, userId)
-            eventRepository.softDeleteEvent(eventId, userId)
+            eventRepository.softDeleteReminder(reminderId, userLocalId)
+            eventRepository.softDeleteEvent(eventId, userLocalId)
             loadMonth(selectedDate)
         }
     }
@@ -69,9 +69,9 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         }
     }
 
-    fun getAllEvent(userId: Int) {
+    fun getAllEvent(userLocalId: Long) {
         viewModelScope.launch {
-            when (val result = eventRepository.getAllEvents(userId)) {
+            when (val result = eventRepository.getAllEvents(userLocalId)) {
                 is Result.Success -> _eventList.postValue(result.data)
                 else -> _eventList.postValue(emptyList())
             }
@@ -91,7 +91,7 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
                 .toInstant()
                 .toEpochMilli() - 1
 
-            val events = eventRepository.getEventsForRange(start, end, UserSession.userId)
+            val events = eventRepository.getEventsForRange(start, end, UserSession.userLocalId)
             val grouped = events.groupBy { it.date }
 
             _monthlyEvents.value = grouped

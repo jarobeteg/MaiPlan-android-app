@@ -48,7 +48,7 @@ interface ReminderApi {
     suspend fun getReminder(@Query("reminder_id") reminderId: Int): Response<ReminderResponse>
 
     @GET("reminders/get-all-reminder")
-    suspend fun getAllReminders(@Query("user_local_id") userLocalId: Int): Response<List<ReminderResponse>>
+    suspend fun getAllReminders(@Query("user_local_id") userLocalId: Long): Response<List<ReminderResponse>>
 
     @POST("reminders/sync")
     suspend fun reminderSync(@Body request: SyncRequest<ReminderSync>): Response<SyncResponse<ReminderSync>>

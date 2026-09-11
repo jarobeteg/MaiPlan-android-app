@@ -33,7 +33,7 @@ fun CreateEventScreen(
     onBackClick: () -> Unit,
 ) {
     val context = LocalContext.current
-    val userId = UserSession.userId ?: return
+    val userLocalId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -54,8 +54,8 @@ fun CreateEventScreen(
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
-    LaunchedEffect(userId) {
-        categoryViewModel.getAllCategories(userId)
+    LaunchedEffect(userLocalId) {
+        categoryViewModel.getAllCategories(userLocalId)
     }
 
     EventEditorLayout(
@@ -102,14 +102,14 @@ fun CreateEventScreen(
                 errorMessage = null
                 val reminder = reminderDateTime?.let {
                     ReminderEntity(
-                        userId = userId,
+                        userLocalId = userLocalId,
                         reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                         message = reminderMessage,
                         syncState = 4,
                     )
                 }
                 val event = EventEntity(
-                    userId = userId,
+                    userLocalId = userLocalId,
                     title = title.trim(),
                     categoryId = selectedCategory!!.categoryId,
                     description = description.trim(),

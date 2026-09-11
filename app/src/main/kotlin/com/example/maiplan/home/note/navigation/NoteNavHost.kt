@@ -95,7 +95,7 @@ fun NavGraphBuilder.noteNavGraph(
     noteViewModel: NoteViewModel,
     runWithNotificationPermission: (() -> Unit) -> Unit,
 ) {
-    val userId = UserSession.userId!!
+    val userLocalId = UserSession.userLocalId!!
 
     composable(NoteRoutes.NoteMain.route) {
         val context = LocalContext.current
@@ -106,7 +106,7 @@ fun NavGraphBuilder.noteNavGraph(
             onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteId)) },
             onDeleteClick = { note ->
                 note.reminderId?.let { AlarmScheduler.cancelAlarm(context, it) }
-                noteViewModel.softDeleteNote(note.noteId, userId)
+                noteViewModel.softDeleteNote(note.noteId, userLocalId)
             }
         )
     }
@@ -119,7 +119,7 @@ fun NavGraphBuilder.noteNavGraph(
                 val saveNote = {
                     val reminder = reminderDateTime?.let {
                         ReminderEntity(
-                            userId = userId,
+                            userLocalId = userLocalId,
                             reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                             message = reminderMessage,
                             syncState = 4,
@@ -128,7 +128,7 @@ fun NavGraphBuilder.noteNavGraph(
                     noteViewModel.createNoteWithReminder(
                         reminder,
                         NoteEntity(
-                            userId = userId,
+                            userLocalId = userLocalId,
                             categoryId = category?.categoryId,
                             title = title,
                             content = content,
@@ -184,7 +184,7 @@ fun NavGraphBuilder.noteNavGraph(
                     val reminder = reminderDateTime?.let {
                         ReminderEntity(
                             reminderId = originalReminderId ?: 0,
-                            userId = userId,
+                            userLocalId = userLocalId,
                             reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                             message = reminderMessage,
                             syncState = if (originalReminderId == null) 4 else 2,

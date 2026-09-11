@@ -64,15 +64,15 @@ class EventLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun softDeleteEvent(eventId: Int, userId: Int): Result<Unit> {
+    suspend fun softDeleteEvent(eventId: Int, userLocalId: Long): Result<Unit> {
         return handleLocalResponse {
-            eventDao.softDeleteEvent(eventId, userId)
+            eventDao.softDeleteEvent(eventId, userLocalId)
         }
     }
 
-    suspend fun getPendingEvents(userId: Int): Result<List<EventEntity>> {
+    suspend fun getPendingEvents(userLocalId: Long): Result<List<EventEntity>> {
         return handleLocalResponse {
-            eventDao.getPendingEvents(userId)
+            eventDao.getPendingEvents(userLocalId)
         }
     }
 
@@ -80,7 +80,7 @@ class EventLocalDataSource(private val context: Context) {
         return eventDao.getEvent(eventId)
     }
 
-    suspend fun getEventForRange(startMillis: Long, endMillis: Long, userId: Int): List<EventEntity> {
-        return eventDao.getEventsForRange(startMillis, endMillis, userId)
+    suspend fun getEventForRange(startMillis: Long, endMillis: Long, userLocalId: Long): List<EventEntity> {
+        return eventDao.getEventsForRange(startMillis, endMillis, userLocalId)
     }
 }

@@ -43,7 +43,7 @@ fun NavGraphBuilder.eventNavGraph(
     reminderViewModel: ReminderViewModel
 ) {
 
-    val userId = UserSession.userId!!
+    val userLocalId = UserSession.userLocalId!!
     // --- Main Event Screen ---
     composable(EventRoutes.EventMain.route) {
         EventScreen(
@@ -53,7 +53,7 @@ fun NavGraphBuilder.eventNavGraph(
             onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) },
             onUpdateEventClick = { eventId -> localNavController.navigate(EventRoutes.Update.withArgs(eventId)) },
             onDeleteClick = { reminderId, eventId, selectedDate->
-                eventViewModel.softDeleteEventWithReminder(reminderId, eventId, userId, selectedDate)
+                eventViewModel.softDeleteEventWithReminder(reminderId, eventId, userLocalId, selectedDate)
             },
         )
     }

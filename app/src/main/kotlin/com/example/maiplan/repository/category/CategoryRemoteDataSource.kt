@@ -13,8 +13,8 @@ class CategoryRemoteDataSource(private val categoryApi: CategoryApi) {
         return categoryApi.createCategory(category)
     }
 
-    suspend fun getAllCategories(userId: Int): Response<List<CategoryResponse>> {
-        return categoryApi.getAllCategories(userId)
+    suspend fun getAllCategories(userLocalId: Long): Response<List<CategoryResponse>> {
+        return categoryApi.getAllCategories(userLocalId)
     }
 
     suspend fun updateCategory(category: CategoryResponse): Response<Unit> {

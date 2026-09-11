@@ -32,10 +32,10 @@ class CategoryActivity : BaseActivity() {
         val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
         val categoryLocal = CategoryLocalDataSource(this)
         val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
-        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo, networkChecker) }
+        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo) }
 
         viewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
-        viewModel.getAllCategories(UserSession.userId!!)
+        viewModel.getAllCategories(UserSession.userLocalId!!)
     }
 
     private fun setupComposeUI() {

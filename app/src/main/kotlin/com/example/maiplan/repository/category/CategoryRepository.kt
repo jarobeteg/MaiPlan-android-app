@@ -20,12 +20,12 @@ class CategoryRepository(
 
     override suspend fun sync() {
         try {
-            val pendingCategoriesResult = local.getPendingCategories(UserSession.userId!!)
+            val pendingCategoriesResult = local.getPendingCategories(UserSession.userLocalId!!)
             if (pendingCategoriesResult is Result.Success) {
                 val categories: List<CategoryEntity> = pendingCategoriesResult.data
                 val changes: MutableList<CategorySync> = mutableListOf()
                 categories.map { changes.add(it.toCategorySync()) }
-                val request: SyncRequest<CategorySync> = SyncRequest(UserSession.userId!!, changes)
+                val request: SyncRequest<CategorySync> = SyncRequest(UserSession.userLocalId!!, changes)
                 val response = remote.categorySync(request)
 
                 if (response.isSuccessful) {
@@ -45,16 +45,16 @@ class CategoryRepository(
         return local.categoryInsert(category.toCategoryEntity())
     }
 
-    suspend fun getAllCategories(userId: Int): Result<List<CategoryEntity>> {
-        return local.getCategories(userId)
+    suspend fun getAllCategories(userLocalId: Long): Result<List<CategoryEntity>> {
+        return local.getCategories(userLocalId)
     }
 
-    suspend fun updateCategory(category: CategoryResponse, userId: Int): Result<Unit> {
-        return local.categoryUpdate(category, userId)
+    suspend fun updateCategory(category: CategoryResponse, userLocalId: Long): Result<Unit> {
+        return local.categoryUpdate(category, userLocalId)
     }
 
-    suspend fun softDeleteCategory(categoryId: Int, userId: Int): Result<Unit> {
-        return local.softDeleteCategory(categoryId, userId)
+    suspend fun softDeleteCategory(categoryId: Int, userLocalId: Long): Result<Unit> {
+        return local.softDeleteCategory(categoryId, userLocalId)
     }
 
     suspend fun deleteCategory(category: CategoryEntity): Result<Unit> {

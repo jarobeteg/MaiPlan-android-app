@@ -40,14 +40,14 @@ fun NavGraphBuilder.categoryNavGraph(
     navController: NavController,
     categoryViewModel: CategoryViewModel
 ) {
-    val userId = UserSession.userId!!
+    val userLocalId = UserSession.userLocalId!!
 
     // --- Category Management Screen ---
     composable(CategoryRoutes.Management.route) {
         CategoryManagementScreen(
             viewModel = categoryViewModel,
             onCardSwipeDelete = { categoryId ->
-                categoryViewModel.softDeleteCategory(categoryId, userId)
+                categoryViewModel.softDeleteCategory(categoryId, userLocalId)
             },
             onCardSwipeEdit = { category ->
                 // Prevent double navigation using isNavigating flag
@@ -68,7 +68,7 @@ fun NavGraphBuilder.categoryNavGraph(
         CreateCategoryScreen(
             viewModel = categoryViewModel,
             onSaveClick = { name, description, color, icon ->
-                categoryViewModel.createCategory(CategoryCreate(userId, name, description, color, icon))
+                categoryViewModel.createCategory(CategoryCreate(userLocalId, name, description, color, icon))
             },
             onBackClick = {
                 navController.popBackStack()
@@ -108,7 +108,7 @@ fun NavGraphBuilder.categoryNavGraph(
             viewModel = categoryViewModel,
             category = selectedCategory,
             onSaveClick = { name, description, color, icon ->
-                categoryViewModel.updateCategory(CategoryResponse(selectedCategory.categoryId, name, description, color, icon), userId)
+                categoryViewModel.updateCategory(CategoryResponse(selectedCategory.categoryId, name, description, color, icon), userLocalId)
             },
             onBackClick = {
                 navController.popBackStack()

@@ -16,8 +16,8 @@ class ReminderRemoteDataSource(private val reminderApi: ReminderApi) {
         return reminderApi.getReminder(reminderId)
     }
 
-    suspend fun getAllReminders(userId: Int): Response<List<ReminderResponse>> {
-        return reminderApi.getAllReminders(userId)
+    suspend fun getAllReminders(userLocalId: Long): Response<List<ReminderResponse>> {
+        return reminderApi.getAllReminders(userLocalId)
     }
 
     suspend fun reminderSync(request: SyncRequest<ReminderSync>): Response<SyncResponse<ReminderSync>> {

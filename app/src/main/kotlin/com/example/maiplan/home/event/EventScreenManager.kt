@@ -28,7 +28,6 @@ import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 fun EventScreenManager(rootNavController: NavHostController) {
     val localNavController = rememberNavController()
     val context = LocalContext.current
-    val networkChecker = NetworkChecker(context)
 
     val eventViewModel = remember {
         val eventRemote = EventRemoteDataSource(RetrofitClient.eventApi)
@@ -44,7 +43,7 @@ fun EventScreenManager(rootNavController: NavHostController) {
         val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
         val categoryLocal = CategoryLocalDataSource(context)
         val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
-        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo, networkChecker) }
+        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[CategoryViewModel::class.java]
     }
 

@@ -63,7 +63,7 @@ interface EventApi {
     suspend fun getEvent(@Query("event_id") eventId: Int): Response<EventResponse>
 
     @GET("events/get-all-event")
-    suspend fun getAllEvents(@Query("user_local_id") userLocalId: Int): Response<List<EventResponse>>
+    suspend fun getAllEvents(@Query("user_local_id") userLocalId: Long): Response<List<EventResponse>>
 
     @POST("events/sync")
     suspend fun eventSync(@Body request: SyncRequest<EventSync>): Response<SyncResponse<EventSync>>

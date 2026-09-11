@@ -36,7 +36,7 @@ fun UpdateEventScreen(
     val event by eventViewModel.getEventById(eventId).collectAsState()
     val safeEvent = event ?: return
     val context = LocalContext.current
-    val userId = UserSession.userId ?: return
+    val userLocalId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
 
     var errorMessage by remember(safeEvent.eventId) { mutableStateOf<String?>(null) }
@@ -56,8 +56,8 @@ fun UpdateEventScreen(
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
-    LaunchedEffect(userId) {
-        categoryViewModel.getAllCategories(userId)
+    LaunchedEffect(userLocalId) {
+        categoryViewModel.getAllCategories(userLocalId)
     }
     LaunchedEffect(categories, safeEvent.categoryId) {
         selectedCategory = categories.find { it.categoryId == safeEvent.categoryId }
@@ -105,7 +105,7 @@ fun UpdateEventScreen(
                 val reminder = reminderDateTime?.let {
                     ReminderEntity(
                         reminderId = safeEvent.reminderId.takeIf { id -> id != 0 } ?: 0,
-                        userId = userId,
+                        userLocalId = userLocalId,
                         reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                         message = reminderMessage,
                         syncState = 2,
@@ -113,7 +113,7 @@ fun UpdateEventScreen(
                 }
                 val updatedEvent = EventEntity(
                     eventId = safeEvent.eventId,
-                    userId = userId,
+                    userLocalId = userLocalId,
                     title = title.trim(),
                     categoryId = selectedCategory!!.categoryId,
                     reminderId = safeEvent.reminderId.takeIf { it != 0 },

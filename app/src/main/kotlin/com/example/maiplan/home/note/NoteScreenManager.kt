@@ -35,7 +35,7 @@ fun NoteScreenManager(rootNavController: NavHostController) {
     }
 
     LaunchedEffect(Unit) {
-        UserSession.userId?.let {
+        UserSession.userLocalId?.let {
             noteViewModel.loadCategories(it)
             noteViewModel.loadNotes(it)
         }

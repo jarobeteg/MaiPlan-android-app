@@ -121,12 +121,12 @@ data class TideChange(
 )
 
 data class SyncRequest<T>(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     val changes: List<T>
 )
 
 data class SyncResponse<T>(
-    @SerializedName("user_id") val userId: Int,
+    @SerializedName("user_local_id") val userLocalId: Long,
     val acknowledged: List<T>,   // records that were acknowledged during sync
     val rejected: List<T>       // records that were rejected during sync
 )

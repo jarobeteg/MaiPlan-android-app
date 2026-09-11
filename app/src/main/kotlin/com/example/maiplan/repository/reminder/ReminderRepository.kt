@@ -19,12 +19,12 @@ class ReminderRepository(
 
     override suspend fun sync() {
         try {
-            val pendingRemindersResult = local.getPendingReminders(UserSession.userId!!)
+            val pendingRemindersResult = local.getPendingReminders(UserSession.userLocalId!!)
             if (pendingRemindersResult is Result.Success) {
                 val reminders: List<ReminderEntity> = pendingRemindersResult.data
                 val changes: MutableList<ReminderSync> = mutableListOf()
                 reminders.map { changes.add(it.toReminderSync()) }
-                val request: SyncRequest<ReminderSync> = SyncRequest(UserSession.userId!!, changes)
+                val request: SyncRequest<ReminderSync> = SyncRequest(UserSession.userLocalId!!, changes)
                 val response = remote.reminderSync(request)
 
                 if (response.isSuccessful) {
@@ -56,9 +56,9 @@ class ReminderRepository(
         }
     }
 
-    suspend fun getAllReminders(userId: Int): Result<List<ReminderResponse>> {
+    suspend fun getAllReminders(userLocalId: Long): Result<List<ReminderResponse>> {
         return try {
-            handleRemoteResponse(remote.getAllReminders(userId))
+            handleRemoteResponse(remote.getAllReminders(userLocalId))
         } catch (e: Exception) {
             Result.Error(e)
         }

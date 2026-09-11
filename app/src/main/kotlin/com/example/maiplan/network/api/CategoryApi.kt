@@ -47,7 +47,7 @@ interface CategoryApi {
     suspend fun createCategory(@Body categoryCreate: CategoryCreate): Response<Unit>
 
     @GET("categories/get-all-category")
-    suspend fun getAllCategories(@Query("user_local_id") userLocalId: Int): Response<List<CategoryResponse>>
+    suspend fun getAllCategories(@Query("user_local_id") userLocalId: Long): Response<List<CategoryResponse>>
 
     @POST("categories/update-category")
     suspend fun updateCategory(@Body category: CategoryResponse): Response<Unit>

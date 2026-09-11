@@ -17,8 +17,8 @@ class EventRemoteDataSource(private val eventApi: EventApi) {
         return eventApi.getEvent(eventId)
     }
 
-    suspend fun getAllEvents(userId: Int): Response<List<EventResponse>> {
-        return eventApi.getAllEvents(userId)
+    suspend fun getAllEvents(userLocalId: Long): Response<List<EventResponse>> {
+        return eventApi.getAllEvents(userLocalId)
     }
 
     suspend fun eventSync(request: SyncRequest<EventSync>): Response<SyncResponse<EventSync>> {

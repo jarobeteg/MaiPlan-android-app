@@ -22,19 +22,19 @@ class CategoryLocalDataSource(private val context: Context) {
         database.categoryDAO()
     }
 
-    suspend fun getPendingCategories(userId: Int): Result<List<CategoryEntity>> {
+    suspend fun getPendingCategories(userLocalId: Long): Result<List<CategoryEntity>> {
         return handleLocalResponse {
-            categoryDao.getPendingCategories(userId)
+            categoryDao.getPendingCategories(userLocalId)
         }
     }
 
-    suspend fun getCategory(categoryId: Int?, userId: Int): CategoryEntity {
-        return categoryDao.getCategory(categoryId!!, userId)
+    suspend fun getCategory(categoryId: Int?, userLocalId: Long): CategoryEntity {
+        return categoryDao.getCategory(categoryId!!, userLocalId)
     }
 
-    suspend fun getCategories(userId: Int): Result<List<CategoryEntity>> {
+    suspend fun getCategories(userLocalId: Long): Result<List<CategoryEntity>> {
         return handleLocalResponse {
-            categoryDao.getCategories(userId)
+            categoryDao.getCategories(userLocalId)
         }
     }
 
@@ -44,7 +44,7 @@ class CategoryLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun categoryUpdate(category: CategoryResponse, userId: Int): Result<Unit> {
+    suspend fun categoryUpdate(category: CategoryResponse, userLocalId: Long): Result<Unit> {
         if (category.name.isEmpty() || category.name.isBlank()) {
             return Result.Failure(EMPTY_CATEGORY_NAME_ERROR)
         }
@@ -54,7 +54,7 @@ class CategoryLocalDataSource(private val context: Context) {
         }
 
         return handleLocalResponse {
-            categoryDao.categoryUpdate(category.name, category.description, category.color, category.icon, category.categoryId, userId)
+            categoryDao.categoryUpdate(category.name, category.description, category.color, category.icon, category.categoryId, userLocalId)
         }
     }
 
@@ -72,9 +72,9 @@ class CategoryLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun softDeleteCategory(categoryId: Int, userId: Int): Result<Unit> {
+    suspend fun softDeleteCategory(categoryId: Int, userLocalId: Long): Result<Unit> {
         return handleLocalResponse {
-            categoryDao.softDeleteCategory(categoryId, userId)
+            categoryDao.softDeleteCategory(categoryId, userLocalId)
         }
     }
 

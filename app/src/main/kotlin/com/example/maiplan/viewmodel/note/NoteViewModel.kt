@@ -32,15 +32,15 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     private val _selectedReminder = MutableLiveData<ReminderEntity?>(null)
     val selectedReminder: LiveData<ReminderEntity?> get() = _selectedReminder
 
-    fun loadNotes(userId: Int, categoryId: Int? = null) {
+    fun loadNotes(userLocalId: Long, categoryId: Int? = null) {
         viewModelScope.launch {
-            refreshNotes(userId, categoryId)
+            refreshNotes(userLocalId, categoryId)
         }
     }
 
-    fun loadCategories(userId: Int) {
+    fun loadCategories(userLocalId: Long) {
         viewModelScope.launch {
-            _categoryList.postValue(noteRepository.getCategories(userId))
+            _categoryList.postValue(noteRepository.getCategories(userLocalId))
         }
     }
 
@@ -52,7 +52,7 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         viewModelScope.launch {
             _createNoteResult.postValue(Result.Loading)
             val result = noteRepository.createNoteWithReminder(null, note)
-            if (result is Result.Success) refreshNotes(note.userId)
+            if (result is Result.Success) refreshNotes(note.userLocalId)
             _createNoteResult.postValue(result)
         }
     }
@@ -61,7 +61,7 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         viewModelScope.launch {
             _updateNoteResult.postValue(Result.Loading)
             val result = noteRepository.updateNoteWithReminder(null, note)
-            if (result is Result.Success) refreshNotes(note.userId)
+            if (result is Result.Success) refreshNotes(note.userLocalId)
             _updateNoteResult.postValue(result)
         }
     }
@@ -70,7 +70,7 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         viewModelScope.launch {
             _createNoteResult.postValue(Result.Loading)
             val result = noteRepository.createNoteWithReminder(reminder, note)
-            if (result is Result.Success) refreshNotes(note.userId)
+            if (result is Result.Success) refreshNotes(note.userLocalId)
             _createNoteResult.postValue(result)
         }
     }
@@ -79,7 +79,7 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         viewModelScope.launch {
             _updateNoteResult.postValue(Result.Loading)
             val result = noteRepository.updateNoteWithReminder(reminder, note)
-            if (result is Result.Success) refreshNotes(note.userId)
+            if (result is Result.Success) refreshNotes(note.userLocalId)
             _updateNoteResult.postValue(result)
         }
     }
@@ -93,10 +93,10 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun softDeleteNote(noteId: Int, userId: Int) {
+    fun softDeleteNote(noteId: Int, userLocalId: Long) {
         viewModelScope.launch {
-            val result = noteRepository.softDeleteNote(noteId, userId)
-            if (result is Result.Success) refreshNotes(userId)
+            val result = noteRepository.softDeleteNote(noteId, userLocalId)
+            if (result is Result.Success) refreshNotes(userLocalId)
             _deleteNoteResult.postValue(result)
         }
     }
@@ -109,8 +109,8 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         _updateNoteResult.postValue(Result.Idle)
     }
 
-    private suspend fun refreshNotes(userId: Int, categoryId: Int? = null) {
-        val result = noteRepository.getNotes(userId, categoryId)
+    private suspend fun refreshNotes(userLocalId: Long, categoryId: Int? = null) {
+        val result = noteRepository.getNotes(userLocalId, categoryId)
         _noteList.postValue(result.orEmptyList())
     }
 }

@@ -28,15 +28,15 @@ class ReminderLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun softDeleteReminder(reminderId: Int, userId: Int): Result<Unit> {
+    suspend fun softDeleteReminder(reminderId: Int, userLocalId: Long): Result<Unit> {
         return handleLocalResponse {
-            reminderDao.softDeleteReminder(reminderId, userId)
+            reminderDao.softDeleteReminder(reminderId, userLocalId)
         }
     }
 
-    suspend fun getPendingReminders(userId: Int): Result<List<ReminderEntity>> {
+    suspend fun getPendingReminders(userLocalId: Long): Result<List<ReminderEntity>> {
         return handleLocalResponse {
-            reminderDao.getPendingReminders(userId)
+            reminderDao.getPendingReminders(userLocalId)
         }
     }
 

@@ -30,7 +30,7 @@ class EventRepository(
 
     override suspend fun sync() {
         try {
-            val pendingEventsResult = local.getPendingEvents(UserSession.userId!!)
+            val pendingEventsResult = local.getPendingEvents(UserSession.userLocalId!!)
             if (pendingEventsResult is Result.Success) {
                 val events: List<EventEntity> = pendingEventsResult.data
                 val changes: MutableList<EventSync> = mutableListOf()
@@ -41,7 +41,7 @@ class EventRepository(
                     changes.add(eventSync)
                 }
 
-                val request: SyncRequest<EventSync> = SyncRequest(UserSession.userId!!, changes)
+                val request: SyncRequest<EventSync> = SyncRequest(UserSession.userLocalId!!, changes)
                 val response = remote.eventSync(request)
 
                 if (response.isSuccessful) {
@@ -64,7 +64,7 @@ class EventRepository(
         return EventSync(
             eventId = eventId,
             serverId = serverId ?: 0,
-            userId = this.userId,
+            userLocalId = this.userLocalId,
             categoryId = categoryServerId ?: 0,
             reminderId = reminderServerId ?: 0,
             title = this.title,
@@ -93,7 +93,7 @@ class EventRepository(
         return EventEntity(
             eventId = eventId,
             serverId = serverId,
-            userId = this.userId,
+            userLocalId = this.userLocalId,
             categoryId = categoryId,
             reminderId = reminderId,
             title = this.title,
@@ -112,7 +112,7 @@ class EventRepository(
     }
 
     private suspend fun EventEntity.toCalendarEventUI(): CalendarEventUI {
-        val category = localCategory.getCategory(this.categoryId, this.userId)
+        val category = localCategory.getCategory(this.categoryId, this.userLocalId)
         var reminderTime = 0L
         var reminderMessage = ""
 
@@ -156,15 +156,15 @@ class EventRepository(
         }
     }
 
-    suspend fun softDeleteReminder(reminderId: Int?, userId: Int): Result<Unit> {
+    suspend fun softDeleteReminder(reminderId: Int?, userLocalId: Long): Result<Unit> {
         if (reminderId != null) {
-            return localReminder.softDeleteReminder(reminderId, userId)
+            return localReminder.softDeleteReminder(reminderId, userLocalId)
         }
         return Result.Idle
     }
 
-    suspend fun softDeleteEvent(eventId: Int, userId: Int): Result<Unit> {
-        return local.softDeleteEvent(eventId, userId)
+    suspend fun softDeleteEvent(eventId: Int, userLocalId: Long): Result<Unit> {
+        return local.softDeleteEvent(eventId, userLocalId)
     }
 
     suspend fun createEvent(event: EventCreate): Result<Unit> {
@@ -183,17 +183,17 @@ class EventRepository(
         }
     }
 
-    suspend fun getAllEvents(userId: Int): Result<List<EventResponse>> {
+    suspend fun getAllEvents(userLocalId: Long): Result<List<EventResponse>> {
         return try {
-            handleRemoteResponse(remote.getAllEvents(userId))
+            handleRemoteResponse(remote.getAllEvents(userLocalId))
         } catch (e: Exception) {
             Result.Error(e)
         }
     }
 
-    suspend fun getEventsForRange(startMillis: Long, endMillis: Long, userId: Int?): List<CalendarEventUI> {
+    suspend fun getEventsForRange(startMillis: Long, endMillis: Long, userLocalId: Long?): List<CalendarEventUI> {
         var result: List<CalendarEventUI>
-        val events = local.getEventForRange(startMillis, endMillis, userId!!)
+        val events = local.getEventForRange(startMillis, endMillis, userLocalId!!)
         result = events.map { it.toCalendarEventUI() }
         return result
     }

@@ -5,7 +5,8 @@ import androidx.room.withTransaction
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.database.dao.NoteDAO
 import com.example.maiplan.database.dao.ReminderDAO
-import com.example.maiplan.database.entities.AuthEntity
+import com.example.maiplan.database.dao.UserDAO
+import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.repository.Result
@@ -29,21 +30,25 @@ class NoteLocalDataSource(private val context: Context) {
         database.reminderDAO()
     }
 
-    suspend fun getPendingNotes(userId: Int): Result<List<NoteEntity>> {
+    private val userDao: UserDAO by lazy {
+        database.userDAO()
+    }
+
+    suspend fun getPendingNotes(userLocalId: Long): Result<List<NoteEntity>> {
         return handleLocalResponse {
-            noteDao.getPendingNotes(userId)
+            noteDao.getPendingNotes(userLocalId)
         }
     }
 
-    suspend fun getNote(noteId: Int, userId: Int): Result<NoteEntity> {
+    suspend fun getNote(noteId: Int, userLocalId: Long): Result<NoteEntity> {
         return handleLocalResponse {
-            noteDao.getNote(noteId, userId)
+            noteDao.getNote(noteId, userLocalId)
         }
     }
 
-    suspend fun getNotes(userId: Int, categoryId: Int? = null): Result<List<NoteEntity>> {
+    suspend fun getNotes(userLocalId: Long, categoryId: Int? = null): Result<List<NoteEntity>> {
         return handleLocalResponse {
-            noteDao.getNotes(userId, categoryId)
+            noteDao.getNotes(userLocalId, categoryId)
         }
     }
 
@@ -53,7 +58,7 @@ class NoteLocalDataSource(private val context: Context) {
         }
 
         return handleLocalResponse {
-            ensureLocalUserExists(note.userId)
+            ensureLocalUserExists(note.userLocalId)
             noteDao.noteInsert(note)
             Unit
         }
@@ -69,7 +74,7 @@ class NoteLocalDataSource(private val context: Context) {
 
         return handleLocalResponse {
             database.withTransaction {
-                ensureLocalUserExists(note.userId)
+                ensureLocalUserExists(note.userLocalId)
                 val reminderId = reminder?.let { reminderDao.reminderInsert(it).toInt() }
                 noteDao.noteInsert(note.copy(reminderId = reminderId))
                 reminderId
@@ -85,7 +90,7 @@ class NoteLocalDataSource(private val context: Context) {
         return handleLocalResponse {
             noteDao.noteUpdate(
                 noteId = note.noteId,
-                userId = note.userId,
+                userLocalId = note.userLocalId,
                 title = note.title,
                 content = note.content,
                 categoryId = note.categoryId,
@@ -112,14 +117,14 @@ class NoteLocalDataSource(private val context: Context) {
                     existingReminderId != null && reminder != null -> {
                         reminderDao.reminderUpdate(
                             reminderId = existingReminderId,
-                            userId = note.userId,
+                            userLocalId = note.userLocalId,
                             reminderTime = reminder.reminderTime,
                             message = reminder.message,
                         )
                         existingReminderId
                     }
                     existingReminderId != null -> {
-                        reminderDao.softDeleteReminder(existingReminderId, note.userId)
+                        reminderDao.softDeleteReminder(existingReminderId, note.userLocalId)
                         null
                     }
                     else -> null
@@ -127,7 +132,7 @@ class NoteLocalDataSource(private val context: Context) {
 
                 noteDao.noteUpdate(
                     noteId = note.noteId,
-                    userId = note.userId,
+                    userLocalId = note.userLocalId,
                     title = note.title,
                     content = note.content,
                     categoryId = note.categoryId,
@@ -140,23 +145,23 @@ class NoteLocalDataSource(private val context: Context) {
 
     suspend fun noteUpsert(note: NoteEntity): Result<Unit> {
         return handleLocalResponse {
-            ensureLocalUserExists(note.userId)
+            ensureLocalUserExists(note.userLocalId)
             noteDao.noteUpsert(note)
         }
     }
 
-    suspend fun softDeleteNote(noteId: Int, userId: Int): Result<Unit> {
+    suspend fun softDeleteNote(noteId: Int, userLocalId: Long): Result<Unit> {
         return handleLocalResponse {
-            noteDao.softDeleteNote(noteId, userId)
+            noteDao.softDeleteNote(noteId, userLocalId)
         }
     }
 
-    suspend fun softDeleteNoteWithReminder(noteId: Int, userId: Int): Result<Unit> {
+    suspend fun softDeleteNoteWithReminder(noteId: Int, userLocalId: Long): Result<Unit> {
         return handleLocalResponse {
             database.withTransaction {
-                val note = noteDao.getNote(noteId, userId)
-                note.reminderId?.let { reminderDao.softDeleteReminder(it, userId) }
-                noteDao.softDeleteNote(noteId, userId)
+                val note = noteDao.getNote(noteId, userLocalId)
+                note.reminderId?.let { reminderDao.softDeleteReminder(it, userLocalId) }
+                noteDao.softDeleteNote(noteId, userLocalId)
             }
         }
     }
@@ -167,20 +172,7 @@ class NoteLocalDataSource(private val context: Context) {
         }
     }
 
-    private suspend fun ensureLocalUserExists(userId: Int) {
-        if (authDao.getUserById(userId) != null) return
-
-        val email = UserSession.email ?: throw IllegalStateException("No local auth row for note user $userId")
-        val username = UserSession.username ?: throw IllegalStateException("No local auth row for note user $userId")
-
-        authDao.authSync(
-            AuthEntity(
-                userId = userId,
-                email = email,
-                username = username,
-                passwordHash = "pseudo",
-                syncState = 0
-            )
-        )
+    private suspend fun ensureLocalUserExists(userLocalId: Long) {
+        if (userDao.getUserByLocalId(userLocalId) != null) return
     }
 }

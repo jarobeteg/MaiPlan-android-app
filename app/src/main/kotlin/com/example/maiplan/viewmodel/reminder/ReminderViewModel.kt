@@ -36,9 +36,9 @@ class ReminderViewModel(private val reminderRepository: ReminderRepository) : Vi
         }
     }
 
-    fun getAllReminder(userId: Int) {
+    fun getAllReminder(userLocalId: Long) {
         viewModelScope.launch {
-            when (val result = reminderRepository.getAllReminders(userId)) {
+            when (val result = reminderRepository.getAllReminders(userLocalId)) {
                 is Result.Success -> _reminderList.postValue(result.data)
                 else -> _reminderList.postValue(emptyList())
             }

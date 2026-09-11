@@ -14,10 +14,7 @@ import com.example.maiplan.repository.orEmptyList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class CategoryViewModel(
-    private val categoryRepo: CategoryRepository,
-    private val networkChecker: NetworkChecker
-) : ViewModel() {
+class CategoryViewModel(private val categoryRepo: CategoryRepository) : ViewModel() {
     private val _createCategoryResult = MutableLiveData<Result<Unit>>()
     val createCategoryResult: LiveData<Result<Unit>> get() = _createCategoryResult
 
@@ -48,13 +45,13 @@ class CategoryViewModel(
             _createCategoryResult.postValue(Result.Loading)
             val result = categoryRepo.createCategory(category)
             _createCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(category.userId)
+            if (result is Result.Success) getAllCategories(category.userLocalId)
         }
     }
 
-    fun getAllCategories(userId: Int) {
+    fun getAllCategories(userLocalId: Long) {
         viewModelScope.launch {
-            val result = categoryRepo.getAllCategories(userId)
+            val result = categoryRepo.getAllCategories(userLocalId)
             _categoryList.postValue(result.orEmptyList())
         }
     }
@@ -63,20 +60,20 @@ class CategoryViewModel(
         return _categoryList.value!!.find { it.categoryId == categoryId }!!
     }
 
-    fun updateCategory(category: CategoryResponse, userId: Int) {
+    fun updateCategory(category: CategoryResponse, userLocalId: Long) {
         viewModelScope.launch {
             _updateCategoryResult.postValue(Result.Loading)
-            val result = categoryRepo.updateCategory(category, userId)
+            val result = categoryRepo.updateCategory(category, userLocalId)
             _updateCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(userId)
+            if (result is Result.Success) getAllCategories(userLocalId)
         }
     }
 
-    fun softDeleteCategory(categoryId: Int, userId: Int) {
+    fun softDeleteCategory(categoryId: Int, userLocalId: Long) {
         viewModelScope.launch {
-            val result = categoryRepo.softDeleteCategory(categoryId, userId)
+            val result = categoryRepo.softDeleteCategory(categoryId, userLocalId)
             _deleteCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(userId)
+            if (result is Result.Success) getAllCategories(userLocalId)
         }
     }
 
