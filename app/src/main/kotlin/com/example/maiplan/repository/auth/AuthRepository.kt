@@ -15,7 +15,11 @@ class AuthRepository(
     private val local: UserLocalDataSource,
     private val session: SessionManager
 ) {
-    private suspend fun completeAuthentication(result: Result<AuthResponse>): Result<UserEntity> {
+    private suspend fun completeAuthentication(
+        result: Result<AuthResponse>,
+        expectedUserSyncId: UUID? = null,
+        expectedSessionId: UUID? = null
+    ): Result<UserEntity> {
         if (result !is Result.Success) {
             return when (result) {
                 is Result.Failure -> result
@@ -32,23 +36,62 @@ class AuthRepository(
             )
         }
 
+        if (result.data.refreshToken.isBlank()) {
+            return Result.Error(
+                IllegalStateException("The server returned a blank refresh token")
+            )
+        }
+
         if (!result.data.tokenType.equals("bearer", ignoreCase = true)) {
             return Result.Error(
                 IllegalStateException("The server returned an unsupported token type")
             )
         }
 
-        val localUser: UserEntity = local.reconcileServerUser(result.data.user)
-
-        check(localUser.deletedAt == null) {
-            "Cannot establish a session for a deleted user"
+        val returnedUserSyncId = runCatching {
+            UUID.fromString(result.data.user.syncId)
+        }.getOrElse {
+            return Result.Error(IllegalStateException("The server returned an invalid user ID", it))
         }
 
-        session.saveSession(
-            accessToken = result.data.accessToken,
-            refreshToken = result.data.refreshToken,
-            userSyncId = localUser.syncId
-        )
+        if (expectedUserSyncId != null && returnedUserSyncId != expectedUserSyncId) {
+            return Result.Error(
+                IllegalStateException("The server returned a different user")
+            )
+        }
+
+        val returnedSessionId = runCatching {
+            UUID.fromString(result.data.sessionId)
+        }.getOrElse {
+            return Result.Error(IllegalStateException("The server returned an invalid session ID", it))
+        }
+
+        if (expectedSessionId != null && returnedSessionId != expectedSessionId) {
+            return Result.Error(
+                IllegalStateException("The server replaced the session during token refresh")
+            )
+        }
+
+        val localUser: UserEntity = local.reconcileServerUser(result.data.user)
+
+        if (localUser.deletedAt != null) {
+            return Result.Error(
+                IllegalStateException("Cannot establish a session for a deleted user")
+            )
+        }
+
+        try {
+            session.saveSession(
+                accessToken = result.data.accessToken,
+                refreshToken = result.data.refreshToken,
+                sessionId = result.data.sessionId,
+                userSyncId = localUser.syncId,
+                accessTokenExpiresAt = result.data.accessTokenExpiresAt,
+                refreshTokenExpiresAt = result.data.refreshTokenExpiresAt
+            )
+        } catch (exception: Exception) {
+            return Result.Error(exception)
+        }
 
         return Result.Success(localUser)
     }
@@ -101,44 +144,33 @@ class AuthRepository(
         }
     }
 
-    suspend fun refreshProfile(): Result<UserEntity> {
+    suspend fun refreshSession(): Result<UserEntity> {
         return try {
-            val expectedSyncId = session.getActiveUserSyncId()
+            val expectedUserSyncId = session.getActiveUserSyncId()
                 ?: run {
                     session.clearSession()
                     return Result.Error(IllegalStateException("No active user in the session"))
                 }
-
-            if (session.getAccessToken().isNullOrBlank()) {
-                session.clearSession()
-                return Result.Error(IllegalStateException("No access token in the session"))
-            }
-
-            when (
-                val result = handleRemoteResponse(remote.getProfile())
-            ) {
-                is Result.Success -> {
-                    val returnedSyncId = UUID.fromString(result.data.syncId)
-
-                    if (returnedSyncId != expectedSyncId) {
-                        session.clearSession()
-
-                        return Result.Error(
-                            IllegalStateException("The server returned a different user")
-                        )
-                    }
-
-                    val localUser = local.reconcileServerUser(result.data)
-
-                    if (localUser.deletedAt != null) {
-                        session.clearSession()
-
-                        Result.Error(IllegalStateException("The current user account has been deleted"))
-                    } else {
-                        Result.Success(localUser)
-                    }
+            val expectedSessionId = session.getSessionId()
+                ?: run {
+                    session.clearSession()
+                    return Result.Error(IllegalStateException("No session ID in the session"))
+                }
+            val refreshToken = session.getRefreshToken()
+                ?.takeIf { it.isNotBlank() }
+                ?: run {
+                    session.clearSession()
+                    return Result.Error(IllegalStateException("No refresh token in the session"))
                 }
 
+            when (
+                val result = completeAuthentication(
+                    result = handleRemoteResponse(remote.refresh(refreshToken)),
+                    expectedUserSyncId = expectedUserSyncId,
+                    expectedSessionId = expectedSessionId
+                )
+            ) {
+                is Result.Success -> result
                 is Result.Failure -> {
                     if (result.httpStatus == 401 || result.httpStatus == 403) {
                         session.clearSession()
@@ -146,7 +178,10 @@ class AuthRepository(
 
                     result
                 }
-                is Result.Error -> result
+                is Result.Error -> {
+                    session.clearSession()
+                    result
+                }
                 is Result.Idle -> result
                 is Result.Loading -> result
             }

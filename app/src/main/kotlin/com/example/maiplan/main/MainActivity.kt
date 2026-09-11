@@ -16,6 +16,7 @@ import com.example.maiplan.repository.auth.UserLocalDataSource
 import com.example.maiplan.repository.auth.AuthRemoteDataSource
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.DeviceIdentityStore
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.utils.BaseActivity
@@ -49,7 +50,7 @@ class MainActivity : BaseActivity() {
     private fun setupDependencies() {
         val authRemote = AuthRemoteDataSource(
             publicAuthApi = RetrofitClient.publicAuthApi,
-            authenticatedAuthApi = RetrofitClient.authenticatedAuthApi
+            deviceId = DeviceIdentityStore(applicationContext).getOrCreateDeviceId()
         )
         val authLocal = UserLocalDataSource(applicationContext)
         val authRepo = AuthRepository(authRemote, authLocal, sessionManager)
@@ -70,7 +71,7 @@ class MainActivity : BaseActivity() {
                         setupComposeUIOnce()
                     } else {
                         UserSession.setup(user)
-                        authViewModel.refreshProfile()
+                        authViewModel.refreshSession()
                     }
                 }
 
@@ -85,7 +86,7 @@ class MainActivity : BaseActivity() {
             }
         }
 
-        authViewModel.profileResult.observe(this) { result ->
+        authViewModel.sessionRefreshResult.observe(this) { result ->
             when (result) {
                 is Result.Success -> {
                     UserSession.setup(result.data)
@@ -95,7 +96,7 @@ class MainActivity : BaseActivity() {
                 is Result.Failure,
                 is Result.Error -> {
                     if (
-                        canUseCachedProfile(result) &&
+                        canUseCachedSession(result) &&
                         sessionManager.hasSession() &&
                         UserSession.isLoggedIn()
                     ) {
@@ -133,7 +134,7 @@ class MainActivity : BaseActivity() {
         }
     }
 
-    private fun canUseCachedProfile(result: Result<UserEntity>): Boolean {
+    private fun canUseCachedSession(result: Result<UserEntity>): Boolean {
         return when (result) {
             is Result.Error -> result.exception is IOException
             is Result.Failure -> result.httpStatus == 408 ||

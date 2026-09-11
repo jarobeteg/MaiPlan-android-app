@@ -8,15 +8,15 @@ class AuthInterceptor (private val sessionManager: SessionManager) : Interceptor
 
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
-        val accessToken = sessionManager.getAccessToken()
+        val authorizationHeader = sessionManager.getAuthorizationHeader()
 
-        if (accessToken.isNullOrBlank() || originalRequest.header("Authorization") != null) {
+        if (authorizationHeader == null || originalRequest.header("Authorization") != null) {
             return chain.proceed(originalRequest)
         }
 
         val authenticatedRequest = originalRequest
             .newBuilder()
-            .header("Authorization", "Bearer $accessToken")
+            .header("Authorization", authorizationHeader)
             .build()
 
         return chain.proceed(authenticatedRequest)

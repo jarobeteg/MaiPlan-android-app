@@ -23,9 +23,9 @@ class AuthViewModel(
     private val _loginResult = MutableLiveData<Result<UserEntity>>()
     val loginResult: LiveData<Result<UserEntity>> get() = _loginResult
 
-    private var profileJob: Job? = null
-    private val _profileResult = MutableLiveData<Result<UserEntity>>()
-    val profileResult: LiveData<Result<UserEntity>> get() = _profileResult
+    private var sessionRefreshJob: Job? = null
+    private val _sessionRefreshResult = MutableLiveData<Result<UserEntity>>()
+    val sessionRefreshResult: LiveData<Result<UserEntity>> get() = _sessionRefreshResult
 
     private var cachedSessionJob: Job? = null
     private val _cachedSessionUser = MutableLiveData<Result<UserEntity?>>()
@@ -61,11 +61,11 @@ class AuthViewModel(
         }
     }
 
-    fun refreshProfile() {
-        profileJob?.cancel()
-        profileJob = viewModelScope.launch {
-            _profileResult.value = Result.Loading
-            _profileResult.value = authRepo.refreshProfile()
+    fun refreshSession() {
+        sessionRefreshJob?.cancel()
+        sessionRefreshJob = viewModelScope.launch {
+            _sessionRefreshResult.value = Result.Loading
+            _sessionRefreshResult.value = authRepo.refreshSession()
         }
     }
 

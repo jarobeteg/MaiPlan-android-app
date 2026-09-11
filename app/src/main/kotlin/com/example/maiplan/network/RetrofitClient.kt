@@ -8,6 +8,8 @@ import com.example.maiplan.network.api.EventApi
 import com.example.maiplan.network.api.NoteApi
 import com.example.maiplan.network.api.RaspiApi
 import com.example.maiplan.network.api.ReminderApi
+import com.example.maiplan.network.api.TokenRefreshApi
+import com.example.maiplan.utils.DeviceIdentityStore
 import com.example.maiplan.utils.SessionManager
 import okhttp3.ConnectionPool
 import okhttp3.OkHttpClient
@@ -17,10 +19,12 @@ import java.util.concurrent.TimeUnit
 
 object RetrofitClient {
     private lateinit var sessionManager: SessionManager
+    private lateinit var deviceIdentityStore: DeviceIdentityStore
     private lateinit var BASE_URL: String
 
     fun init(context: Context) {
         sessionManager = SessionManager(context.applicationContext)
+        deviceIdentityStore = DeviceIdentityStore(context.applicationContext)
         BASE_URL = BuildConfig.API_BASE_URL
     }
 
@@ -41,6 +45,13 @@ object RetrofitClient {
     private val authenticatedClient: OkHttpClient by lazy {
         standardClientBuilder()
             .addInterceptor(AuthInterceptor(sessionManager))
+            .authenticator(
+                ForegroundTokenAuthenticator(
+                    sessionManager = sessionManager,
+                    refreshApi = tokenRefreshApi,
+                    deviceId = deviceIdentityStore.getOrCreateDeviceId()
+                )
+            )
             .build()
     }
 
@@ -78,7 +89,9 @@ object RetrofitClient {
     }
 
     val publicAuthApi: AuthApi by lazy { publicRetrofit.create(AuthApi::class.java) }
-    val authenticatedAuthApi: AuthApi by lazy { normalRetrofit.create(AuthApi::class.java) }
+    private val tokenRefreshApi: TokenRefreshApi by lazy {
+        publicRetrofit.create(TokenRefreshApi::class.java)
+    }
     val categoryApi: CategoryApi by lazy { normalRetrofit.create(CategoryApi::class.java) }
     val eventApi: EventApi by lazy { normalRetrofit.create(EventApi::class.java) }
     val noteApi: NoteApi by lazy { normalRetrofit.create(NoteApi::class.java) }

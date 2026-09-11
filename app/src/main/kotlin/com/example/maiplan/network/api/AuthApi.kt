@@ -1,9 +1,9 @@
 package com.example.maiplan.network.api
 
 import com.google.gson.annotations.SerializedName
+import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.Body
-import retrofit2.http.GET
 import retrofit2.http.POST
 
 data class UserRegisterRequest(
@@ -15,12 +15,26 @@ data class UserRegisterRequest(
     val password: String,
 
     @SerializedName("password_again")
-    val passwordAgain: String
+    val passwordAgain: String,
+
+    @SerializedName("device_id")
+    val deviceId: String? = null
 )
 
 data class UserLoginRequest(
     val email: String,
-    val password: String
+    val password: String,
+
+    @SerializedName("device_id")
+    val deviceId: String? = null
+)
+
+data class RefreshTokenRequest(
+    @SerializedName("refresh_token")
+    val refreshToken: String,
+
+    @SerializedName("device_id")
+    val deviceId: String
 )
 
 data class UserResponse(
@@ -51,7 +65,16 @@ data class AuthResponse(
     val tokenType: String,
 
     @SerializedName("refresh_token")
-    val refreshToken: String? = null,
+    val refreshToken: String,
+
+    @SerializedName("session_id")
+    val sessionId: String,
+
+    @SerializedName("access_token_expires_at")
+    val accessTokenExpiresAt: String,
+
+    @SerializedName("refresh_token_expires_at")
+    val refreshTokenExpiresAt: String,
 
     val user: UserResponse
 )
@@ -63,6 +86,11 @@ interface AuthApi {
     @POST("auth/login")
     suspend fun login(@Body request: UserLoginRequest): Response<AuthResponse>
 
-    @GET("auth/me")
-    suspend fun getProfile(): Response<UserResponse>
+    @POST("auth/refresh")
+    suspend fun refresh(@Body request: RefreshTokenRequest): Response<AuthResponse>
+}
+
+interface TokenRefreshApi {
+    @POST("auth/refresh")
+    fun refresh(@Body request: RefreshTokenRequest): Call<AuthResponse>
 }

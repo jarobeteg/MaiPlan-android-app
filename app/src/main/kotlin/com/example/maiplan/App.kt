@@ -5,6 +5,7 @@ import com.example.maiplan.home.clock.HomeClockPreferences
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
+import com.example.maiplan.utils.AppVisibilityTracker
 import com.example.maiplan.utils.notifications.NotificationHelper
 
 class App : Application() {
@@ -13,6 +14,7 @@ class App : Application() {
         AppThemeManager.initialize(this)
         HomeClockPreferences.initialize(this)
         NotificationHelper.createNotificationChannel(this)
+        registerActivityLifecycleCallbacks(AppVisibilityTracker)
         RetrofitClient.init(this)
         SyncScheduler.schedulePeriodicSync(this)
     }
