@@ -22,8 +22,6 @@ class SyncWorker(
             return Result.success()
         }
 
-        // A background sync may use an existing access token, but it must never rotate the
-        // refresh token and thereby extend the user's 30-day idle session window.
         if (!sessionManager.hasUsableAccessToken()) {
             return Result.success()
         }

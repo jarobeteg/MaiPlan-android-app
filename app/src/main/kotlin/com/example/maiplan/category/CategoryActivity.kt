@@ -26,9 +26,6 @@ class CategoryActivity : BaseActivity() {
         setupDependencies()
         setupComposeUI()
         observeCategoryViewModel()
-
-        // this is only temporary for testing purpose only - it will be removed later on
-        //viewModel.sync()
     }
 
     private fun setupDependencies() {
@@ -54,9 +51,9 @@ class CategoryActivity : BaseActivity() {
             when (result) {
                 is Result.Success -> { Toast.makeText(this, getString(successMessage), Toast.LENGTH_SHORT).show() }
                 is Result.Error -> { Toast.makeText(this, getString(R.string.unknown_error), Toast.LENGTH_SHORT).show() }
-                is Result.Failure -> {} // No feedback for Failure
-                is Result.Idle -> {} // No action needed since it's Idle
-                is Result.Loading -> {} // No action needed since it's Loading
+                is Result.Failure,
+                is Result.Idle,
+                is Result.Loading -> {}
             }
         }
 
