@@ -48,13 +48,13 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                "\"http://100.70.156.115:8001/\""
+                "\"https://jaro-raspi.tailccb39c.ts.net:8443/\""
             )
 
             buildConfigField(
                 "String",
                 "API_HOST",
-                "\"100.70.156.115\""
+                "\"jaro-raspi.tailccb39c.ts.net\""
             )
 
             buildConfigField(
@@ -70,13 +70,13 @@ android {
             buildConfigField(
                 "String",
                 "API_BASE_URL",
-                "\"http://100.70.156.115:8002/\""
+                "\"https://jaro-raspi.tailccb39c.ts.net:9443/\""
             )
 
             buildConfigField(
                 "String",
                 "API_HOST",
-                "\"100.70.156.115\""
+                "\"jaro-raspi.tailccb39c.ts.net\""
             )
 
             buildConfigField(
