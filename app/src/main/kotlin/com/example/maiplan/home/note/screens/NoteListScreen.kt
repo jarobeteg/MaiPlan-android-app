@@ -25,7 +25,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.NotificationsNone
@@ -99,13 +98,13 @@ fun NoteListScreen(
     val adaptiveLayout = LocalAdaptiveLayout.current
     val compactLandscape = adaptiveLayout.isLandscape && adaptiveLayout.isShort
     var searchQuery by remember { mutableStateOf("") }
-    var selectedCategoryId by remember { mutableStateOf<Int?>(null) }
+    var selectedCategoryLocalId by remember { mutableStateOf<Long?>(null) }
     val filteredNotes = notes.filter { note ->
-        (selectedCategoryId == null || note.categoryId == selectedCategoryId) &&
+        (selectedCategoryLocalId == null || note.categoryLocalId == selectedCategoryLocalId) &&
             (note.title.contains(searchQuery, ignoreCase = true) ||
                 note.content.orEmpty().contains(searchQuery, ignoreCase = true))
     }
-    val isFiltered = searchQuery.isNotBlank() || selectedCategoryId != null
+    val isFiltered = searchQuery.isNotBlank() || selectedCategoryLocalId != null
 
     NoteScreenBackground {
         Scaffold(
@@ -167,8 +166,8 @@ fun NoteListScreen(
                         Box(Modifier.weight(1.1f)) {
                             NoteCategoryFilter(
                                 categories = categories,
-                                selectedCategoryId = selectedCategoryId,
-                                onCategorySelected = { selectedCategoryId = it },
+                                selectedCategoryLocalId = selectedCategoryLocalId,
+                                onCategorySelected = { selectedCategoryLocalId = it },
                             )
                         }
                     }
@@ -176,8 +175,8 @@ fun NoteListScreen(
                     NoteSearchField(searchQuery) { searchQuery = it }
                     NoteCategoryFilter(
                         categories = categories,
-                        selectedCategoryId = selectedCategoryId,
-                        onCategorySelected = { selectedCategoryId = it },
+                        selectedCategoryLocalId = selectedCategoryLocalId,
+                        onCategorySelected = { selectedCategoryLocalId = it },
                     )
                 }
                 NoteListHeader(filteredNotes.size, isFiltered, compact = compactLandscape)
@@ -197,7 +196,7 @@ fun NoteListScreen(
                         items(filteredNotes, key = { it.noteId }) { note ->
                             SwipeableNoteCard(
                                 note = note,
-                                category = categories.find { it.categoryId == note.categoryId },
+                                category = categories.find { it.categoryLocalId == note.categoryLocalId },
                                 onEdit = { onNoteClick(note) },
                                 onDelete = { onDeleteClick(note) },
                                 compact = compactLandscape,
@@ -352,8 +351,8 @@ private fun NoteSearchField(value: String, onValueChange: (String) -> Unit) {
 @Composable
 private fun NoteCategoryFilter(
     categories: List<CategoryEntity>,
-    selectedCategoryId: Int?,
-    onCategorySelected: (Int?) -> Unit,
+    selectedCategoryLocalId: Long?,
+    onCategorySelected: (Long?) -> Unit,
 ) {
     val dark = LocalAppDarkTheme.current
     LazyRow(
@@ -364,17 +363,17 @@ private fun NoteCategoryFilter(
             NoteFilterChip(
                 label = stringResource(R.string.all),
                 color = NotePrimary,
-                selected = selectedCategoryId == null,
+                selected = selectedCategoryLocalId == null,
                 onClick = { onCategorySelected(null) },
                 dark = dark,
             )
         }
-        items(categories, key = { it.categoryId }) { category ->
+        items(categories, key = { it.categoryLocalId }) { category ->
             NoteFilterChip(
                 label = category.name,
                 color = category.color.toULongOrNull()?.let(::Color) ?: NotePrimary,
-                selected = selectedCategoryId == category.categoryId,
-                onClick = { onCategorySelected(category.categoryId) },
+                selected = selectedCategoryLocalId == category.categoryLocalId,
+                onClick = { onCategorySelected(category.categoryLocalId) },
                 dark = dark,
             )
         }

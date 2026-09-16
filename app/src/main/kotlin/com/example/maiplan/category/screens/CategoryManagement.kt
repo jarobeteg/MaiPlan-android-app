@@ -53,7 +53,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 @Composable
 fun CategoryManagementScreen(
     viewModel: CategoryViewModel,
-    onCardSwipeDelete: (Int) -> Unit,
+    onCardSwipeDelete: (Long) -> Unit,
     onCardSwipeEdit: (CategoryEntity) -> Unit,
     onCreateCategoryClick: () -> Unit,
 ) {
@@ -119,7 +119,7 @@ fun CategoryManagementScreen(
                                 CategoryEmptyState(isSearching = searchQuery.isNotBlank())
                             }
                         } else {
-                            items(filteredCategories, key = { it.categoryId }) { category ->
+                            items(filteredCategories, key = { it.categoryLocalId }) { category ->
                                 val dismissState = rememberSwipeToDismissBoxState(
                                     positionalThreshold = { it * 0.45f },
                                 )
@@ -132,7 +132,7 @@ fun CategoryManagementScreen(
                                             }
                                             SwipeToDismissBoxValue.EndToStart -> {
                                                 dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                                                onCardSwipeDelete(category.categoryId)
+                                                onCardSwipeDelete(category.categoryLocalId)
                                             }
                                             SwipeToDismissBoxValue.Settled -> Unit
                                         }

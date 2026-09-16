@@ -32,9 +32,9 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     private val _selectedReminder = MutableLiveData<ReminderEntity?>(null)
     val selectedReminder: LiveData<ReminderEntity?> get() = _selectedReminder
 
-    fun loadNotes(userLocalId: Long, categoryId: Int? = null) {
+    fun loadNotes(userLocalId: Long, categoryLocalId: Long? = null) {
         viewModelScope.launch {
-            refreshNotes(userLocalId, categoryId)
+            refreshNotes(userLocalId, categoryLocalId)
         }
     }
 
@@ -109,8 +109,8 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         _updateNoteResult.postValue(Result.Idle)
     }
 
-    private suspend fun refreshNotes(userLocalId: Long, categoryId: Int? = null) {
-        val result = noteRepository.getNotes(userLocalId, categoryId)
+    private suspend fun refreshNotes(userLocalId: Long, categoryLocalId: Long? = null) {
+        val result = noteRepository.getNotes(userLocalId, categoryLocalId)
         _noteList.postValue(result.orEmptyList())
     }
 }

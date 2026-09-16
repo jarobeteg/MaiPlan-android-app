@@ -5,7 +5,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.maiplan.network.api.EventSync
 
 @Entity(
     tableName = "event",
@@ -18,8 +17,8 @@ import com.example.maiplan.network.api.EventSync
         ),
         ForeignKey(
             entity = CategoryEntity::class,
-            parentColumns = ["category_id"],
-            childColumns = ["category_id"],
+            parentColumns = ["category_local_id"],
+            childColumns = ["category_local_id"],
             onDelete = ForeignKey.SET_NULL
         ),
         ForeignKey(
@@ -31,7 +30,7 @@ import com.example.maiplan.network.api.EventSync
     ],
     indices = [
         Index(value = ["user_local_id"]),
-        Index(value = ["category_id"]),
+        Index(value = ["category_local_id"]),
         Index(value = ["reminder_id"]),
         Index(value = ["date"]),
         Index(value = ["user_local_id", "date"]),
@@ -48,8 +47,8 @@ data class EventEntity(
     @ColumnInfo(name = "user_local_id")
     val userLocalId: Long,
 
-    @ColumnInfo(name = "category_id")
-    val categoryId: Int? = null,
+    @ColumnInfo(name = "category_local_id")
+    val categoryLocalId: Long? = null,
 
     @ColumnInfo(name = "reminder_id")
     val reminderId: Int? = null,
@@ -88,47 +87,3 @@ data class EventEntity(
     @ColumnInfo(name = "server_id")
     val serverId: Int? = null
 )
-
-fun EventEntity.toEventSync(): EventSync {
-    return EventSync(
-        eventId = this.eventId,
-        serverId = this.serverId ?: 0,
-        userLocalId = this.userLocalId,
-        categoryId = this.categoryId ?: 0,
-        reminderId = this.reminderId ?: 0,
-        title = this.title,
-        description = this.description ?: "",
-        date = this.date,
-        startTime = this.startTime ?: 0,
-        endTime = this.endTime ?: 0,
-        priority = this.priority,
-        location = this.location ?: "",
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        lastModified = this.lastModified,
-        syncState = this.syncState,
-        isDeleted = this.isDeleted
-    )
-}
-
-fun EventSync.toEventEntity(): EventEntity {
-    return EventEntity(
-        eventId = this.eventId,
-        serverId = this.serverId,
-        userLocalId = this.userLocalId,
-        categoryId = this.categoryId,
-        reminderId = this.reminderId,
-        title = this.title,
-        description = this.description,
-        date = this.date,
-        startTime = this.startTime,
-        endTime = this.endTime,
-        priority = this.priority,
-        location = this.location,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        lastModified = this.lastModified,
-        syncState = this.syncState,
-        isDeleted = this.isDeleted
-    )
-}

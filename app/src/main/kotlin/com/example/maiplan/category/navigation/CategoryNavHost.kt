@@ -13,11 +13,10 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
+import com.example.maiplan.category.data.CreateCategoryInput
+import com.example.maiplan.category.data.UpdateCategoryInput
 import com.example.maiplan.category.screens.*
-import com.example.maiplan.network.api.CategoryCreate
-import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
-import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 @Composable
@@ -40,20 +39,18 @@ fun NavGraphBuilder.categoryNavGraph(
     navController: NavController,
     categoryViewModel: CategoryViewModel
 ) {
-    val userLocalId = UserSession.userLocalId!!
-
     // --- Category Management Screen ---
     composable(CategoryRoutes.Management.route) {
         CategoryManagementScreen(
             viewModel = categoryViewModel,
             onCardSwipeDelete = { categoryId ->
-                categoryViewModel.softDeleteCategory(categoryId, userLocalId)
+                categoryViewModel.softDeleteCategory(categoryId)
             },
             onCardSwipeEdit = { category ->
                 // Prevent double navigation using isNavigating flag
                 if (categoryViewModel.isNavigating.value == false) {
                     categoryViewModel.startNavigation()
-                    navController.navigate(CategoryRoutes.Update.withArgs(category.categoryId))
+                    navController.navigate(CategoryRoutes.Update.withArgs(category.categoryLocalId))
                     categoryViewModel.resetNavigation()
                 }
             },
@@ -68,7 +65,14 @@ fun NavGraphBuilder.categoryNavGraph(
         CreateCategoryScreen(
             viewModel = categoryViewModel,
             onSaveClick = { name, description, color, icon ->
-                categoryViewModel.createCategory(CategoryCreate(userLocalId, name, description, color, icon))
+                categoryViewModel.createCategory(
+                    CreateCategoryInput(
+                        name = name,
+                        description = description,
+                        color = color,
+                        icon = icon
+                    )
+                )
             },
             onBackClick = {
                 navController.popBackStack()
@@ -94,21 +98,29 @@ fun NavGraphBuilder.categoryNavGraph(
     // --- Update Category Screen ---
     composable(
         route = CategoryRoutes.Update.route,
-        arguments = listOf(navArgument("categoryId") { type = NavType.IntType })
+        arguments = listOf(navArgument("categoryLocalId") { type = NavType.LongType })
     ) { backStackEntry ->
         /*
          * Retrieves the categoryId from the formatted route.
          *
          * Retrieves selected Category using the retrieved categoryId.
          */
-        val categoryId = backStackEntry.arguments?.getInt("categoryId") ?: return@composable
-        val selectedCategory = categoryViewModel.getCategory(categoryId)
+        val categoryLocalId = backStackEntry.arguments?.getLong("categoryLocalId") ?: return@composable
+        val selectedCategory = categoryViewModel.getCategory(categoryLocalId) ?: return@composable
 
         UpdateCategoryScreen(
             viewModel = categoryViewModel,
             category = selectedCategory,
             onSaveClick = { name, description, color, icon ->
-                categoryViewModel.updateCategory(CategoryResponse(selectedCategory.categoryId, name, description, color, icon), userLocalId)
+                categoryViewModel.updateCategory(
+                    UpdateCategoryInput(
+                        categoryLocalId = selectedCategory.categoryLocalId,
+                        name = name,
+                        description = description,
+                        color = color,
+                        icon = icon
+                    )
+                )
             },
             onBackClick = {
                 navController.popBackStack()

@@ -22,15 +22,15 @@ fun UpdateCategoryScreen(
     onBackClick: () -> Unit,
 ) {
     val saveResult by viewModel.updateCategoryResult.observeAsState()
-    var name by remember(category.categoryId) { mutableStateOf(category.name) }
-    var description by remember(category.categoryId) { mutableStateOf(category.description) }
-    var selectedColor by remember(category.categoryId) {
+    var name by remember(category.categoryLocalId) { mutableStateOf(category.name) }
+    var description by remember(category.categoryLocalId) { mutableStateOf(category.description) }
+    var selectedColor by remember(category.categoryLocalId) {
         mutableStateOf(Color(category.color.toULong()))
     }
-    var selectedIcon by remember(category.categoryId) {
+    var selectedIcon by remember(category.categoryLocalId) {
         mutableStateOf(IconData.getIconByKey(category.icon))
     }
-    var selectedIconString by remember(category.categoryId) { mutableStateOf(category.icon) }
+    var selectedIconString by remember(category.categoryLocalId) { mutableStateOf(category.icon) }
 
     val errorMessage = (saveResult as? Result.Failure)?.let { error ->
         stringResource(

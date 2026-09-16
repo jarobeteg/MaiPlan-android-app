@@ -6,12 +6,10 @@ import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.database.dao.NoteDAO
 import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.dao.UserDAO
-import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
-import com.example.maiplan.utils.common.UserSession
 
 class NoteLocalDataSource(private val context: Context) {
     companion object {
@@ -46,9 +44,9 @@ class NoteLocalDataSource(private val context: Context) {
         }
     }
 
-    suspend fun getNotes(userLocalId: Long, categoryId: Int? = null): Result<List<NoteEntity>> {
+    suspend fun getNotes(userLocalId: Long, categoryLocalId: Long? = null): Result<List<NoteEntity>> {
         return handleLocalResponse {
-            noteDao.getNotes(userLocalId, categoryId)
+            noteDao.getNotes(userLocalId, categoryLocalId)
         }
     }
 
@@ -93,7 +91,7 @@ class NoteLocalDataSource(private val context: Context) {
                 userLocalId = note.userLocalId,
                 title = note.title,
                 content = note.content,
-                categoryId = note.categoryId,
+                categoryLocalId = note.categoryLocalId,
                 reminderId = note.reminderId,
             )
         }
@@ -135,7 +133,7 @@ class NoteLocalDataSource(private val context: Context) {
                     userLocalId = note.userLocalId,
                     title = note.title,
                     content = note.content,
-                    categoryId = note.categoryId,
+                    categoryLocalId = note.categoryLocalId,
                     reminderId = finalReminderId,
                 )
                 finalReminderId

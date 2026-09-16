@@ -9,10 +9,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.note.navigation.NoteNavHost
-import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.note.NoteLocalDataSource
-import com.example.maiplan.repository.note.NoteRemoteDataSource
 import com.example.maiplan.repository.note.NoteRepository
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.utils.common.UserSession
@@ -25,7 +23,6 @@ fun NoteScreenManager(rootNavController: NavHostController) {
     val localNavController = rememberNavController()
     val noteViewModel = remember(context) {
         val repository = NoteRepository(
-            remote = NoteRemoteDataSource(RetrofitClient.noteApi),
             local = NoteLocalDataSource(context),
             localCategory = CategoryLocalDataSource(context),
             localReminder = ReminderLocalDataSource(context),

@@ -6,11 +6,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.maiplan.R
 import com.example.maiplan.category.navigation.CategoryNavHost
-import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryLocalDataSource
-import com.example.maiplan.repository.category.CategoryRemoteDataSource
+import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.BaseActivity
 import com.example.maiplan.utils.common.UserSession
@@ -29,13 +28,17 @@ class CategoryActivity : BaseActivity() {
     }
 
     private fun setupDependencies() {
-        val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
+        val userLocalId = checkNotNull(UserSession.userLocalId) {
+            "CategoryActivity requires an active user"
+        }
+
         val categoryLocal = CategoryLocalDataSource(this)
-        val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
-        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo) }
+        val categoryRepo = CategoryRepository(categoryLocal) {
+            SyncScheduler.runOneTimeSync(applicationContext)
+        }
+        val categoryFactory = GenericViewModelFactory { CategoryViewModel(categoryRepo, userLocalId) }
 
         viewModel = ViewModelProvider(this, categoryFactory)[CategoryViewModel::class.java]
-        viewModel.getAllCategories(UserSession.userLocalId!!)
     }
 
     private fun setupComposeUI() {

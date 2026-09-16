@@ -5,9 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.example.maiplan.network.api.CategoryCreate
-import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.network.api.CategorySync
+import java.time.Instant
+import java.util.UUID
 
 @Entity(
     tableName = "category",
@@ -20,16 +19,14 @@ import com.example.maiplan.network.api.CategorySync
         )
     ],
     indices = [
-        Index(value = ["user_local_id"]),
-        Index(value = ["last_modified"]),
-        Index(value = ["sync_state"]),
-        Index(value = ["server_id"])
+        Index(value = ["sync_id"], unique = true),
+        Index(value = ["user_local_id"])
     ]
 )
 data class CategoryEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "category_id")
-    val categoryId: Int = 0,
+    @ColumnInfo(name = "category_local_id")
+    val categoryLocalId: Long = 0L,
 
     @ColumnInfo(name = "user_local_id")
     val userLocalId: Long,
@@ -42,76 +39,18 @@ data class CategoryEntity(
 
     val icon: String,
 
+    @ColumnInfo(name = "sync_id")
+    val syncId: UUID,
+
+    @ColumnInfo(name = "server_version")
+    val serverVersion: Long? = null,
+
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Instant = Instant.now(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis(),
+    val updatedAt: Instant = Instant.now(),
 
-    @ColumnInfo(name = "last_modified")
-    val lastModified: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "sync_state")
-    val syncState: Int = 0,
-
-    @ColumnInfo(name = "is_deleted")
-    val isDeleted: Int = 0,
-
-    @ColumnInfo(name = "server_id")
-    val serverId: Int? = null
+    @ColumnInfo(name = "deleted_at")
+    val deletedAt: Instant? = null
 )
-
-fun CategoryEntity.toCategorySync(): CategorySync {
-    return CategorySync(
-        categoryId = this.categoryId,
-        serverId = this.serverId ?: 0,
-        userLocalId = this.userLocalId,
-        name = this.name,
-        description = this.description,
-        color = this.color,
-        icon = this.icon,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        lastModified = this.lastModified,
-        syncState = this.syncState,
-        isDeleted = this.isDeleted
-    )
-}
-
-fun CategorySync.toCategoryEntity(): CategoryEntity {
-    return CategoryEntity(
-        categoryId = this.categoryId,
-        userLocalId = this.userLocalId,
-        name = this.name,
-        description = this.description,
-        color = this.color,
-        icon = this.icon,
-        createdAt = this.createdAt,
-        updatedAt = this.updatedAt,
-        lastModified = this.lastModified,
-        syncState = this.syncState,
-        isDeleted = this.isDeleted,
-        serverId = this.serverId
-    )
-}
-
-fun CategoryCreate.toCategoryEntity(): CategoryEntity {
-    return CategoryEntity (
-        userLocalId = this.userLocalId,
-        name = this.name,
-        description = this.description,
-        color = this.color,
-        icon = this.icon,
-        syncState = 4
-    )
-}
-
-fun CategoryEntity.toCategoryResponse(): CategoryResponse {
-    return CategoryResponse (
-        categoryId = this.categoryId,
-        name = this.name,
-        description = this.description,
-        color = this.color,
-        icon = this.icon
-    )
-}

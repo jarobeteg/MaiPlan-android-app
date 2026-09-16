@@ -56,11 +56,8 @@ fun UpdateEventScreen(
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
-    LaunchedEffect(userLocalId) {
-        categoryViewModel.getAllCategories(userLocalId)
-    }
-    LaunchedEffect(categories, safeEvent.categoryId) {
-        selectedCategory = categories.find { it.categoryId == safeEvent.categoryId }
+    LaunchedEffect(categories, safeEvent.categoryLocalId) {
+        selectedCategory = categories.find { it.categoryLocalId == safeEvent.categoryLocalId }
     }
 
     EventEditorLayout(
@@ -115,7 +112,7 @@ fun UpdateEventScreen(
                     eventId = safeEvent.eventId,
                     userLocalId = userLocalId,
                     title = title.trim(),
-                    categoryId = selectedCategory!!.categoryId,
+                    categoryLocalId = selectedCategory!!.categoryLocalId,
                     reminderId = safeEvent.reminderId.takeIf { it != 0 },
                     description = description.trim(),
                     date = date.toEpochMillis(),

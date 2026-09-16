@@ -1,50 +1,69 @@
 package com.example.maiplan.database.dao
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Upsert
 import com.example.maiplan.database.entities.CategoryEntity
+import androidx.room.OnConflictStrategy
+import kotlinx.coroutines.flow.Flow
+import androidx.room.Insert
+import androidx.room.Update
+import androidx.room.Query
+import androidx.room.Dao
+import java.util.UUID
 
 @Dao
 interface CategoryDAO {
-    @Query("SELECT * FROM category WHERE user_local_id = :userLocalId AND sync_state != 0")
-    suspend fun getPendingCategories(userLocalId: Long): List<CategoryEntity>
-
-    @Query("SELECT * FROM category WHERE category_id = :categoryId AND user_local_id = :userLocalId AND is_deleted = 0")
-    suspend fun getCategory(categoryId: Int, userLocalId: Long): CategoryEntity
-
-    @Query("SELECT * FROM category WHERE user_local_id = :userLocalId AND is_deleted = 0")
-    suspend fun getCategories(userLocalId: Long): List<CategoryEntity>
-
-    @Upsert
-    suspend fun categoryUpsert(entity: CategoryEntity)
-
-    @Insert
-    suspend fun categoryInsert(entity: CategoryEntity)
-
-    @Query("""
-        UPDATE category
-        SET
-            name = :name,
-            description = :description,
-            color = :color,
-            icon = :icon,
-            sync_state = 2
-        WHERE category_id = :categoryId AND user_local_id = :userLocalId
+    @Query(value = """
+       SELECT * FROM category
+       WHERE user_local_id = :userLocalId
+       AND deleted_at IS NULL
+       ORDER BY name COLLATE NOCASE, category_local_id
     """)
-    suspend fun categoryUpdate(name: String, description: String, color: String, icon: String, categoryId: Int, userLocalId: Long)
+    fun observeActiveCategories(userLocalId: Long): Flow<List<CategoryEntity>>
 
-    @Query("UPDATE category SET sync_state = 98, is_deleted = 1 WHERE category_id = :categoryId AND user_local_id = :userLocalId")
-    suspend fun softDeleteCategory(categoryId: Int, userLocalId: Long)
+    @Query(value = """
+       SELECT * FROM category
+       WHERE user_local_id = :userLocalId
+       AND deleted_at IS NULL
+       ORDER BY name COLLATE NOCASE, category_local_id
+    """)
+    suspend fun getActiveCategories(userLocalId: Long): List<CategoryEntity>
 
-    @Delete
-    suspend fun deleteCategory(entity: CategoryEntity): Int
+    @Query(value = """
+        SELECT * FROM category
+        WHERE category_local_id = :categoryLocalId
+        AND user_local_id = :userLocalId
+    """)
+    suspend fun getCategoryByLocalId(categoryLocalId: Long, userLocalId: Long): CategoryEntity?
 
-    @Query("SELECT category_id FROM category WHERE server_id = :serverId")
-    suspend fun getCategoryId(serverId: Int): Int?
+    @Query(value = """
+        SELECT * FROM category
+        WHERE sync_id = :syncId
+        AND user_local_id = :userLocalId
+    """)
+    suspend fun getCategoryBySyncId(syncId: UUID, userLocalId: Long): CategoryEntity?
 
-    @Query("SELECT server_id FROM category WHERE category_id = :localId")
-    suspend fun getServerId(localId: Int): Int?
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertCategory(category: CategoryEntity): Long
+
+    @Update
+    suspend fun updateCategory(category: CategoryEntity): Int
+
+    @Query(value = """
+        UPDATE category
+        SET server_version = :serverVersion
+        WHERE sync_id = :syncId
+        AND user_local_id = :userLocalId
+        AND (server_version IS NULL OR server_version < :serverVersion)
+    """)
+    suspend fun updateServerVersion(
+        syncId: UUID,
+        userLocalId: Long,
+        serverVersion: Long
+    ): Int
+
+    @Query(value = """
+        DELETE FROM category
+        WHERE category_local_id = :categoryLocalId
+        AND user_local_id = :userLocalId
+    """)
+    suspend fun hardDeleteCategory(categoryLocalId: Long, userLocalId: Long): Int
 }

@@ -4,9 +4,12 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.maiplan.database.MaiPlanDatabase
+import com.example.maiplan.network.TideHttpException
+import com.example.maiplan.network.TideProtocolException
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.CancellationException
+import java.io.IOException
 
 class SyncWorker(
     appContext: Context,
@@ -47,12 +50,32 @@ class SyncWorker(
             UserSession.setup(activeUser)
 
             val manager = ServiceLocator.provideSyncManager(applicationContext)
-            manager.syncAll()
-            Result.success()
+            val hasMoreWork = manager.syncAll(
+                userLocalId = activeUser.userLocalId,
+                userSyncId = activeUser.syncId
+            )
+
+            if (hasMoreWork) Result.retry() else Result.success()
         } catch (exception: CancellationException) {
             throw exception
+        } catch (exception: TideHttpException) {
+            if (exception.statusCode.isRetryableTideStatus()) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
+        } catch (_: TideProtocolException) {
+            Result.failure()
+        } catch (_: TideResponseValidationException) {
+            Result.failure()
+        } catch (_: IOException) {
+            Result.retry()
         } catch (_: Exception) {
             Result.retry()
         }
+    }
+
+    private fun Int.isRetryableTideStatus(): Boolean {
+        return this == 408 || this == 425 || this == 429 || this in 500..599
     }
 }

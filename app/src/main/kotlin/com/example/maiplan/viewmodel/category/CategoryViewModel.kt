@@ -3,86 +3,77 @@ package com.example.maiplan.viewmodel.category
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.maiplan.category.data.CreateCategoryInput
+import com.example.maiplan.category.data.UpdateCategoryInput
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.network.NetworkChecker
-import com.example.maiplan.network.api.CategoryCreate
-import com.example.maiplan.network.api.CategoryResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryRepository
-import com.example.maiplan.repository.orEmptyList
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
-class CategoryViewModel(private val categoryRepo: CategoryRepository) : ViewModel() {
-    private val _createCategoryResult = MutableLiveData<Result<Unit>>()
-    val createCategoryResult: LiveData<Result<Unit>> get() = _createCategoryResult
+class CategoryViewModel(
+    private val categoryRepo: CategoryRepository,
+    private val userLocalId: Long
+) : ViewModel() {
+    val categoryList: LiveData<List<CategoryEntity>> =
+        categoryRepo.observeCategories(userLocalId).asLiveData()
 
-    private var _categoryList = MutableLiveData<List<CategoryEntity>>()
-    val categoryList: LiveData<List<CategoryEntity>> get() = _categoryList
+    private val _createCategoryResult = MutableLiveData<Result<Unit>>(Result.Idle)
+    val createCategoryResult: LiveData<Result<Unit>> = _createCategoryResult
 
-    private val _updateCategoryResult = MutableLiveData<Result<Unit>>()
-    val updateCategoryResult: LiveData<Result<Unit>> get() = _updateCategoryResult
+    private val _updateCategoryResult = MutableLiveData<Result<Unit>>(Result.Idle)
+    val updateCategoryResult: LiveData<Result<Unit>> = _updateCategoryResult
 
-    private val _deleteCategoryResult = MutableLiveData<Result<Unit>>()
-    val deleteCategoryResult: LiveData<Result<Unit>> get() = _deleteCategoryResult
+    private val _deleteCategoryResult = MutableLiveData<Result<Unit>>(Result.Idle)
+    val deleteCategoryResult: LiveData<Result<Unit>> = _deleteCategoryResult
 
     private val _isNavigating = MutableLiveData(false)
-    val isNavigating: LiveData<Boolean> get() = _isNavigating
+    val isNavigating: LiveData<Boolean> = _isNavigating
 
-    init {
-        clearErrors()
-    }
-
-    fun sync() {
+    fun createCategory(input: CreateCategoryInput) {
         viewModelScope.launch {
-            categoryRepo.sync()
+            _createCategoryResult.value = Result.Loading
+            _createCategoryResult.value = categoryRepo.createCategory(input, userLocalId)
         }
     }
 
-    fun createCategory(category: CategoryCreate) {
+    fun updateCategory(input: UpdateCategoryInput) {
         viewModelScope.launch {
-            _createCategoryResult.postValue(Result.Loading)
-            val result = categoryRepo.createCategory(category)
-            _createCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(category.userLocalId)
+            _updateCategoryResult.value = Result.Loading
+            _updateCategoryResult.value = categoryRepo.updateCategory(input, userLocalId)
         }
     }
 
-    fun getAllCategories(userLocalId: Long) {
+    fun softDeleteCategory(categoryLocalId: Long) {
         viewModelScope.launch {
-            val result = categoryRepo.getAllCategories(userLocalId)
-            _categoryList.postValue(result.orEmptyList())
+            _deleteCategoryResult.value = Result.Loading
+            _deleteCategoryResult.value = categoryRepo.softDeleteCategory(categoryLocalId, userLocalId)
         }
     }
 
-    fun getCategory(categoryId: Int): CategoryEntity {
-        return _categoryList.value!!.find { it.categoryId == categoryId }!!
-    }
-
-    fun updateCategory(category: CategoryResponse, userLocalId: Long) {
-        viewModelScope.launch {
-            _updateCategoryResult.postValue(Result.Loading)
-            val result = categoryRepo.updateCategory(category, userLocalId)
-            _updateCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(userLocalId)
-        }
-    }
-
-    fun softDeleteCategory(categoryId: Int, userLocalId: Long) {
-        viewModelScope.launch {
-            val result = categoryRepo.softDeleteCategory(categoryId, userLocalId)
-            _deleteCategoryResult.postValue(result)
-            if (result is Result.Success) getAllCategories(userLocalId)
-        }
+    fun getCategory(categoryLocalId: Long): CategoryEntity? {
+        return categoryList.value?.find { it.categoryLocalId == categoryLocalId }
     }
 
     fun clearCreateResult() {
-        _createCategoryResult.postValue(Result.Idle)
+        _createCategoryResult.value = Result.Idle
     }
 
     fun clearUpdateResult() {
-        _updateCategoryResult.postValue(Result.Idle)
+        _updateCategoryResult.value = Result.Idle
+    }
+
+    fun clearDeleteResult() {
+        _deleteCategoryResult.value = Result.Idle
+    }
+
+    fun clearErrors() {
+        clearCreateResult()
+        clearUpdateResult()
+        clearDeleteResult()
     }
 
     fun startNavigation() {
@@ -91,13 +82,8 @@ class CategoryViewModel(private val categoryRepo: CategoryRepository) : ViewMode
 
     fun resetNavigation() {
         viewModelScope.launch {
-            delay(500)
+            delay(500.milliseconds)
             _isNavigating.value = false
         }
-    }
-
-    fun clearErrors() {
-        _createCategoryResult.postValue(Result.Idle)
-        _updateCategoryResult.postValue(Result.Idle)
     }
 }

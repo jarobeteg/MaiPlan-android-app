@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.navigation.HomeNavHost
+import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppTheme
 import com.example.maiplan.utils.BaseActivity
 
@@ -17,5 +18,10 @@ class HomeActivity : BaseActivity() {
                 HomeNavHost(rootNavController)
             }
         }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        SyncScheduler.runOneTimeSync(applicationContext)
     }
 }

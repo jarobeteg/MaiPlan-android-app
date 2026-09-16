@@ -2,6 +2,7 @@ package com.example.maiplan.network.sync
 
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
+import java.util.UUID
 
 interface Syncable {
     suspend fun sync()
@@ -9,15 +10,18 @@ interface Syncable {
 
 data class TideSyncRequest(
     @SerializedName("tide_protocol_version")
-    val tideProtocolVersion: Int = 1,
+    val tideProtocolVersion: Int = TideProtocol.VERSION,
+
+    @SerializedName("request_id")
+    val requestId: UUID,
 
     @SerializedName("device_id")
-    val deviceId: String,
+    val deviceId: UUID,
 
     val cursor: String?,
 
     @SerializedName("data_limit")
-    val dataLimit: Int = 100,
+    val dataLimit: Int = TideProtocol.DEFAULT_DATA_LIMIT,
 
     val mutations: List<TideMutation>
 )
@@ -25,6 +29,12 @@ data class TideSyncRequest(
 data class TideSyncResponse(
     @SerializedName("tide_protocol_version")
     val tideProtocolVersion: Int,
+
+    @SerializedName("request_id")
+    val requestId: UUID,
+
+    @SerializedName("response_id")
+    val responseId: UUID,
 
     val acknowledged: List<TideAcknowledgement>,
     val rejected: List<TideRejection>,
@@ -40,13 +50,13 @@ data class TideSyncResponse(
 
 data class TideMutation(
     @SerializedName("mutation_id")
-    val mutationId: String,
+    val mutationId: UUID,
 
     @SerializedName("entity_type")
     val entityType: String,
 
     @SerializedName("entity_sync_id")
-    val entitySyncId: String,
+    val entitySyncId: UUID,
 
     val operation: String,
 
@@ -58,13 +68,13 @@ data class TideMutation(
 
 data class TideAcknowledgement(
     @SerializedName("mutation_id")
-    val mutationId: String,
+    val mutationId: UUID,
 
     @SerializedName("entity_type")
     val entityType: String,
 
     @SerializedName("entity_sync_id")
-    val entitySyncId: String,
+    val entitySyncId: UUID,
 
     @SerializedName("server_version")
     val serverVersion: Long
@@ -72,13 +82,13 @@ data class TideAcknowledgement(
 
 data class TideRejection(
     @SerializedName("mutation_id")
-    val mutationId: String,
+    val mutationId: UUID,
 
     @SerializedName("entity_type")
     val entityType: String,
 
     @SerializedName("entity_sync_id")
-    val entitySyncId: String,
+    val entitySyncId: UUID,
 
     @SerializedName("error_code")
     val errorCode: String,
@@ -88,13 +98,13 @@ data class TideRejection(
 
 data class TideConflict(
     @SerializedName("mutation_id")
-    val mutationId: String,
+    val mutationId: UUID,
 
     @SerializedName("entity_type")
     val entityType: String,
 
     @SerializedName("entity_sync_id")
-    val entitySyncId: String,
+    val entitySyncId: UUID,
 
     @SerializedName("server_version")
     val serverVersion: Long,
@@ -110,7 +120,7 @@ data class TideChange(
     val entityType: String,
 
     @SerializedName("entity_sync_id")
-    val entitySyncId: String,
+    val entitySyncId: UUID,
 
     val operation: String,
 

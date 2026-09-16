@@ -1,7 +1,6 @@
 package com.example.maiplan.home.event.screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -53,10 +52,6 @@ fun CreateEventScreen(
     val blankEndTimeMessage = stringResource(R.string.blank_event_end_time)
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
-
-    LaunchedEffect(userLocalId) {
-        categoryViewModel.getAllCategories(userLocalId)
-    }
 
     EventEditorLayout(
         topBarTitle = stringResource(R.string.event_new),
@@ -111,7 +106,7 @@ fun CreateEventScreen(
                 val event = EventEntity(
                     userLocalId = userLocalId,
                     title = title.trim(),
-                    categoryId = selectedCategory!!.categoryId,
+                    categoryLocalId = selectedCategory!!.categoryLocalId,
                     description = description.trim(),
                     date = date!!.toEpochMillis(),
                     startTime = startTime!!.toEpochMillis(date!!),

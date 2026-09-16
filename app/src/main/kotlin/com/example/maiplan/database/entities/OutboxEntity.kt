@@ -14,14 +14,14 @@ import java.util.UUID
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
-            parentColumns = ["sync_id"],
-            childColumns = ["user_sync_id"],
+            parentColumns = ["user_local_id"],
+            childColumns = ["user_local_id"],
             onDelete = ForeignKey.RESTRICT
         )
     ],
     indices = [
         Index(value = ["mutation_id"], unique = true),
-        Index(value = ["user_sync_id", "status", "created_at"]),
+        Index(value = ["user_local_id", "status", "created_at"]),
         Index(value = ["entity_type", "entity_sync_id"])
     ]
 )
@@ -33,8 +33,8 @@ data class OutboxEntity(
     @ColumnInfo(name = "mutation_id")
     val mutationId: UUID,
 
-    @ColumnInfo(name = "user_sync_id")
-    val userSyncId: UUID,
+    @ColumnInfo(name = "user_local_id")
+    val userLocalId: Long,
 
     @ColumnInfo(name = "entity_type")
     val entityType: String,
@@ -62,5 +62,11 @@ data class OutboxEntity(
     val attemptCount: Int = 0,
 
     @ColumnInfo(name = "last_error")
-    val lastError: String? = null
+    val lastError: String? = null,
+
+    @ColumnInfo(name = "conflict_server_version")
+    val conflictServerVersion: Long? = null,
+
+    @ColumnInfo(name = "conflict_server_data_json")
+    val conflictServerDataJson: String? = null
 )

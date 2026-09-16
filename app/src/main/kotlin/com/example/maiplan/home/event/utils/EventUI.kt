@@ -9,7 +9,7 @@ import java.time.LocalTime
 data class CalendarEventUI(
     val eventId: Int,
     val reminderId: Int,
-    val categoryId: Int,
+    val categoryLocalId: Long,
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,

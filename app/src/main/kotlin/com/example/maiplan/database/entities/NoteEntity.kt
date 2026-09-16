@@ -17,8 +17,8 @@ import androidx.room.PrimaryKey
         ),
         ForeignKey(
             entity = CategoryEntity::class,
-            parentColumns = ["category_id"],
-            childColumns = ["category_id"],
+            parentColumns = ["category_local_id"],
+            childColumns = ["category_local_id"],
             onDelete = ForeignKey.SET_NULL
         ),
         ForeignKey(
@@ -30,7 +30,7 @@ import androidx.room.PrimaryKey
     ],
     indices = [
         Index(value = ["user_local_id"]),
-        Index(value = ["category_id"]),
+        Index(value = ["category_local_id"]),
         Index(value = ["reminder_id"]),
         Index(value = ["last_modified"]),
         Index(value = ["sync_state"]),
@@ -45,8 +45,8 @@ data class NoteEntity(
     @ColumnInfo(name = "user_local_id")
     val userLocalId: Long,
 
-    @ColumnInfo(name = "category_id")
-    val categoryId: Int? = null,
+    @ColumnInfo(name = "category_local_id")
+    val categoryLocalId: Long? = null,
 
     @ColumnInfo(name = "reminder_id")
     val reminderId: Int? = null,

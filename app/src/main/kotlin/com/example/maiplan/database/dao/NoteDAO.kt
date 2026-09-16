@@ -19,10 +19,10 @@ interface NoteDAO {
         SELECT * FROM note
         WHERE user_local_id = :userLocalId
             AND is_deleted = 0
-            AND (:categoryId IS NULL OR category_id = :categoryId)
+            AND (:categoryLocalId IS NULL OR category_local_id = :categoryLocalId)
         ORDER BY updated_at DESC, created_at DESC
     """)
-    suspend fun getNotes(userLocalId: Long, categoryId: Int? = null): List<NoteEntity>
+    suspend fun getNotes(userLocalId: Long, categoryLocalId: Long? = null): List<NoteEntity>
 
     @Insert
     suspend fun noteInsert(entity: NoteEntity): Long
@@ -35,7 +35,7 @@ interface NoteDAO {
         SET
             title = :title,
             content = :content,
-            category_id = :categoryId,
+            category_local_id = :categoryLocalId,
             reminder_id = :reminderId,
             updated_at = :updatedAt,
             last_modified = :updatedAt,
@@ -47,7 +47,7 @@ interface NoteDAO {
         userLocalId: Long,
         title: String,
         content: String?,
-        categoryId: Int?,
+        categoryLocalId: Long?,
         reminderId: Int?,
         updatedAt: Long = System.currentTimeMillis()
     )

@@ -1,63 +1,39 @@
 package com.example.maiplan.repository.category
 
+import com.example.maiplan.category.data.CreateCategoryInput
+import com.example.maiplan.category.data.UpdateCategoryInput
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.database.entities.toCategoryEntity
-import com.example.maiplan.database.entities.toCategoryResponse
-import com.example.maiplan.database.entities.toCategorySync
-import com.example.maiplan.network.api.CategoryCreate
-import com.example.maiplan.network.api.CategoryResponse
-import com.example.maiplan.network.api.CategorySync
-import com.example.maiplan.network.sync.SyncRequest
-import com.example.maiplan.network.sync.Syncable
 import com.example.maiplan.repository.Result
-import com.example.maiplan.repository.map
-import com.example.maiplan.utils.common.UserSession
+import kotlinx.coroutines.flow.Flow
 
 class CategoryRepository(
-    private val remote: CategoryRemoteDataSource,
-    private val local: CategoryLocalDataSource
-    ) : Syncable {
+    private val local: CategoryLocalDataSource,
+    private val requestSync: () -> Unit = {}
+) {
 
-    override suspend fun sync() {
-        try {
-            val pendingCategoriesResult = local.getPendingCategories(UserSession.userLocalId!!)
-            if (pendingCategoriesResult is Result.Success) {
-                val categories: List<CategoryEntity> = pendingCategoriesResult.data
-                val changes: MutableList<CategorySync> = mutableListOf()
-                categories.map { changes.add(it.toCategorySync()) }
-                val request: SyncRequest<CategorySync> = SyncRequest(UserSession.userLocalId!!, changes)
-                val response = remote.categorySync(request)
+    fun observeCategories(userLocalId: Long): Flow<List<CategoryEntity>> {
+        return local.observeCategories(userLocalId)
+    }
 
-                if (response.isSuccessful) {
-                    val body = response.body()
-                    if (body != null) {
-                        if (body.acknowledged.isNotEmpty()) body.acknowledged.map { local.categoryUpsert(it.toCategoryEntity()) }
-                        if (body.rejected.isNotEmpty()) body.rejected.map { local.deleteCategory(it.toCategoryEntity()) }
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            Result.Error(e)
+    suspend fun getCategory(categoryLocalId: Long, userLocalId: Long): CategoryEntity? {
+        return local.getCategory(categoryLocalId, userLocalId)
+    }
+
+    suspend fun createCategory(input: CreateCategoryInput, userLocalId: Long): Result<Unit> {
+        return local.createCategory(input, userLocalId).also(::requestSyncAfterSuccess)
+    }
+
+    suspend fun updateCategory(input: UpdateCategoryInput, userLocalId: Long): Result<Unit> {
+        return local.updateCategory(input, userLocalId).also(::requestSyncAfterSuccess)
+    }
+
+    suspend fun softDeleteCategory(categoryLocalId: Long, userLocalId: Long): Result<Unit> {
+        return local.softDeleteCategory(categoryLocalId, userLocalId).also(::requestSyncAfterSuccess)
+    }
+
+    private fun requestSyncAfterSuccess(result: Result<Unit>) {
+        if (result is Result.Success) {
+            runCatching(requestSync)
         }
-    }
-
-    suspend fun createCategory(category: CategoryCreate): Result<Unit> {
-        return local.categoryInsert(category.toCategoryEntity())
-    }
-
-    suspend fun getAllCategories(userLocalId: Long): Result<List<CategoryEntity>> {
-        return local.getCategories(userLocalId)
-    }
-
-    suspend fun updateCategory(category: CategoryResponse, userLocalId: Long): Result<Unit> {
-        return local.categoryUpdate(category, userLocalId)
-    }
-
-    suspend fun softDeleteCategory(categoryId: Int, userLocalId: Long): Result<Unit> {
-        return local.softDeleteCategory(categoryId, userLocalId)
-    }
-
-    suspend fun deleteCategory(category: CategoryEntity): Result<Unit> {
-        return local.deleteCategory(category)
     }
 }

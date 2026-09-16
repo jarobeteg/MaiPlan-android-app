@@ -129,7 +129,7 @@ fun NavGraphBuilder.noteNavGraph(
                         reminder,
                         NoteEntity(
                             userLocalId = userLocalId,
-                            categoryId = category?.categoryId,
+                            categoryLocalId = category?.categoryLocalId,
                             title = title,
                             content = content,
                             syncState = 4
@@ -195,7 +195,7 @@ fun NavGraphBuilder.noteNavGraph(
                         selectedNote.copy(
                             title = title,
                             content = content,
-                            categoryId = category?.categoryId,
+                            categoryLocalId = category?.categoryLocalId,
                             reminderId = originalReminderId,
                             syncState = 2
                         )

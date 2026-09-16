@@ -1,21 +1,19 @@
 package com.example.maiplan.network.sync
 
-import com.example.maiplan.repository.category.CategoryRepository
-import com.example.maiplan.repository.event.EventRepository
-import com.example.maiplan.repository.note.NoteRepository
 import com.example.maiplan.repository.reminder.ReminderRepository
+import java.util.UUID
 
 class SyncManager (
-    private val categoryRepo: CategoryRepository,
     private val reminderRepo: ReminderRepository,
-    private val eventRepo: EventRepository,
-    private val noteRepo: NoteRepository
+    private val categorySynchronizer: CategoryTideSynchronizer
 ) {
 
-    suspend fun syncAll() {
-        categoryRepo.sync()
+    suspend fun syncAll(userLocalId: Long, userSyncId: UUID): Boolean {
+        val categoryResult = categorySynchronizer.sync(
+            userLocalId = userLocalId,
+            userSyncId = userSyncId
+        )
         reminderRepo.sync()
-        eventRepo.sync()
-        noteRepo.sync()
+        return categoryResult.hasMoreWork
     }
 }

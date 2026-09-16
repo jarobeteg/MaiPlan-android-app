@@ -8,10 +8,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.event.navigation.EventNavHost
-import com.example.maiplan.network.NetworkChecker
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.repository.category.CategoryLocalDataSource
-import com.example.maiplan.repository.category.CategoryRemoteDataSource
 import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.event.EventLocalDataSource
 import com.example.maiplan.repository.event.EventRemoteDataSource
@@ -19,6 +17,7 @@ import com.example.maiplan.repository.event.EventRepository
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.repository.reminder.ReminderRemoteDataSource
 import com.example.maiplan.repository.reminder.ReminderRepository
+import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.viewmodel.category.CategoryViewModel
@@ -26,6 +25,7 @@ import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 
 @Composable
 fun EventScreenManager(rootNavController: NavHostController) {
+    val userLocalId = UserSession.userLocalId ?: return
     val localNavController = rememberNavController()
     val context = LocalContext.current
 
@@ -40,10 +40,9 @@ fun EventScreenManager(rootNavController: NavHostController) {
     }
 
     val categoryViewModel = remember {
-        val categoryRemote = CategoryRemoteDataSource(RetrofitClient.categoryApi)
         val categoryLocal = CategoryLocalDataSource(context)
-        val categoryRepo = CategoryRepository(categoryRemote, categoryLocal)
-        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo) }
+        val categoryRepo = CategoryRepository(categoryLocal)
+        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo, userLocalId) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[CategoryViewModel::class.java]
     }
 

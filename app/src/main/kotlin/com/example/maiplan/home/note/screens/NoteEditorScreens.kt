@@ -32,7 +32,7 @@ fun CreateNoteScreen(
         saveResult = viewModel.createNoteResult.observeAsState().value,
         initialTitle = "",
         initialContent = "",
-        initialCategoryId = null,
+        initialCategoryLocalId = null,
         initialReminderDateTime = null,
         initialReminderMessage = "",
         onSaveClick = onSaveClick,
@@ -60,7 +60,7 @@ fun UpdateNoteScreen(
         saveResult = viewModel.updateNoteResult.observeAsState().value,
         initialTitle = note.title,
         initialContent = note.content.orEmpty(),
-        initialCategoryId = note.categoryId,
+        initialCategoryLocalId = note.categoryLocalId,
         initialReminderDateTime = reminder
             ?.takeIf { it.reminderId == note.reminderId }
             ?.reminderTime
@@ -84,7 +84,7 @@ private fun NoteEditorScreen(
     saveResult: Result<NoteSaveOutcome>?,
     initialTitle: String,
     initialContent: String,
-    initialCategoryId: Int?,
+    initialCategoryLocalId: Long?,
     initialReminderDateTime: LocalDateTime?,
     initialReminderMessage: String,
     onSaveClick: (String, String, CategoryEntity?, LocalDateTime?, String) -> Unit,
@@ -93,7 +93,7 @@ private fun NoteEditorScreen(
     val categories by viewModel.categoryList.observeAsState(emptyList())
     var title by remember(initialTitle) { mutableStateOf(initialTitle) }
     var content by remember(initialContent) { mutableStateOf(initialContent) }
-    var selectedCategory by remember(initialCategoryId) { mutableStateOf<CategoryEntity?>(null) }
+    var selectedCategory by remember(initialCategoryLocalId) { mutableStateOf<CategoryEntity?>(null) }
     var reminderDateTime by remember(initialReminderDateTime) {
         mutableStateOf(initialReminderDateTime)
     }
@@ -104,9 +104,9 @@ private fun NoteEditorScreen(
     val titleRequiredMessage = stringResource(R.string.note_error_1)
     val reminderPastMessage = stringResource(R.string.note_reminder_past)
 
-    LaunchedEffect(categories, initialCategoryId) {
-        if (initialCategoryId != null && selectedCategory == null) {
-            selectedCategory = categories.find { it.categoryId == initialCategoryId }
+    LaunchedEffect(categories, initialCategoryLocalId) {
+        if (initialCategoryLocalId != null && selectedCategory == null) {
+            selectedCategory = categories.find { it.categoryLocalId == initialCategoryLocalId }
         }
     }
 

@@ -3,11 +3,11 @@ package com.example.maiplan.network
 import android.content.Context
 import com.example.maiplan.BuildConfig
 import com.example.maiplan.network.api.AuthApi
-import com.example.maiplan.network.api.CategoryApi
 import com.example.maiplan.network.api.EventApi
 import com.example.maiplan.network.api.NoteApi
 import com.example.maiplan.network.api.RaspiApi
 import com.example.maiplan.network.api.ReminderApi
+import com.example.maiplan.network.api.TideApi
 import com.example.maiplan.network.api.TokenRefreshApi
 import com.example.maiplan.utils.DeviceIdentityStore
 import com.example.maiplan.utils.SessionManager
@@ -92,7 +92,7 @@ object RetrofitClient {
     private val tokenRefreshApi: TokenRefreshApi by lazy {
         publicRetrofit.create(TokenRefreshApi::class.java)
     }
-    val categoryApi: CategoryApi by lazy { normalRetrofit.create(CategoryApi::class.java) }
+    val tideApi: TideApi by lazy { normalRetrofit.create(TideApi::class.java) }
     val eventApi: EventApi by lazy { normalRetrofit.create(EventApi::class.java) }
     val noteApi: NoteApi by lazy { normalRetrofit.create(NoteApi::class.java) }
     val reminderApi: ReminderApi by lazy { normalRetrofit.create(ReminderApi::class.java) }
