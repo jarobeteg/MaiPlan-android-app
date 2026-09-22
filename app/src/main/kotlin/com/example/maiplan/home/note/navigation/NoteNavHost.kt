@@ -103,10 +103,10 @@ fun NavGraphBuilder.noteNavGraph(
             rootNavController = rootNavController,
             viewModel = noteViewModel,
             onCreateClick = { localNavController.navigate(NoteRoutes.Create.route) },
-            onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteId)) },
+            onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteLocalId)) },
             onDeleteClick = { note ->
-                note.reminderId?.let { AlarmScheduler.cancelAlarm(context, it) }
-                noteViewModel.softDeleteNote(note.noteId, userLocalId)
+                note.reminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                noteViewModel.softDeleteNote(note.noteLocalId, userLocalId)
             }
         )
     }
@@ -122,7 +122,6 @@ fun NavGraphBuilder.noteNavGraph(
                             userLocalId = userLocalId,
                             reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                             message = reminderMessage,
-                            syncState = 4,
                         )
                     }
                     noteViewModel.createNoteWithReminder(
@@ -132,7 +131,6 @@ fun NavGraphBuilder.noteNavGraph(
                             categoryLocalId = category?.categoryLocalId,
                             title = title,
                             content = content,
-                            syncState = 4
                         )
                     )
                 }
@@ -152,9 +150,9 @@ fun NavGraphBuilder.noteNavGraph(
         LaunchedEffect(result) {
             if (result is Result.Success) {
                 val saved = result.data
-                if (saved.reminderId != null && saved.reminderTime != null) {
+                if (saved.reminderLocalId != null && saved.reminderTime != null) {
                     val reminderData = ReminderData(
-                        reminderId = saved.reminderId,
+                        reminderLocalId = saved.reminderLocalId,
                         reminderTime = saved.reminderTime,
                         reminderTitle = saved.reminderTitle,
                         reminderMessage = saved.reminderMessage,
@@ -169,12 +167,12 @@ fun NavGraphBuilder.noteNavGraph(
 
     composable(
         route = NoteRoutes.Update.route,
-        arguments = listOf(navArgument("noteId") { type = NavType.IntType })
+        arguments = listOf(navArgument("noteLocalId") { type = NavType.LongType })
     ) { backStackEntry ->
         val context = LocalContext.current
-        val noteId = backStackEntry.arguments?.getInt("noteId") ?: return@composable
-        val selectedNote = noteViewModel.getNote(noteId) ?: return@composable
-        val originalReminderId = remember(noteId) { selectedNote.reminderId }
+        val noteLocalId = backStackEntry.arguments?.getLong("noteLocalId") ?: return@composable
+        val selectedNote = noteViewModel.getNote(noteLocalId) ?: return@composable
+        val originalReminderLocalId = remember(noteLocalId) { selectedNote.reminderLocalId }
 
         UpdateNoteScreen(
             viewModel = noteViewModel,
@@ -183,11 +181,10 @@ fun NavGraphBuilder.noteNavGraph(
                 val saveNote = {
                     val reminder = reminderDateTime?.let {
                         ReminderEntity(
-                            reminderId = originalReminderId ?: 0,
+                            reminderLocalId = originalReminderLocalId ?: 0L,
                             userLocalId = userLocalId,
                             reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                             message = reminderMessage,
-                            syncState = if (originalReminderId == null) 4 else 2,
                         )
                     }
                     noteViewModel.updateNoteWithReminder(
@@ -196,8 +193,7 @@ fun NavGraphBuilder.noteNavGraph(
                             title = title,
                             content = content,
                             categoryLocalId = category?.categoryLocalId,
-                            reminderId = originalReminderId,
-                            syncState = 2
+                            reminderLocalId = originalReminderLocalId,
                         )
                     )
                 }
@@ -217,16 +213,16 @@ fun NavGraphBuilder.noteNavGraph(
         LaunchedEffect(result) {
             if (result is Result.Success) {
                 val saved = result.data
-                if (saved.reminderId != null && saved.reminderTime != null) {
+                if (saved.reminderLocalId != null && saved.reminderTime != null) {
                     val reminderData = ReminderData(
-                        reminderId = saved.reminderId,
+                        reminderLocalId = saved.reminderLocalId,
                         reminderTime = saved.reminderTime,
                         reminderTitle = saved.reminderTitle,
                         reminderMessage = saved.reminderMessage,
                     )
                     AlarmScheduler.attemptSchedule(context, reminderData)
                 } else {
-                    originalReminderId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                    originalReminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
                 }
                 localNavController.popBackStack()
                 noteViewModel.clearUpdateResult()

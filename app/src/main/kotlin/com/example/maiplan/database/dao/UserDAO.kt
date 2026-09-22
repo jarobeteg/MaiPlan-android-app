@@ -5,11 +5,15 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Dao
+import androidx.room.Update
 import java.time.Instant
 import java.util.UUID
 
 @Dao
 interface UserDAO {
+    @Update
+    suspend fun updateUser(user: UserEntity): Int
+
     @Query(value = "SELECT * FROM user WHERE user_local_id = :userLocalId AND deleted_at is NULL")
     suspend fun getActiveUserByLocalId(userLocalId: Long): UserEntity?
 
@@ -30,28 +34,6 @@ interface UserDAO {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertUser(user: UserEntity): Long
-
-    @Query(value = """
-        UPDATE user 
-        SET username = :username, updated_at = :updatedAt
-        WHERE user_local_id = :userLocalId AND deleted_at IS NULL
-        """)
-    suspend fun updateUserLocally(
-        username: String,
-        updatedAt: Instant,
-        userLocalId: Long
-    ): Int
-
-    @Query(value = """
-        UPDATE user
-        SET updated_at = :updatedAt, deleted_at = :deletedAt
-        WHERE user_local_id = :userLocalId AND deleted_at IS NULL
-    """)
-    suspend fun markUserDeletedLocally(
-        updatedAt: Instant,
-        deletedAt: Instant,
-        userLocalId: Long
-    ): Int
 
     @Query(value = """
         UPDATE user
@@ -77,23 +59,4 @@ interface UserDAO {
         syncId: UUID
     ): Int
 
-    @Query(value = """
-        UPDATE user 
-        SET server_version = :serverVersion, updated_at = :updatedAt, deleted_at = :deletedAt
-        WHERE 
-            sync_id = :syncId
-        AND
-            (server_version IS NULL
-        OR
-            server_version < :serverVersion)
-        """)
-    suspend fun applyServerUserDeletion(
-        serverVersion: Long,
-        updatedAt: Instant,
-        deletedAt: Instant,
-        syncId: UUID
-    ): Int
-
-    @Query ("DELETE FROM user WHERE sync_id = :syncId")
-    suspend fun hardDeleteUser(syncId: UUID): Int
 }

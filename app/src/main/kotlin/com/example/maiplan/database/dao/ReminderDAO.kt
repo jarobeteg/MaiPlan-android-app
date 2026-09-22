@@ -1,53 +1,54 @@
 package com.example.maiplan.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
+import androidx.room.Update
 import com.example.maiplan.database.entities.ReminderEntity
+import java.util.UUID
 
 @Dao
 interface ReminderDAO {
-    @Insert
-    suspend fun reminderInsert(reminder: ReminderEntity): Long
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertReminder(reminder: ReminderEntity): Long
 
-    @Upsert
-    suspend fun reminderUpsert(reminder: ReminderEntity)
+    @Update
+    suspend fun updateReminder(reminder: ReminderEntity): Int
 
-    @Query("""
-        UPDATE reminder
-        SET reminder_time = :reminderTime,
-            message = :message,
-            updated_at = :updatedAt,
-            last_modified = :updatedAt,
-            sync_state = 2,
-            is_deleted = 0
-        WHERE reminder_id = :reminderId AND user_local_id = :userLocalId
-    """)
-    suspend fun reminderUpdate(
-        reminderId: Int,
-        userLocalId: Long,
-        reminderTime: Long,
-        message: String?,
-        updatedAt: Long = System.currentTimeMillis(),
+    @Query(
+        """
+        SELECT * FROM reminder
+        WHERE reminder_local_id = :reminderLocalId
+          AND user_local_id = :userLocalId
+        """
     )
+    suspend fun getReminderByLocalId(
+        reminderLocalId: Long,
+        userLocalId: Long
+    ): ReminderEntity?
 
-    @Delete
-    suspend fun deleteReminder(reminder: ReminderEntity)
+    @Query(
+        """
+        SELECT * FROM reminder
+        WHERE sync_id = :syncId
+          AND user_local_id = :userLocalId
+        """
+    )
+    suspend fun getReminderBySyncId(syncId: UUID, userLocalId: Long): ReminderEntity?
 
-    @Query("UPDATE reminder SET sync_state = 98, is_deleted = 1 WHERE reminder_id = :reminderId AND user_local_id = :userLocalId")
-    suspend fun softDeleteReminder(reminderId: Int, userLocalId: Long)
-
-    @Query("SELECT * FROM reminder WHERE user_local_id = :userLocalId AND sync_state != 0")
-    suspend fun getPendingReminders(userLocalId: Long): List<ReminderEntity>
-
-    @Query("SELECT reminder_id FROM reminder WHERE server_id = :serverId")
-    suspend fun getReminderId(serverId: Int): Int?
-
-    @Query("SELECT server_id FROM reminder WHERE reminder_id = :localId")
-    suspend fun getServerId(localId: Int): Int?
-
-    @Query("SELECT * FROM reminder WHERE reminder_id = :reminderId")
-    suspend fun getReminder(reminderId: Int): ReminderEntity
+    @Query(
+        """
+        UPDATE reminder
+        SET server_version = :serverVersion
+        WHERE sync_id = :syncId
+          AND user_local_id = :userLocalId
+          AND (server_version IS NULL OR server_version < :serverVersion)
+        """
+    )
+    suspend fun updateServerVersion(
+        syncId: UUID,
+        userLocalId: Long,
+        serverVersion: Long
+    ): Int
 }

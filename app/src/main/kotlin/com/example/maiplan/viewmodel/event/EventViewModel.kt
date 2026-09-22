@@ -7,10 +7,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.home.event.utils.CalendarEventUI
-import com.example.maiplan.network.api.EventCreate
-import com.example.maiplan.network.api.EventResponse
-import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.event.EventRepository
+import com.example.maiplan.repository.event.StoredEventWithReminder
+import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -24,14 +23,8 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
-    private val _createEventResult = MutableLiveData<Result<Unit>>()
-    val createEventResult: LiveData<Result<Unit>> get() = _createEventResult
-
-    private val _getEventResult = MutableLiveData<Result<EventResponse>>()
-    val getEventResult: LiveData<Result<EventResponse>> get() = _getEventResult
-
-    private var _eventList = MutableLiveData<List<EventResponse>>()
-    val eventList: LiveData<List<EventResponse>> get() = _eventList
+    private val _saveEventResult = MutableLiveData<Result<StoredEventWithReminder>>(Result.Idle)
+    val saveEventResult: LiveData<Result<StoredEventWithReminder>> get() = _saveEventResult
 
     private val _monthlyEvents =
         MutableStateFlow<Map<LocalDate, List<CalendarEventUI>>>(emptyMap())
@@ -39,42 +32,30 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
 
     fun createEventWithReminder(reminder: ReminderEntity?, event: EventEntity) {
         viewModelScope.launch {
-            eventRepository.createEventWithReminder(reminder, event)
+            _saveEventResult.postValue(Result.Loading)
+            _saveEventResult.postValue(eventRepository.createEventWithReminder(reminder, event))
         }
     }
 
     fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity) {
         viewModelScope.launch {
-            eventRepository.updateEventWithReminder(reminder, event)
+            _saveEventResult.postValue(Result.Loading)
+            _saveEventResult.postValue(eventRepository.updateEventWithReminder(reminder, event))
         }
     }
 
-    fun softDeleteEventWithReminder(reminderId: Int?, eventId: Int, userLocalId: Long, selectedDate: LocalDate) {
+    fun clearSaveResult() {
+        _saveEventResult.postValue(Result.Idle)
+    }
+
+    fun softDeleteEventWithReminder(
+        eventLocalId: Long,
+        userLocalId: Long,
+        selectedDate: LocalDate
+    ) {
         viewModelScope.launch {
-            eventRepository.softDeleteReminder(reminderId, userLocalId)
-            eventRepository.softDeleteEvent(eventId, userLocalId)
+            eventRepository.softDeleteEventWithReminder(eventLocalId, userLocalId)
             loadMonth(selectedDate)
-        }
-    }
-
-    fun createEvent(event: EventCreate) {
-        viewModelScope.launch {
-            _createEventResult.postValue(eventRepository.createEvent(event))
-        }
-    }
-
-    fun getEvent(eventId: Int) {
-        viewModelScope.launch {
-            _getEventResult.postValue(eventRepository.getEvent(eventId))
-        }
-    }
-
-    fun getAllEvent(userLocalId: Long) {
-        viewModelScope.launch {
-            when (val result = eventRepository.getAllEvents(userLocalId)) {
-                is Result.Success -> _eventList.postValue(result.data)
-                else -> _eventList.postValue(emptyList())
-            }
         }
     }
 
@@ -91,7 +72,8 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
                 .toInstant()
                 .toEpochMilli() - 1
 
-            val events = eventRepository.getEventsForRange(start, end, UserSession.userLocalId)
+            val userLocalId = UserSession.userLocalId ?: return@launch
+            val events = eventRepository.getEventsForRange(start, end, userLocalId)
             val grouped = events.groupBy { it.date }
 
             _monthlyEvents.value = grouped
@@ -99,13 +81,13 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     }
 
 
-    fun getEventById(eventId: Int): StateFlow<CalendarEventUI?> {
+    fun getEventById(eventLocalId: Long): StateFlow<CalendarEventUI?> {
         return monthlyEvents
             .map { eventsByDate ->
                 eventsByDate
                     .values
                     .flatten()
-                    .firstOrNull { it.eventId == eventId }
+                    .firstOrNull { it.eventLocalId == eventLocalId }
             }
             .stateIn(
                 scope = viewModelScope,

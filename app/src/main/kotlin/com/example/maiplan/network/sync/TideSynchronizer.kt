@@ -8,7 +8,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.UUID
 
-data class CategoryTideSyncResult(
+data class TideSyncResult(
     val pageCount: Int,
     val uploadedMutationCount: Int,
     val acknowledgedMutationCount: Int,
@@ -19,17 +19,17 @@ data class CategoryTideSyncResult(
     val hasMoreWork: Boolean
 )
 
-class CategoryTideSynchronizer(
+class TideSynchronizer(
     private val requestPreparer: TideRequestPreparer,
     private val exchangeClient: TideExchangeClient,
-    private val responseValidator: TideCategoryResponseValidator,
-    private val reconciler: CategoryTideReconciler
+    private val responseValidator: TideResponseValidator,
+    private val reconciler: TideReconciler
 ) {
     suspend fun sync(
         userLocalId: Long,
         userSyncId: UUID,
         maxPages: Int = TideClientConfig.MAX_PAGES_PER_RUN
-    ): CategoryTideSyncResult = syncMutex.withLock {
+    ): TideSyncResult = syncMutex.withLock {
         require(maxPages > 0) { "Maximum TIDE page count must be positive" }
 
         var pageCount = 0
@@ -42,7 +42,7 @@ class CategoryTideSynchronizer(
         var hasMoreWork: Boolean
 
         do {
-            val preparedRequest = requestPreparer.prepareCategoryRequest(
+            val preparedRequest = requestPreparer.prepareRequest(
                 userLocalId = userLocalId,
                 userSyncId = userSyncId
             )
@@ -77,11 +77,15 @@ class CategoryTideSynchronizer(
             appliedChangeCount += reconciliation.appliedChangeCount
             deferredChangeCount += reconciliation.deferredChangeCount
 
+            val retryableRejection = exchange.response.rejected.any {
+                it.errorCode in TideRejectionCode.RETRYABLE
+            }
             hasMoreWork = reconciliation.moreChanges ||
-                preparedRequest.claimedMutationIds.isNotEmpty()
+                preparedRequest.claimedMutationIds.size >= TideClientConfig.UPLOAD_BATCH_SIZE ||
+                retryableRejection
         } while (hasMoreWork && pageCount < maxPages)
 
-        CategoryTideSyncResult(
+        TideSyncResult(
             pageCount = pageCount,
             uploadedMutationCount = uploadedCount,
             acknowledgedMutationCount = acknowledgedCount,

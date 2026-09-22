@@ -7,17 +7,30 @@ class TideResponseValidationException(
     cause: Throwable? = null
 ) : Exception(message, cause)
 
-data class ValidatedCategoryResponse(
+data class ValidatedTideResponse(
     val preparedRequest: PreparedTideRequest,
     val response: TideSyncResponse,
     val submittedMutationsById: Map<UUID, TideMutation>
 )
 
-class TideCategoryResponseValidator {
+class TideResponseValidator {
     fun validate(
         preparedRequest: PreparedTideRequest,
         response: TideSyncResponse
-    ): ValidatedCategoryResponse {
+    ): ValidatedTideResponse {
+        return try {
+            validateInternal(preparedRequest, response)
+        } catch (exception: TideResponseValidationException) {
+            throw exception
+        } catch (exception: Exception) {
+            throw TideResponseValidationException("The TIDE response is malformed", exception)
+        }
+    }
+
+    private fun validateInternal(
+        preparedRequest: PreparedTideRequest,
+        response: TideSyncResponse
+    ): ValidatedTideResponse {
         val request = preparedRequest.request
 
         ensure(
@@ -57,10 +70,10 @@ class TideCategoryResponseValidator {
 
         response.acknowledged.forEach { acknowledgement ->
             validateOutcomeIdentity(
-                mutationId = acknowledgement.mutationId,
-                entityType = acknowledgement.entityType,
-                entitySyncId = acknowledgement.entitySyncId,
-                submittedMutations = submittedMutations
+                acknowledgement.mutationId,
+                acknowledgement.entityType,
+                acknowledgement.entitySyncId,
+                submittedMutations
             )
             ensure(
                 acknowledgement.serverVersion > 0,
@@ -70,23 +83,20 @@ class TideCategoryResponseValidator {
 
         response.rejected.forEach { rejection ->
             validateOutcomeIdentity(
-                mutationId = rejection.mutationId,
-                entityType = rejection.entityType,
-                entitySyncId = rejection.entitySyncId,
-                submittedMutations = submittedMutations
+                rejection.mutationId,
+                rejection.entityType,
+                rejection.entitySyncId,
+                submittedMutations
             )
-            ensure(
-                rejection.errorCode.isNotBlank(),
-                "A rejected mutation is missing its error code"
-            )
+            ensure(rejection.errorCode.isNotBlank(), "A rejected mutation is missing its error code")
         }
 
         response.conflicts.forEach { conflict ->
             validateOutcomeIdentity(
-                mutationId = conflict.mutationId,
-                entityType = conflict.entityType,
-                entitySyncId = conflict.entitySyncId,
-                submittedMutations = submittedMutations
+                conflict.mutationId,
+                conflict.entityType,
+                conflict.entitySyncId,
+                submittedMutations
             )
             ensure(
                 conflict.serverVersion > 0,
@@ -99,7 +109,7 @@ class TideCategoryResponseValidator {
             "The response exceeds the requested data limit"
         )
         ensureUnique(response.changes.map { it.sequence }, "Response change sequences")
-        response.changes.forEach(::validateCategoryChange)
+        response.changes.forEach(::validateChange)
 
         if (response.moreChanges) {
             ensure(
@@ -119,7 +129,7 @@ class TideCategoryResponseValidator {
             )
         }
 
-        return ValidatedCategoryResponse(
+        return ValidatedTideResponse(
             preparedRequest = preparedRequest,
             response = response,
             submittedMutationsById = submittedMutations
@@ -128,52 +138,32 @@ class TideCategoryResponseValidator {
 
     private fun validateSubmittedMutation(mutation: TideMutation) {
         ensure(
-            mutation.entityType == TideEntityType.CATEGORY,
-            "The Category synchronizer received an unsupported entity type"
+            mutation.entityType in TideEntityType.MUTABLE,
+            "The TIDE request contains an unsupported entity type"
         )
-
-        when (mutation.operation) {
-            TideOperation.CREATE,
-            TideOperation.UPDATE -> ensure(
-                mutation.data != null,
-                "${mutation.operation} requires mutation data"
-            )
-
-            TideOperation.DELETE -> ensure(
-                mutation.data == null,
-                "DELETE must not contain mutation data"
-            )
-
-            else -> throw TideResponseValidationException(
-                "The request contains an unsupported mutation operation"
-            )
-        }
+        validateOperationAndData(mutation.operation, mutation.data != null, "mutation")
     }
 
-    private fun validateCategoryChange(change: TideChange) {
+    private fun validateChange(change: TideChange) {
         ensure(
-            change.entityType == TideEntityType.CATEGORY,
-            "The Category synchronizer received an unsupported remote entity type"
+            change.entityType in TideEntityType.SUPPORTED,
+            "The TIDE response contains an unsupported entity type"
         )
-        ensure(
-            change.serverVersion > 0,
-            "A remote change has an invalid server version"
-        )
+        ensure(change.serverVersion > 0, "A remote change has an invalid server version")
+        validateOperationAndData(change.operation, change.data != null, "change")
+    }
 
-        when (change.operation) {
+    private fun validateOperationAndData(
+        operation: String,
+        hasData: Boolean,
+        description: String
+    ) {
+        when (operation) {
             TideOperation.CREATE,
-            TideOperation.UPDATE -> ensure(
-                change.data != null,
-                "${change.operation} requires change data"
-            )
-
-            TideOperation.DELETE -> ensure(
-                change.data == null,
-                "DELETE must not contain change data"
-            )
-
+            TideOperation.UPDATE -> ensure(hasData, "$operation requires $description data")
+            TideOperation.DELETE -> ensure(!hasData, "DELETE must not contain $description data")
             else -> throw TideResponseValidationException(
-                "The response contains an unsupported change operation"
+                "The TIDE payload contains an unsupported operation"
             )
         }
     }
@@ -188,7 +178,6 @@ class TideCategoryResponseValidator {
             ?: throw TideResponseValidationException(
                 "The response contains an outcome for an unknown mutation"
             )
-
         ensure(
             entityType == submittedMutation.entityType,
             "The response outcome entity type does not match the submitted mutation"
@@ -204,8 +193,6 @@ class TideCategoryResponseValidator {
     }
 
     private fun ensure(condition: Boolean, message: String) {
-        if (!condition) {
-            throw TideResponseValidationException(message)
-        }
+        if (!condition) throw TideResponseValidationException(message)
     }
 }

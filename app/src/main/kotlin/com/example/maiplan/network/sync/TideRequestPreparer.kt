@@ -23,7 +23,7 @@ class TideRequestPreparer(
     private val outboxDao = database.outboxDAO()
     private val syncStateDao = database.syncStateDAO()
 
-    suspend fun prepareCategoryRequest(
+    suspend fun prepareRequest(
         userLocalId: Long,
         userSyncId: UUID,
         mutationLimit: Int = TideClientConfig.UPLOAD_BATCH_SIZE,
@@ -44,7 +44,7 @@ class TideRequestPreparer(
         val localBatch = database.withTransaction {
             outboxDao.recoverStaleMutations(
                 userLocalId = userLocalId,
-                entityTypes = listOf(TideEntityType.CATEGORY),
+                entityTypes = TideEntityType.MUTABLE,
                 staleBefore = attemptedAt.minusSeconds(TideClientConfig.STALE_CLAIM_SECONDS),
                 pendingStatus = OutboxStatus.PENDING,
                 inSyncStatus = OutboxStatus.IN_SYNC,
@@ -54,7 +54,7 @@ class TideRequestPreparer(
             val pending = outboxDao.getMutations(
                 userLocalId = userLocalId,
                 status = OutboxStatus.PENDING,
-                entityTypes = listOf(TideEntityType.CATEGORY),
+                entityTypes = TideEntityType.MUTABLE,
                 blockingStatuses = listOf(
                     OutboxStatus.PENDING,
                     OutboxStatus.IN_SYNC,
@@ -119,7 +119,7 @@ class TideRequestPreparer(
     }
 
     private fun OutboxEntity.toTideMutation(): TideMutation {
-        check(entityType == TideEntityType.CATEGORY) {
+        check(entityType in TideEntityType.MUTABLE) {
             "Unsupported TIDE entity type: $entityType"
         }
 
@@ -129,13 +129,13 @@ class TideRequestPreparer(
             TideOperation.CREATE,
             TideOperation.UPDATE -> {
                 check(payload != null) {
-                    "$operation Category mutation requires data"
+                    "$operation $entityType mutation requires data"
                 }
             }
 
             TideOperation.DELETE -> {
                 check(payload == null) {
-                    "DELETE Category mutation must not contain data"
+                    "DELETE $entityType mutation must not contain data"
                 }
             }
 

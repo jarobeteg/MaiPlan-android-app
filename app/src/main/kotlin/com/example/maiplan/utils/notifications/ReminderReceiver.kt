@@ -9,12 +9,13 @@ class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         Log.d("ALARM_TEST", "!!! RECEIVER HIT SUCCESSFULLY !!!")
-        val reminderId = intent.getIntExtra("reminder_id", 0)
+        val reminderLocalId = intent.getLongExtra("reminder_local_id", 0L)
         val reminderTitle = intent.getStringExtra("reminder_title") ?: "Title"
         val reminderMessage = intent.getStringExtra("reminder_message") ?: "Message"
 
         NotificationHelper.createNotificationChannel(context)
 
-        NotificationHelper.showNotification(context, reminderTitle, reminderMessage, reminderId)
+        val notificationId = (reminderLocalId xor (reminderLocalId ushr 32)).toInt()
+        NotificationHelper.showNotification(context, reminderTitle, reminderMessage, notificationId)
     }
 }

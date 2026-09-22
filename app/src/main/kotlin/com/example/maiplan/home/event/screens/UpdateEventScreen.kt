@@ -8,48 +8,42 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.utils.common.UserSession
-import com.example.maiplan.utils.notifications.AlarmScheduler
-import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.utils.toLocalDateTime
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
-import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 import java.time.LocalDate
 
 @Composable
 fun UpdateEventScreen(
-    eventId: Int,
+    eventLocalId: Long,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
-    reminderViewModel: ReminderViewModel,
     onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
-    val event by eventViewModel.getEventById(eventId).collectAsState()
+    val event by eventViewModel.getEventById(eventLocalId).collectAsState()
     val safeEvent = event ?: return
-    val context = LocalContext.current
     val userLocalId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
 
-    var errorMessage by remember(safeEvent.eventId) { mutableStateOf<String?>(null) }
-    var selectedCategory by remember(safeEvent.eventId) { mutableStateOf<CategoryEntity?>(null) }
-    var title by remember(safeEvent.eventId) { mutableStateOf(safeEvent.title) }
-    var description by remember(safeEvent.eventId) { mutableStateOf(safeEvent.description) }
-    var date by remember(safeEvent.eventId) { mutableStateOf(safeEvent.date) }
-    var startTime by remember(safeEvent.eventId) { mutableStateOf(safeEvent.startTime) }
-    var endTime by remember(safeEvent.eventId) { mutableStateOf(safeEvent.endTime) }
-    var reminderDateTime by remember(safeEvent.eventId) {
-        mutableStateOf(safeEvent.reminderTime.takeIf { it != 0L }?.toLocalDateTime())
+    var errorMessage by remember(safeEvent.eventLocalId) { mutableStateOf<String?>(null) }
+    var selectedCategory by remember(safeEvent.eventLocalId) { mutableStateOf<CategoryEntity?>(null) }
+    var title by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.title) }
+    var description by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.description) }
+    var date by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.date) }
+    var startTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.startTime) }
+    var endTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.endTime) }
+    var reminderDateTime by remember(safeEvent.eventLocalId) {
+        mutableStateOf(safeEvent.reminderTime?.toLocalDateTime())
     }
-    var reminderMessage by remember(safeEvent.eventId) { mutableStateOf(safeEvent.reminderMessage) }
+    var reminderMessage by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.reminderMessage) }
 
     val blankTitleMessage = stringResource(R.string.blank_event_title)
     val dateInPastMessage = stringResource(R.string.event_date_in_past)
@@ -101,40 +95,27 @@ fun UpdateEventScreen(
                 errorMessage = null
                 val reminder = reminderDateTime?.let {
                     ReminderEntity(
-                        reminderId = safeEvent.reminderId.takeIf { id -> id != 0 } ?: 0,
+                        reminderLocalId = safeEvent.reminderLocalId ?: 0L,
                         userLocalId = userLocalId,
                         reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                         message = reminderMessage,
-                        syncState = 2,
                     )
                 }
                 val updatedEvent = EventEntity(
-                    eventId = safeEvent.eventId,
+                    eventLocalId = safeEvent.eventLocalId,
                     userLocalId = userLocalId,
                     title = title.trim(),
                     categoryLocalId = selectedCategory!!.categoryLocalId,
-                    reminderId = safeEvent.reminderId.takeIf { it != 0 },
+                    reminderLocalId = safeEvent.reminderLocalId,
                     description = description.trim(),
                     date = date.toEpochMillis(),
                     startTime = startTime.toEpochMillis(date),
                     endTime = endTime.toEpochMillis(date),
                     priority = 1,
                     location = "",
-                    syncState = 2,
                 )
 
                 onUpdateClick(reminder, updatedEvent)
-                reminder?.let {
-                    AlarmScheduler.scheduleAlarm(
-                        context,
-                        ReminderData(
-                            reminderId = it.reminderId,
-                            reminderTime = it.reminderTime,
-                            reminderTitle = updatedEvent.title,
-                            reminderMessage = it.message.orEmpty(),
-                        ),
-                    )
-                }
             }
         },
     )

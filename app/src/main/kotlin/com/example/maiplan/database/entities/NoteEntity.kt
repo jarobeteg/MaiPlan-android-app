@@ -5,6 +5,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.time.Instant
+import java.util.UUID
 
 @Entity(
     tableName = "note",
@@ -23,24 +25,22 @@ import androidx.room.PrimaryKey
         ),
         ForeignKey(
             entity = ReminderEntity::class,
-            parentColumns = ["reminder_id"],
-            childColumns = ["reminder_id"],
+            parentColumns = ["reminder_local_id"],
+            childColumns = ["reminder_local_id"],
             onDelete = ForeignKey.SET_NULL
         )
     ],
     indices = [
+        Index(value = ["sync_id"], unique = true),
         Index(value = ["user_local_id"]),
         Index(value = ["category_local_id"]),
-        Index(value = ["reminder_id"]),
-        Index(value = ["last_modified"]),
-        Index(value = ["sync_state"]),
-        Index(value = ["server_id"])
+        Index(value = ["reminder_local_id"])
     ]
 )
 data class NoteEntity(
     @PrimaryKey(autoGenerate = true)
-    @ColumnInfo(name = "note_id")
-    val noteId: Int = 0,
+    @ColumnInfo(name = "note_local_id")
+    val noteLocalId: Long = 0L,
 
     @ColumnInfo(name = "user_local_id")
     val userLocalId: Long,
@@ -48,31 +48,28 @@ data class NoteEntity(
     @ColumnInfo(name = "category_local_id")
     val categoryLocalId: Long? = null,
 
-    @ColumnInfo(name = "reminder_id")
-    val reminderId: Int? = null,
+    @ColumnInfo(name = "reminder_local_id")
+    val reminderLocalId: Long? = null,
 
     val title: String,
 
     val content: String? = null,
 
+    @ColumnInfo(name = "is_pinned")
+    val isPinned: Boolean = false,
+
+    @ColumnInfo(name = "sync_id")
+    val syncId: UUID = UUID.randomUUID(),
+
+    @ColumnInfo(name = "server_version")
+    val serverVersion: Long? = null,
+
     @ColumnInfo(name = "created_at")
-    val createdAt: Long = System.currentTimeMillis(),
+    val createdAt: Instant = Instant.now(),
 
     @ColumnInfo(name = "updated_at")
-    val updatedAt: Long = System.currentTimeMillis(),
+    val updatedAt: Instant = Instant.now(),
 
-    @ColumnInfo(name = "last_modified")
-    val lastModified: Long = System.currentTimeMillis(),
-
-    @ColumnInfo(name = "sync_state")
-    val syncState: Int = 0,
-
-    @ColumnInfo(name = "is_deleted")
-    val isDeleted: Int = 0,
-
-    @ColumnInfo(name = "server_id")
-    val serverId: Int? = null,
-
-    @ColumnInfo(name = "is_pinned")
-    val isPinned: Int = 0
+    @ColumnInfo(name = "deleted_at")
+    val deletedAt: Instant? = null
 )

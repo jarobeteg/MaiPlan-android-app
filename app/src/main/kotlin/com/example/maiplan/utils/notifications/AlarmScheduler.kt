@@ -53,7 +53,7 @@ object AlarmScheduler {
                 reminder.reminderTime,
                 reminderPendingIntent(context, reminder),
             )
-            Log.d("AlarmScheduler", "Scheduled exact reminder ${reminder.reminderId}.")
+            Log.d("AlarmScheduler", "Scheduled exact reminder ${reminder.reminderLocalId}.")
             true
         } catch (e: SecurityException) {
             Log.w("AlarmScheduler", "Exact alarm rejected; scheduling fallback.", e)
@@ -73,27 +73,31 @@ object AlarmScheduler {
 
     private fun reminderPendingIntent(context: Context, reminder: ReminderData): PendingIntent {
         val intent = Intent(context, ReminderReceiver::class.java).apply {
-            putExtra("reminder_id", reminder.reminderId)
+            putExtra("reminder_local_id", reminder.reminderLocalId)
             putExtra("reminder_title", reminder.reminderTitle)
             putExtra("reminder_message", reminder.reminderMessage)
         }
         return PendingIntent.getBroadcast(
             context,
-            reminder.reminderId,
+            requestCode(reminder.reminderLocalId),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
     }
 
-    fun cancelAlarm(context: Context, reminderId: Int) {
+    fun cancelAlarm(context: Context, reminderLocalId: Long) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            reminderId,
+            requestCode(reminderLocalId),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         alarmManager.cancel(pendingIntent)
+    }
+
+    private fun requestCode(reminderLocalId: Long): Int {
+        return (reminderLocalId xor (reminderLocalId ushr 32)).toInt()
     }
 }

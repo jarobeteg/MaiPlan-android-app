@@ -10,6 +10,9 @@ import java.util.UUID
 
 @Dao
 interface OutboxDAO {
+    @Query("SELECT * FROM outbox WHERE mutation_id = :mutationId")
+    suspend fun getMutation(mutationId: UUID): OutboxEntity?
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertMutation(mutation: OutboxEntity): Long
 

@@ -4,9 +4,6 @@ import android.content.Context
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.network.RetrofitClient
 import com.example.maiplan.network.TideExchangeClient
-import com.example.maiplan.repository.reminder.ReminderLocalDataSource
-import com.example.maiplan.repository.reminder.ReminderRemoteDataSource
-import com.example.maiplan.repository.reminder.ReminderRepository
 import com.example.maiplan.utils.DeviceIdentityStore
 
 object ServiceLocator {
@@ -23,19 +20,12 @@ object ServiceLocator {
         )
 
         return SyncManager(
-            reminderRepo = provideReminderRepo(appContext),
-            categorySynchronizer = CategoryTideSynchronizer(
+            tideSynchronizer = TideSynchronizer(
                 requestPreparer = requestPreparer,
                 exchangeClient = exchangeClient,
-                responseValidator = TideCategoryResponseValidator(),
-                reconciler = CategoryTideReconciler(database)
+                responseValidator = TideResponseValidator(),
+                reconciler = TideReconciler(database)
             )
         )
-    }
-
-    private fun provideReminderRepo(context: Context): ReminderRepository {
-        val remote = ReminderRemoteDataSource(RetrofitClient.reminderApi)
-        val local = ReminderLocalDataSource(context)
-        return ReminderRepository(remote, local)
     }
 }

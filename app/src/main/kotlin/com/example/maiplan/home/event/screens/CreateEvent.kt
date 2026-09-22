@@ -6,32 +6,24 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.utils.common.UserSession
-import com.example.maiplan.utils.notifications.AlarmScheduler
-import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.category.CategoryViewModel
-import com.example.maiplan.viewmodel.event.EventViewModel
-import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 @Composable
 fun CreateEventScreen(
-    eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
-    reminderViewModel: ReminderViewModel,
     onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
-    val context = LocalContext.current
     val userLocalId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
 
@@ -100,7 +92,6 @@ fun CreateEventScreen(
                         userLocalId = userLocalId,
                         reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
                         message = reminderMessage,
-                        syncState = 4,
                     )
                 }
                 val event = EventEntity(
@@ -113,21 +104,9 @@ fun CreateEventScreen(
                     endTime = endTime!!.toEpochMillis(date!!),
                     priority = 1,
                     location = "",
-                    syncState = 4,
                 )
 
                 onSaveClick(reminder, event)
-                reminder?.let {
-                    val reminderData = ReminderData(
-                        reminderId = it.reminderId,
-                        reminderTime = it.reminderTime,
-                        reminderTitle = event.title,
-                        reminderMessage = it.message.orEmpty(),
-                    )
-                    if (!AlarmScheduler.attemptSchedule(context, reminderData)) {
-                        AlarmScheduler.requestExactAlarmPermission(context)
-                    }
-                }
             }
         },
     )

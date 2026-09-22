@@ -8,20 +8,16 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.event.navigation.EventNavHost
-import com.example.maiplan.network.RetrofitClient
+import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.category.CategoryRepository
 import com.example.maiplan.repository.event.EventLocalDataSource
-import com.example.maiplan.repository.event.EventRemoteDataSource
 import com.example.maiplan.repository.event.EventRepository
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
-import com.example.maiplan.repository.reminder.ReminderRemoteDataSource
-import com.example.maiplan.repository.reminder.ReminderRepository
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.event.EventViewModel
 import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.viewmodel.category.CategoryViewModel
-import com.example.maiplan.viewmodel.reminder.ReminderViewModel
 
 @Composable
 fun EventScreenManager(rootNavController: NavHostController) {
@@ -30,11 +26,12 @@ fun EventScreenManager(rootNavController: NavHostController) {
     val context = LocalContext.current
 
     val eventViewModel = remember {
-        val eventRemote = EventRemoteDataSource(RetrofitClient.eventApi)
         val eventLocal = EventLocalDataSource(context)
         val localCategory = CategoryLocalDataSource(context)
         val localReminder = ReminderLocalDataSource(context)
-        val eventRepo = EventRepository(eventRemote, eventLocal, localCategory, localReminder)
+        val eventRepo = EventRepository(eventLocal, localCategory, localReminder) {
+            SyncScheduler.runOneTimeSync(context.applicationContext)
+        }
         val factory = GenericViewModelFactory { EventViewModel(eventRepo) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
     }
@@ -46,13 +43,5 @@ fun EventScreenManager(rootNavController: NavHostController) {
         ViewModelProvider(context as ViewModelStoreOwner, factory)[CategoryViewModel::class.java]
     }
 
-    val reminderViewModel = remember {
-        val reminderRemote = ReminderRemoteDataSource(RetrofitClient.reminderApi)
-        val reminderLocal = ReminderLocalDataSource(context)
-        val reminderRepo = ReminderRepository(reminderRemote, reminderLocal)
-        val factory = GenericViewModelFactory { ReminderViewModel(reminderRepo) }
-        ViewModelProvider(context as ViewModelStoreOwner, factory)[ReminderViewModel::class.java]
-    }
-
-    EventNavHost(rootNavController, localNavController, eventViewModel, categoryViewModel, reminderViewModel)
+    EventNavHost(rootNavController, localNavController, eventViewModel, categoryViewModel)
 }

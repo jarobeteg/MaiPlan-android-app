@@ -11,6 +11,7 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.note.NoteRepository
 import com.example.maiplan.repository.note.NoteSaveOutcome
 import com.example.maiplan.repository.orEmptyList
+import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.launch
 
 class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
@@ -44,8 +45,8 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun getNote(noteId: Int): NoteEntity? {
-        return _noteList.value?.find { it.noteId == noteId }
+    fun getNote(noteLocalId: Long): NoteEntity? {
+        return _noteList.value?.find { it.noteLocalId == noteLocalId }
     }
 
     fun createNote(note: NoteEntity) {
@@ -84,18 +85,19 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun loadNoteReminder(reminderId: Int?) {
+    fun loadNoteReminder(reminderLocalId: Long?) {
         viewModelScope.launch {
-            when (val result = noteRepository.getReminder(reminderId)) {
+            val userLocalId = UserSession.userLocalId ?: return@launch
+            when (val result = noteRepository.getReminder(reminderLocalId, userLocalId)) {
                 is Result.Success -> _selectedReminder.postValue(result.data)
                 else -> _selectedReminder.postValue(null)
             }
         }
     }
 
-    fun softDeleteNote(noteId: Int, userLocalId: Long) {
+    fun softDeleteNote(noteLocalId: Long, userLocalId: Long) {
         viewModelScope.launch {
-            val result = noteRepository.softDeleteNote(noteId, userLocalId)
+            val result = noteRepository.softDeleteNote(noteLocalId, userLocalId)
             if (result is Result.Success) refreshNotes(userLocalId)
             _deleteNoteResult.postValue(result)
         }

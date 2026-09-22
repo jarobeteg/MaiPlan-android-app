@@ -4,115 +4,79 @@ import androidx.compose.ui.graphics.Color
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.home.event.utils.CalendarEventUI
-import com.example.maiplan.network.api.EventCreate
-import com.example.maiplan.network.api.EventResponse
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryLocalDataSource
-import com.example.maiplan.repository.handleLocalResponse
-import com.example.maiplan.repository.handleRemoteResponse
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.utils.common.IconData
 import java.time.Instant
 import java.time.ZoneId
 
 class EventRepository(
-    private val remote: EventRemoteDataSource,
     private val local: EventLocalDataSource,
     private val localCategory: CategoryLocalDataSource,
-    private val localReminder: ReminderLocalDataSource
+    private val localReminder: ReminderLocalDataSource,
+    private val requestSync: () -> Unit = {}
 ) {
-
     private suspend fun EventEntity.toCalendarEventUI(): CalendarEventUI {
-        val categoryLocalId = requireNotNull(this.categoryLocalId) {
-            "Event $eventId has no Category"
+        val categoryLocalId = requireNotNull(categoryLocalId) {
+            "Event $eventLocalId has no Category"
         }
-
         val category = requireNotNull(localCategory.getCategory(categoryLocalId, userLocalId)) {
-            "Category $categoryLocalId was not found for Event $eventId"
+            "Category $categoryLocalId was not found for Event $eventLocalId"
         }
-
-        var reminderTime = 0L
-        var reminderMessage = ""
-
-        if (this.reminderId != null) {
-            val reminder = localReminder.getReminder(this.reminderId)
-            reminderTime = reminder.reminderTime
-            reminderMessage = reminder.message.toString()
+        val reminder = reminderLocalId?.let {
+            localReminder.getReminder(it, userLocalId)
         }
+        val eventZone = ZoneId.of(zoneId)
 
         return CalendarEventUI(
-            eventId = this.eventId,
-            title = this.title,
-            description = this.description!!,
-            date = Instant.ofEpochMilli(this.date).atZone(ZoneId.systemDefault()).toLocalDate(),
-            startTime = Instant.ofEpochMilli(this.startTime!!).atZone(ZoneId.systemDefault())
-                .toLocalTime(),
-            endTime = Instant.ofEpochMilli(this.endTime!!).atZone(ZoneId.systemDefault())
-                .toLocalTime(),
+            eventLocalId = eventLocalId,
+            title = title,
+            description = description.orEmpty(),
+            date = Instant.ofEpochMilli(date).atZone(eventZone).toLocalDate(),
+            startTime = Instant.ofEpochMilli(requireNotNull(startTime)).atZone(eventZone).toLocalTime(),
+            endTime = Instant.ofEpochMilli(requireNotNull(endTime)).atZone(eventZone).toLocalTime(),
             color = Color(category.color.toULong()),
             icon = IconData.getIconByKey(category.icon),
-            reminderId = this.reminderId ?: 0,
-            categoryLocalId = this.categoryLocalId ?: 0,
-            reminderTime = reminderTime,
-            reminderMessage = reminderMessage
+            reminderLocalId = reminderLocalId,
+            categoryLocalId = categoryLocalId,
+            reminderTime = reminder?.reminderTime,
+            reminderMessage = reminder?.message.orEmpty()
         )
     }
 
-    suspend fun createEventWithReminder(reminder: ReminderEntity?, event: EventEntity): Result<Unit> {
-        return try {
-            handleLocalResponse { local.createEventWithReminder(reminder, event) }
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
+    suspend fun createEventWithReminder(
+        reminder: ReminderEntity?,
+        event: EventEntity
+    ): Result<StoredEventWithReminder> {
+        return local.createEventWithReminder(reminder, event).also(::requestSyncAfterSuccess)
     }
 
-    suspend fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity): Result<Unit> {
-        return try {
-            handleLocalResponse { local.updateEventWithReminder(reminder, event) }
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
+    suspend fun updateEventWithReminder(
+        reminder: ReminderEntity?,
+        event: EventEntity
+    ): Result<StoredEventWithReminder> {
+        return local.updateEventWithReminder(reminder, event).also(::requestSyncAfterSuccess)
     }
 
-    suspend fun softDeleteReminder(reminderId: Int?, userLocalId: Long): Result<Unit> {
-        if (reminderId != null) {
-            return localReminder.softDeleteReminder(reminderId, userLocalId)
-        }
-        return Result.Idle
+    suspend fun softDeleteEventWithReminder(
+        eventLocalId: Long,
+        userLocalId: Long
+    ): Result<Unit> {
+        return local.softDeleteEventWithReminder(eventLocalId, userLocalId)
+            .also(::requestSyncAfterSuccess)
     }
 
-    suspend fun softDeleteEvent(eventId: Int, userLocalId: Long): Result<Unit> {
-        return local.softDeleteEvent(eventId, userLocalId)
+    suspend fun getEventsForRange(
+        startMillis: Long,
+        endMillis: Long,
+        userLocalId: Long
+    ): List<CalendarEventUI> {
+        return local.getEventsForRange(startMillis, endMillis, userLocalId)
+            .map { it.toCalendarEventUI() }
     }
 
-    suspend fun createEvent(event: EventCreate): Result<Unit> {
-        return try {
-            handleRemoteResponse(remote.createEvent(event))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun getEvent(eventId: Int): Result<EventResponse> {
-        return try {
-            handleRemoteResponse(remote.getEvent(eventId))
-        } catch (e: Exception){
-            Result.Error(e)
-        }
-    }
-
-    suspend fun getAllEvents(userLocalId: Long): Result<List<EventResponse>> {
-        return try {
-            handleRemoteResponse(remote.getAllEvents(userLocalId))
-        } catch (e: Exception) {
-            Result.Error(e)
-        }
-    }
-
-    suspend fun getEventsForRange(startMillis: Long, endMillis: Long, userLocalId: Long?): List<CalendarEventUI> {
-        var result: List<CalendarEventUI>
-        val events = local.getEventForRange(startMillis, endMillis, userLocalId!!)
-        result = events.map { it.toCalendarEventUI() }
-        return result
+    private fun requestSyncAfterSuccess(result: Result<*>) {
+        if (result is Result.Success) runCatching(requestSync)
     }
 }

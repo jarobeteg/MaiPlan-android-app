@@ -12,7 +12,14 @@ object TideClientConfig {
 }
 
 object TideEntityType {
+    const val USER = "user"
     const val CATEGORY = "category"
+    const val REMINDER = "reminder"
+    const val EVENT = "event"
+    const val NOTE = "note"
+
+    val MUTABLE = listOf(CATEGORY, REMINDER, EVENT, NOTE)
+    val SUPPORTED = setOf(USER, CATEGORY, REMINDER, EVENT, NOTE)
 }
 
 object TideOperation {

@@ -193,7 +193,7 @@ fun NoteListScreen(
                         contentPadding = PaddingValues(bottom = if (compactLandscape) 70.dp else 96.dp),
                         verticalArrangement = Arrangement.spacedBy(if (compactLandscape) 8.dp else 12.dp),
                     ) {
-                        items(filteredNotes, key = { it.noteId }) { note ->
+                        items(filteredNotes, key = { it.noteLocalId }) { note ->
                             SwipeableNoteCard(
                                 note = note,
                                 category = categories.find { it.categoryLocalId == note.categoryLocalId },
@@ -221,7 +221,7 @@ private fun SwipeableNoteCard(
         positionalThreshold = { it * 0.45f },
     )
 
-    LaunchedEffect(dismissState, note.noteId) {
+    LaunchedEffect(dismissState, note.noteLocalId) {
         snapshotFlow { dismissState.currentValue }.collectLatest { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
@@ -547,8 +547,7 @@ private fun NoteCard(
     val categoryColor = category?.color?.toULongOrNull()?.let(::Color) ?: NotePrimary
     val icon = category?.let { IconData.getIconByKey(it.icon) } ?: Icons.AutoMirrored.Rounded.Notes
     val updatedAt = remember(note.updatedAt) {
-        Instant.ofEpochMilli(note.updatedAt)
-            .atZone(ZoneId.systemDefault())
+        note.updatedAt.atZone(ZoneId.systemDefault())
             .format(DateTimeFormatter.ofPattern("MMM d, HH:mm"))
     }
 
@@ -627,7 +626,7 @@ private fun NoteCard(
                         style = MaterialTheme.typography.labelSmall,
                         color = muted,
                     )
-                    if (note.reminderId != null) {
+                    if (note.reminderLocalId != null) {
                         Spacer(Modifier.width(7.dp))
                         Icon(
                             Icons.Rounded.NotificationsNone,

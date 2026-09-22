@@ -1,68 +1,65 @@
 package com.example.maiplan.database.dao
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
+import androidx.room.Update
 import com.example.maiplan.database.entities.NoteEntity
+import java.util.UUID
 
 @Dao
 interface NoteDAO {
-    @Query("SELECT * FROM note WHERE user_local_id = :userLocalId AND sync_state != 0")
-    suspend fun getPendingNotes(userLocalId: Long): List<NoteEntity>
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insertNote(note: NoteEntity): Long
 
-    @Query("SELECT * FROM note WHERE note_id = :noteId AND user_local_id = :userLocalId AND is_deleted = 0")
-    suspend fun getNote(noteId: Int, userLocalId: Long): NoteEntity
+    @Update
+    suspend fun updateNote(note: NoteEntity): Int
 
-    @Query("""
+    @Query(
+        """
+        SELECT * FROM note
+        WHERE note_local_id = :noteLocalId
+          AND user_local_id = :userLocalId
+        """
+    )
+    suspend fun getNoteByLocalId(noteLocalId: Long, userLocalId: Long): NoteEntity?
+
+    @Query(
+        """
+        SELECT * FROM note
+        WHERE sync_id = :syncId
+          AND user_local_id = :userLocalId
+        """
+    )
+    suspend fun getNoteBySyncId(syncId: UUID, userLocalId: Long): NoteEntity?
+
+    @Query(
+        """
         SELECT * FROM note
         WHERE user_local_id = :userLocalId
-            AND is_deleted = 0
-            AND (:categoryLocalId IS NULL OR category_local_id = :categoryLocalId)
+          AND deleted_at IS NULL
+          AND (:categoryLocalId IS NULL OR category_local_id = :categoryLocalId)
         ORDER BY updated_at DESC, created_at DESC
-    """)
-    suspend fun getNotes(userLocalId: Long, categoryLocalId: Long? = null): List<NoteEntity>
-
-    @Insert
-    suspend fun noteInsert(entity: NoteEntity): Long
-
-    @Upsert
-    suspend fun noteUpsert(entity: NoteEntity)
-
-    @Query("""
-        UPDATE note
-        SET
-            title = :title,
-            content = :content,
-            category_local_id = :categoryLocalId,
-            reminder_id = :reminderId,
-            updated_at = :updatedAt,
-            last_modified = :updatedAt,
-            sync_state = 2
-        WHERE note_id = :noteId AND user_local_id = :userLocalId
-    """)
-    suspend fun noteUpdate(
-        noteId: Int,
-        userLocalId: Long,
-        title: String,
-        content: String?,
-        categoryLocalId: Long?,
-        reminderId: Int?,
-        updatedAt: Long = System.currentTimeMillis()
+        """
     )
+    suspend fun getNotes(
+        userLocalId: Long,
+        categoryLocalId: Long? = null
+    ): List<NoteEntity>
 
-    @Query("""
+    @Query(
+        """
         UPDATE note
-        SET
-            is_deleted = 1,
-            sync_state = 98,
-            updated_at = :deletedAt,
-            last_modified = :deletedAt
-        WHERE note_id = :noteId AND user_local_id = :userLocalId
-    """)
-    suspend fun softDeleteNote(noteId: Int, userLocalId: Long, deletedAt: Long = System.currentTimeMillis())
-
-    @Delete
-    suspend fun deleteNote(entity: NoteEntity): Int
+        SET server_version = :serverVersion
+        WHERE sync_id = :syncId
+          AND user_local_id = :userLocalId
+          AND (server_version IS NULL OR server_version < :serverVersion)
+        """
+    )
+    suspend fun updateServerVersion(
+        syncId: UUID,
+        userLocalId: Long,
+        serverVersion: Long
+    ): Int
 }

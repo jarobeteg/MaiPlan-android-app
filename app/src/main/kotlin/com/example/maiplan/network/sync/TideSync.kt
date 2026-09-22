@@ -4,10 +4,6 @@ import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import java.util.UUID
 
-interface Syncable {
-    suspend fun sync()
-}
-
 data class TideSyncRequest(
     @SerializedName("tide_protocol_version")
     val tideProtocolVersion: Int = TideProtocol.VERSION,
@@ -129,16 +125,3 @@ data class TideChange(
 
     val data: JsonObject?
 )
-
-data class SyncRequest<T>(
-    @SerializedName("user_local_id") val userLocalId: Long,
-    val changes: List<T>
-)
-
-data class SyncResponse<T>(
-    @SerializedName("user_local_id") val userLocalId: Long,
-    val acknowledged: List<T>,   // records that were acknowledged during sync
-    val rejected: List<T>       // records that were rejected during sync
-)
-
-// figure out a more advanced method, to do batch processing to maybe

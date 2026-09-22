@@ -1,54 +1,51 @@
 package com.example.maiplan.repository.reminder
 
 import android.content.Context
+import androidx.room.withTransaction
 import com.example.maiplan.database.MaiPlanDatabase
-import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
 
-class ReminderLocalDataSource(private val context: Context) {
+class ReminderLocalDataSource(context: Context) {
     private val database: MaiPlanDatabase by lazy {
-        MaiPlanDatabase.getDatabase(context)
+        MaiPlanDatabase.getDatabase(context.applicationContext)
     }
+    private val reminderDao by lazy { database.reminderDAO() }
+    private val mutationWriter by lazy { ReminderMutationWriter(database) }
 
-    private val reminderDao: ReminderDAO by lazy {
-        database.reminderDAO()
-    }
-
-    suspend fun reminderUpsert(reminder: ReminderEntity): Result<Unit> {
+    suspend fun createReminder(reminder: ReminderEntity): Result<ReminderEntity> {
         return handleLocalResponse {
-            reminderDao.reminderUpsert(reminder)
+            database.withTransaction {
+                mutationWriter.create(reminder, reminder.userLocalId)
+            }
         }
     }
 
-    suspend fun deleteReminder(reminder: ReminderEntity): Result<Unit> {
+    suspend fun updateReminder(reminder: ReminderEntity): Result<ReminderEntity> {
         return handleLocalResponse {
-            reminderDao.deleteReminder(reminder)
+            database.withTransaction {
+                mutationWriter.update(reminder, reminder.userLocalId)
+            }
         }
     }
 
-    suspend fun softDeleteReminder(reminderId: Int, userLocalId: Long): Result<Unit> {
+    suspend fun softDeleteReminder(
+        reminderLocalId: Long,
+        userLocalId: Long
+    ): Result<Unit> {
         return handleLocalResponse {
-            reminderDao.softDeleteReminder(reminderId, userLocalId)
+            database.withTransaction {
+                mutationWriter.delete(reminderLocalId, userLocalId)
+                Unit
+            }
         }
     }
 
-    suspend fun getPendingReminders(userLocalId: Long): Result<List<ReminderEntity>> {
-        return handleLocalResponse {
-            reminderDao.getPendingReminders(userLocalId)
-        }
-    }
-
-    suspend fun getReminderId(serverId: Int): Int? {
-        return reminderDao.getReminderId(serverId)
-    }
-
-    suspend fun getServerId(localId: Int): Int? {
-        return reminderDao.getServerId(localId)
-    }
-
-    suspend fun getReminder(reminderId: Int): ReminderEntity {
-        return reminderDao.getReminder(reminderId)
+    suspend fun getReminder(
+        reminderLocalId: Long,
+        userLocalId: Long
+    ): ReminderEntity? {
+        return reminderDao.getReminderByLocalId(reminderLocalId, userLocalId)
     }
 }

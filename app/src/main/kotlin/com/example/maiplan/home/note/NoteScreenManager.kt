@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.home.note.navigation.NoteNavHost
+import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.note.NoteLocalDataSource
 import com.example.maiplan.repository.note.NoteRepository
@@ -26,6 +27,7 @@ fun NoteScreenManager(rootNavController: NavHostController) {
             local = NoteLocalDataSource(context),
             localCategory = CategoryLocalDataSource(context),
             localReminder = ReminderLocalDataSource(context),
+            requestSync = { SyncScheduler.runOneTimeSync(context.applicationContext) },
         )
         val factory = GenericViewModelFactory { NoteViewModel(repository) }
         ViewModelProvider(context as ViewModelStoreOwner, factory)[NoteViewModel::class.java]

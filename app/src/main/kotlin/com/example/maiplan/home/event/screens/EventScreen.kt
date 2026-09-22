@@ -81,8 +81,8 @@ fun EventScreen(
     rootNavController: NavHostController,
     localNavController: NavHostController,
     onCreateEventClick: () -> Unit,
-    onUpdateEventClick: (Int) -> Unit,
-    onDeleteClick: (Int?, Int, LocalDate) -> Unit,
+    onUpdateEventClick: (Long) -> Unit,
+    onDeleteClick: (Long, LocalDate) -> Unit,
 ) {
     var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(LocalDate.now())
@@ -349,8 +349,8 @@ private fun CalendarDayCell(
 @Composable
 fun DayEventsSection(
     events: List<CalendarEventUI>,
-    onUpdateEventClick: (Int) -> Unit,
-    onDeleteClick: (Int?, Int, LocalDate) -> Unit,
+    onUpdateEventClick: (Long) -> Unit,
+    onDeleteClick: (Long, LocalDate) -> Unit,
     selectedDate: LocalDate,
     modifier: Modifier = Modifier,
 ) {
@@ -408,7 +408,7 @@ fun DayEventsSection(
                     contentPadding = PaddingValues(start = 14.dp, end = 14.dp, bottom = 92.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(events, key = { it.eventId }) { event ->
+                    items(events, key = { it.eventLocalId }) { event ->
                         SwipeableEventCard(
                             event = event,
                             selectedDate = selectedDate,
@@ -480,26 +480,25 @@ private fun EventEmptyState(modifier: Modifier = Modifier) {
 private fun SwipeableEventCard(
     event: CalendarEventUI,
     selectedDate: LocalDate,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int?, Int, LocalDate) -> Unit,
+    onEdit: (Long) -> Unit,
+    onDelete: (Long, LocalDate) -> Unit,
 ) {
     val context = LocalContext.current
     val dismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { it * 0.45f },
     )
 
-    LaunchedEffect(dismissState, event.eventId) {
+    LaunchedEffect(dismissState, event.eventLocalId) {
         snapshotFlow { dismissState.currentValue }.collectLatest { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    onEdit(event.eventId)
+                    onEdit(event.eventLocalId)
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    val reminderId = event.reminderId.takeIf { it != 0 }
-                    onDelete(reminderId, event.eventId, selectedDate)
-                    reminderId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                    onDelete(event.eventLocalId, selectedDate)
+                    event.reminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
                 }
                 SwipeToDismissBoxValue.Settled -> Unit
             }
@@ -542,7 +541,7 @@ private fun SwipeableEventCard(
             }
         },
     ) {
-        EventCard(event = event, onClick = { onEdit(event.eventId) })
+        EventCard(event = event, onClick = { onEdit(event.eventLocalId) })
     }
 }
 

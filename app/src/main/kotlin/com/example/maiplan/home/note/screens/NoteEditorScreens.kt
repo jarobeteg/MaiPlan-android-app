@@ -48,8 +48,8 @@ fun UpdateNoteScreen(
     onBackClick: () -> Unit,
 ) {
     val reminder by viewModel.selectedReminder.observeAsState()
-    LaunchedEffect(note.reminderId) {
-        viewModel.loadNoteReminder(note.reminderId)
+    LaunchedEffect(note.reminderLocalId) {
+        viewModel.loadNoteReminder(note.reminderLocalId)
     }
     NoteEditorScreen(
         viewModel = viewModel,
@@ -62,11 +62,11 @@ fun UpdateNoteScreen(
         initialContent = note.content.orEmpty(),
         initialCategoryLocalId = note.categoryLocalId,
         initialReminderDateTime = reminder
-            ?.takeIf { it.reminderId == note.reminderId }
+            ?.takeIf { it.reminderLocalId == note.reminderLocalId }
             ?.reminderTime
             ?.toLocalDateTime(),
         initialReminderMessage = reminder
-            ?.takeIf { it.reminderId == note.reminderId }
+            ?.takeIf { it.reminderLocalId == note.reminderLocalId }
             ?.message
             .orEmpty(),
         onSaveClick = onSaveClick,
