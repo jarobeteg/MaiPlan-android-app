@@ -129,8 +129,10 @@
     <string name="event_preview_time">Time not selected</string>
     <string name="event_select_date">Choose a date</string>
     <string name="event_select_time">Choose a time</string>
+    <string name="time_zone_search">Search time zones</string>
     <string name="event_reminder_optional">Add a reminder</string>
     <string name="event_no_categories">No categories available</string>
+    <string name="event_no_time_zone">No time zones available</string>
     <string name="event_new_action">New event</string>
     <string name="event_calendar_title">Calendar</string>
     <string name="event_calendar_subtitle">Select a day to see its schedule</string>
@@ -149,6 +151,7 @@
     <string name="mid">Mid</string>
     <string name="high">High</string>
     <string name="category">Category</string>
+    <string name="time_zone">Time Zone</string>
     <string name="reminder">Reminder</string>
     <string name="message">Message</string>
     <string name="date_time">Select date &amp; time</string>

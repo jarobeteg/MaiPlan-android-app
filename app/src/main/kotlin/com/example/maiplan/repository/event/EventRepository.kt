@@ -36,6 +36,7 @@ class EventRepository(
             date = Instant.ofEpochMilli(date).atZone(eventZone).toLocalDate(),
             startTime = Instant.ofEpochMilli(requireNotNull(startTime)).atZone(eventZone).toLocalTime(),
             endTime = Instant.ofEpochMilli(requireNotNull(endTime)).atZone(eventZone).toLocalTime(),
+            zoneId = zoneId,
             color = Color(category.color.toULong()),
             icon = IconData.getIconByKey(category.icon),
             reminderLocalId = reminderLocalId,

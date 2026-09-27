@@ -17,6 +17,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 
 @Composable
 fun CreateEventScreen(
@@ -34,8 +35,11 @@ fun CreateEventScreen(
     var date by remember { mutableStateOf<LocalDate?>(null) }
     var startTime by remember { mutableStateOf<LocalTime?>(null) }
     var endTime by remember { mutableStateOf<LocalTime?>(null) }
+    var zoneId by remember { mutableStateOf<String>(ZoneId.systemDefault().id) }
     var reminderDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var reminderMessage by remember { mutableStateOf("") }
+
+    val zone = ZoneId.of(zoneId)
 
     val blankTitleMessage = stringResource(R.string.blank_event_title)
     val blankDateMessage = stringResource(R.string.blank_event_date)
@@ -56,6 +60,7 @@ fun CreateEventScreen(
             date = date,
             startTime = startTime,
             endTime = endTime,
+            zoneId = zoneId,
             selectedCategory = selectedCategory,
             categories = categories,
             reminderDateTime = reminderDateTime,
@@ -67,6 +72,7 @@ fun CreateEventScreen(
         onDateChange = { date = it },
         onStartTimeChange = { startTime = it },
         onEndTimeChange = { endTime = it },
+        onZoneChange = { zoneId = it },
         onCategoryChange = { selectedCategory = it },
         onReminderDateTimeChange = { reminderDateTime = it },
         onReminderMessageChange = { reminderMessage = it },
@@ -75,7 +81,7 @@ fun CreateEventScreen(
             val validationMessage = when {
                 title.isBlank() -> blankTitleMessage
                 date == null -> blankDateMessage
-                date!!.isBefore(LocalDate.now()) -> dateInPastMessage
+                date!!.isBefore(LocalDate.now(zone)) -> dateInPastMessage
                 startTime == null -> blankStartTimeMessage
                 endTime == null -> blankEndTimeMessage
                 endTime!!.isBefore(startTime) -> invalidTimeRangeMessage
@@ -90,7 +96,8 @@ fun CreateEventScreen(
                 val reminder = reminderDateTime?.let {
                     ReminderEntity(
                         userLocalId = userLocalId,
-                        reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
+                        reminderTime = it.withSecond(0).withNano(0).toEpochMillis(zone),
+                        zoneId = zone.id,
                         message = reminderMessage,
                     )
                 }
@@ -99,9 +106,10 @@ fun CreateEventScreen(
                     title = title.trim(),
                     categoryLocalId = selectedCategory!!.categoryLocalId,
                     description = description.trim(),
-                    date = date!!.toEpochMillis(),
-                    startTime = startTime!!.toEpochMillis(date!!),
-                    endTime = endTime!!.toEpochMillis(date!!),
+                    date = date!!.toEpochMillis(zone),
+                    startTime = startTime!!.toEpochMillis(date!!, zone),
+                    endTime = endTime!!.toEpochMillis(date!!, zone),
+                    zoneId = zone.id,
                     priority = 1,
                     location = "",
                 )

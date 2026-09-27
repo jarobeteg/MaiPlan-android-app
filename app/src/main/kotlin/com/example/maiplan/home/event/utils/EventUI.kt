@@ -13,6 +13,7 @@ data class CalendarEventUI(
     val date: LocalDate,
     val startTime: LocalTime,
     val endTime: LocalTime,
+    val zoneId: String,
     val title: String,
     val description: String,
     val reminderTime: Long?,

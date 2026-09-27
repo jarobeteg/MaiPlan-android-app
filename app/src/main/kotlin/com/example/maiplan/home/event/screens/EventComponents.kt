@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.Notifications
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material.icons.rounded.Title
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -67,6 +70,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,6 +99,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 internal val EventPrimary: Color get() = AppThemeManager.selectedTheme.primary
@@ -111,6 +116,7 @@ internal data class EventEditorState(
     val date: LocalDate?,
     val startTime: LocalTime?,
     val endTime: LocalTime?,
+    val zoneId: String,
     val selectedCategory: CategoryEntity?,
     val categories: List<CategoryEntity>,
     val reminderDateTime: LocalDateTime?,
@@ -197,6 +203,7 @@ internal fun EventEditorLayout(
     onDateChange: (LocalDate) -> Unit,
     onStartTimeChange: (LocalTime) -> Unit,
     onEndTimeChange: (LocalTime) -> Unit,
+    onZoneChange: (String) -> Unit,
     onCategoryChange: (CategoryEntity) -> Unit,
     onReminderDateTimeChange: (LocalDateTime) -> Unit,
     onReminderMessageChange: (String) -> Unit,
@@ -289,6 +296,28 @@ internal fun EventEditorLayout(
                                     )
                                 }
                             }
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+
+                        var showZoneDialog by remember { mutableStateOf(false) }
+
+                        EventSelectionField(
+                            label = stringResource(R.string.time_zone),
+                            value = state.zoneId,
+                            icon = Icons.Rounded.Public,
+                            onClick = { showZoneDialog = true }
+                        )
+
+                        if (showZoneDialog) {
+                            ZonePickerDialog(
+                                selectedZone = state.zoneId,
+                                onZoneSelected = {
+                                    onZoneChange(it)
+                                    showZoneDialog = false
+                                },
+                                onDismiss = { showZoneDialog = false }
+                            )
                         }
                     }
 
@@ -558,6 +587,89 @@ private fun EventTimeSelector(
             onTimeSelected = onValueChange,
             onDismiss = { showDialog = false },
         )
+    }
+}
+
+@Composable
+private fun ZonePickerDialog(
+    selectedZone: String,
+    onZoneSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val dark = LocalAppDarkTheme.current
+    val surface = if (dark) Color(0xFF191D2E) else Color.White
+    val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
+    val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
+    val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
+    val border = if (dark) Color(0xFF3A435C) else EventBorder
+    val zones = remember {
+        ZoneId.getAvailableZoneIds()
+            .filter { it == "UTC" || "/" in it }
+            .sorted()
+    }
+
+    var query by rememberSaveable { mutableStateOf("") }
+
+    val filteredZones = remember(query, zones) {
+        if (query.isBlank()) {
+            zones
+        } else {
+            zones.filter { it.contains(query, ignoreCase = true) }
+        }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            color = surface,
+            contentColor = foreground,
+            border = BorderStroke(1.dp, border),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp)
+        ) {
+            Column(Modifier.padding(20.dp)) {
+                OutlinedTextField(
+                    value = query,
+                    onValueChange = { query = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.time_zone_search)) },
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = field,
+                        unfocusedContainerColor = field,
+                        focusedTextColor = foreground,
+                        unfocusedTextColor = foreground,
+                        cursorColor = EventPrimary,
+                        focusedBorderColor = EventPrimary,
+                        unfocusedBorderColor = border,
+                        focusedLabelColor = EventPrimary,
+                        unfocusedLabelColor = muted,
+                    )
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
+                    items(
+                        items = filteredZones,
+                        key = { it }
+                    ) { zone ->
+                        DropdownMenuItem(
+                            text = { Text(zone, color = foreground) },
+                            onClick = { onZoneSelected(zone) },
+                            trailingIcon = {
+                                if (zone == selectedZone) {
+                                    Icon(
+                                        Icons.Rounded.Check,
+                                        contentDescription = null,
+                                        tint = EventPrimaryLight
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -877,7 +989,7 @@ internal fun EventDatePickerDialog(
                     state.selectedDateMillis?.let { millis ->
                         onDateSelected(
                             Instant.ofEpochMilli(millis)
-                                .atZone(ZoneId.systemDefault())
+                                .atZone(ZoneOffset.UTC)
                                 .toLocalDate(),
                         )
                     }

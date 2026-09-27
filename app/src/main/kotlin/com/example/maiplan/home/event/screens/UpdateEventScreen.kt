@@ -19,6 +19,7 @@ import com.example.maiplan.utils.toLocalDateTime
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
 import java.time.LocalDate
+import java.time.ZoneId
 
 @Composable
 fun UpdateEventScreen(
@@ -40,10 +41,13 @@ fun UpdateEventScreen(
     var date by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.date) }
     var startTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.startTime) }
     var endTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.endTime) }
-    var reminderDateTime by remember(safeEvent.eventLocalId) {
-        mutableStateOf(safeEvent.reminderTime?.toLocalDateTime())
+    var zoneId by remember { mutableStateOf(safeEvent.zoneId) }
+    var reminderDateTime by remember(safeEvent.eventLocalId, safeEvent.zoneId) {
+        mutableStateOf(safeEvent.reminderTime?.toLocalDateTime(ZoneId.of(safeEvent.zoneId)))
     }
     var reminderMessage by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.reminderMessage) }
+
+    val zone = ZoneId.of(zoneId)
 
     val blankTitleMessage = stringResource(R.string.blank_event_title)
     val dateInPastMessage = stringResource(R.string.event_date_in_past)
@@ -65,6 +69,7 @@ fun UpdateEventScreen(
             date = date,
             startTime = startTime,
             endTime = endTime,
+            zoneId = zoneId,
             selectedCategory = selectedCategory,
             categories = categories,
             reminderDateTime = reminderDateTime,
@@ -76,6 +81,7 @@ fun UpdateEventScreen(
         onDateChange = { date = it },
         onStartTimeChange = { startTime = it },
         onEndTimeChange = { endTime = it },
+        onZoneChange = { zoneId = it },
         onCategoryChange = { selectedCategory = it },
         onReminderDateTimeChange = { reminderDateTime = it },
         onReminderMessageChange = { reminderMessage = it },
@@ -83,7 +89,7 @@ fun UpdateEventScreen(
         onSubmit = {
             val validationMessage = when {
                 title.isBlank() -> blankTitleMessage
-                date.isBefore(LocalDate.now()) -> dateInPastMessage
+                date.isBefore(LocalDate.now(zone)) -> dateInPastMessage
                 endTime.isBefore(startTime) -> invalidTimeRangeMessage
                 selectedCategory == null -> blankCategoryMessage
                 else -> null
@@ -97,7 +103,8 @@ fun UpdateEventScreen(
                     ReminderEntity(
                         reminderLocalId = safeEvent.reminderLocalId ?: 0L,
                         userLocalId = userLocalId,
-                        reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
+                        reminderTime = it.withSecond(0).withNano(0).toEpochMillis(zone),
+                        zoneId = zone.id,
                         message = reminderMessage,
                     )
                 }
@@ -108,9 +115,10 @@ fun UpdateEventScreen(
                     categoryLocalId = selectedCategory!!.categoryLocalId,
                     reminderLocalId = safeEvent.reminderLocalId,
                     description = description.trim(),
-                    date = date.toEpochMillis(),
-                    startTime = startTime.toEpochMillis(date),
-                    endTime = endTime.toEpochMillis(date),
+                    date = date.toEpochMillis(zone),
+                    startTime = startTime.toEpochMillis(date, zone),
+                    endTime = endTime.toEpochMillis(date, zone),
+                    zoneId = zone.id,
                     priority = 1,
                     location = "",
                 )

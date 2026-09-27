@@ -18,9 +18,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
+import java.time.ZoneOffset
 
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _saveEventResult = MutableLiveData<Result<StoredEventWithReminder>>(Result.Idle)
@@ -61,22 +60,30 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
 
     fun loadMonth(date: LocalDate) {
         viewModelScope.launch {
-            val start = date.withDayOfMonth(1)
-                .atStartOfDay(ZoneId.systemDefault())
+            val monthStart = date.withDayOfMonth(1)
+            val monthEndExclusive = monthStart.plusMonths(1)
+
+            val queryStart = monthStart
+                .minusDays(2)
+                .atStartOfDay(ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli()
 
-            val end = date.withDayOfMonth(date.lengthOfMonth())
-                .plusDays(1)
-                .atStartOfDay(ZoneId.systemDefault())
+            val queryEnd = monthEndExclusive
+                .plusDays(2)
+                .atStartOfDay(ZoneOffset.UTC)
                 .toInstant()
                 .toEpochMilli() - 1
 
             val userLocalId = UserSession.userLocalId ?: return@launch
-            val events = eventRepository.getEventsForRange(start, end, userLocalId)
-            val grouped = events.groupBy { it.date }
+            val events = eventRepository
+                .getEventsForRange(queryStart, queryEnd, userLocalId)
+                .filter { event ->
+                    !event.date.isBefore(monthStart) &&
+                    event.date.isBefore(monthEndExclusive)
+                }
 
-            _monthlyEvents.value = grouped
+            _monthlyEvents.value = events.groupBy { it.date }
         }
     }
 
