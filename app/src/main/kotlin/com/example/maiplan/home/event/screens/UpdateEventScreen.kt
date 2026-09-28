@@ -41,10 +41,11 @@ fun UpdateEventScreen(
     var date by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.date) }
     var startTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.startTime) }
     var endTime by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.endTime) }
-    var zoneId by remember { mutableStateOf(safeEvent.zoneId) }
+    var zoneId by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.zoneId) }
     var reminderDateTime by remember(safeEvent.eventLocalId, safeEvent.zoneId) {
         mutableStateOf(safeEvent.reminderTime?.toLocalDateTime(ZoneId.of(safeEvent.zoneId)))
     }
+    var reminderEdited by remember(safeEvent.eventLocalId) { mutableStateOf(false) }
     var reminderMessage by remember(safeEvent.eventLocalId) { mutableStateOf(safeEvent.reminderMessage) }
 
     val zone = ZoneId.of(zoneId)
@@ -52,6 +53,9 @@ fun UpdateEventScreen(
     val blankTitleMessage = stringResource(R.string.blank_event_title)
     val dateInPastMessage = stringResource(R.string.event_date_in_past)
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
+    val nonexistentStartTimeMessage = stringResource(R.string.event_start_time_nonexistent)
+    val nonexistentEndTimeMessage = stringResource(R.string.event_end_time_nonexistent)
+    val nonexistentReminderTimeMessage = stringResource(R.string.event_reminder_time_nonexistent)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
     LaunchedEffect(categories, safeEvent.categoryLocalId) {
@@ -83,14 +87,20 @@ fun UpdateEventScreen(
         onEndTimeChange = { endTime = it },
         onZoneChange = { zoneId = it },
         onCategoryChange = { selectedCategory = it },
-        onReminderDateTimeChange = { reminderDateTime = it },
+        onReminderDateTimeChange = {
+            reminderDateTime = it
+            reminderEdited = true
+        },
         onReminderMessageChange = { reminderMessage = it },
         onBackClick = onBackClick,
         onSubmit = {
             val validationMessage = when {
                 title.isBlank() -> blankTitleMessage
                 date.isBefore(LocalDate.now(zone)) -> dateInPastMessage
-                endTime.isBefore(startTime) -> invalidTimeRangeMessage
+                !endTime.isAfter(startTime) -> invalidTimeRangeMessage
+                isNonexistentLocalTime(date.atTime(startTime), zone) -> nonexistentStartTimeMessage
+                isNonexistentLocalTime(date.atTime(endTime), zone) -> nonexistentEndTimeMessage
+                reminderDateTime?.let { isNonexistentLocalTime(it, zone) } == true -> nonexistentReminderTimeMessage
                 selectedCategory == null -> blankCategoryMessage
                 else -> null
             }
@@ -103,7 +113,13 @@ fun UpdateEventScreen(
                     ReminderEntity(
                         reminderLocalId = safeEvent.reminderLocalId ?: 0L,
                         userLocalId = userLocalId,
-                        reminderTime = it.withSecond(0).withNano(0).toEpochMillis(zone),
+                        reminderTime = reminderEpochMillisForUpdate(
+                            localDateTime = it,
+                            selectedZone = zone,
+                            originalMillis = safeEvent.reminderTime,
+                            originalZoneId = safeEvent.zoneId,
+                            reminderEdited = reminderEdited,
+                        ),
                         zoneId = zone.id,
                         message = reminderMessage,
                     )

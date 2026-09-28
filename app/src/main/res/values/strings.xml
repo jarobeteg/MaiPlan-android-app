@@ -162,7 +162,10 @@
     <string name="event_date_in_past">Event date cannot be in the past</string>
     <string name="blank_event_start_time">Start time is required</string>
     <string name="blank_event_end_time">End time is required</string>
-    <string name="event_end_time_before_start_time">End time cannot be earlier than start time</string>
+    <string name="event_end_time_before_start_time">End time must be after start time</string>
+    <string name="event_start_time_nonexistent">Start time does not exist in the selected time zone</string>
+    <string name="event_end_time_nonexistent">End time does not exist in the selected time zone</string>
+    <string name="event_reminder_time_nonexistent">Reminder time does not exist in the selected time zone</string>
     <string name="blank_event_category">Category is required</string>
 
     <!-- days -->

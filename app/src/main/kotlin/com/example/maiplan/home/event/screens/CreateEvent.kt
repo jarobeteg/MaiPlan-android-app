@@ -27,6 +27,11 @@ fun CreateEventScreen(
 ) {
     val userLocalId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
+    val supportedZones = remember {
+        ZoneId.getAvailableZoneIds()
+            .filter { it == "UTC" || "/" in it }
+            .toSet()
+    }
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var selectedCategory by remember { mutableStateOf<CategoryEntity?>(null) }
@@ -35,7 +40,9 @@ fun CreateEventScreen(
     var date by remember { mutableStateOf<LocalDate?>(null) }
     var startTime by remember { mutableStateOf<LocalTime?>(null) }
     var endTime by remember { mutableStateOf<LocalTime?>(null) }
-    var zoneId by remember { mutableStateOf<String>(ZoneId.systemDefault().id) }
+    var zoneId by remember { mutableStateOf(
+        ZoneId.systemDefault().id.takeIf { it in supportedZones } ?: "UTC"
+    ) }
     var reminderDateTime by remember { mutableStateOf<LocalDateTime?>(null) }
     var reminderMessage by remember { mutableStateOf("") }
 
@@ -47,6 +54,9 @@ fun CreateEventScreen(
     val blankStartTimeMessage = stringResource(R.string.blank_event_start_time)
     val blankEndTimeMessage = stringResource(R.string.blank_event_end_time)
     val invalidTimeRangeMessage = stringResource(R.string.event_end_time_before_start_time)
+    val nonexistentStartTimeMessage = stringResource(R.string.event_start_time_nonexistent)
+    val nonexistentEndTimeMessage = stringResource(R.string.event_end_time_nonexistent)
+    val nonexistentReminderTimeMessage = stringResource(R.string.event_reminder_time_nonexistent)
     val blankCategoryMessage = stringResource(R.string.blank_event_category)
 
     EventEditorLayout(
@@ -84,7 +94,10 @@ fun CreateEventScreen(
                 date!!.isBefore(LocalDate.now(zone)) -> dateInPastMessage
                 startTime == null -> blankStartTimeMessage
                 endTime == null -> blankEndTimeMessage
-                endTime!!.isBefore(startTime) -> invalidTimeRangeMessage
+                !endTime!!.isAfter(startTime) -> invalidTimeRangeMessage
+                isNonexistentLocalTime(date!!.atTime(startTime!!), zone) -> nonexistentStartTimeMessage
+                isNonexistentLocalTime(date!!.atTime(endTime!!), zone) -> nonexistentEndTimeMessage
+                reminderDateTime?.let { isNonexistentLocalTime(it, zone) } == true -> nonexistentReminderTimeMessage
                 selectedCategory == null -> blankCategoryMessage
                 else -> null
             }

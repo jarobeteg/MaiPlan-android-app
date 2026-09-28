@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.NotificationsNone
+import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -598,6 +599,25 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
                     fontWeight = FontWeight.SemiBold,
                     color = EventPrimaryLight,
                 )
+                Spacer(Modifier.height(3.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(
+                        Icons.Rounded.Public,
+                        contentDescription = null,
+                        tint = muted,
+                        modifier = Modifier.size(14.dp),
+                    )
+                    Text(
+                        text = event.zoneId,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = muted,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             if (event.reminderTime != 0L) {
                 Icon(
