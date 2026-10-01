@@ -42,6 +42,9 @@ class EventLocalDataSource(
         event: EventEntity
     ): Result<StoredEventWithReminder> {
         if (event.title.isBlank()) return Result.Failure(EMPTY_EVENT_TITLE_ERROR)
+        validateEventDefinition(event)
+        require(reminder == null || (event.reminderOffsetMinutes == null &&
+            event.reminderLeadDays == null && event.recurrenceFrequency == null))
 
         return handleLocalResponse {
             database.withTransaction {
@@ -71,6 +74,9 @@ class EventLocalDataSource(
         event: EventEntity
     ): Result<StoredEventWithReminder> {
         if (event.title.isBlank()) return Result.Failure(EMPTY_EVENT_TITLE_ERROR)
+        validateEventDefinition(event)
+        require(reminder == null || (event.reminderOffsetMinutes == null &&
+            event.reminderLeadDays == null && event.recurrenceFrequency == null))
 
         return handleLocalResponse {
             database.withTransaction {
@@ -101,9 +107,19 @@ class EventLocalDataSource(
                     reminderLocalId = storedReminder?.reminderLocalId,
                     title = event.title.trim(),
                     description = event.description,
-                    date = event.date,
+                    startDate = event.startDate,
+                    endDate = event.endDate,
                     startTime = event.startTime,
                     endTime = event.endTime,
+                    recurrenceFrequency = event.recurrenceFrequency,
+                    recurrenceInterval = event.recurrenceInterval,
+                    recurrenceWeekdays = event.recurrenceWeekdays,
+                    recurrenceMonthlyMode = event.recurrenceMonthlyMode,
+                    recurrenceUntilDate = event.recurrenceUntilDate,
+                    reminderOffsetMinutes = event.reminderOffsetMinutes,
+                    reminderLeadDays = event.reminderLeadDays,
+                    reminderMinuteOfDay = event.reminderMinuteOfDay,
+                    relativeReminderMessage = event.relativeReminderMessage,
                     zoneId = event.zoneId,
                     priority = event.priority,
                     location = event.location,
@@ -128,7 +144,7 @@ class EventLocalDataSource(
     suspend fun softDeleteEventWithReminder(
         eventLocalId: Long,
         userLocalId: Long
-    ): Result<Unit> {
+    ): Result<Long?> {
         return handleLocalResponse {
             database.withTransaction {
                 val existing = checkNotNull(
@@ -146,7 +162,7 @@ class EventLocalDataSource(
                         reminderWriter.delete(it, userLocalId, now)
                     }
                 }
-                Unit
+                existing.reminderLocalId
             }
         }
     }
@@ -155,12 +171,20 @@ class EventLocalDataSource(
         return eventDao.getEventByLocalId(eventLocalId, userLocalId)
     }
 
-    suspend fun getEventsForRange(
-        startMillis: Long,
-        endMillis: Long,
-        userLocalId: Long
+    suspend fun getEventsForMonth(
+        userLocalId: Long,
+        monthStart: java.time.LocalDate,
+        monthEndExclusive: java.time.LocalDate,
     ): List<EventEntity> {
-        return eventDao.getEventsForRange(startMillis, endMillis, userLocalId)
+        val lowerDay = monthStart.toEpochDay()
+        val upperDay = monthEndExclusive.toEpochDay()
+        return (
+            eventDao.getTimedOneOffOverlapping(userLocalId, lowerDay, upperDay) +
+            eventDao.getDateOnlyOneOffOverlapping(
+                userLocalId, lowerDay, upperDay
+            ) +
+            eventDao.getActiveSeries(userLocalId)
+        ).distinctBy { it.eventLocalId }
     }
 
     private suspend fun enqueue(
@@ -186,9 +210,23 @@ class EventLocalDataSource(
                     reminderSyncId = reminderSyncId,
                     title = event.title,
                     description = event.description,
-                    date = event.date,
-                    startTime = event.startTime,
-                    endTime = event.endTime,
+                    startDate = event.startDate.toEpochDay(),
+                    endDate = event.endDate.toEpochDay(),
+                    startTime = eventTimeToEpochMillis(
+                        event.startDate, event.startTime, event.zoneId
+                    ),
+                    endTime = eventTimeToEpochMillis(
+                        event.endDate, event.endTime, event.zoneId
+                    ),
+                    recurrenceFrequency = event.recurrenceFrequency,
+                    recurrenceInterval = event.recurrenceInterval,
+                    recurrenceWeekdays = event.recurrenceWeekdays,
+                    recurrenceMonthlyMode = event.recurrenceMonthlyMode,
+                    recurrenceUntilDate = event.recurrenceUntilDate?.toEpochDay(),
+                    reminderOffsetMinutes = event.reminderOffsetMinutes,
+                    reminderLeadDays = event.reminderLeadDays,
+                    reminderMinuteOfDay = event.reminderMinuteOfDay,
+                    relativeReminderMessage = event.relativeReminderMessage,
                     zoneId = event.zoneId,
                     priority = event.priority,
                     location = event.location

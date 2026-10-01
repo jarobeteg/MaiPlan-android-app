@@ -6,6 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.example.maiplan.database.converters.InstantTypeConverter
+import com.example.maiplan.database.converters.LocalDateTypeConverter
+import com.example.maiplan.database.converters.LocalTimeTypeConverter
 import com.example.maiplan.database.converters.UuidTypeConverter
 import com.example.maiplan.database.dao.CategoryDAO
 import com.example.maiplan.database.dao.EventDAO
@@ -38,7 +40,9 @@ import com.example.maiplan.database.entities.SyncStateEntity
 @TypeConverters(
     value = [
         UuidTypeConverter::class,
-        InstantTypeConverter::class
+        InstantTypeConverter::class,
+        LocalDateTypeConverter::class,
+        LocalTimeTypeConverter::class
     ]
 )
 abstract class MaiPlanDatabase: RoomDatabase() {

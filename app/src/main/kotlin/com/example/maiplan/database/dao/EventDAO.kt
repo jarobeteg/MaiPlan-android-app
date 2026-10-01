@@ -34,20 +34,34 @@ interface EventDAO {
     )
     suspend fun getEventBySyncId(syncId: UUID, userLocalId: Long): EventEntity?
 
-    @Query(
-        """
-        SELECT * FROM event
-        WHERE date BETWEEN :startMillis AND :endMillis
-          AND deleted_at IS NULL
-          AND user_local_id = :userLocalId
-        ORDER BY date, start_time, event_local_id
-        """
-    )
-    suspend fun getEventsForRange(
-        startMillis: Long,
-        endMillis: Long,
-        userLocalId: Long
+    @Query("""
+        SELECT * FROM event WHERE user_local_id = :userLocalId
+          AND deleted_at IS NULL AND recurrence_frequency IS NULL
+          AND start_time IS NOT NULL AND end_time IS NOT NULL
+          AND start_date < :endExclusiveEpochDay AND end_date >= :startEpochDay
+    """)
+    suspend fun getTimedOneOffOverlapping(
+        userLocalId: Long, startEpochDay: Long, endExclusiveEpochDay: Long
     ): List<EventEntity>
+
+    @Query("""
+        SELECT * FROM event WHERE user_local_id = :userLocalId
+          AND deleted_at IS NULL AND recurrence_frequency IS NULL
+          AND start_time IS NULL AND end_time IS NULL
+          AND start_date < :endExclusiveEpochDay AND end_date >= :startEpochDay
+    """)
+    suspend fun getDateOnlyOneOffOverlapping(
+        userLocalId: Long, startEpochDay: Long, endExclusiveEpochDay: Long
+    ): List<EventEntity>
+
+    @Query("""
+        SELECT * FROM event WHERE user_local_id = :userLocalId
+          AND deleted_at IS NULL AND recurrence_frequency IS NOT NULL
+    """)
+    suspend fun getActiveSeries(userLocalId: Long): List<EventEntity>
+
+    @Query("SELECT event_local_id FROM event WHERE user_local_id = :userLocalId")
+    suspend fun getAllEventIdsForUser(userLocalId: Long): List<Long>
 
     @Query(
         """

@@ -8,18 +8,14 @@ import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.repository.event.EventRepository
+import com.example.maiplan.repository.event.EventEditSnapshot
 import com.example.maiplan.repository.event.StoredEventWithReminder
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneOffset
 
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _saveEventResult = MutableLiveData<Result<StoredEventWithReminder>>(Result.Idle)
@@ -63,44 +59,15 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
             val monthStart = date.withDayOfMonth(1)
             val monthEndExclusive = monthStart.plusMonths(1)
 
-            val queryStart = monthStart
-                .minusDays(2)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-                .toEpochMilli()
-
-            val queryEnd = monthEndExclusive
-                .plusDays(2)
-                .atStartOfDay(ZoneOffset.UTC)
-                .toInstant()
-                .toEpochMilli() - 1
-
             val userLocalId = UserSession.userLocalId ?: return@launch
-            val events = eventRepository
-                .getEventsForRange(queryStart, queryEnd, userLocalId)
-                .filter { event ->
-                    !event.date.isBefore(monthStart) &&
-                    event.date.isBefore(monthEndExclusive)
-                }
-
-            _monthlyEvents.value = events.groupBy { it.date }
+            _monthlyEvents.value = eventRepository.getEventsForMonth(
+                monthStart, monthEndExclusive, userLocalId
+            )
         }
     }
 
 
-    fun getEventById(eventLocalId: Long): StateFlow<CalendarEventUI?> {
-        return monthlyEvents
-            .map { eventsByDate ->
-                eventsByDate
-                    .values
-                    .flatten()
-                    .firstOrNull { it.eventLocalId == eventLocalId }
-            }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = null
-            )
-    }
+    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long): EventEditSnapshot? =
+        eventRepository.getEventForEdit(eventLocalId, userLocalId)
 
 }

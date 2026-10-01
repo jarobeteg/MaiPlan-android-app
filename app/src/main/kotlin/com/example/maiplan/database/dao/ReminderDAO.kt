@@ -10,6 +10,9 @@ import java.util.UUID
 
 @Dao
 interface ReminderDAO {
+    @Query("SELECT * FROM reminder WHERE user_local_id = :userLocalId")
+    suspend fun getAllForUser(userLocalId: Long): List<ReminderEntity>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertReminder(reminder: ReminderEntity): Long
 

@@ -33,6 +33,7 @@ import androidx.compose.material.icons.rounded.EventAvailable
 import androidx.compose.material.icons.rounded.NotificationsNone
 import androidx.compose.material.icons.rounded.Public
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
@@ -43,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
@@ -69,7 +71,6 @@ import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalAdaptiveLayout
-import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.viewmodel.event.EventViewModel
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
@@ -409,7 +410,8 @@ fun DayEventsSection(
                     contentPadding = PaddingValues(start = 14.dp, end = 14.dp, bottom = 92.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(events, key = { it.eventLocalId }) { event ->
+                    items(events.sortedWith(compareBy({ it.isTimed }, { it.startTime })),
+                        key = { it.listKey }) { event ->
                         SwipeableEventCard(
                             event = event,
                             selectedDate = selectedDate,
@@ -484,12 +486,12 @@ private fun SwipeableEventCard(
     onEdit: (Long) -> Unit,
     onDelete: (Long, LocalDate) -> Unit,
 ) {
-    val context = LocalContext.current
+    var confirmDelete by remember(event.listKey) { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { it * 0.45f },
     )
 
-    LaunchedEffect(dismissState, event.eventLocalId) {
+    LaunchedEffect(dismissState, event.listKey) {
         snapshotFlow { dismissState.currentValue }.collectLatest { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
@@ -498,8 +500,8 @@ private fun SwipeableEventCard(
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    onDelete(event.eventLocalId, selectedDate)
-                    event.reminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                    if (event.isRecurring) confirmDelete = true
+                    else onDelete(event.eventLocalId, selectedDate)
                 }
                 SwipeToDismissBoxValue.Settled -> Unit
             }
@@ -544,6 +546,20 @@ private fun SwipeableEventCard(
     ) {
         EventCard(event = event, onClick = { onEdit(event.eventLocalId) })
     }
+    if (confirmDelete) AlertDialog(
+        onDismissRequest = { confirmDelete = false },
+        title = { Text("Delete entire series?") },
+        text = { Text("This removes all occurrences of this repeating event.") },
+        confirmButton = {
+            TextButton(onClick = {
+                confirmDelete = false
+                onDelete(event.eventLocalId, selectedDate)
+            }) { Text("Delete series") }
+        },
+        dismissButton = {
+            TextButton(onClick = { confirmDelete = false }) { Text("Cancel") }
+        },
+    )
 }
 
 @Composable
@@ -592,9 +608,27 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
+                if (event.isRecurring) Text(
+                    text = "Repeats weekly • Edit changes the whole series",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = muted,
+                )
                 Spacer(Modifier.height(6.dp))
                 Text(
-                    text = "${event.startTime} – ${event.endTime}",
+                    text = if (event.isTimed) {
+                        "${event.startTime} – ${event.endTime}" +
+                            if (event.day.occurrence.localEndDate !=
+                                event.day.occurrence.originalStartDate) {
+                                " • ${event.day.occurrence.originalStartDate} – " +
+                                    event.day.occurrence.localEndDate
+                            } else ""
+                    } else {
+                        "No time set • ${event.day.occurrence.originalStartDate}" +
+                            if (event.day.occurrence.localEndDate !=
+                                event.day.occurrence.originalStartDate) {
+                                " – ${event.day.occurrence.localEndDate}"
+                            } else ""
+                    },
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = EventPrimaryLight,
@@ -619,7 +653,7 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
                     )
                 }
             }
-            if (event.reminderTime != 0L) {
+            if (event.reminderTime != null || event.hasRelativeReminder) {
                 Icon(
                     Icons.Rounded.NotificationsNone,
                     contentDescription = null,

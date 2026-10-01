@@ -1,6 +1,9 @@
 package com.example.maiplan.repository.event
 
+import android.content.Context
 import androidx.compose.ui.graphics.Color
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Event
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.home.event.utils.CalendarEventUI
@@ -8,41 +11,48 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.utils.common.IconData
-import java.time.Instant
-import java.time.ZoneId
+import com.example.maiplan.utils.notifications.AlarmScheduler
+import com.example.maiplan.utils.notifications.EventAlarmCoordinator
+import com.example.maiplan.utils.notifications.ReminderData
+import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
+import java.time.LocalDate
+import kotlinx.coroutines.CancellationException
+
+data class EventEditSnapshot(
+    val event: EventEntity,
+    val reminder: ReminderEntity?,
+)
 
 class EventRepository(
+    private val context: Context,
     private val local: EventLocalDataSource,
     private val localCategory: CategoryLocalDataSource,
     private val localReminder: ReminderLocalDataSource,
     private val requestSync: () -> Unit = {}
 ) {
-    private suspend fun EventEntity.toCalendarEventUI(): CalendarEventUI {
-        val categoryLocalId = requireNotNull(categoryLocalId) {
-            "Event $eventLocalId has no Category"
-        }
-        val category = requireNotNull(localCategory.getCategory(categoryLocalId, userLocalId)) {
-            "Category $categoryLocalId was not found for Event $eventLocalId"
-        }
+    private val coordinator = EventAlarmCoordinator(context.applicationContext)
+    private suspend fun EventEntity.toCalendarEventUI(day: EventDayEntry): CalendarEventUI {
+        val category = categoryLocalId?.let { localCategory.getCategory(it, userLocalId) }
         val reminder = reminderLocalId?.let {
             localReminder.getReminder(it, userLocalId)
         }
-        val eventZone = ZoneId.of(zoneId)
-
         return CalendarEventUI(
+            day = day,
             eventLocalId = eventLocalId,
             title = title,
             description = description.orEmpty(),
-            date = Instant.ofEpochMilli(date).atZone(eventZone).toLocalDate(),
-            startTime = Instant.ofEpochMilli(requireNotNull(startTime)).atZone(eventZone).toLocalTime(),
-            endTime = Instant.ofEpochMilli(requireNotNull(endTime)).atZone(eventZone).toLocalTime(),
+            date = day.visibleDate,
+            startTime = day.occurrence.start?.toLocalTime(),
+            endTime = day.occurrence.end?.toLocalTime(),
             zoneId = zoneId,
-            color = Color(category.color.toULong()),
-            icon = IconData.getIconByKey(category.icon),
+            color = category?.let { Color(it.color.toULong()) } ?: Color(0xFF64748B),
+            icon = category?.let { IconData.getIconByKey(it.icon) } ?: Icons.Rounded.Event,
             reminderLocalId = reminderLocalId,
             categoryLocalId = categoryLocalId,
             reminderTime = reminder?.reminderTime,
-            reminderMessage = reminder?.message.orEmpty()
+            reminderMessage = reminder?.message.orEmpty(),
+            hasRelativeReminder = reminderOffsetMinutes != null || reminderLeadDays != null,
+            isRecurring = recurrenceFrequency != null,
         )
     }
 
@@ -50,34 +60,97 @@ class EventRepository(
         reminder: ReminderEntity?,
         event: EventEntity
     ): Result<StoredEventWithReminder> {
-        return local.createEventWithReminder(reminder, event).also(::requestSyncAfterSuccess)
+        val result = local.createEventWithReminder(reminder, event)
+        if (result is Result.Success) {
+            try {
+                scheduleAbsolute(result.data)
+                coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                enqueueEventAlarmRecovery(context)
+            }
+            requestSyncAfterSuccess(result)
+        }
+        return result
     }
 
     suspend fun updateEventWithReminder(
         reminder: ReminderEntity?,
         event: EventEntity
     ): Result<StoredEventWithReminder> {
-        return local.updateEventWithReminder(reminder, event).also(::requestSyncAfterSuccess)
+        val result = local.updateEventWithReminder(reminder, event)
+        if (result is Result.Success) {
+            try {
+                result.data.removedReminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
+                scheduleAbsolute(result.data)
+                coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                enqueueEventAlarmRecovery(context)
+            }
+            requestSyncAfterSuccess(result)
+        }
+        return result
     }
 
     suspend fun softDeleteEventWithReminder(
         eventLocalId: Long,
         userLocalId: Long
-    ): Result<Unit> {
-        return local.softDeleteEventWithReminder(eventLocalId, userLocalId)
-            .also(::requestSyncAfterSuccess)
+    ): Result<Long?> {
+        val result = local.softDeleteEventWithReminder(eventLocalId, userLocalId)
+        if (result is Result.Success) {
+            try {
+                result.data?.let { AlarmScheduler.cancelAlarm(context, it) }
+                coordinator.reconcileSeries(userLocalId, eventLocalId)
+            } catch (error: CancellationException) {
+                throw error
+            } catch (_: Exception) {
+                enqueueEventAlarmRecovery(context)
+            }
+            requestSyncAfterSuccess(result)
+        }
+        return result
     }
 
-    suspend fun getEventsForRange(
-        startMillis: Long,
-        endMillis: Long,
-        userLocalId: Long
-    ): List<CalendarEventUI> {
-        return local.getEventsForRange(startMillis, endMillis, userLocalId)
-            .map { it.toCalendarEventUI() }
+    suspend fun getEventsForMonth(
+        monthStart: LocalDate,
+        monthEndExclusive: LocalDate,
+        userLocalId: Long,
+    ): Map<LocalDate, List<CalendarEventUI>> {
+        val rows = local.getEventsForMonth(userLocalId, monthStart, monthEndExclusive)
+        val entries = mutableListOf<CalendarEventUI>()
+        for (event in rows) {
+            for (occurrence in event.occurrencesIntersecting(monthStart, monthEndExclusive)) {
+                for (day in occurrence.visibleDays(monthStart, monthEndExclusive)) {
+                    entries += event.toCalendarEventUI(day)
+                }
+            }
+        }
+        return entries.groupBy { it.date }
+    }
+
+    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long): EventEditSnapshot? {
+        val event = local.getEvent(eventLocalId, userLocalId)
+            ?.takeIf { it.deletedAt == null } ?: return null
+        val reminder = event.reminderLocalId?.let {
+            localReminder.getReminder(it, userLocalId)
+        }
+        return EventEditSnapshot(event, reminder)
     }
 
     private fun requestSyncAfterSuccess(result: Result<*>) {
         if (result is Result.Success) runCatching(requestSync)
+    }
+
+    private fun scheduleAbsolute(stored: StoredEventWithReminder) {
+        val reminder = stored.reminder ?: return
+        AlarmScheduler.attemptSchedule(context, ReminderData(
+            reminderLocalId = reminder.reminderLocalId,
+            reminderTime = reminder.reminderTime,
+            reminderTitle = stored.event.title,
+            reminderMessage = reminder.message.orEmpty(),
+        ))
     }
 }

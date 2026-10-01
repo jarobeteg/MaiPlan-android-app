@@ -7,7 +7,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -17,8 +16,6 @@ import androidx.navigation.navArgument
 import com.example.maiplan.home.event.screens.*
 import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
-import com.example.maiplan.utils.notifications.AlarmScheduler
-import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
 
@@ -64,7 +61,6 @@ fun NavGraphBuilder.eventNavGraph(
 
     // --- Create Event Screen ---
     composable(EventRoutes.Create.route) {
-        val context = LocalContext.current
         val saveResult by eventViewModel.saveEventResult.observeAsState()
         CreateEventScreen(
             categoryViewModel = categoryViewModel,
@@ -76,17 +72,6 @@ fun NavGraphBuilder.eventNavGraph(
         LaunchedEffect(saveResult) {
             val result = saveResult
             if (result is Result.Success) {
-                result.data.reminder?.let { reminder ->
-                    val reminderData = ReminderData(
-                        reminderLocalId = reminder.reminderLocalId,
-                        reminderTime = reminder.reminderTime,
-                        reminderTitle = result.data.event.title,
-                        reminderMessage = reminder.message.orEmpty()
-                    )
-                    if (!AlarmScheduler.attemptSchedule(context, reminderData)) {
-                        AlarmScheduler.requestExactAlarmPermission(context)
-                    }
-                }
                 eventViewModel.clearSaveResult()
                 localNavController.popBackStack()
             }
@@ -100,7 +85,6 @@ fun NavGraphBuilder.eventNavGraph(
             navArgument("eventLocalId") { type = NavType.LongType }
         )
     ) { backstackEntry ->
-        val context = LocalContext.current
         val saveResult by eventViewModel.saveEventResult.observeAsState()
         val eventLocalId = backstackEntry
             .arguments
@@ -118,20 +102,6 @@ fun NavGraphBuilder.eventNavGraph(
         LaunchedEffect(saveResult) {
             val result = saveResult
             if (result is Result.Success) {
-                result.data.removedReminderLocalId?.let {
-                    AlarmScheduler.cancelAlarm(context, it)
-                }
-                result.data.reminder?.let { reminder ->
-                    AlarmScheduler.attemptSchedule(
-                        context,
-                        ReminderData(
-                            reminderLocalId = reminder.reminderLocalId,
-                            reminderTime = reminder.reminderTime,
-                            reminderTitle = result.data.event.title,
-                            reminderMessage = reminder.message.orEmpty()
-                        )
-                    )
-                }
                 eventViewModel.clearSaveResult()
                 localNavController.popBackStack()
             }

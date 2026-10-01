@@ -7,9 +7,14 @@ import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.database.entities.SyncStateEntity
+import com.example.maiplan.repository.event.eventTimeFromEpochMillis
+import com.example.maiplan.repository.event.validateEventDefinition
 import com.example.maiplan.utils.common.OutboxStatus
 import com.google.gson.JsonObject
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.DateTimeException
 import java.time.format.DateTimeParseException
 import java.util.UUID
 
@@ -348,6 +353,9 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             TideOperation.CREATE,
             TideOperation.UPDATE -> {
                 val data = checkNotNull(change.data)
+                val startDate = data.eventDateOrExisting("start_date", existing?.startDate)
+                val endDate = data.eventDateOrExisting("end_date", existing?.endDate)
+                val zoneId = data.stringOrExisting("zone_id", existing?.zoneId, true)
                 val entity = EventEntity(
                     eventLocalId = existing?.eventLocalId ?: 0L,
                     userLocalId = userLocalId,
@@ -365,10 +373,42 @@ class TideReconciler(private val database: MaiPlanDatabase) {
                     ),
                     title = data.stringOrExisting("title", existing?.title, true),
                     description = data.nullableStringOrExisting("description", existing?.description),
-                    date = data.longOrExisting("date", existing?.date),
-                    startTime = data.nullableLongOrExisting("start_time", existing?.startTime),
-                    endTime = data.nullableLongOrExisting("end_time", existing?.endTime),
-                    zoneId = data.stringOrExisting("zone_id", existing?.zoneId, true),
+                    startDate = startDate,
+                    endDate = endDate,
+                    startTime = data.eventTimeOrExisting(
+                        "start_time", existing?.startTime, startDate, zoneId
+                    ),
+                    endTime = data.eventTimeOrExisting(
+                        "end_time", existing?.endTime, endDate, zoneId
+                    ),
+                    recurrenceFrequency = data.nullableStringOrExisting(
+                        "recurrence_frequency", existing?.recurrenceFrequency
+                    ),
+                    recurrenceInterval = data.nullableIntOrExisting(
+                        "recurrence_interval", existing?.recurrenceInterval
+                    ),
+                    recurrenceWeekdays = data.nullableIntOrExisting(
+                        "recurrence_weekdays", existing?.recurrenceWeekdays
+                    ),
+                    recurrenceMonthlyMode = data.nullableStringOrExisting(
+                        "recurrence_monthly_mode", existing?.recurrenceMonthlyMode
+                    ),
+                    recurrenceUntilDate = data.nullableEventDateOrExisting(
+                        "recurrence_until_date", existing?.recurrenceUntilDate
+                    ),
+                    reminderOffsetMinutes = data.nullableIntOrExisting(
+                        "reminder_offset_minutes", existing?.reminderOffsetMinutes
+                    ),
+                    reminderLeadDays = data.nullableIntOrExisting(
+                        "reminder_lead_days", existing?.reminderLeadDays
+                    ),
+                    reminderMinuteOfDay = data.nullableIntOrExisting(
+                        "reminder_minute_of_day", existing?.reminderMinuteOfDay
+                    ),
+                    relativeReminderMessage = data.nullableStringOrExisting(
+                        "relative_reminder_message", existing?.relativeReminderMessage
+                    ),
+                    zoneId = zoneId,
                     priority = data.intOrExisting("priority", existing?.priority),
                     location = data.nullableStringOrExisting("location", existing?.location),
                     syncId = change.entitySyncId,
@@ -377,6 +417,13 @@ class TideReconciler(private val database: MaiPlanDatabase) {
                     updatedAt = data.instantOrExisting("updated_at", existing?.updatedAt ?: Instant.EPOCH),
                     deletedAt = null
                 )
+                try {
+                    validateEventDefinition(entity)
+                } catch (error: IllegalArgumentException) {
+                    throw TideResponseValidationException("Invalid event definition", error)
+                } catch (error: DateTimeException) {
+                    throw TideResponseValidationException("Invalid event time zone", error)
+                }
                 if (existing == null) eventDao.insertEvent(entity)
                 else check(eventDao.updateEvent(entity) == 1) {
                     "Could not apply a remote Event update"
@@ -552,6 +599,50 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             throw TideResponseValidationException("Field $name is outside the integer range")
         }
         return value.toInt()
+    }
+
+    private fun JsonObject.nullableIntOrExisting(name: String, existing: Int?): Int? {
+        if (!has(name)) return existing
+        if (get(name).isJsonNull) return null
+        val value = requiredLong(name)
+        if (value !in Int.MIN_VALUE..Int.MAX_VALUE) {
+            throw TideResponseValidationException("Field $name is outside the integer range")
+        }
+        return value.toInt()
+    }
+
+    private fun eventDate(name: String, epochDay: Long): LocalDate {
+        val min = LocalDate.of(1, 1, 1).toEpochDay()
+        val max = LocalDate.of(9999, 12, 31).toEpochDay()
+        if (epochDay !in min..max) {
+            throw TideResponseValidationException("Field $name is outside the date range")
+        }
+        return try {
+            LocalDate.ofEpochDay(epochDay)
+        } catch (error: DateTimeException) {
+            throw TideResponseValidationException("Field $name is outside the date range", error)
+        }
+    }
+
+    private fun JsonObject.eventDateOrExisting(name: String, existing: LocalDate?): LocalDate =
+        eventDate(name, longOrExisting(name, existing?.toEpochDay()))
+
+    private fun JsonObject.nullableEventDateOrExisting(
+        name: String, existing: LocalDate?
+    ): LocalDate? = nullableLongOrExisting(name, existing?.toEpochDay())?.let {
+        eventDate(name, it)
+    }
+
+    private fun JsonObject.eventTimeOrExisting(
+        name: String, existing: LocalTime?, date: LocalDate, zoneId: String
+    ): LocalTime? {
+        if (!has(name)) return existing
+        val millis = nullableLongOrExisting(name, null) ?: return null
+        return try {
+            eventTimeFromEpochMillis(millis, date, zoneId)
+        } catch (error: RuntimeException) {
+            throw TideResponseValidationException("Invalid $name timestamp", error)
+        }
     }
 
     private fun JsonObject.booleanOrExisting(name: String, existing: Boolean?): Boolean {

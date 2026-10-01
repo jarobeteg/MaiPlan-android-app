@@ -8,6 +8,7 @@ import com.example.maiplan.network.TideHttpException
 import com.example.maiplan.network.TideProtocolException
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.notifications.EventAlarmCoordinator
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
@@ -54,6 +55,8 @@ class SyncWorker(
                 userLocalId = activeUser.userLocalId,
                 userSyncId = activeUser.syncId
             )
+
+            EventAlarmCoordinator(applicationContext).reconcileAll(activeUser.userLocalId)
 
             if (hasMoreWork) Result.retry() else Result.success()
         } catch (exception: CancellationException) {

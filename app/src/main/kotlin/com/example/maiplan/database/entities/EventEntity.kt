@@ -6,6 +6,8 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import java.util.UUID
 
@@ -36,7 +38,7 @@ import java.util.UUID
         Index(value = ["user_local_id"]),
         Index(value = ["category_local_id"]),
         Index(value = ["reminder_local_id"]),
-        Index(value = ["user_local_id", "date"])
+        Index(value = ["user_local_id", "start_date"])
     ]
 )
 data class EventEntity(
@@ -57,13 +59,44 @@ data class EventEntity(
 
     val description: String? = null,
 
-    val date: Long,
+    @ColumnInfo(name = "start_date")
+    val startDate: LocalDate,
+
+    @ColumnInfo(name = "end_date")
+    val endDate: LocalDate = startDate,
 
     @ColumnInfo(name = "start_time")
-    val startTime: Long? = null,
+    val startTime: LocalTime? = null,
 
     @ColumnInfo(name = "end_time")
-    val endTime: Long? = null,
+    val endTime: LocalTime? = null,
+
+    @ColumnInfo(name = "recurrence_frequency")
+    val recurrenceFrequency: String? = null,
+
+    @ColumnInfo(name = "recurrence_interval")
+    val recurrenceInterval: Int? = null,
+
+    @ColumnInfo(name = "recurrence_weekdays")
+    val recurrenceWeekdays: Int? = null,
+
+    @ColumnInfo(name = "recurrence_monthly_mode")
+    val recurrenceMonthlyMode: String? = null,
+
+    @ColumnInfo(name = "recurrence_until_date")
+    val recurrenceUntilDate: LocalDate? = null,
+
+    @ColumnInfo(name = "reminder_offset_minutes")
+    val reminderOffsetMinutes: Int? = null,
+
+    @ColumnInfo(name = "reminder_lead_days")
+    val reminderLeadDays: Int? = null,
+
+    @ColumnInfo(name = "reminder_minute_of_day")
+    val reminderMinuteOfDay: Int? = null,
+
+    @ColumnInfo(name = "relative_reminder_message")
+    val relativeReminderMessage: String? = null,
 
     @ColumnInfo(name = "zone_id")
     val zoneId: String = ZoneId.systemDefault().id,

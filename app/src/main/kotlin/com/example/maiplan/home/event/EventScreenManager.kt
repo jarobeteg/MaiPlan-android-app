@@ -29,7 +29,7 @@ fun EventScreenManager(rootNavController: NavHostController) {
         val eventLocal = EventLocalDataSource(context)
         val localCategory = CategoryLocalDataSource(context)
         val localReminder = ReminderLocalDataSource(context)
-        val eventRepo = EventRepository(eventLocal, localCategory, localReminder) {
+        val eventRepo = EventRepository(context.applicationContext, eventLocal, localCategory, localReminder) {
             SyncScheduler.runOneTimeSync(context.applicationContext)
         }
         val factory = GenericViewModelFactory { EventViewModel(eventRepo) }

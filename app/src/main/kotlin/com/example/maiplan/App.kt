@@ -7,6 +7,7 @@ import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.AppVisibilityTracker
 import com.example.maiplan.utils.notifications.NotificationHelper
+import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
 
 class App : Application() {
     override fun onCreate() {
@@ -17,5 +18,6 @@ class App : Application() {
         registerActivityLifecycleCallbacks(AppVisibilityTracker)
         RetrofitClient.init(this)
         SyncScheduler.schedulePeriodicSync(this)
+        enqueueEventAlarmRecovery(this)
     }
 }
