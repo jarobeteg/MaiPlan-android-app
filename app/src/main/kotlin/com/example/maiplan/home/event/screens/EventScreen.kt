@@ -609,7 +609,7 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
                     )
                 }
                 if (event.isRecurring) Text(
-                    text = "Repeats weekly • Edit changes the whole series",
+                    text = "Repeats ${event.recurrenceFrequency?.lowercase()} • Edit changes the whole series",
                     style = MaterialTheme.typography.labelSmall,
                     color = muted,
                 )

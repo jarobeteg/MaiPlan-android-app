@@ -127,6 +127,7 @@
     <string name="event_preview_title">Your event title</string>
     <string name="event_preview_date">Date not selected</string>
     <string name="event_preview_time">Time not selected</string>
+    <string name="event_all_day">All day</string>
     <string name="event_select_date">Choose a date</string>
     <string name="event_select_time">Choose a time</string>
     <string name="time_zone_search">Search time zones</string>

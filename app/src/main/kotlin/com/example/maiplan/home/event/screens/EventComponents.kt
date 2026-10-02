@@ -204,7 +204,7 @@ internal fun EventEditorLayout(
     onStartTimeChange: (LocalTime) -> Unit,
     onEndTimeChange: (LocalTime) -> Unit,
     onZoneChange: (String) -> Unit,
-    onCategoryChange: (CategoryEntity) -> Unit,
+    onCategoryChange: (CategoryEntity?) -> Unit,
     onReminderDateTimeChange: (LocalDateTime) -> Unit,
     onReminderMessageChange: (String) -> Unit,
     onSubmit: () -> Unit,
@@ -365,7 +365,7 @@ internal fun EventEditorLayout(
 }
 
 @Composable
-private fun EventEditorHeading(heading: String, subtitle: String) {
+internal fun EventEditorHeading(heading: String, subtitle: String) {
     val dark = LocalAppDarkTheme.current
     Column {
         Text(
@@ -386,7 +386,7 @@ private fun EventEditorHeading(heading: String, subtitle: String) {
 }
 
 @Composable
-private fun EventPreview(state: EventEditorState) {
+internal fun EventPreview(state: EventEditorState) {
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
@@ -399,7 +399,7 @@ private fun EventPreview(state: EventEditorState) {
     val timeText = if (state.startTime != null && state.endTime != null) {
         "${state.startTime.format(DateTimeFormatter.ofPattern("HH:mm"))} – ${state.endTime.format(DateTimeFormatter.ofPattern("HH:mm"))}"
     } else {
-        stringResource(R.string.event_preview_time)
+        stringResource(R.string.event_all_day)
     }
 
     Surface(
@@ -470,7 +470,7 @@ private fun EventPreview(state: EventEditorState) {
 }
 
 @Composable
-private fun EventEditorSection(
+internal fun EventEditorSection(
     title: String,
     subtitle: String,
     content: @Composable ColumnScope.() -> Unit,
@@ -505,13 +505,14 @@ private fun EventEditorSection(
 }
 
 @Composable
-private fun EventEditorTextField(
+internal fun EventEditorTextField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     icon: ImageVector,
     singleLine: Boolean,
     imeAction: ImeAction,
+    keyboardType: KeyboardType = KeyboardType.Text,
 ) {
     val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
@@ -531,7 +532,7 @@ private fun EventEditorTextField(
         minLines = if (singleLine) 1 else 3,
         shape = RoundedCornerShape(15.dp),
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Text,
+            keyboardType = keyboardType,
             imeAction = imeAction,
         ),
         colors = OutlinedTextFieldDefaults.colors(
@@ -591,10 +592,49 @@ private fun EventTimeSelector(
 }
 
 @Composable
-private fun ZonePickerDialog(
+internal fun ZonePickerDialog(
     selectedZone: String,
     onZoneSelected: (String) -> Unit,
     onDismiss: () -> Unit
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        ZonePickerContent(selectedZone, onZoneSelected, Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+internal fun ZonePickerOverlay(
+    selectedZone: String,
+    onZoneSelected: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier.fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.38f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                ) { onDismiss() },
+        )
+        Box(
+            modifier = Modifier.fillMaxSize().padding(20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            ZonePickerContent(
+                selectedZone,
+                onZoneSelected,
+                Modifier.widthIn(max = 480.dp).fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZonePickerContent(
+    selectedZone: String,
+    onZoneSelected: (String) -> Unit,
+    modifier: Modifier,
 ) {
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
@@ -618,55 +658,54 @@ private fun ZonePickerDialog(
         }
     }
 
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            color = surface,
-            contentColor = foreground,
-            border = BorderStroke(1.dp, border),
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(24.dp)
-        ) {
-            Column(Modifier.padding(20.dp)) {
-                OutlinedTextField(
-                    value = query,
-                    onValueChange = { query = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(stringResource(R.string.time_zone_search)) },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = field,
-                        unfocusedContainerColor = field,
-                        focusedTextColor = foreground,
-                        unfocusedTextColor = foreground,
-                        cursorColor = EventPrimary,
-                        focusedBorderColor = EventPrimary,
-                        unfocusedBorderColor = border,
-                        focusedLabelColor = EventPrimary,
-                        unfocusedLabelColor = muted,
-                    )
+    Surface(
+        onClick = {},
+        color = surface,
+        contentColor = foreground,
+        border = BorderStroke(1.dp, border),
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(Modifier.padding(20.dp)) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.time_zone_search)) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = field,
+                    unfocusedContainerColor = field,
+                    focusedTextColor = foreground,
+                    unfocusedTextColor = foreground,
+                    cursorColor = EventPrimary,
+                    focusedBorderColor = EventPrimary,
+                    unfocusedBorderColor = border,
+                    focusedLabelColor = EventPrimary,
+                    unfocusedLabelColor = muted,
                 )
+            )
 
-                Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(12.dp))
 
-                LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
-                    items(
-                        items = filteredZones,
-                        key = { it }
-                    ) { zone ->
-                        DropdownMenuItem(
-                            text = { Text(zone, color = foreground) },
-                            onClick = { onZoneSelected(zone) },
-                            trailingIcon = {
-                                if (zone == selectedZone) {
-                                    Icon(
-                                        Icons.Rounded.Check,
-                                        contentDescription = null,
-                                        tint = EventPrimaryLight
-                                    )
-                                }
+            LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
+                items(
+                    items = filteredZones,
+                    key = { it }
+                ) { zone ->
+                    DropdownMenuItem(
+                        text = { Text(zone, color = foreground) },
+                        onClick = { onZoneSelected(zone) },
+                        trailingIcon = {
+                            if (zone == selectedZone) {
+                                Icon(
+                                    Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = EventPrimaryLight
+                                )
                             }
-                        )
-                    }
+                        }
+                    )
                 }
             }
         }
@@ -710,7 +749,7 @@ private fun EventReminderDateTimeSelector(
 }
 
 @Composable
-private fun EventSelectionField(
+internal fun EventSelectionField(
     label: String,
     value: String,
     icon: ImageVector,
@@ -782,10 +821,10 @@ private fun EventSelectionField(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EventCategoryDropdown(
+internal fun EventCategoryDropdown(
     categories: List<CategoryEntity>,
     selectedCategory: CategoryEntity?,
-    onCategorySelected: (CategoryEntity) -> Unit,
+    onCategorySelected: (CategoryEntity?) -> Unit,
 ) {
     val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
@@ -797,7 +836,7 @@ private fun EventCategoryDropdown(
         onExpandedChange = { expanded = !expanded },
     ) {
         OutlinedTextField(
-            value = selectedCategory?.name.orEmpty(),
+            value = selectedCategory?.name ?: "None",
             onValueChange = {},
             modifier = Modifier
                 .fillMaxWidth()
@@ -835,6 +874,13 @@ private fun EventCategoryDropdown(
             onDismissRequest = { expanded = false },
             modifier = Modifier.background(if (dark) Color(0xFF20263A) else Color.White),
         ) {
+            DropdownMenuItem(
+                text = { Text("None", color = foreground) },
+                onClick = {
+                    onCategorySelected(null)
+                    expanded = false
+                },
+            )
             if (categories.isEmpty()) {
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.event_no_categories), color = muted) },
@@ -882,7 +928,7 @@ private fun EventCategoryDropdown(
 }
 
 @Composable
-private fun EventEditorError(message: String) {
+internal fun EventEditorError(message: String) {
     val dark = LocalAppDarkTheme.current
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -910,7 +956,7 @@ private fun EventEditorError(message: String) {
 }
 
 @Composable
-private fun EventEditorButton(text: String, onClick: () -> Unit) {
+internal fun EventEditorButton(text: String, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         modifier = Modifier
@@ -943,66 +989,111 @@ internal fun EventDatePickerDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        EventPickerDialogSurface(onDismiss = onDismiss) {
+            EventDatePickerContent(onDateSelected, onDismiss)
+        }
+    }
+}
+
+@Composable
+internal fun EventDatePickerOverlay(
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    EventPickerOverlay(onDismiss) {
+        EventDatePickerContent(onDateSelected, onDismiss)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EventDatePickerContent(
+    onDateSelected: (LocalDate) -> Unit,
+    onDismiss: () -> Unit,
+) {
     val state = rememberDatePickerState()
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        EventPickerDialogSurface(onDismiss = onDismiss) {
-            DatePicker(
-                state = state,
-                title = {
-                    EventPickerHeader(
-                        title = stringResource(R.string.picker_date_title),
-                        subtitle = stringResource(R.string.picker_date_subtitle),
-                        icon = Icons.Rounded.CalendarMonth,
-                    )
-                },
-                showModeToggle = false,
-                colors = DatePickerDefaults.colors(
-                    containerColor = surface,
-                    titleContentColor = foreground,
-                    headlineContentColor = foreground,
-                    weekdayContentColor = EventPrimaryLight,
-                    subheadContentColor = foreground,
-                    yearContentColor = foreground,
-                    selectedDayContentColor = Color.White,
-                    selectedDayContainerColor = EventPrimary,
-                    selectedYearContentColor = Color.White,
-                    selectedYearContainerColor = EventPrimary,
-                    todayDateBorderColor = EventPrimary,
-                    todayContentColor = EventPrimaryLight,
-                    currentYearContentColor = EventPrimaryLight,
-                    dayContentColor = foreground,
-                    disabledDayContentColor = muted.copy(alpha = 0.45f),
-                    dayInSelectionRangeContentColor = foreground,
-                ),
+    DatePicker(
+        state = state,
+        title = {
+            EventPickerHeader(
+                title = stringResource(R.string.picker_date_title),
+                subtitle = stringResource(R.string.picker_date_subtitle),
+                icon = Icons.Rounded.CalendarMonth,
             )
-            EventPickerActions(
-                onDismiss = onDismiss,
-                onConfirm = {
-                    state.selectedDateMillis?.let { millis ->
-                        onDateSelected(
-                            Instant.ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC)
-                                .toLocalDate(),
-                        )
-                    }
-                    onDismiss()
-                },
-            )
-        }
-    }
+        },
+        showModeToggle = false,
+        colors = DatePickerDefaults.colors(
+            containerColor = surface,
+            titleContentColor = foreground,
+            headlineContentColor = foreground,
+            weekdayContentColor = EventPrimaryLight,
+            subheadContentColor = foreground,
+            yearContentColor = foreground,
+            selectedDayContentColor = Color.White,
+            selectedDayContainerColor = EventPrimary,
+            selectedYearContentColor = Color.White,
+            selectedYearContainerColor = EventPrimary,
+            todayDateBorderColor = EventPrimary,
+            todayContentColor = EventPrimaryLight,
+            currentYearContentColor = EventPrimaryLight,
+            dayContentColor = foreground,
+            disabledDayContentColor = muted.copy(alpha = 0.45f),
+            dayInSelectionRangeContentColor = foreground,
+        ),
+    )
+    EventPickerActions(
+        onDismiss = onDismiss,
+        onConfirm = {
+            state.selectedDateMillis?.let { millis ->
+                onDateSelected(
+                    Instant.ofEpochMilli(millis)
+                        .atZone(ZoneOffset.UTC)
+                        .toLocalDate(),
+                )
+            }
+            onDismiss()
+        },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EventTimePickerDialog(
+    onTimeSelected: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        EventPickerDialogSurface(onDismiss = onDismiss) {
+            EventTimePickerContent(onTimeSelected, onDismiss)
+        }
+    }
+}
+
+@Composable
+internal fun EventTimePickerOverlay(
+    onTimeSelected: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    EventPickerOverlay(onDismiss) {
+        EventTimePickerContent(onTimeSelected, onDismiss)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ColumnScope.EventTimePickerContent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -1012,51 +1103,62 @@ internal fun EventTimePickerDialog(
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
 
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false),
-    ) {
-        EventPickerDialogSurface(onDismiss = onDismiss) {
-            EventPickerHeader(
-                title = stringResource(R.string.picker_time_title),
-                subtitle = stringResource(R.string.picker_time_subtitle),
-                icon = Icons.Rounded.AccessTime,
-            )
-            TimePicker(
-                state = state,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                colors = TimePickerDefaults.colors(
-                    clockDialColor = field,
-                    clockDialSelectedContentColor = Color.White,
-                    clockDialUnselectedContentColor = foreground,
-                    selectorColor = EventPrimary,
-                    containerColor = Color.Transparent,
-                    periodSelectorBorderColor = if (dark) Color(0xFF3A435C) else EventBorder,
-                    periodSelectorSelectedContainerColor = EventPrimary,
-                    periodSelectorUnselectedContainerColor = field,
-                    periodSelectorSelectedContentColor = Color.White,
-                    periodSelectorUnselectedContentColor = muted,
-                    timeSelectorSelectedContainerColor = EventPrimary,
-                    timeSelectorUnselectedContainerColor = field,
-                    timeSelectorSelectedContentColor = Color.White,
-                    timeSelectorUnselectedContentColor = foreground,
-                ),
-            )
-            Spacer(Modifier.height(18.dp))
-            EventPickerActions(
-                onDismiss = onDismiss,
-                onConfirm = {
-                    onTimeSelected(LocalTime.of(state.hour, state.minute))
-                    onDismiss()
-                },
-            )
-        }
+    EventPickerHeader(
+        title = stringResource(R.string.picker_time_title),
+        subtitle = stringResource(R.string.picker_time_subtitle),
+        icon = Icons.Rounded.AccessTime,
+    )
+    TimePicker(
+        state = state,
+        modifier = Modifier.align(Alignment.CenterHorizontally),
+        colors = TimePickerDefaults.colors(
+            clockDialColor = field,
+            clockDialSelectedContentColor = Color.White,
+            clockDialUnselectedContentColor = foreground,
+            selectorColor = EventPrimary,
+            containerColor = Color.Transparent,
+            periodSelectorBorderColor = if (dark) Color(0xFF3A435C) else EventBorder,
+            periodSelectorSelectedContainerColor = EventPrimary,
+            periodSelectorUnselectedContainerColor = field,
+            periodSelectorSelectedContentColor = Color.White,
+            periodSelectorUnselectedContentColor = muted,
+            timeSelectorSelectedContainerColor = EventPrimary,
+            timeSelectorUnselectedContainerColor = field,
+            timeSelectorSelectedContentColor = Color.White,
+            timeSelectorUnselectedContentColor = foreground,
+        ),
+    )
+    Spacer(Modifier.height(18.dp))
+    EventPickerActions(
+        onDismiss = onDismiss,
+        onConfirm = {
+            onTimeSelected(LocalTime.of(state.hour, state.minute))
+            onDismiss()
+        },
+    )
+}
+
+@Composable
+private fun EventPickerOverlay(
+    onDismiss: () -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
+) {
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier.fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.38f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                ) { onDismiss() },
+        )
+        EventPickerDialogSurface(content = content)
     }
 }
 
 @Composable
 private fun EventPickerDialogSurface(
-    onDismiss: () -> Unit,
+    onDismiss: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val dark = LocalAppDarkTheme.current
@@ -1066,15 +1168,18 @@ private fun EventPickerDialogSurface(
             .padding(20.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() },
-                ) { onDismiss() },
-        )
+        if (onDismiss != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() },
+                    ) { onDismiss() },
+            )
+        }
         Surface(
+            onClick = {},
             modifier = Modifier
                 .widthIn(max = 380.dp)
                 .fillMaxWidth()

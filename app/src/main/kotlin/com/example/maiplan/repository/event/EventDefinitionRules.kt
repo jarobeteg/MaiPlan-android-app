@@ -3,6 +3,7 @@ package com.example.maiplan.repository.event
 import com.example.maiplan.database.entities.EventEntity
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 fun validateEventDefinition(event: EventEntity) {
     val minDate = LocalDate.of(1, 1, 1)
@@ -73,6 +74,30 @@ fun validateEventDefinition(event: EventEntity) {
         require(event.recurrenceUntilDate == null ||
             !event.recurrenceUntilDate.isBefore(event.startDate))
         require(event.reminderLocalId == null)
+        val daySpan = ChronoUnit.DAYS.between(event.startDate, event.endDate)
+        val datesToCheck = when (event.recurrenceFrequency) {
+            "DAILY" -> 2
+            "WEEKLY" -> 16 // Includes a full week and the start of the next repeat cycle.
+            else -> 4801 // Covers month and leap-year patterns across a Gregorian cycle.
+        }
+        val overlapping = daySpan > 0 && event.ruleDatesOnOrAfter(event.startDate)
+            .take(datesToCheck)
+            .zipWithNext()
+            .any { (current, next) ->
+                val currentEndDate = current.plusDays(daySpan)
+                if (!timed) {
+                    !currentEndDate.isBefore(next)
+                } else {
+                    resolveLocal(currentEndDate.atTime(requireNotNull(event.endTime)), zone)
+                        .toInstant().isAfter(
+                            resolveLocal(next.atTime(requireNotNull(event.startTime)), zone)
+                                .toInstant()
+                        )
+                }
+            }
+        require(!overlapping) {
+            "Event occurrences overlap. Shorten End date for each occurrence; use Repeat until for the last repeat."
+        }
     }
     val hasDateLead = event.reminderLeadDays != null
     require(hasDateLead == (event.reminderMinuteOfDay != null))

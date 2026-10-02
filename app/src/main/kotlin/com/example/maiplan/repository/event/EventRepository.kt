@@ -52,7 +52,7 @@ class EventRepository(
             reminderTime = reminder?.reminderTime,
             reminderMessage = reminder?.message.orEmpty(),
             hasRelativeReminder = reminderOffsetMinutes != null || reminderLeadDays != null,
-            isRecurring = recurrenceFrequency != null,
+            recurrenceFrequency = recurrenceFrequency,
         )
     }
 
