@@ -4,12 +4,16 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.maiplan.R
 import com.example.maiplan.main.MainActivity
@@ -37,9 +41,50 @@ object NotificationHelper {
                 Manifest.permission.POST_NOTIFICATIONS,
             ) == PackageManager.PERMISSION_GRANTED
 
+    fun canDeliverReminders(context: Context): Boolean {
+        if (!canPostNotifications(context) ||
+            !NotificationManagerCompat.from(context).areNotificationsEnabled()
+        ) return false
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (manager.getNotificationChannel(CHANNEL_ID)?.importance ==
+                NotificationManager.IMPORTANCE_NONE
+            ) return false
+        }
+        return true
+    }
+
+    fun openReminderNotificationSettings(context: Context) {
+        val settingsIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            if (NotificationManagerCompat.from(context).areNotificationsEnabled() &&
+                manager.getNotificationChannel(CHANNEL_ID)?.importance ==
+                NotificationManager.IMPORTANCE_NONE
+            ) {
+                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    putExtra(Settings.EXTRA_CHANNEL_ID, CHANNEL_ID)
+                }
+            } else {
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                    putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                }
+            }
+        } else {
+            Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:${context.packageName}"))
+        }
+        try {
+            context.startActivity(settingsIntent)
+        } catch (_: ActivityNotFoundException) {
+            context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:${context.packageName}")))
+        }
+    }
+
     fun showNotification(context: Context, title: String, message: String, notificationId: Int) {
-        if (!canPostNotifications(context)) {
-            Log.w("NotificationHelper", "Notification permission is not granted.")
+        if (!canDeliverReminders(context)) {
+            Log.w("NotificationHelper", "Reminder notifications are disabled.")
             return
         }
 

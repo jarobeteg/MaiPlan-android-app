@@ -1,6 +1,10 @@
 package com.example.maiplan.home.event.screens
 
+import android.Manifest
+import android.os.Build
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -22,11 +26,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
@@ -35,6 +43,10 @@ import com.example.maiplan.repository.event.resolveLocal
 import com.example.maiplan.repository.event.validateEventDefinition
 import com.example.maiplan.theme.LocalAppDarkTheme
 import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.utils.notifications.NotificationHelper
+import com.example.maiplan.utils.notifications.AlarmScheduler
+import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
+import com.example.maiplan.utils.notifications.nextEventReminderAfter
 import java.time.*
 import java.time.format.DateTimeFormatter
 
@@ -48,6 +60,53 @@ internal fun EventFullEditor(
     onSave: (ReminderEntity?, EventEntity) -> Unit,
 ) {
     val userId = UserSession.userLocalId ?: return
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val currentOnSave by rememberUpdatedState(onSave)
+    var pendingSave by remember { mutableStateOf<Pair<ReminderEntity?, EventEntity>?>(null) }
+    var notificationDialogMode by remember { mutableStateOf<String?>(null) }
+    var notificationsEnabled by remember { mutableStateOf(NotificationHelper.canDeliverReminders(context)) }
+    var exactAlarmsEnabled by remember { mutableStateOf(AlarmScheduler.canScheduleExactAlarms(context)) }
+    DisposableEffect(lifecycleOwner, context) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                notificationsEnabled = NotificationHelper.canDeliverReminders(context)
+                val exactNow = AlarmScheduler.canScheduleExactAlarms(context)
+                if (exactNow && !exactAlarmsEnabled) enqueueEventAlarmRecovery(context)
+                exactAlarmsEnabled = exactNow
+                val pending = pendingSave
+                if (pending != null && notificationDialogMode == null) {
+                    when {
+                        !notificationsEnabled -> notificationDialogMode = "settings"
+                        !exactNow -> notificationDialogMode = "exact"
+                        else -> {
+                            pendingSave = null
+                            currentOnSave(pending.first, pending.second)
+                        }
+                    }
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val pending = pendingSave
+        if (pending != null) {
+            if (granted && NotificationHelper.canDeliverReminders(context)) {
+                if (AlarmScheduler.canScheduleExactAlarms(context)) {
+                    pendingSave = null
+                    currentOnSave(pending.first, pending.second)
+                } else {
+                    notificationDialogMode = "exact"
+                }
+            } else {
+                notificationDialogMode = "settings"
+            }
+        }
+    }
     var title by rememberSaveable(initial?.eventLocalId) { mutableStateOf(initial?.title.orEmpty()) }
     var description by rememberSaveable(initial?.eventLocalId) {
         mutableStateOf(initial?.description.orEmpty())
@@ -128,10 +187,13 @@ internal fun EventFullEditor(
     var pickingDate by remember { mutableStateOf<String?>(null) }
     var pickingTime by remember { mutableStateOf<String?>(null) }
     var pickingZone by remember { mutableStateOf(false) }
-    BackHandler(enabled = pickingDate != null || pickingTime != null || pickingZone) {
+    var pickingCategory by remember { mutableStateOf(false) }
+    BackHandler(enabled = pickingDate != null || pickingTime != null ||
+        pickingZone || pickingCategory) {
         pickingDate = null
         pickingTime = null
         pickingZone = false
+        pickingCategory = false
     }
     val dateFormat = remember { DateTimeFormatter.ofPattern("EEE, MMM d, yyyy") }
     val previewState = EventEditorState(
@@ -261,11 +323,9 @@ internal fun EventFullEditor(
                         title = stringResource(R.string.event_organization_title),
                         subtitle = stringResource(R.string.event_organization_subtitle),
                     ) {
-                        EventCategoryDropdown(
-                            categories = categories,
-                            selectedCategory = previewState.selectedCategory,
-                            onCategorySelected = { categoryId = it?.categoryLocalId },
-                        )
+                        EventCategoryField(previewState.selectedCategory) {
+                            pickingCategory = true
+                        }
                     }
 
                     EventEditorSection(title = "Repeat", subtitle = "Choose how often this event occurs.") {
@@ -382,10 +442,38 @@ internal fun EventFullEditor(
                             EventEditorTextField(reminderMessage, { reminderMessage = it },
                                 "Reminder message", Icons.AutoMirrored.Rounded.Message,
                                 false, ImeAction.Default)
+                            if (!notificationsEnabled) {
+                                Spacer(Modifier.height(12.dp))
+                                EventEditorError(stringResource(R.string.event_notifications_disabled_inline))
+                                TextButton(
+                                    onClick = {
+                                        NotificationHelper.openReminderNotificationSettings(context)
+                                    },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = if (LocalAppDarkTheme.current) EventPrimaryLight
+                                            else EventPrimary,
+                                    ),
+                                ) {
+                                    Text(stringResource(R.string.event_notifications_open_settings_inline))
+                                }
+                            } else if (!exactAlarmsEnabled) {
+                                Spacer(Modifier.height(12.dp))
+                                EventEditorError(stringResource(R.string.event_exact_alarm_disabled_inline))
+                                TextButton(
+                                    onClick = { AlarmScheduler.requestExactAlarmPermission(context) },
+                                    colors = ButtonDefaults.textButtonColors(
+                                        contentColor = if (LocalAppDarkTheme.current) EventPrimaryLight
+                                            else EventPrimary,
+                                    ),
+                                ) {
+                                    Text(stringResource(R.string.event_exact_alarm_open_settings_inline))
+                                }
+                            }
                         }
                     }
 
                     error?.let { EventEditorError(it) }
+                    val reminderInPastMessage = stringResource(R.string.event_reminder_in_past)
                     EventEditorButton(stringResource(R.string.event_save)) {
                         try {
                             val zone = ZoneId.of(zoneText)
@@ -494,8 +582,32 @@ internal fun EventFullEditor(
                                 )
                             } else null
                             validateEventDefinition(event)
+                            if (reminder != null) {
+                                require(reminder.reminderTime > System.currentTimeMillis()) {
+                                    reminderInPastMessage
+                                }
+                            } else if (offset != null || lead != null) {
+                                require(nextEventReminderAfter(event, Instant.now()) != null) {
+                                    reminderInPastMessage
+                                }
+                            }
                             error = null
-                            onSave(reminder, event)
+                            if (reminderMode != "none" &&
+                                !NotificationHelper.canDeliverReminders(context)
+                            ) {
+                                pendingSave = reminder to event
+                                notificationDialogMode = if (
+                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    !NotificationHelper.canPostNotifications(context)
+                                ) "permission" else "settings"
+                            } else if (reminderMode != "none" &&
+                                !AlarmScheduler.canScheduleExactAlarms(context)
+                            ) {
+                                pendingSave = reminder to event
+                                notificationDialogMode = "exact"
+                            } else {
+                                currentOnSave(reminder, event)
+                            }
                         } catch (failure: Exception) {
                             error = failure.message ?: "Check event fields"
                         }
@@ -548,6 +660,83 @@ internal fun EventFullEditor(
             selectedZone = zoneText,
             onZoneSelected = { zoneText = it; pickingZone = false },
             onDismiss = { pickingZone = false },
+        )
+        if (pickingCategory) CategoryPickerOverlay(
+            categories = categories,
+            selectedCategory = previewState.selectedCategory,
+            onCategorySelected = { categoryId = it?.categoryLocalId; pickingCategory = false },
+            onDismiss = { pickingCategory = false },
+        )
+    }
+    notificationDialogMode?.let { mode ->
+        val dark = LocalAppDarkTheme.current
+        AlertDialog(
+            onDismissRequest = {
+                notificationDialogMode = null
+                pendingSave = null
+            },
+            title = {
+                Text(stringResource(
+                    when (mode) {
+                        "permission" -> R.string.event_notifications_permission_title
+                        "exact" -> R.string.event_exact_alarm_title
+                        else -> R.string.event_notifications_settings_title
+                    },
+                ))
+            },
+            text = {
+                Text(stringResource(
+                    when (mode) {
+                        "permission" -> R.string.event_notifications_permission_message
+                        "exact" -> R.string.event_exact_alarm_message
+                        else -> R.string.event_notifications_settings_message
+                    },
+                ))
+            },
+            confirmButton = {
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = EventPrimary),
+                    onClick = {
+                        notificationDialogMode = null
+                        if (mode == "permission") {
+                            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        } else {
+                            if (mode == "exact") {
+                                AlarmScheduler.requestExactAlarmPermission(context)
+                            } else {
+                                NotificationHelper.openReminderNotificationSettings(context)
+                            }
+                        }
+                    },
+                ) {
+                    Text(stringResource(
+                        when (mode) {
+                            "permission" -> R.string.event_notifications_allow
+                            "exact" -> R.string.event_exact_alarm_open_settings
+                            else -> R.string.event_notifications_open_settings
+                        },
+                    ))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = EventPrimary),
+                    onClick = {
+                        notificationDialogMode = null
+                        val pending = pendingSave
+                        pendingSave = null
+                        pending?.let { currentOnSave(it.first, it.second) }
+                    },
+                ) {
+                    Text(stringResource(
+                        if (mode == "exact") R.string.event_exact_alarm_save_anyway
+                        else R.string.event_notifications_save_anyway,
+                    ))
+                }
+            },
+            containerColor = if (dark) Color(0xFF191D2E) else Color.White,
+            titleContentColor = if (dark) Color(0xFFF5F7FB) else EventInk,
+            textContentColor = if (dark) Color(0xFFAEB7C9) else EventMuted,
         )
     }
 }

@@ -35,6 +35,7 @@ import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -45,6 +46,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.work.WorkInfo
 import com.example.maiplan.BuildConfig
 import com.example.maiplan.R
 import com.example.maiplan.category.CategoryActivity
@@ -74,6 +78,7 @@ import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.BaseActivity
 import com.example.maiplan.utils.common.UserSession
+import java.util.UUID
 
 private val MorePrimary: Color get() = AppThemeManager.selectedTheme.primary
 private val MorePrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
@@ -91,6 +96,30 @@ fun MoreScreen(
 ) {
     val context = LocalContext.current
     val onLogoutClick = rememberLogoutHandler()
+    val syncWork by remember(context) {
+        SyncScheduler.observeOneTimeSync(context.applicationContext)
+    }.collectAsState(initial = null)
+    var syncRequested by remember { mutableStateOf(false) }
+    var priorSyncWorkId by remember { mutableStateOf<UUID?>(null) }
+    var syncEnqueueFailed by remember { mutableStateOf(false) }
+    LaunchedEffect(syncWork?.id) {
+        if (syncRequested && syncWork?.id != priorSyncWorkId) syncRequested = false
+    }
+    val syncBusy = syncRequested || syncWork?.state?.isFinished == false
+    val syncSubtitle = when {
+        syncEnqueueFailed -> stringResource(R.string.more_sync_failed)
+        syncRequested -> stringResource(R.string.more_sync_starting)
+        syncWork?.state == WorkInfo.State.RUNNING -> stringResource(R.string.more_sync_running)
+        syncWork?.state == WorkInfo.State.ENQUEUED &&
+            (syncWork?.runAttemptCount ?: 0) > 0 ->
+            stringResource(R.string.more_sync_retrying)
+        syncWork?.state == WorkInfo.State.ENQUEUED ||
+            syncWork?.state == WorkInfo.State.BLOCKED -> stringResource(R.string.more_sync_waiting)
+        syncWork?.state == WorkInfo.State.SUCCEEDED -> stringResource(R.string.more_sync_success)
+        syncWork?.state == WorkInfo.State.FAILED ||
+            syncWork?.state == WorkInfo.State.CANCELLED -> stringResource(R.string.more_sync_failed)
+        else -> stringResource(R.string.more_sync_subtitle)
+    }
 
     MoreScreenBackground {
         Scaffold(
@@ -125,10 +154,21 @@ fun MoreScreen(
                         MoreSectionDivider()
                         MoreActionRow(
                             title = stringResource(R.string.sync),
-                            subtitle = stringResource(R.string.more_sync_subtitle),
+                            subtitle = syncSubtitle,
                             icon = Icons.Rounded.CloudSync,
                             accent = MoreTeal,
-                            onClick = { SyncScheduler.runOneTimeSync(context) },
+                            enabled = !syncBusy,
+                            showProgress = syncBusy,
+                            onClick = {
+                                priorSyncWorkId = syncWork?.id
+                                syncEnqueueFailed = false
+                                syncRequested = true
+                                runCatching { SyncScheduler.runOneTimeSync(context) }
+                                    .onFailure {
+                                        syncRequested = false
+                                        syncEnqueueFailed = true
+                                    }
+                            },
                         )
                     }
 
@@ -358,6 +398,8 @@ private fun MoreActionRow(
     onClick: () -> Unit,
     accent: Color = MorePrimary,
     destructive: Boolean = false,
+    enabled: Boolean = true,
+    showProgress: Boolean = false,
 ) {
     val dark = LocalAppDarkTheme.current
     val titleColor = when {
@@ -371,6 +413,7 @@ private fun MoreActionRow(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = Color.Transparent,
+        enabled = enabled,
         onClick = onClick,
     ) {
         Row(
@@ -409,12 +452,20 @@ private fun MoreActionRow(
                 )
             }
             Spacer(Modifier.width(10.dp))
-            Icon(
-                imageVector = Icons.Rounded.ChevronRight,
-                contentDescription = null,
-                tint = if (destructive) titleColor else muted,
-                modifier = Modifier.size(22.dp),
-            )
+            if (showProgress) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(22.dp),
+                    color = accent,
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Rounded.ChevronRight,
+                    contentDescription = null,
+                    tint = if (destructive) titleColor else muted,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
         }
     }
 }

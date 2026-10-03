@@ -8,7 +8,10 @@ import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.util.concurrent.TimeUnit
 
 object SyncScheduler {
@@ -49,4 +52,11 @@ object SyncScheduler {
                 request
             )
     }
+
+    fun observeOneTimeSync(context: Context): Flow<WorkInfo?> =
+        WorkManager.getInstance(context.applicationContext)
+            .getWorkInfosForUniqueWorkFlow(IMMEDIATE_SYNC_NAME)
+            .map { infos ->
+                infos.firstOrNull { !it.state.isFinished } ?: infos.lastOrNull()
+            }
 }

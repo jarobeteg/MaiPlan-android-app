@@ -71,17 +71,18 @@ class EventAlarmCoordinator(private val context: Context) {
     }
 
     suspend fun reconcileAll(userLocalId: Long) {
-        database.reminderDAO().getAllForUser(userLocalId)
+        val reminders = database.reminderDAO().getAllForUser(userLocalId)
+        val activeReminders = reminders.filter { it.deletedAt == null }
+            .associateBy { it.reminderLocalId }
+        reminders
             .filter { it.deletedAt != null }
             .forEach { AlarmScheduler.cancelAlarm(context, it.reminderLocalId) }
         database.eventDAO().getAllEventIdsForUser(userLocalId).forEach {
             reconcileSeries(userLocalId, it)
             val event = database.eventDAO().getEventByLocalId(it, userLocalId)
-            val reminder = event?.reminderLocalId?.let { reminderId ->
-                database.reminderDAO().getReminderByLocalId(reminderId, userLocalId)
-            }
+            val reminder = event?.reminderLocalId?.let(activeReminders::get)
             if (event != null && event.deletedAt == null &&
-                reminder != null && reminder.deletedAt == null) {
+                reminder != null) {
                 AlarmScheduler.attemptSchedule(context, ReminderData(
                     reminderLocalId = reminder.reminderLocalId,
                     reminderTime = reminder.reminderTime,
@@ -91,6 +92,15 @@ class EventAlarmCoordinator(private val context: Context) {
             } else if (reminder != null) {
                 AlarmScheduler.cancelAlarm(context, reminder.reminderLocalId)
             }
+        }
+        database.noteDAO().getNotes(userLocalId).forEach { note ->
+            val reminder = note.reminderLocalId?.let(activeReminders::get) ?: return@forEach
+            AlarmScheduler.attemptSchedule(context, ReminderData(
+                reminderLocalId = reminder.reminderLocalId,
+                reminderTime = reminder.reminderTime,
+                reminderTitle = note.title,
+                reminderMessage = reminder.message.orEmpty(),
+            ))
         }
     }
 

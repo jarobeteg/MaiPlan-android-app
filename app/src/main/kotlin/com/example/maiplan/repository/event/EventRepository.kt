@@ -1,6 +1,7 @@
 package com.example.maiplan.repository.event
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Event
@@ -67,7 +68,8 @@ class EventRepository(
                 coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.e("EventRepository", "Could not schedule new event reminder", error)
                 enqueueEventAlarmRecovery(context)
             }
             requestSyncAfterSuccess(result)
@@ -87,7 +89,8 @@ class EventRepository(
                 coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.e("EventRepository", "Could not update event reminder alarm", error)
                 enqueueEventAlarmRecovery(context)
             }
             requestSyncAfterSuccess(result)
@@ -106,7 +109,8 @@ class EventRepository(
                 coordinator.reconcileSeries(userLocalId, eventLocalId)
             } catch (error: CancellationException) {
                 throw error
-            } catch (_: Exception) {
+            } catch (error: Exception) {
+                Log.e("EventRepository", "Could not cancel event reminder alarm", error)
                 enqueueEventAlarmRecovery(context)
             }
             requestSyncAfterSuccess(result)

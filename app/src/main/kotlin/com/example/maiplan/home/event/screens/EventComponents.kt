@@ -49,9 +49,6 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -325,10 +322,18 @@ internal fun EventEditorLayout(
                         title = stringResource(R.string.event_organization_title),
                         subtitle = stringResource(R.string.event_organization_subtitle),
                     ) {
-                        EventCategoryDropdown(
+                        var showCategoryDialog by remember { mutableStateOf(false) }
+                        EventCategoryField(state.selectedCategory) {
+                            showCategoryDialog = true
+                        }
+                        if (showCategoryDialog) CategoryPickerDialog(
                             categories = state.categories,
                             selectedCategory = state.selectedCategory,
-                            onCategorySelected = onCategoryChange,
+                            onCategorySelected = {
+                                onCategoryChange(it)
+                                showCategoryDialog = false
+                            },
+                            onDismiss = { showCategoryDialog = false },
                         )
                     }
 
@@ -819,111 +824,189 @@ internal fun EventSelectionField(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun EventCategoryDropdown(
+internal fun EventCategoryField(selectedCategory: CategoryEntity?, onClick: () -> Unit) {
+    EventSelectionField(
+        label = stringResource(R.string.category),
+        value = selectedCategory?.name ?: "None",
+        icon = selectedCategory?.let { IconData.getIconByKey(it.icon) }
+            ?: Icons.Rounded.Category,
+        onClick = onClick,
+    )
+}
+
+@Composable
+internal fun CategoryPickerDialog(
     categories: List<CategoryEntity>,
     selectedCategory: CategoryEntity?,
     onCategorySelected: (CategoryEntity?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Dialog(onDismissRequest = onDismiss) {
+        CategoryPickerContent(categories, selectedCategory, onCategorySelected, Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+internal fun CategoryPickerOverlay(
+    categories: List<CategoryEntity>,
+    selectedCategory: CategoryEntity?,
+    onCategorySelected: (CategoryEntity?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    Box(Modifier.fillMaxSize()) {
+        Box(
+            Modifier.fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.38f))
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() },
+                ) { onDismiss() },
+        )
+        Box(
+            modifier = Modifier.fillMaxSize().padding(20.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            CategoryPickerContent(
+                categories,
+                selectedCategory,
+                onCategorySelected,
+                Modifier.widthIn(max = 480.dp).fillMaxWidth(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun CategoryPickerContent(
+    categories: List<CategoryEntity>,
+    selectedCategory: CategoryEntity?,
+    onCategorySelected: (CategoryEntity?) -> Unit,
+    modifier: Modifier,
 ) {
     val dark = LocalAppDarkTheme.current
+    val surface = if (dark) Color(0xFF191D2E) else Color.White
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
     val muted = if (dark) Color(0xFFAEB7C9) else EventMuted
-    var expanded by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
+    val border = if (dark) Color(0xFF3A435C) else EventBorder
+    var query by rememberSaveable { mutableStateOf("") }
+    val filteredCategories = remember(query, categories) {
+        if (query.isBlank()) categories
+        else categories.filter { it.name.contains(query, ignoreCase = true) }
+    }
+    val showNone = query.isBlank() || "None".contains(query, ignoreCase = true)
+
+    Surface(
+        onClick = {},
+        color = surface,
+        contentColor = foreground,
+        border = BorderStroke(1.dp, border),
+        modifier = modifier,
+        shape = RoundedCornerShape(24.dp),
     ) {
-        OutlinedTextField(
-            value = selectedCategory?.name ?: "None",
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
-            readOnly = true,
-            singleLine = true,
-            label = { Text(stringResource(R.string.category)) },
-            leadingIcon = {
-                Icon(
-                    imageVector = selectedCategory?.let { IconData.getIconByKey(it.icon) }
-                        ?: Icons.Rounded.Category,
-                    contentDescription = null,
-                    modifier = Modifier.size(21.dp),
-                )
-            },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            shape = RoundedCornerShape(15.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = field,
-                unfocusedContainerColor = field,
-                focusedBorderColor = EventPrimary,
-                unfocusedBorderColor = if (dark) Color(0xFF3A435C) else EventBorder,
-                focusedTextColor = foreground,
-                unfocusedTextColor = foreground,
-                focusedLabelColor = EventPrimary,
-                unfocusedLabelColor = muted,
-                focusedLeadingIconColor = EventPrimary,
-                unfocusedLeadingIconColor = EventPrimary,
-                focusedTrailingIconColor = muted,
-                unfocusedTrailingIconColor = muted,
-            ),
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(if (dark) Color(0xFF20263A) else Color.White),
-        ) {
-            DropdownMenuItem(
-                text = { Text("None", color = foreground) },
-                onClick = {
-                    onCategorySelected(null)
-                    expanded = false
-                },
+        Column(Modifier.padding(20.dp)) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.category_search)) },
+                singleLine = true,
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = field,
+                    unfocusedContainerColor = field,
+                    focusedTextColor = foreground,
+                    unfocusedTextColor = foreground,
+                    cursorColor = EventPrimary,
+                    focusedBorderColor = EventPrimary,
+                    unfocusedBorderColor = border,
+                    focusedLabelColor = EventPrimary,
+                    unfocusedLabelColor = muted,
+                ),
             )
-            if (categories.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.event_no_categories), color = muted) },
-                    onClick = {},
-                    enabled = false,
-                )
-            } else {
-                categories.forEach { category ->
-                    val categoryColor = Color(category.color.toULong())
+            Spacer(Modifier.height(12.dp))
+            LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
+                if (showNone) item(key = "none") {
                     DropdownMenuItem(
-                        text = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Surface(
-                                    modifier = Modifier.size(34.dp),
-                                    shape = RoundedCornerShape(10.dp),
-                                    color = categoryColor.copy(alpha = if (dark) 0.24f else 0.14f),
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Icon(
-                                            imageVector = IconData.getIconByKey(category.icon),
-                                            contentDescription = null,
-                                            tint = if (categoryColor.luminance() > 0.82f) EventPrimary else categoryColor,
-                                            modifier = Modifier.size(19.dp),
-                                        )
-                                    }
-                                }
-                                Spacer(Modifier.width(12.dp))
-                                Text(
-                                    text = category.name,
-                                    color = foreground,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium,
-                                )
-                            }
-                        },
-                        onClick = {
-                            onCategorySelected(category)
-                            expanded = false
+                        text = { CategoryPickerRow(null, "None", foreground, dark) },
+                        onClick = { onCategorySelected(null) },
+                        trailingIcon = {
+                            if (selectedCategory == null) Icon(
+                                Icons.Rounded.Check,
+                                contentDescription = null,
+                                tint = EventPrimaryLight,
+                            )
                         },
                     )
                 }
+                items(filteredCategories, key = { it.categoryLocalId }) { category ->
+                    DropdownMenuItem(
+                        text = { CategoryPickerRow(category, category.name, foreground, dark) },
+                        onClick = { onCategorySelected(category) },
+                        trailingIcon = {
+                            if (selectedCategory?.categoryLocalId == category.categoryLocalId) Icon(
+                                Icons.Rounded.Check,
+                                contentDescription = null,
+                                tint = EventPrimaryLight,
+                            )
+                        },
+                    )
+                }
+                if (!showNone && filteredCategories.isEmpty()) item(key = "empty") {
+                    Text(
+                        text = stringResource(R.string.category_empty_search_title),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = muted,
+                    )
+                }
+                if (showNone && filteredCategories.isEmpty() && categories.isEmpty()) {
+                    item(key = "no-categories") {
+                        Text(
+                            text = stringResource(R.string.event_no_categories),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = muted,
+                        )
+                    }
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun CategoryPickerRow(
+    category: CategoryEntity?,
+    label: String,
+    foreground: Color,
+    dark: Boolean,
+) {
+    val accent = category?.let { Color(it.color.toULong()) } ?: EventPrimary
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Surface(
+            modifier = Modifier.size(34.dp),
+            shape = RoundedCornerShape(10.dp),
+            color = accent.copy(alpha = if (dark) 0.24f else 0.14f),
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = category?.let { IconData.getIconByKey(it.icon) }
+                        ?: Icons.Rounded.Category,
+                    contentDescription = null,
+                    tint = if (category == null) EventPrimaryLight
+                        else if (accent.luminance() > 0.82f) EventPrimary else accent,
+                    modifier = Modifier.size(19.dp),
+                )
+            }
+        }
+        Spacer(Modifier.width(12.dp))
+        Text(
+            text = label,
+            color = foreground,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
     }
 }
 

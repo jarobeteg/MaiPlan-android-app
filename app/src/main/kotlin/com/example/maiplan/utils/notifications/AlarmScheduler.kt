@@ -2,6 +2,7 @@ package com.example.maiplan.utils.notifications
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -33,7 +34,13 @@ object AlarmScheduler {
                 val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
                     data = "package:${context.packageName}".toUri()
                 }
-                context.startActivity(intent)
+                try {
+                    context.startActivity(intent)
+                } catch (_: ActivityNotFoundException) {
+                    context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = "package:${context.packageName}".toUri()
+                    })
+                }
             }
         }
     }

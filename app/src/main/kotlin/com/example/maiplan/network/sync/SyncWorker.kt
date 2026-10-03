@@ -6,6 +6,7 @@ import androidx.work.WorkerParameters
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.network.TideHttpException
 import com.example.maiplan.network.TideProtocolException
+import com.example.maiplan.utils.AppVisibilityTracker
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.EventAlarmCoordinator
@@ -23,11 +24,14 @@ class SyncWorker(
         if (!sessionManager.hasSession()) {
             sessionManager.clearSession()
             UserSession.clear()
-            return Result.success()
+            return Result.failure()
         }
 
-        if (!sessionManager.hasUsableAccessToken()) {
-            return Result.success()
+        // ForegroundTokenAuthenticator can renew an expired access token while the app is open.
+        // A background run cannot renew it, so report that run as incomplete.
+        if (!sessionManager.hasUsableAccessToken() &&
+            !AppVisibilityTracker.isAppInForeground) {
+            return Result.failure()
         }
 
         return try {
@@ -35,7 +39,7 @@ class SyncWorker(
                 ?: run {
                     sessionManager.clearSession()
                     UserSession.clear()
-                    return Result.success()
+                    return Result.failure()
                 }
 
             val activeUser = MaiPlanDatabase.getDatabase(applicationContext)
@@ -45,7 +49,7 @@ class SyncWorker(
             if (activeUser == null) {
                 sessionManager.clearSession()
                 UserSession.clear()
-                return Result.success()
+                return Result.failure()
             }
 
             UserSession.setup(activeUser)

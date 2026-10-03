@@ -8,8 +8,9 @@ import android.util.Log
 class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("ALARM_TEST", "!!! RECEIVER HIT SUCCESSFULLY !!!")
         val reminderLocalId = intent.getLongExtra("reminder_local_id", 0L)
+        if (reminderLocalId <= 0L) return
+        Log.d("ReminderReceiver", "Delivering reminder $reminderLocalId")
         val reminderTitle = intent.getStringExtra("reminder_title") ?: "Title"
         val reminderMessage = intent.getStringExtra("reminder_message") ?: "Message"
 
