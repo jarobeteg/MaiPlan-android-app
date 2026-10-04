@@ -79,7 +79,7 @@ import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.common.IconData
 import com.example.maiplan.viewmodel.note.NoteViewModel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -222,7 +222,7 @@ private fun SwipeableNoteCard(
     )
 
     LaunchedEffect(dismissState, note.noteLocalId) {
-        snapshotFlow { dismissState.currentValue }.collectLatest { value ->
+        snapshotFlow { dismissState.settledValue }.collect { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)

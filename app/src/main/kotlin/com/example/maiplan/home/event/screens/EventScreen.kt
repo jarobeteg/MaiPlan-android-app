@@ -72,7 +72,7 @@ import com.example.maiplan.home.event.utils.LocalDateSaver
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.viewmodel.event.EventViewModel
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -492,7 +492,7 @@ private fun SwipeableEventCard(
     )
 
     LaunchedEffect(dismissState, event.listKey) {
-        snapshotFlow { dismissState.currentValue }.collectLatest { value ->
+        snapshotFlow { dismissState.settledValue }.collect { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
