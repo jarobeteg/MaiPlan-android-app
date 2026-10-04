@@ -12,12 +12,14 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.reminder.ReminderLocalDataSource
 import com.example.maiplan.utils.common.IconData
-import com.example.maiplan.utils.notifications.AlarmScheduler
-import com.example.maiplan.utils.notifications.EventAlarmCoordinator
-import com.example.maiplan.utils.notifications.ReminderData
+import com.example.maiplan.utils.notifications.ReminderCoordinator
+import com.example.maiplan.utils.notifications.ReminderAlarmScheduler
 import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
 import java.time.LocalDate
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 data class EventEditSnapshot(
     val event: EventEntity,
@@ -31,7 +33,7 @@ class EventRepository(
     private val localReminder: ReminderLocalDataSource,
     private val requestSync: () -> Unit = {}
 ) {
-    private val coordinator = EventAlarmCoordinator(context.applicationContext)
+    private val coordinator = ReminderCoordinator(context.applicationContext)
     private suspend fun EventEntity.toCalendarEventUI(day: EventDayEntry): CalendarEventUI {
         val category = categoryLocalId?.let { localCategory.getCategory(it, userLocalId) }
         val reminder = reminderLocalId?.let {
@@ -61,17 +63,10 @@ class EventRepository(
         reminder: ReminderEntity?,
         event: EventEntity
     ): Result<StoredEventWithReminder> {
-        val result = local.createEventWithReminder(reminder, event)
+        val result = withContext(NonCancellable + Dispatchers.IO) {
+            local.createEventWithReminder(reminder, event).let { armSaved(it, event.userLocalId) }
+        }
         if (result is Result.Success) {
-            try {
-                scheduleAbsolute(result.data)
-                coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                Log.e("EventRepository", "Could not schedule new event reminder", error)
-                enqueueEventAlarmRecovery(context)
-            }
             requestSyncAfterSuccess(result)
         }
         return result
@@ -81,18 +76,10 @@ class EventRepository(
         reminder: ReminderEntity?,
         event: EventEntity
     ): Result<StoredEventWithReminder> {
-        val result = local.updateEventWithReminder(reminder, event)
+        val result = withContext(NonCancellable + Dispatchers.IO) {
+            local.updateEventWithReminder(reminder, event).let { armSaved(it, event.userLocalId) }
+        }
         if (result is Result.Success) {
-            try {
-                result.data.removedReminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
-                scheduleAbsolute(result.data)
-                coordinator.reconcileSeries(event.userLocalId, result.data.event.eventLocalId)
-            } catch (error: CancellationException) {
-                throw error
-            } catch (error: Exception) {
-                Log.e("EventRepository", "Could not update event reminder alarm", error)
-                enqueueEventAlarmRecovery(context)
-            }
             requestSyncAfterSuccess(result)
         }
         return result
@@ -101,12 +88,12 @@ class EventRepository(
     suspend fun softDeleteEventWithReminder(
         eventLocalId: Long,
         userLocalId: Long
-    ): Result<Long?> {
+    ): Result<Unit> {
         val result = local.softDeleteEventWithReminder(eventLocalId, userLocalId)
         if (result is Result.Success) {
             try {
-                result.data?.let { AlarmScheduler.cancelAlarm(context, it) }
-                coordinator.reconcileSeries(userLocalId, eventLocalId)
+                ReminderAlarmScheduler.cancel(context, "event:$eventLocalId")
+                coordinator.recover(userLocalId)
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
@@ -148,13 +135,16 @@ class EventRepository(
         if (result is Result.Success) runCatching(requestSync)
     }
 
-    private fun scheduleAbsolute(stored: StoredEventWithReminder) {
-        val reminder = stored.reminder ?: return
-        AlarmScheduler.attemptSchedule(context, ReminderData(
-            reminderLocalId = reminder.reminderLocalId,
-            reminderTime = reminder.reminderTime,
-            reminderTitle = stored.event.title,
-            reminderMessage = reminder.message.orEmpty(),
-        ))
+    private suspend fun armSaved(result: Result<StoredEventWithReminder>, user: Long): Result<StoredEventWithReminder> {
+        if (result !is Result.Success) return result
+        val warning = try {
+            coordinator.recover(user)
+            coordinator.warning("event:${result.data.event.eventLocalId}")
+        } catch (error: Exception) {
+            Log.e("EventRepository", "Event saved; alarm registration needs recovery", error)
+            enqueueEventAlarmRecovery(context)
+            "The event was saved, but its reminder could not be armed. Please reopen the app to retry."
+        }
+        return Result.Success(result.data.copy(reminderWarning = warning))
     }
 }

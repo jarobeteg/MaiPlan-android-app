@@ -1,5 +1,13 @@
 package com.example.maiplan.repository.note
 
+import android.content.Context
+import android.util.Log
+import com.example.maiplan.utils.notifications.ReminderCoordinator
+import com.example.maiplan.utils.notifications.ReminderAlarmScheduler
+import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
@@ -13,10 +21,12 @@ data class NoteSaveOutcome(
     val reminderLocalId: Long?,
     val reminderTime: Long?,
     val reminderTitle: String,
-    val reminderMessage: String
+    val reminderMessage: String,
+    val reminderWarning: String? = null,
 )
 
 class NoteRepository(
+    private val context: Context,
     private val local: NoteLocalDataSource,
     private val localCategory: CategoryLocalDataSource,
     private val localReminder: ReminderLocalDataSource,
@@ -34,22 +44,28 @@ class NoteRepository(
         reminder: ReminderEntity?,
         note: NoteEntity
     ): Result<NoteSaveOutcome> {
-        return local.createNoteWithReminder(reminder, note)
-            .also(::requestSyncAfterSuccess)
-            .map { stored -> stored.toSaveOutcome() }
+        return withContext(NonCancellable + Dispatchers.IO) {
+            armSaved(local.createNoteWithReminder(reminder, note), note.userLocalId)
+        }.also(::requestSyncAfterSuccess)
     }
 
     suspend fun updateNoteWithReminder(
         reminder: ReminderEntity?,
         note: NoteEntity
     ): Result<NoteSaveOutcome> {
-        return local.updateNoteWithReminder(reminder, note)
-            .also(::requestSyncAfterSuccess)
-            .map { stored -> stored.toSaveOutcome() }
+        return withContext(NonCancellable + Dispatchers.IO) {
+            armSaved(local.updateNoteWithReminder(reminder, note), note.userLocalId)
+        }.also(::requestSyncAfterSuccess)
     }
 
     suspend fun softDeleteNote(noteLocalId: Long, userLocalId: Long): Result<Unit> {
         return local.softDeleteNoteWithReminder(noteLocalId, userLocalId)
+            .also {
+                if (it is Result.Success) {
+                    ReminderAlarmScheduler.cancel(context, "note:$noteLocalId")
+                    enqueueEventAlarmRecovery(context)
+                }
+            }
             .also(::requestSyncAfterSuccess)
     }
 
@@ -83,6 +99,20 @@ class NoteRepository(
             reminderTitle = note.title,
             reminderMessage = reminder?.message.orEmpty()
         )
+    }
+
+    private suspend fun armSaved(result: Result<StoredNoteWithReminder>, user: Long): Result<NoteSaveOutcome> {
+        if (result !is Result.Success) return result.map { it.toSaveOutcome() }
+        val coordinator = ReminderCoordinator(context)
+        val warning = try {
+            coordinator.recover(user)
+            coordinator.warning("note:${result.data.note.noteLocalId}")
+        } catch (error: Exception) {
+            Log.e("NoteRepository", "Note saved; alarm registration needs recovery", error)
+            enqueueEventAlarmRecovery(context)
+            "The note was saved, but its reminder could not be armed. Please reopen the app to retry."
+        }
+        return Result.Success(result.data.toSaveOutcome().copy(reminderWarning = warning))
     }
 
     private fun requestSyncAfterSuccess(result: Result<*>) {

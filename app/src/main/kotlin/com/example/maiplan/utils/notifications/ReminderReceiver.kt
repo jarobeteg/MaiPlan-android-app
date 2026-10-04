@@ -8,15 +8,7 @@ import android.util.Log
 class ReminderReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val reminderLocalId = intent.getLongExtra("reminder_local_id", 0L)
-        if (reminderLocalId <= 0L) return
-        Log.d("ReminderReceiver", "Delivering reminder $reminderLocalId")
-        val reminderTitle = intent.getStringExtra("reminder_title") ?: "Title"
-        val reminderMessage = intent.getStringExtra("reminder_message") ?: "Message"
-
-        NotificationHelper.createNotificationChannel(context)
-
-        val notificationId = (reminderLocalId xor (reminderLocalId ushr 32)).toInt()
-        NotificationHelper.showNotification(context, reminderTitle, reminderMessage, notificationId)
+        Log.i("ReminderReceiver", "Alarm received: ${intent.getStringExtra("alarm_key")}")
+        recoverReminders(context)
     }
 }

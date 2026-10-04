@@ -723,15 +723,10 @@ internal fun EventFullEditor(
                     colors = ButtonDefaults.textButtonColors(contentColor = EventPrimary),
                     onClick = {
                         notificationDialogMode = null
-                        val pending = pendingSave
                         pendingSave = null
-                        pending?.let { currentOnSave(it.first, it.second) }
                     },
                 ) {
-                    Text(stringResource(
-                        if (mode == "exact") R.string.event_exact_alarm_save_anyway
-                        else R.string.event_notifications_save_anyway,
-                    ))
+                    Text(stringResource(R.string.event_reminder_back_to_editor))
                 }
             },
             containerColor = if (dark) Color(0xFF191D2E) else Color.White,

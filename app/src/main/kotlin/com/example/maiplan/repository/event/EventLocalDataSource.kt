@@ -12,6 +12,7 @@ import com.example.maiplan.network.sync.TideOperation
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
 import com.example.maiplan.repository.reminder.ReminderMutationWriter
+import com.example.maiplan.utils.notifications.ReminderPlanWriter
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.time.Instant
@@ -20,7 +21,7 @@ import java.util.UUID
 data class StoredEventWithReminder(
     val event: EventEntity,
     val reminder: ReminderEntity?,
-    val removedReminderLocalId: Long? = null
+    val reminderWarning: String? = null,
 )
 
 class EventLocalDataSource(
@@ -64,6 +65,7 @@ class EventLocalDataSource(
                 val eventLocalId = eventDao.insertEvent(created)
                 val storedEvent = created.copy(eventLocalId = eventLocalId)
                 enqueue(storedEvent, TideOperation.CREATE, null, now)
+                ReminderPlanWriter(database).event(storedEvent, storedReminder)
                 StoredEventWithReminder(storedEvent, storedReminder)
             }
         }
@@ -132,11 +134,8 @@ class EventLocalDataSource(
                 reminderToDelete?.let {
                     reminderWriter.delete(it, event.userLocalId, now)
                 }
-                StoredEventWithReminder(
-                    event = updated,
-                    reminder = storedReminder,
-                    removedReminderLocalId = reminderToDelete
-                )
+                ReminderPlanWriter(database).event(updated, storedReminder)
+                StoredEventWithReminder(event = updated, reminder = storedReminder)
             }
         }
     }
@@ -144,7 +143,7 @@ class EventLocalDataSource(
     suspend fun softDeleteEventWithReminder(
         eventLocalId: Long,
         userLocalId: Long
-    ): Result<Long?> {
+    ): Result<Unit> {
         return handleLocalResponse {
             database.withTransaction {
                 val existing = checkNotNull(
@@ -158,11 +157,12 @@ class EventLocalDataSource(
                         "Event deletion affected an unexpected number of rows"
                     }
                     enqueue(tombstone, TideOperation.DELETE, existing.serverVersion, now)
+                    ReminderPlanWriter(database).event(tombstone, null)
                     existing.reminderLocalId?.let {
                         reminderWriter.delete(it, userLocalId, now)
                     }
                 }
-                existing.reminderLocalId
+                Unit
             }
         }
     }

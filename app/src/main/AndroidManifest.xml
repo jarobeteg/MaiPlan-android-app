@@ -37,8 +37,6 @@
         </activity>
         <receiver android:name=".utils.notifications.ReminderReceiver"
             android:exported="false"/>
-        <receiver android:name=".utils.notifications.EventReminderReceiver"
-            android:exported="false" />
         <receiver android:name=".utils.notifications.EventAlarmRecoveryReceiver"
             android:exported="false">
             <intent-filter>

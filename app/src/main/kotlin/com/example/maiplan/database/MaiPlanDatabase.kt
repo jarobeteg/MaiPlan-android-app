@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.example.maiplan.database.dao.ScheduledReminderDAO
+import com.example.maiplan.database.entities.ScheduledReminderEntity
 import com.example.maiplan.database.converters.InstantTypeConverter
 import com.example.maiplan.database.converters.LocalDateTypeConverter
 import com.example.maiplan.database.converters.LocalTimeTypeConverter
@@ -32,7 +34,8 @@ import com.example.maiplan.database.entities.SyncStateEntity
         EventEntity::class,
         NoteEntity::class,
         OutboxEntity::class,
-        SyncStateEntity::class
+        SyncStateEntity::class,
+        ScheduledReminderEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -53,6 +56,7 @@ abstract class MaiPlanDatabase: RoomDatabase() {
     abstract fun noteDAO(): NoteDAO
     abstract fun outboxDAO(): OutboxDAO
     abstract fun syncStateDAO(): SyncStateDAO
+    abstract fun scheduledReminderDAO(): ScheduledReminderDAO
 
     companion object {
         @Volatile
@@ -65,7 +69,6 @@ abstract class MaiPlanDatabase: RoomDatabase() {
                     MaiPlanDatabase::class.java,
                     "mai_plan_database"
                 )
-                    .fallbackToDestructiveMigration(false)
                     .build()
                 INSTANCE = instance
                 instance

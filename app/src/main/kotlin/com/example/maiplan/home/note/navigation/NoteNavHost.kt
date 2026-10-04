@@ -2,6 +2,7 @@ package com.example.maiplan.home.note.navigation
 
 import android.Manifest
 import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.tween
@@ -40,7 +41,6 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.utils.notifications.NotificationHelper
-import com.example.maiplan.utils.notifications.ReminderData
 import com.example.maiplan.utils.toEpochMillis
 import com.example.maiplan.viewmodel.note.NoteViewModel
 
@@ -162,7 +162,6 @@ fun NavGraphBuilder.noteNavGraph(
             onCreateClick = { localNavController.navigate(NoteRoutes.Create.route) },
             onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteLocalId)) },
             onDeleteClick = { note ->
-                note.reminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
                 noteViewModel.softDeleteNote(note.noteLocalId, userLocalId)
             }
         )
@@ -206,16 +205,7 @@ fun NavGraphBuilder.noteNavGraph(
         val result = noteViewModel.createNoteResult.observeAsState().value
         LaunchedEffect(result) {
             if (result is Result.Success) {
-                val saved = result.data
-                if (saved.reminderLocalId != null && saved.reminderTime != null) {
-                    val reminderData = ReminderData(
-                        reminderLocalId = saved.reminderLocalId,
-                        reminderTime = saved.reminderTime,
-                        reminderTitle = saved.reminderTitle,
-                        reminderMessage = saved.reminderMessage,
-                    )
-                    AlarmScheduler.attemptSchedule(context, reminderData)
-                }
+                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 localNavController.popBackStack()
                 noteViewModel.clearCreateResult()
             }
@@ -269,18 +259,7 @@ fun NavGraphBuilder.noteNavGraph(
         val result = noteViewModel.updateNoteResult.observeAsState().value
         LaunchedEffect(result) {
             if (result is Result.Success) {
-                val saved = result.data
-                if (saved.reminderLocalId != null && saved.reminderTime != null) {
-                    val reminderData = ReminderData(
-                        reminderLocalId = saved.reminderLocalId,
-                        reminderTime = saved.reminderTime,
-                        reminderTitle = saved.reminderTitle,
-                        reminderMessage = saved.reminderMessage,
-                    )
-                    AlarmScheduler.attemptSchedule(context, reminderData)
-                } else {
-                    originalReminderLocalId?.let { AlarmScheduler.cancelAlarm(context, it) }
-                }
+                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 localNavController.popBackStack()
                 noteViewModel.clearUpdateResult()
             }

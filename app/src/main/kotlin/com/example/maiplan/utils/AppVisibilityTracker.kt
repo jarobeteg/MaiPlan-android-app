@@ -3,6 +3,7 @@ package com.example.maiplan.utils
 import android.app.Activity
 import android.app.Application
 import android.os.Bundle
+import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
 
 object AppVisibilityTracker : Application.ActivityLifecycleCallbacks {
     @Volatile
@@ -12,6 +13,7 @@ object AppVisibilityTracker : Application.ActivityLifecycleCallbacks {
         get() = startedActivityCount > 0
 
     override fun onActivityStarted(activity: Activity) {
+        if (startedActivityCount == 0) enqueueEventAlarmRecovery(activity.applicationContext)
         startedActivityCount += 1
     }
 

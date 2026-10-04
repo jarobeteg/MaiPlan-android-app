@@ -9,7 +9,7 @@ import com.example.maiplan.network.TideProtocolException
 import com.example.maiplan.utils.AppVisibilityTracker
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
-import com.example.maiplan.utils.notifications.EventAlarmCoordinator
+import com.example.maiplan.utils.notifications.ReminderCoordinator
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
@@ -27,8 +27,6 @@ class SyncWorker(
             return Result.failure()
         }
 
-        // ForegroundTokenAuthenticator can renew an expired access token while the app is open.
-        // A background run cannot renew it, so report that run as incomplete.
         if (!sessionManager.hasUsableAccessToken() &&
             !AppVisibilityTracker.isAppInForeground) {
             return Result.failure()
@@ -60,7 +58,7 @@ class SyncWorker(
                 userSyncId = activeUser.syncId
             )
 
-            EventAlarmCoordinator(applicationContext).reconcileAll(activeUser.userLocalId)
+            ReminderCoordinator(applicationContext).recover(activeUser.userLocalId)
 
             if (hasMoreWork) Result.retry() else Result.success()
         } catch (exception: CancellationException) {

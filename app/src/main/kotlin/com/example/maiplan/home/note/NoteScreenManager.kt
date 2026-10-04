@@ -24,6 +24,7 @@ fun NoteScreenManager(rootNavController: NavHostController) {
     val localNavController = rememberNavController()
     val noteViewModel = remember(context) {
         val repository = NoteRepository(
+            context = context.applicationContext,
             local = NoteLocalDataSource(context),
             localCategory = CategoryLocalDataSource(context),
             localReminder = ReminderLocalDataSource(context),

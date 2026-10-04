@@ -74,7 +74,7 @@ private fun monthlyDate(month: YearMonth, anchor: LocalDate, mode: String): Loca
     when (mode) {
         "DAY_OF_MONTH" ->
             if (anchor.dayOfMonth <= month.lengthOfMonth()) month.atDay(anchor.dayOfMonth)
-            else null // Skip months without the selected date.
+            else null
         "LAST_DAY" -> month.atEndOfMonth()
         "NTH_WEEKDAY" -> {
             val ordinal = (anchor.dayOfMonth - 1) / 7 + 1

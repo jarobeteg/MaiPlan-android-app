@@ -1,5 +1,7 @@
 package com.example.maiplan.home.event.navigation
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -61,6 +63,7 @@ fun NavGraphBuilder.eventNavGraph(
 
     // --- Create Event Screen ---
     composable(EventRoutes.Create.route) {
+        val context = LocalContext.current
         val saveResult by eventViewModel.saveEventResult.observeAsState()
         CreateEventScreen(
             categoryViewModel = categoryViewModel,
@@ -72,6 +75,7 @@ fun NavGraphBuilder.eventNavGraph(
         LaunchedEffect(saveResult) {
             val result = saveResult
             if (result is Result.Success) {
+                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 eventViewModel.clearSaveResult()
                 localNavController.popBackStack()
             }
@@ -85,6 +89,7 @@ fun NavGraphBuilder.eventNavGraph(
             navArgument("eventLocalId") { type = NavType.LongType }
         )
     ) { backstackEntry ->
+        val context = LocalContext.current
         val saveResult by eventViewModel.saveEventResult.observeAsState()
         val eventLocalId = backstackEntry
             .arguments
@@ -102,6 +107,7 @@ fun NavGraphBuilder.eventNavGraph(
         LaunchedEffect(saveResult) {
             val result = saveResult
             if (result is Result.Success) {
+                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 eventViewModel.clearSaveResult()
                 localNavController.popBackStack()
             }

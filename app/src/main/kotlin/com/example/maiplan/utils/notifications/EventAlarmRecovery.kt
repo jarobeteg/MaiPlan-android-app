@@ -10,16 +10,19 @@ import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.example.maiplan.database.MaiPlanDatabase
-import com.example.maiplan.utils.SessionManager
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CancellationException
 
 class EventAlarmRecoveryReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED &&
             !AlarmScheduler.canScheduleExactAlarms(context)) return
         enqueueEventAlarmRecovery(context)
+        recoverReminders(context)
     }
 }
 
@@ -29,8 +32,12 @@ fun enqueueEventAlarmRecovery(context: Context) {
         request.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
     }
     WorkManager.getInstance(context).enqueueUniqueWork(
-        "event-alarm-recovery", ExistingWorkPolicy.REPLACE,
+        "event-alarm-recovery", ExistingWorkPolicy.KEEP,
         request.build(),
+    )
+    WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+        "reminder-queue-maintenance", ExistingPeriodicWorkPolicy.KEEP,
+        PeriodicWorkRequestBuilder<EventAlarmRecoveryWorker>(15, TimeUnit.MINUTES).build(),
     )
 }
 
@@ -39,13 +46,11 @@ class EventAlarmRecoveryWorker(
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result {
-        val session = SessionManager(applicationContext)
-        val syncId = session.getActiveUserSyncId() ?: return Result.success()
-        val user = MaiPlanDatabase.getDatabase(applicationContext).userDAO()
-            .getActiveUserBySyncId(syncId) ?: return Result.success()
         return try {
-            EventAlarmCoordinator(applicationContext).reconcileAll(user.userLocalId)
+            ReminderCoordinator(applicationContext).recover()
             Result.success()
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: Exception) {
             Log.e("EventAlarmRecovery", "Could not restore reminder alarms", error)
             Result.retry()

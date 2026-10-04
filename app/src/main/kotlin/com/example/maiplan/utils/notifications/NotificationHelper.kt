@@ -82,11 +82,15 @@ object NotificationHelper {
         }
     }
 
-    fun showNotification(context: Context, title: String, message: String, notificationId: Int) {
+    fun showNotification(
+        context: Context, title: String, message: String, notificationId: Int,
+        notificationTag: String? = null, scheduledTime: Long? = null,
+    ): Boolean {
         if (!canDeliverReminders(context)) {
             Log.w("NotificationHelper", "Reminder notifications are disabled.")
-            return
+            return false
         }
+        createNotificationChannel(context)
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -101,16 +105,21 @@ object NotificationHelper {
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+        scheduledTime?.let { builder.setWhen(it).setShowWhen(true) }
 
         val notificationManager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         try {
-            notificationManager.notify(notificationId, builder.build())
+            notificationManager.notify(notificationTag, notificationId, builder.build())
+            return true
         } catch (e: SecurityException) {
             Log.e("NotificationHelper", "Unable to post reminder notification.", e)
+            return false
         }
     }
 }

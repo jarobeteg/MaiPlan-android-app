@@ -77,8 +77,8 @@ fun validateEventDefinition(event: EventEntity) {
         val daySpan = ChronoUnit.DAYS.between(event.startDate, event.endDate)
         val datesToCheck = when (event.recurrenceFrequency) {
             "DAILY" -> 2
-            "WEEKLY" -> 16 // Includes a full week and the start of the next repeat cycle.
-            else -> 4801 // Covers month and leap-year patterns across a Gregorian cycle.
+            "WEEKLY" -> 16
+            else -> 4801
         }
         val overlapping = daySpan > 0 && event.ruleDatesOnOrAfter(event.startDate)
             .take(datesToCheck)

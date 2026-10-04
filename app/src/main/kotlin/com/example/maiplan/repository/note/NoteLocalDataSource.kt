@@ -12,6 +12,7 @@ import com.example.maiplan.network.sync.TideOperation
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
 import com.example.maiplan.repository.reminder.ReminderMutationWriter
+import com.example.maiplan.utils.notifications.ReminderPlanWriter
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.time.Instant
@@ -76,6 +77,7 @@ class NoteLocalDataSource(
                 )
                 val noteLocalId = noteDao.insertNote(created)
                 val storedNote = created.copy(noteLocalId = noteLocalId)
+                ReminderPlanWriter(database).note(storedNote, storedReminder)
                 enqueue(storedNote, TideOperation.CREATE, null, now)
                 StoredNoteWithReminder(storedNote, storedReminder)
             }
@@ -127,6 +129,7 @@ class NoteLocalDataSource(
                 reminderToDelete?.let {
                     reminderWriter.delete(it, note.userLocalId, now)
                 }
+                ReminderPlanWriter(database).note(updated, storedReminder)
                 StoredNoteWithReminder(updated, storedReminder)
             }
         }
@@ -149,6 +152,7 @@ class NoteLocalDataSource(
                         "Note deletion affected an unexpected number of rows"
                     }
                     enqueue(tombstone, TideOperation.DELETE, existing.serverVersion, now)
+                    ReminderPlanWriter(database).note(tombstone, null)
                     existing.reminderLocalId?.let {
                         reminderWriter.delete(it, userLocalId, now)
                     }
