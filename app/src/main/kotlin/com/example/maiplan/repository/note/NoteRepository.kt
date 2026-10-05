@@ -6,6 +6,7 @@ import com.example.maiplan.utils.notifications.ReminderCoordinator
 import com.example.maiplan.utils.notifications.ReminderAlarmScheduler
 import com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 import com.example.maiplan.database.entities.CategoryEntity
@@ -69,6 +70,15 @@ class NoteRepository(
             .also(::requestSyncAfterSuccess)
     }
 
+    suspend fun setNotePinned(
+        noteLocalId: Long,
+        userLocalId: Long,
+        isPinned: Boolean
+    ): Result<Unit> {
+        return local.setNotePinned(noteLocalId, userLocalId, isPinned)
+            .also(::requestSyncAfterSuccess)
+    }
+
     suspend fun getReminder(
         reminderLocalId: Long?,
         userLocalId: Long
@@ -76,6 +86,8 @@ class NoteRepository(
         if (reminderLocalId == null) return Result.Success(null)
         return try {
             Result.Success(localReminder.getReminder(reminderLocalId, userLocalId))
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: Exception) {
             Result.Error(exception)
         }

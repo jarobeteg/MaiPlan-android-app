@@ -28,6 +28,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.NotificationsNone
+import androidx.compose.material.icons.rounded.PushPin
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +42,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxState
@@ -59,6 +62,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
@@ -75,6 +79,7 @@ import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.home.navigation.HomeNavigationBar
+import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.adaptiveContentWidth
 import com.example.maiplan.utils.common.IconData
@@ -90,11 +95,25 @@ fun NoteListScreen(
     viewModel: NoteViewModel,
     onCreateClick: () -> Unit,
     onNoteClick: (NoteEntity) -> Unit,
+    onPinClick: (NoteEntity) -> Unit,
     onDeleteClick: (NoteEntity) -> Unit,
 ) {
     val context = LocalContext.current
     val notes by viewModel.noteList.observeAsState(emptyList())
     val categories by viewModel.categoryList.observeAsState(emptyList())
+    val pinResult by viewModel.pinNoteResult.observeAsState(Result.Idle)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val pinErrorMessage = stringResource(R.string.note_pin_error)
+    LaunchedEffect(pinResult) {
+        when (pinResult) {
+            is Result.Error, is Result.Failure -> {
+                viewModel.clearPinResult()
+                snackbarHostState.showSnackbar(pinErrorMessage)
+            }
+            is Result.Success -> viewModel.clearPinResult()
+            else -> Unit
+        }
+    }
     val adaptiveLayout = LocalAdaptiveLayout.current
     val compactLandscape = adaptiveLayout.isLandscape && adaptiveLayout.isShort
     var searchQuery by remember { mutableStateOf("") }
@@ -105,12 +124,15 @@ fun NoteListScreen(
                 note.content.orEmpty().contains(searchQuery, ignoreCase = true))
     }
     val isFiltered = searchQuery.isNotBlank() || selectedCategoryLocalId != null
+    val pinnedNotes = filteredNotes.filter { it.isPinned }
+    val otherNotes = filteredNotes.filterNot { it.isPinned }
 
     NoteScreenBackground {
         Scaffold(
             containerColor = Color.Transparent,
             topBar = { NotesTopBar(compact = compactLandscape) },
             bottomBar = { HomeNavigationBar(rootNavController, context) },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             floatingActionButton = {
                 if (compactLandscape) {
                     FloatingActionButton(
@@ -193,11 +215,28 @@ fun NoteListScreen(
                         contentPadding = PaddingValues(bottom = if (compactLandscape) 70.dp else 96.dp),
                         verticalArrangement = Arrangement.spacedBy(if (compactLandscape) 8.dp else 12.dp),
                     ) {
-                        items(filteredNotes, key = { it.noteLocalId }) { note ->
+                        if (pinnedNotes.isNotEmpty()) {
+                            item { NoteSectionHeader(stringResource(R.string.note_pinned_section)) }
+                        }
+                        items(pinnedNotes, key = { it.noteLocalId }) { note ->
                             SwipeableNoteCard(
                                 note = note,
                                 category = categories.find { it.categoryLocalId == note.categoryLocalId },
                                 onEdit = { onNoteClick(note) },
+                                onPin = { onPinClick(note) },
+                                onDelete = { onDeleteClick(note) },
+                                compact = compactLandscape,
+                            )
+                        }
+                        if (pinnedNotes.isNotEmpty() && otherNotes.isNotEmpty()) {
+                            item { NoteSectionHeader(stringResource(R.string.note_other_section)) }
+                        }
+                        items(otherNotes, key = { it.noteLocalId }) { note ->
+                            SwipeableNoteCard(
+                                note = note,
+                                category = categories.find { it.categoryLocalId == note.categoryLocalId },
+                                onEdit = { onNoteClick(note) },
+                                onPin = { onPinClick(note) },
                                 onDelete = { onDeleteClick(note) },
                                 compact = compactLandscape,
                             )
@@ -210,10 +249,22 @@ fun NoteListScreen(
 }
 
 @Composable
+private fun NoteSectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelLarge,
+        fontWeight = FontWeight.SemiBold,
+        color = if (LocalAppDarkTheme.current) Color(0xFFAEB7C9) else NoteMuted,
+        modifier = Modifier.padding(start = 3.dp, top = 4.dp),
+    )
+}
+
+@Composable
 private fun SwipeableNoteCard(
     note: NoteEntity,
     category: CategoryEntity?,
     onEdit: () -> Unit,
+    onPin: () -> Unit,
     onDelete: () -> Unit,
     compact: Boolean,
 ) {
@@ -245,7 +296,7 @@ private fun SwipeableNoteCard(
             note = note,
             category = category,
             onClick = onEdit,
-            onDeleteClick = onDelete,
+            onPinClick = onPin,
             compact = compact,
         )
     }
@@ -538,7 +589,7 @@ private fun NoteCard(
     note: NoteEntity,
     category: CategoryEntity?,
     onClick: () -> Unit,
-    onDeleteClick: () -> Unit,
+    onPinClick: () -> Unit,
     compact: Boolean,
 ) {
     val dark = LocalAppDarkTheme.current
@@ -637,12 +688,16 @@ private fun NoteCard(
                     }
                 }
             }
-            IconButton(onClick = onDeleteClick, modifier = Modifier.size(40.dp)) {
+            IconButton(onClick = onPinClick, modifier = Modifier.size(40.dp)) {
                 Icon(
-                    Icons.Rounded.DeleteOutline,
-                    contentDescription = stringResource(R.string.note_delete),
-                    tint = muted,
-                    modifier = Modifier.size(20.dp),
+                    Icons.Rounded.PushPin,
+                    contentDescription = stringResource(
+                        if (note.isPinned) R.string.note_unpin else R.string.note_pin,
+                    ),
+                    tint = if (note.isPinned) NotePrimary else muted,
+                    modifier = Modifier
+                        .size(21.dp)
+                        .rotate(if (note.isPinned) 30f else 0f),
                 )
             }
         }

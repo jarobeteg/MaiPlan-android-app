@@ -40,7 +40,7 @@ interface NoteDAO {
         WHERE user_local_id = :userLocalId
           AND deleted_at IS NULL
           AND (:categoryLocalId IS NULL OR category_local_id = :categoryLocalId)
-        ORDER BY updated_at DESC, created_at DESC
+        ORDER BY is_pinned DESC, updated_at DESC, created_at DESC
         """
     )
     suspend fun getNotes(

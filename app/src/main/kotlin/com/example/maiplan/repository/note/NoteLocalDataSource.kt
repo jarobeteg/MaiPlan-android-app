@@ -135,6 +135,30 @@ class NoteLocalDataSource(
         }
     }
 
+    suspend fun setNotePinned(
+        noteLocalId: Long,
+        userLocalId: Long,
+        isPinned: Boolean
+    ): Result<Unit> {
+        return handleLocalResponse {
+            database.withTransaction {
+                val existing = checkNotNull(noteDao.getNoteByLocalId(noteLocalId, userLocalId)) {
+                    "Note $noteLocalId was not found"
+                }
+                check(existing.deletedAt == null) { "A deleted Note cannot be pinned" }
+                if (existing.isPinned != isPinned) {
+                    val now = Instant.now()
+                    val updated = existing.copy(isPinned = isPinned, updatedAt = now)
+                    check(noteDao.updateNote(updated) == 1) {
+                        "Note pin update affected an unexpected number of rows"
+                    }
+                    enqueue(updated, TideOperation.UPDATE, existing.serverVersion, now)
+                }
+                Unit
+            }
+        }
+    }
+
     suspend fun softDeleteNoteWithReminder(
         noteLocalId: Long,
         userLocalId: Long

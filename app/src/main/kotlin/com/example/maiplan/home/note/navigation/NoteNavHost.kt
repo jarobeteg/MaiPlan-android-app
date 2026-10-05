@@ -17,9 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -36,8 +38,12 @@ import com.example.maiplan.R
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.home.note.screens.CreateNoteScreen
 import com.example.maiplan.home.note.screens.NoteListScreen
+import com.example.maiplan.home.note.screens.NotePrimary
+import com.example.maiplan.home.note.screens.NoteInk
+import com.example.maiplan.home.note.screens.NoteMuted
 import com.example.maiplan.home.note.screens.UpdateNoteScreen
 import com.example.maiplan.repository.Result
+import com.example.maiplan.theme.LocalAppDarkTheme
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.utils.notifications.NotificationHelper
@@ -57,7 +63,7 @@ fun NoteNavHost(
     val continueWhenReady = {
         when {
             !NotificationHelper.canDeliverReminders(context) -> {
-                reminderAccessDialog = "notifications"
+                reminderAccessDialog = "settings"
             }
             !AlarmScheduler.canScheduleExactAlarms(context) -> {
                 reminderAccessDialog = "exact"
@@ -73,7 +79,7 @@ fun NoteNavHost(
     DisposableEffect(lifecycleOwner, context) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME &&
-                pendingNotificationPermissionAction != null && reminderAccessDialog != null) {
+                pendingNotificationPermissionAction != null && reminderAccessDialog == null) {
                 continueWhenReady()
             }
         }
@@ -83,49 +89,81 @@ fun NoteNavHost(
     val notificationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission(),
         onResult = { granted ->
-            if (granted) {
-                continueWhenReady()
-            } else {
-                reminderAccessDialog = "notifications"
+            if (pendingNotificationPermissionAction != null) {
+                if (granted) {
+                    continueWhenReady()
+                } else {
+                    reminderAccessDialog = "settings"
+                }
             }
         },
     )
     val runWithNotificationPermission: (() -> Unit) -> Unit = { onGranted ->
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-            !NotificationHelper.canPostNotifications(context)
-        ) {
-            pendingNotificationPermissionAction = onGranted
-            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        pendingNotificationPermissionAction = onGranted
+        if (!NotificationHelper.canDeliverReminders(context)) {
+            reminderAccessDialog = if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                !NotificationHelper.canPostNotifications(context)
+            ) "permission" else "settings"
         } else {
-            pendingNotificationPermissionAction = onGranted
             continueWhenReady()
         }
     }
 
     reminderAccessDialog?.let { mode ->
+        val dark = LocalAppDarkTheme.current
         AlertDialog(
             onDismissRequest = {
                 reminderAccessDialog = null
                 pendingNotificationPermissionAction = null
             },
-            title = { Text(stringResource(R.string.note_reminder_access_title)) },
+            title = { Text(stringResource(
+                when (mode) {
+                    "permission" -> R.string.note_notifications_permission_title
+                    "exact" -> R.string.event_exact_alarm_title
+                    else -> R.string.note_reminder_access_title
+                },
+            )) },
             text = { Text(stringResource(
-                if (mode == "exact") R.string.note_exact_alarm_access_message
-                else R.string.note_notification_access_message,
+                when (mode) {
+                    "permission" -> R.string.note_notifications_permission_message
+                    "exact" -> R.string.note_exact_alarm_access_message
+                    else -> R.string.note_notification_access_message
+                },
             )) },
             confirmButton = {
-                TextButton(onClick = {
-                    if (mode == "exact") AlarmScheduler.requestExactAlarmPermission(context)
-                    else NotificationHelper.openReminderNotificationSettings(context)
-                }) { Text(stringResource(R.string.note_reminder_access_settings)) }
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = NotePrimary),
+                    onClick = {
+                        reminderAccessDialog = null
+                        when (mode) {
+                            "permission" -> notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            "exact" -> AlarmScheduler.requestExactAlarmPermission(context)
+                            else -> NotificationHelper.openReminderNotificationSettings(context)
+                        }
+                    },
+                ) {
+                    Text(stringResource(
+                        when (mode) {
+                            "permission" -> R.string.event_notifications_allow
+                            "exact" -> R.string.event_exact_alarm_open_settings
+                            else -> R.string.note_reminder_access_settings
+                        },
+                    ))
+                }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    reminderAccessDialog = null
-                    pendingNotificationPermissionAction = null
-                }) { Text(stringResource(android.R.string.cancel)) }
+                TextButton(
+                    colors = ButtonDefaults.textButtonColors(contentColor = NotePrimary),
+                    onClick = {
+                        reminderAccessDialog = null
+                        pendingNotificationPermissionAction = null
+                    },
+                ) { Text(stringResource(R.string.note_reminder_back_to_editor)) }
             },
+            containerColor = if (dark) Color(0xFF191D2E) else Color.White,
+            titleContentColor = if (dark) Color(0xFFF5F7FB) else NoteInk,
+            textContentColor = if (dark) Color(0xFFAEB7C9) else NoteMuted,
         )
     }
 
@@ -161,6 +199,7 @@ fun NavGraphBuilder.noteNavGraph(
             viewModel = noteViewModel,
             onCreateClick = { localNavController.navigate(NoteRoutes.Create.route) },
             onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteLocalId)) },
+            onPinClick = { note -> noteViewModel.setNotePinned(note, !note.isPinned) },
             onDeleteClick = { note ->
                 noteViewModel.softDeleteNote(note.noteLocalId, userLocalId)
             }

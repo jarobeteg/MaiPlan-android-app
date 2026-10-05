@@ -782,7 +782,7 @@ private fun EventEditorToggle(
 }
 
 @Composable
-private fun <T> EventOptionRow(
+internal fun <T> EventOptionRow(
     options: List<T>,
     selected: T?,
     label: (T) -> String,

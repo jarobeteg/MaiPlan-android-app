@@ -1,5 +1,6 @@
 package com.example.maiplan.home.note.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -26,12 +27,9 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.automirrored.rounded.Message
 import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.ChevronRight
-import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.Notifications
@@ -75,14 +73,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
-import com.example.maiplan.home.event.screens.EventDatePickerDialog
-import com.example.maiplan.home.event.screens.EventTimePickerDialog
+import com.example.maiplan.home.event.screens.EventDatePickerOverlay
+import com.example.maiplan.home.event.screens.EventTimePickerOverlay
 import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.common.IconData
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 internal val NotePrimary: Color get() = AppThemeManager.selectedTheme.primary
 internal val NotePrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
@@ -180,11 +176,17 @@ internal fun NoteEditorLayout(
     onCategoryChange: (CategoryEntity?) -> Unit,
     onReminderDateTimeChange: (LocalDateTime) -> Unit,
     onReminderMessageChange: (String) -> Unit,
-    onReminderClear: () -> Unit,
+    onReminderEnabledChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
     onBackClick: () -> Unit,
 ) {
     val compactLandscape = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
+    var pickingReminderDate by remember { mutableStateOf(false) }
+    var pickingReminderTime by remember { mutableStateOf(false) }
+    BackHandler(enabled = pickingReminderDate || pickingReminderTime) {
+        pickingReminderDate = false
+        pickingReminderTime = false
+    }
     NoteScreenBackground {
         Scaffold(
             containerColor = Color.Transparent,
@@ -222,9 +224,10 @@ internal fun NoteEditorLayout(
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
                             onCategoryChange = onCategoryChange,
-                            onReminderDateTimeChange = onReminderDateTimeChange,
+                            onReminderDateClick = { pickingReminderDate = true },
+                            onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
-                            onReminderClear = onReminderClear,
+                            onReminderEnabledChange = onReminderEnabledChange,
                             onSubmit = onSubmit,
                         )
                     }
@@ -253,14 +256,31 @@ internal fun NoteEditorLayout(
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
                             onCategoryChange = onCategoryChange,
-                            onReminderDateTimeChange = onReminderDateTimeChange,
+                            onReminderDateClick = { pickingReminderDate = true },
+                            onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
-                            onReminderClear = onReminderClear,
+                            onReminderEnabledChange = onReminderEnabledChange,
                             onSubmit = onSubmit,
                         )
                     }
                 }
             }
+        }
+        if (pickingReminderDate) {
+            EventDatePickerOverlay(
+                onDateSelected = { date ->
+                    state.reminderDateTime?.let { onReminderDateTimeChange(date.atTime(it.toLocalTime())) }
+                },
+                onDismiss = { pickingReminderDate = false },
+            )
+        }
+        if (pickingReminderTime) {
+            EventTimePickerOverlay(
+                onTimeSelected = { time ->
+                    state.reminderDateTime?.let { onReminderDateTimeChange(it.toLocalDate().atTime(time)) }
+                },
+                onDismiss = { pickingReminderTime = false },
+            )
         }
     }
 }
@@ -273,9 +293,10 @@ private fun NoteEditorForm(
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
     onCategoryChange: (CategoryEntity?) -> Unit,
-    onReminderDateTimeChange: (LocalDateTime) -> Unit,
+    onReminderDateClick: () -> Unit,
+    onReminderTimeClick: () -> Unit,
     onReminderMessageChange: (String) -> Unit,
-    onReminderClear: () -> Unit,
+    onReminderEnabledChange: (Boolean) -> Unit,
     onSubmit: () -> Unit,
 ) {
     Column(
@@ -327,27 +348,14 @@ private fun NoteEditorForm(
             subtitle = stringResource(R.string.note_reminder_subtitle),
             compact = compact,
         ) {
-            NoteReminderDateTimeSelector(
+            NoteReminderFields(
                 value = state.reminderDateTime,
-                onValueChange = onReminderDateTimeChange,
-                onClear = onReminderClear,
+                message = state.reminderMessage,
+                onEnabledChange = onReminderEnabledChange,
+                onDateClick = onReminderDateClick,
+                onTimeClick = onReminderTimeClick,
+                onMessageChange = onReminderMessageChange,
             )
-            if (state.reminderDateTime != null) {
-                Spacer(Modifier.height(if (compact) 10.dp else 14.dp))
-                NoteEditorTextField(
-                    value = state.reminderMessage,
-                    onValueChange = {
-                        if (it.length <= 512) onReminderMessageChange(it)
-                    },
-                    label = stringResource(R.string.note_reminder_message),
-                    placeholder = stringResource(R.string.note_reminder_message),
-                    icon = Icons.AutoMirrored.Rounded.Message,
-                    singleLine = false,
-                    minLines = if (compact) 1 else 2,
-                    maxLines = 4,
-                    imeAction = ImeAction.Done,
-                )
-            }
         }
         state.errorMessage?.let { NoteEditorError(it) }
         NoteEditorButton(
@@ -546,105 +554,6 @@ private fun NoteEditorTextField(
             unfocusedPlaceholderColor = muted,
         ),
     )
-}
-
-@Composable
-private fun NoteReminderDateTimeSelector(
-    value: LocalDateTime?,
-    onValueChange: (LocalDateTime) -> Unit,
-    onClear: () -> Unit,
-) {
-    val dark = LocalAppDarkTheme.current
-    val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
-    val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
-    val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
-    var showDateDialog by remember { mutableStateOf(false) }
-    var showTimeDialog by remember { mutableStateOf(false) }
-    var pendingDate by remember(value) {
-        mutableStateOf(value?.toLocalDate() ?: LocalDate.now())
-    }
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        onClick = { showDateDialog = true },
-        shape = RoundedCornerShape(17.dp),
-        color = field,
-        border = BorderStroke(1.dp, if (dark) Color(0xFF3A435C) else NoteBorder),
-    ) {
-        Row(
-            modifier = Modifier.padding(11.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Surface(
-                modifier = Modifier.size(44.dp),
-                shape = RoundedCornerShape(13.dp),
-                color = NotePrimary.copy(alpha = if (dark) 0.24f else 0.10f),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Rounded.Notifications,
-                        contentDescription = null,
-                        tint = NotePrimaryLight,
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-            }
-            Spacer(Modifier.width(12.dp))
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.date_time),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = muted,
-                )
-                Text(
-                    text = value?.format(DateTimeFormatter.ofPattern("EEE, MMM d · HH:mm"))
-                        ?: stringResource(R.string.note_reminder_optional),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = foreground,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            if (value != null) {
-                IconButton(onClick = onClear, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        Icons.Rounded.Close,
-                        contentDescription = stringResource(R.string.note_reminder_remove),
-                        tint = NoteDanger,
-                        modifier = Modifier.size(19.dp),
-                    )
-                }
-            } else {
-                Icon(
-                    Icons.Rounded.ChevronRight,
-                    contentDescription = null,
-                    tint = NotePrimaryLight,
-                    modifier = Modifier.size(21.dp),
-                )
-            }
-        }
-    }
-
-    if (showDateDialog) {
-        EventDatePickerDialog(
-            onDateSelected = {
-                pendingDate = it
-                showDateDialog = false
-                showTimeDialog = true
-            },
-            onDismiss = { showDateDialog = false },
-        )
-    }
-    if (showTimeDialog) {
-        EventTimePickerDialog(
-            onTimeSelected = {
-                onValueChange(LocalDateTime.of(pendingDate, it))
-                showTimeDialog = false
-            },
-            onDismiss = { showTimeDialog = false },
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

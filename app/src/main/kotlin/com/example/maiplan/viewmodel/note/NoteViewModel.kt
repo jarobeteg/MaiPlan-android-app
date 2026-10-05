@@ -11,7 +11,6 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.note.NoteRepository
 import com.example.maiplan.repository.note.NoteSaveOutcome
 import com.example.maiplan.repository.orEmptyList
-import com.example.maiplan.utils.common.UserSession
 import kotlinx.coroutines.launch
 
 class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
@@ -30,8 +29,9 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
     private val _deleteNoteResult = MutableLiveData<Result<Unit>>(Result.Idle)
     val deleteNoteResult: LiveData<Result<Unit>> get() = _deleteNoteResult
 
-    private val _selectedReminder = MutableLiveData<ReminderEntity?>(null)
-    val selectedReminder: LiveData<ReminderEntity?> get() = _selectedReminder
+    private val _pinNoteResult = MutableLiveData<Result<Unit>>(Result.Idle)
+    val pinNoteResult: LiveData<Result<Unit>> get() = _pinNoteResult
+    private val pinningNoteIds = mutableSetOf<Long>()
 
     fun loadNotes(userLocalId: Long, categoryLocalId: Long? = null) {
         viewModelScope.launch {
@@ -85,14 +85,8 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         }
     }
 
-    fun loadNoteReminder(reminderLocalId: Long?) {
-        viewModelScope.launch {
-            val userLocalId = UserSession.userLocalId ?: return@launch
-            when (val result = noteRepository.getReminder(reminderLocalId, userLocalId)) {
-                is Result.Success -> _selectedReminder.postValue(result.data)
-                else -> _selectedReminder.postValue(null)
-            }
-        }
+    suspend fun getNoteReminder(reminderLocalId: Long?, userLocalId: Long): Result<ReminderEntity?> {
+        return noteRepository.getReminder(reminderLocalId, userLocalId)
     }
 
     fun softDeleteNote(noteLocalId: Long, userLocalId: Long) {
@@ -101,6 +95,23 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
             if (result is Result.Success) refreshNotes(userLocalId)
             _deleteNoteResult.postValue(result)
         }
+    }
+
+    fun setNotePinned(note: NoteEntity, isPinned: Boolean) {
+        if (!pinningNoteIds.add(note.noteLocalId)) return
+        viewModelScope.launch {
+            try {
+                val result = noteRepository.setNotePinned(note.noteLocalId, note.userLocalId, isPinned)
+                if (result is Result.Success) refreshNotes(note.userLocalId)
+                _pinNoteResult.postValue(result)
+            } finally {
+                pinningNoteIds.remove(note.noteLocalId)
+            }
+        }
+    }
+
+    fun clearPinResult() {
+        _pinNoteResult.postValue(Result.Idle)
     }
 
     fun clearCreateResult() {
