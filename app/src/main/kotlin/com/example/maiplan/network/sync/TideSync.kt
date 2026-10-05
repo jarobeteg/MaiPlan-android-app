@@ -1,6 +1,7 @@
 package com.example.maiplan.network.sync
 
 import com.google.gson.JsonObject
+import com.google.gson.annotations.JsonAdapter
 import com.google.gson.annotations.SerializedName
 import java.util.UUID
 
@@ -59,6 +60,7 @@ data class TideMutation(
     @SerializedName("base_version")
     val baseVersion: Long?,
 
+    @field:JsonAdapter(NullableJsonObjectAdapterFactory::class)
     val data: JsonObject?
 )
 
@@ -106,6 +108,7 @@ data class TideConflict(
     val serverVersion: Long,
 
     @SerializedName("server_data")
+    @field:JsonAdapter(NullableJsonObjectAdapterFactory::class)
     val serverData: JsonObject?
 )
 
@@ -123,5 +126,6 @@ data class TideChange(
     @SerializedName("server_version")
     val serverVersion: Long,
 
+    @field:JsonAdapter(NullableJsonObjectAdapterFactory::class)
     val data: JsonObject?
 )

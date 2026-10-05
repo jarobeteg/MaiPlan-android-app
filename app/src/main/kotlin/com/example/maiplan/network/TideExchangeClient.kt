@@ -5,6 +5,7 @@ import com.example.maiplan.network.sync.PreparedTideRequest
 import com.example.maiplan.network.sync.TideRequestPreparer
 import com.example.maiplan.network.sync.TideSyncRequest
 import com.example.maiplan.network.sync.TideSyncResponse
+import com.google.gson.JsonParseException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
@@ -96,6 +97,8 @@ class TideExchangeClient(
             is TideHttpException -> "HTTP_$statusCode"
 
             is TideProtocolException -> "PROTOCOL_ERROR"
+
+            is JsonParseException -> "INVALID_RESPONSE"
 
             else -> "TRANSPORT_ERROR"
         }

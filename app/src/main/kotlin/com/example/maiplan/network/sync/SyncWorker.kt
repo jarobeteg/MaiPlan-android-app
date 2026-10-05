@@ -1,6 +1,7 @@
 package com.example.maiplan.network.sync
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.example.maiplan.database.MaiPlanDatabase
@@ -10,6 +11,7 @@ import com.example.maiplan.utils.AppVisibilityTracker
 import com.example.maiplan.utils.SessionManager
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.ReminderCoordinator
+import com.google.gson.JsonParseException
 import kotlinx.coroutines.CancellationException
 import java.io.IOException
 
@@ -64,23 +66,35 @@ class SyncWorker(
         } catch (exception: CancellationException) {
             throw exception
         } catch (exception: TideHttpException) {
+            Log.w(TAG, "Sync HTTP failure on attempt ${runAttemptCount + 1}", exception)
             if (exception.statusCode.isRetryableTideStatus()) {
                 Result.retry()
             } else {
                 Result.failure()
             }
-        } catch (_: TideProtocolException) {
+        } catch (exception: TideProtocolException) {
+            Log.e(TAG, "Sync protocol failure", exception)
             Result.failure()
-        } catch (_: TideResponseValidationException) {
+        } catch (exception: TideResponseValidationException) {
+            Log.e(TAG, "Sync response validation failure", exception)
             Result.failure()
-        } catch (_: IOException) {
+        } catch (exception: JsonParseException) {
+            Log.e(TAG, "Sync JSON response parsing failure", exception)
+            Result.failure()
+        } catch (exception: IOException) {
+            Log.w(TAG, "Sync transport failure on attempt ${runAttemptCount + 1}", exception)
             Result.retry()
-        } catch (_: Exception) {
+        } catch (exception: Exception) {
+            Log.e(TAG, "Sync processing failure on attempt ${runAttemptCount + 1}", exception)
             Result.retry()
         }
     }
 
     private fun Int.isRetryableTideStatus(): Boolean {
         return this == 408 || this == 425 || this == 429 || this in 500..599
+    }
+
+    private companion object {
+        const val TAG = "TIDESync"
     }
 }
