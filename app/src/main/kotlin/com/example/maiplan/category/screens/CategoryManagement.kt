@@ -123,8 +123,8 @@ fun CategoryManagementScreen(
                                 val dismissState = rememberSwipeToDismissBoxState(
                                     positionalThreshold = { it * 0.45f },
                                 )
-                                LaunchedEffect(dismissState) {
-                                    snapshotFlow { dismissState.currentValue }.collect { value ->
+                                LaunchedEffect(dismissState, category.categoryLocalId) {
+                                    snapshotFlow { dismissState.settledValue }.collect { value ->
                                         when (value) {
                                             SwipeToDismissBoxValue.StartToEnd -> {
                                                 dismissState.snapTo(SwipeToDismissBoxValue.Settled)
