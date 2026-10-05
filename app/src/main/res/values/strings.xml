@@ -283,7 +283,7 @@
     <string name="category_search">Search categories…</string>
     <string name="category_deleted">Category deleted</string>
     <string name="category_error_1">Name field cannot be empty!</string>
-    <string name="category_error_2">Description field cannot be empty!</string>
+    <string name="category_description_optional">Description (optional)</string>
     <string name="hue">Hue</string>
     <string name="saturation">Saturation</string>
     <string name="brightness">Brightness</string>
@@ -302,13 +302,12 @@
     <string name="category_update_heading">Refine your category</string>
     <string name="category_update_subtitle">Update how this category looks and appears across MaiPlan.</string>
     <string name="category_details_title">Category details</string>
-    <string name="category_details_subtitle">Choose a concise name and a helpful description.</string>
+    <string name="category_details_subtitle">Choose a concise name. Add a description if you need one.</string>
     <string name="category_appearance_title">Appearance</string>
     <string name="category_appearance_subtitle">Make the category easy to recognize at a glance.</string>
     <string name="category_color_subtitle">Choose an accent for this category</string>
     <string name="category_icon_subtitle">Choose a symbol that fits</string>
     <string name="category_preview_name">Category name</string>
-    <string name="category_preview_description">Your description will appear here.</string>
     <string name="category_live_preview">Preview</string>
     <string name="category_choose_color_title">Choose a color</string>
     <string name="category_choose_color_subtitle">Adjust the sliders to create your accent.</string>

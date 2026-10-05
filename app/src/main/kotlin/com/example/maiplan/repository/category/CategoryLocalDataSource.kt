@@ -22,7 +22,6 @@ import java.util.UUID
 class CategoryLocalDataSource(private val context: Context) {
     companion object {
         private const val EMPTY_CATEGORY_NAME_ERROR = 1
-        private const val EMPTY_CATEGORY_DESCRIPTION_ERROR = 2
     }
 
     private val database: MaiPlanDatabase by lazy {
@@ -57,7 +56,7 @@ class CategoryLocalDataSource(private val context: Context) {
         val name = input.name.trim()
         val description = input.description.trim()
 
-        validateCategory(name, description)?.let {
+        validateCategory(name)?.let {
             return it
         }
 
@@ -101,7 +100,7 @@ class CategoryLocalDataSource(private val context: Context) {
         val name = input.name.trim()
         val description = input.description.trim()
 
-        validateCategory(name, description)?.let {
+        validateCategory(name)?.let {
             return it
         }
 
@@ -187,11 +186,9 @@ class CategoryLocalDataSource(private val context: Context) {
         }
     }
 
-    private fun validateCategory(name: String, description: String): Result.Failure? {
+    private fun validateCategory(name: String): Result.Failure? {
         return when {
             name.isBlank() -> Result.Failure(EMPTY_CATEGORY_NAME_ERROR)
-
-            description.isBlank() -> Result.Failure(EMPTY_CATEGORY_DESCRIPTION_ERROR)
 
             else -> null
         }

@@ -327,15 +327,17 @@ internal fun CategoryListCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = muted,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 20.sp,
-                )
+                if (description.isNotBlank()) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = muted,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        lineHeight = 20.sp,
+                    )
+                }
             }
 
             Spacer(Modifier.width(10.dp))
@@ -467,7 +469,7 @@ internal fun CategoryEditorLayout(
                         CategoryEditorTextField(
                             value = description,
                             onValueChange = { if (it.length <= 512) onDescriptionChange(it) },
-                            label = stringResource(R.string.description),
+                            label = stringResource(R.string.category_description_optional),
                             leadingIcon = Icons.Rounded.Description,
                             singleLine = false,
                             imeAction = ImeAction.Default,
@@ -571,14 +573,16 @@ private fun CategoryPreview(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Spacer(Modifier.height(5.dp))
-                Text(
-                    text = description.ifBlank { stringResource(R.string.category_preview_description) },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = muted,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                if (description.isNotBlank()) {
+                    Spacer(Modifier.height(5.dp))
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = muted,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
             Surface(
                 shape = RoundedCornerShape(999.dp),

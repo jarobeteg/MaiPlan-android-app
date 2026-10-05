@@ -264,7 +264,7 @@ class TideReconciler(private val database: MaiPlanDatabase) {
                     categoryLocalId = existing?.categoryLocalId ?: 0L,
                     userLocalId = userLocalId,
                     name = data.stringOrExisting("name", existing?.name, true),
-                    description = data.stringOrExisting("description", existing?.description, true),
+                    description = data.nullableStringOrExisting("description", existing?.description).orEmpty(),
                     color = data.stringOrExisting("color", existing?.color, true),
                     icon = data.stringOrExisting("icon", existing?.icon, true),
                     syncId = change.entitySyncId,

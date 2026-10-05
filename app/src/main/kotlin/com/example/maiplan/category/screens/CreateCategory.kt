@@ -30,7 +30,6 @@ fun CreateCategoryScreen(
         stringResource(
             when (error.errorCode) {
                 1 -> R.string.category_error_1
-                2 -> R.string.category_error_2
                 else -> R.string.unknown_error
             },
         )
