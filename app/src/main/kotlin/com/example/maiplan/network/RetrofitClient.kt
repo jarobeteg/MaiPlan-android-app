@@ -3,6 +3,7 @@ package com.example.maiplan.network
 import android.content.Context
 import com.example.maiplan.BuildConfig
 import com.example.maiplan.network.api.AuthApi
+import com.example.maiplan.network.api.AccountApi
 import com.example.maiplan.network.api.RaspiApi
 import com.example.maiplan.network.api.TideApi
 import com.example.maiplan.network.api.TokenRefreshApi
@@ -86,6 +87,7 @@ object RetrofitClient {
     }
 
     val publicAuthApi: AuthApi by lazy { publicRetrofit.create(AuthApi::class.java) }
+    val accountApi: AccountApi by lazy { normalRetrofit.create(AccountApi::class.java) }
     private val tokenRefreshApi: TokenRefreshApi by lazy {
         publicRetrofit.create(TokenRefreshApi::class.java)
     }

@@ -1,6 +1,9 @@
 package com.example.maiplan.utils.common
 
 import com.example.maiplan.database.entities.UserEntity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import java.util.UUID
 
 object UserSession {
@@ -10,10 +13,10 @@ object UserSession {
     var userSyncId: UUID? = null
         private set
 
-    var email: String? = null
+    var email: String? by mutableStateOf(null)
         private set
 
-    var username: String? = null
+    var username: String? by mutableStateOf(null)
         private set
 
     fun setup(user: UserEntity) {

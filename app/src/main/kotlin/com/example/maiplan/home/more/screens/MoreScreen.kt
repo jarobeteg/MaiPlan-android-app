@@ -93,6 +93,7 @@ fun MoreScreen(
     rootNavController: NavHostController,
     onThemeClick: () -> Unit,
     onClockClick: () -> Unit,
+    onAccountClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val onLogoutClick = rememberLogoutHandler()
@@ -142,7 +143,7 @@ fun MoreScreen(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     MoreIntro()
-                    MoreProfileCard()
+                    MoreProfileCard(onClick = onAccountClick)
 
                     MoreSection(title = stringResource(R.string.more_workspace_section)) {
                         MoreActionRow(
@@ -293,7 +294,7 @@ private fun MoreIntro() {
 }
 
 @Composable
-private fun MoreProfileCard() {
+private fun MoreProfileCard(onClick: () -> Unit) {
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else MoreInk
@@ -308,6 +309,7 @@ private fun MoreProfileCard() {
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
         shape = RoundedCornerShape(22.dp),
         color = surface,
         shadowElevation = if (dark) 0.dp else 4.dp,
@@ -349,6 +351,13 @@ private fun MoreProfileCard() {
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.account_manage_action),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MorePrimary,
+                    fontWeight = FontWeight.SemiBold,
+                )
             }
             Surface(
                 shape = CircleShape,
@@ -361,6 +370,13 @@ private fun MoreProfileCard() {
                     modifier = Modifier.padding(9.dp).size(18.dp),
                 )
             }
+            Spacer(Modifier.width(8.dp))
+            Icon(
+                imageVector = Icons.Rounded.ChevronRight,
+                contentDescription = null,
+                tint = muted,
+                modifier = Modifier.size(20.dp),
+            )
         }
     }
 }

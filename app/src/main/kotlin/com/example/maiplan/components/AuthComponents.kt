@@ -266,6 +266,8 @@ fun AuthEmailField(
 fun AuthUsernameField(
     value: String,
     onValueChange: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Next,
+    enabled: Boolean = true,
 ) {
     AuthTextField(
         value = value,
@@ -275,7 +277,8 @@ fun AuthUsernameField(
         label = stringResource(R.string.username),
         icon = Icons.Rounded.PersonOutline,
         keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Next,
+        imeAction = imeAction,
+        enabled = enabled,
     )
 }
 
@@ -288,6 +291,7 @@ fun AuthPasswordField(
     onTogglePasswordVisibility: () -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     showStrength: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -308,8 +312,9 @@ fun AuthPasswordField(
                 PasswordVisualTransformation()
             },
             interactionSource = interactionSource,
+            enabled = enabled,
             trailingIcon = {
-                IconButton(onClick = onTogglePasswordVisibility) {
+                IconButton(onClick = onTogglePasswordVisibility, enabled = enabled) {
                     Icon(
                         imageVector = if (passwordVisible) {
                             Icons.Rounded.VisibilityOff
@@ -347,6 +352,7 @@ private fun AuthTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     trailingIcon: (@Composable () -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     val dark = LocalAppDarkTheme.current
     val fieldColor = if (dark) Color(0xFF20263A) else AuthField
@@ -356,6 +362,7 @@ private fun AuthTextField(
 
     OutlinedTextField(
         value = value,
+        enabled = enabled,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
         label = { Text(label) },
@@ -452,10 +459,11 @@ fun AuthPrimaryButton(
     text: String,
     onClick: () -> Unit,
     isLoading: Boolean,
+    enabled: Boolean = true,
 ) {
     Button(
         onClick = onClick,
-        enabled = !isLoading,
+        enabled = enabled && !isLoading,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),
