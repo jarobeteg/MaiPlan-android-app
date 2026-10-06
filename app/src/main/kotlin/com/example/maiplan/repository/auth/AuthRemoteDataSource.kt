@@ -4,6 +4,7 @@ import com.example.maiplan.network.api.AuthApi
 import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.network.api.RefreshTokenRequest
 import com.example.maiplan.network.api.UserLoginRequest
+import com.example.maiplan.network.api.UserPasswordResetRequest
 import com.example.maiplan.network.api.UserRegisterRequest
 import retrofit2.Response
 import java.util.UUID
@@ -21,6 +22,12 @@ class AuthRemoteDataSource(
     suspend fun login(user: UserLoginRequest): Response<AuthResponse> {
         return publicAuthApi.login(
             user.copy(deviceId = deviceId.toString())
+        )
+    }
+
+    suspend fun resetPassword(request: UserPasswordResetRequest): Response<AuthResponse> {
+        return publicAuthApi.resetPassword(
+            request.copy(deviceId = deviceId.toString())
         )
     }
 

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.network.api.UserLoginRequest
+import com.example.maiplan.network.api.UserPasswordResetRequest
 import com.example.maiplan.network.api.UserRegisterRequest
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.auth.AuthRepository
@@ -22,6 +23,10 @@ class AuthViewModel(
     private var loginJob: Job? = null
     private val _loginResult = MutableLiveData<Result<UserEntity>>()
     val loginResult: LiveData<Result<UserEntity>> get() = _loginResult
+
+    private var passwordResetJob: Job? = null
+    private val _passwordResetResult = MutableLiveData<Result<UserEntity>>()
+    val passwordResetResult: LiveData<Result<UserEntity>> get() = _passwordResetResult
 
     private var sessionRefreshJob: Job? = null
     private val _sessionRefreshResult = MutableLiveData<Result<UserEntity>>()
@@ -53,6 +58,20 @@ class AuthViewModel(
         }
     }
 
+    fun resetPassword(request: UserPasswordResetRequest) {
+        cancelPasswordReset()
+
+        passwordResetJob = viewModelScope.launch {
+            _passwordResetResult.value = Result.Loading
+            _passwordResetResult.value = authRepo.resetPassword(request)
+        }
+    }
+
+    fun cancelPasswordReset() {
+        passwordResetJob?.cancel()
+        _passwordResetResult.value = Result.Idle
+    }
+
     fun loadCachedSessionUser() {
         cachedSessionJob?.cancel()
         cachedSessionJob = viewModelScope.launch {
@@ -72,6 +91,7 @@ class AuthViewModel(
     fun clearErrors() {
         _loginResult.value = Result.Idle
         _registerResult.value = Result.Idle
+        _passwordResetResult.value = Result.Idle
     }
 
     fun cancelRegister() {

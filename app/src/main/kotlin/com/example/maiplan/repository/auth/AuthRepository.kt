@@ -3,6 +3,7 @@ package com.example.maiplan.repository.auth
 import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.network.api.AuthResponse
 import com.example.maiplan.network.api.UserLoginRequest
+import com.example.maiplan.network.api.UserPasswordResetRequest
 import com.example.maiplan.network.api.UserRegisterRequest
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleRemoteResponse
@@ -111,6 +112,18 @@ class AuthRepository(
     suspend fun login(request: UserLoginRequest): Result<UserEntity> {
         return try {
             val result = handleRemoteResponse(remote.login(request))
+
+            completeAuthentication(result)
+        } catch (exception: CancellationException) {
+            throw exception
+        } catch (exception: Exception) {
+            Result.Error(exception)
+        }
+    }
+
+    suspend fun resetPassword(request: UserPasswordResetRequest): Result<UserEntity> {
+        return try {
+            val result = handleRemoteResponse(remote.resetPassword(request))
 
             completeAuthentication(result)
         } catch (exception: CancellationException) {

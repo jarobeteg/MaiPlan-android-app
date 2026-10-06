@@ -19,6 +19,7 @@ import com.example.maiplan.R
 import com.example.maiplan.components.AuthEmailField
 import com.example.maiplan.components.AuthErrorMessage
 import com.example.maiplan.components.AuthFooterAction
+import com.example.maiplan.components.AuthInlineAction
 import com.example.maiplan.components.AuthPage
 import com.example.maiplan.components.AuthPasswordField
 import com.example.maiplan.components.AuthPrimaryButton
@@ -29,7 +30,8 @@ import com.example.maiplan.viewmodel.auth.AuthViewModel
 fun LoginScreen(
     authViewModel: AuthViewModel,
     onLoginClick: (String, String) -> Unit,
-    toRegisterClick: () -> Unit
+    toRegisterClick: () -> Unit,
+    toForgotPasswordClick: () -> Unit,
 ) {
     val loginResult by authViewModel.loginResult.observeAsState()
     val isLoading = loginResult is Result.Loading
@@ -53,6 +55,14 @@ fun LoginScreen(
                 passwordVisible = passwordVisible,
                 onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
                 imeAction = ImeAction.Done,
+            )
+
+            AuthInlineAction(
+                text = stringResource(R.string.forgot_password),
+                onClick = {
+                    authViewModel.cancelLogin()
+                    toForgotPasswordClick()
+                },
             )
 
             AuthPrimaryButton(

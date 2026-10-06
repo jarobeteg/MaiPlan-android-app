@@ -37,6 +37,17 @@ data class RefreshTokenRequest(
     val deviceId: String
 )
 
+data class UserPasswordResetRequest(
+    val email: String,
+    val password: String,
+
+    @SerializedName("password_again")
+    val passwordAgain: String,
+
+    @SerializedName("device_id")
+    val deviceId: String? = null
+)
+
 data class UserResponse(
     @SerializedName("sync_id")
     val syncId: String,
@@ -85,6 +96,9 @@ interface AuthApi {
 
     @POST("auth/login")
     suspend fun login(@Body request: UserLoginRequest): Response<AuthResponse>
+
+    @POST("auth/reset-password")
+    suspend fun resetPassword(@Body request: UserPasswordResetRequest): Response<AuthResponse>
 
     @POST("auth/refresh")
     suspend fun refresh(@Body request: RefreshTokenRequest): Response<AuthResponse>

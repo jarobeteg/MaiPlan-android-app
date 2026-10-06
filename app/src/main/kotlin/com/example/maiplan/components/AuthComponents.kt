@@ -323,7 +323,15 @@ fun AuthPasswordField(
         )
 
         AnimatedVisibility(visible = showStrength && isFocused) {
-            PasswordStrengthIndicator(value)
+            Column {
+                PasswordStrengthIndicator(value)
+                Text(
+                    text = stringResource(R.string.auth_password_requirements),
+                    modifier = Modifier.padding(top = 8.dp, start = 4.dp, end = 4.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

@@ -11,8 +11,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.main.screens.LoginScreen
+import com.example.maiplan.main.screens.ForgotPasswordScreen
 import com.example.maiplan.main.screens.RegisterScreen
 import com.example.maiplan.network.api.UserLoginRequest
+import com.example.maiplan.network.api.UserPasswordResetRequest
 import com.example.maiplan.network.api.UserRegisterRequest
 import com.example.maiplan.viewmodel.auth.AuthViewModel
 import java.util.UUID
@@ -46,6 +48,10 @@ fun NavGraphBuilder.authNavGraph(
             toRegisterClick = {
                 authViewModel.clearErrors()
                 navController.navigate(MainRoutes.Register.route)
+            },
+            toForgotPasswordClick = {
+                authViewModel.clearErrors()
+                navController.navigate(MainRoutes.ForgotPassword.route)
             }
         )
     }
@@ -64,6 +70,21 @@ fun NavGraphBuilder.authNavGraph(
                         password = password,
                         passwordAgain = passwordAgain
                     )
+                )
+            },
+            onBackToLogin = {
+                authViewModel.clearErrors()
+                navController.popBackStack()
+            }
+        )
+    }
+
+    composable(MainRoutes.ForgotPassword.route) {
+        ForgotPasswordScreen(
+            authViewModel = authViewModel,
+            onResetPasswordClick = { email, password, passwordAgain ->
+                authViewModel.resetPassword(
+                    UserPasswordResetRequest(email, password, passwordAgain)
                 )
             },
             onBackToLogin = {

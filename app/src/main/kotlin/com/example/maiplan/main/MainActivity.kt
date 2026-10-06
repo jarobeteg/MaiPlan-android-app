@@ -119,6 +119,10 @@ class MainActivity : BaseActivity() {
         authViewModel.registerResult.observe(this) { result ->
             handleAuthenticationResult(result, R.string.register_success)
         }
+
+        authViewModel.passwordResetResult.observe(this) { result ->
+            handleAuthenticationResult(result, R.string.reset_password_success)
+        }
     }
 
     private fun handleAuthenticationResult(
