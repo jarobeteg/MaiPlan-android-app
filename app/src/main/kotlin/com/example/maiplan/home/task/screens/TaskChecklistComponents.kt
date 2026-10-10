@@ -1,10 +1,12 @@
 package com.example.maiplan.home.task.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
@@ -12,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
@@ -37,7 +40,7 @@ fun TaskEstimateText(estimate: TaskEstimate) {
         estimate.isManual -> stringResource(R.string.task_manual_estimate, label)
         estimate.isPartial -> stringResource(R.string.task_partial_estimate, label)
         else -> label
-    }, style = MaterialTheme.typography.bodySmall)
+    }, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable
@@ -62,6 +65,7 @@ fun TaskOrderedSteps(keys: List<String>, enabled: Boolean, title: (String) -> St
         displayedOrder.forEachIndexed { index, id -> key(id) {
             val position = stringResource(R.string.task_step_position, index + 1, keys.size)
             Surface(shape = MaterialTheme.shapes.medium,
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
                 color = if (dragged == id) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.fillMaxWidth().onSizeChanged { heights[id] = it.height }.testTag("task-step-$id")
                     .semantics { stateDescription = position }) {
@@ -118,20 +122,20 @@ fun TaskStepEditorDialog(step: TaskStepDraft, onDismiss: () -> Unit, onSave: (Ta
         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).imePadding().padding(horizontal = 24.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center) {
             Surface(modifier = Modifier.widthIn(max = 560.dp).fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge,
-                color = MaterialTheme.colorScheme.surfaceContainerHigh) {
+                color = MaterialTheme.colorScheme.surfaceContainerHigh, contentColor = MaterialTheme.colorScheme.onSurface) {
                 Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text(stringResource(R.string.task_step_editor), style = MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(R.string.task_step_editor), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Column(Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                         if (!enabled) Text(stringResource(R.string.task_step_locked))
-                        OutlinedTextField(title, { title = it; error = null }, label = { Text(stringResource(R.string.task_step_title)) },
+                        TaskTextField(title, { title = it; error = null }, label = { Text(stringResource(R.string.task_step_title)) },
                             modifier = Modifier.fillMaxWidth(), maxLines = 4)
                         Text(stringResource(R.string.task_estimate))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedTextField(minutes, { minutes = it; error = null }, label = { Text(stringResource(R.string.task_minutes)) },
+                            TaskTextField(minutes, { minutes = it; error = null }, label = { Text(stringResource(R.string.task_minutes)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.weight(1f))
-                            OutlinedTextField(seconds, { seconds = it; error = null }, label = { Text(stringResource(R.string.task_seconds)) },
+                            TaskTextField(seconds, { seconds = it; error = null }, label = { Text(stringResource(R.string.task_seconds)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.weight(1f))
                         }
                         Text(stringResource(R.string.task_step_estimate_help), style = MaterialTheme.typography.bodySmall)
@@ -140,7 +144,7 @@ fun TaskStepEditorDialog(step: TaskStepDraft, onDismiss: () -> Unit, onSave: (Ta
                         TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)) {
                             Text(stringResource(R.string.task_cancel))
                         }
-                        TextButton(enabled = enabled, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface), onClick = {
+                        Button(enabled = enabled, shape = RoundedCornerShape(15.dp), onClick = {
                             val draft = step.copy(title = title, minutes = minutes, seconds = seconds)
                             try { draft.input(); onSave(draft) } catch (e: IllegalArgumentException) { error = e.message }
                         }) { Text(stringResource(R.string.task_step_save)) }

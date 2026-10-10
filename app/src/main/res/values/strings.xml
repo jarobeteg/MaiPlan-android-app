@@ -382,6 +382,19 @@
     <string name="note_reminder_past">Reminder must be in the future</string>
 
     <!-- task screen -->
+    <string name="task_collection_title">Your tasks</string>
+    <string name="task_collection_subtitle">Plan your days and keep track of your progress.</string>
+    <string name="task_create_heading">Plan your next task</string>
+    <string name="task_create_subtitle">Choose a planned day, add steps, and make it your own.</string>
+    <string name="task_edit_heading">Refine your task</string>
+    <string name="task_edit_subtitle">Update the plan and keep your progress in view.</string>
+    <string name="task_details_title">Task details</string>
+    <string name="task_details_subtitle">Add a clear title and any details you want to remember.</string>
+    <string name="task_planning_title">Planning &amp; category</string>
+    <string name="task_planning_subtitle">Choose when this task is planned and where it belongs.</string>
+    <string name="task_actions_title">Manage task</string>
+    <string name="task_no_matches_help">Try another search, status, or category.</string>
+    <string name="task_clear_search">Clear search</string>
     <string name="task_status_description">Change status of %1$s</string>
     <string name="task_history_partial">Some earlier repeating Tasks still need to be loaded.</string>
     <string name="task_page_number">Task page %1$d</string>
@@ -423,7 +436,7 @@
     <string name="task_field_title">Title (required)</string>
     <string name="task_description">Description (optional)</string>
     <string name="task_planned_date">Planned date (optional)</string>
-    <string name="task_date_hint">YYYY-MM-DD • planned day only</string>
+    <string name="task_date_hint">Planned day only</string>
     <string name="task_choose_date">Choose planned date</string>
     <string name="task_clear_date">Clear date</string>
     <string name="task_clear_category">Clear Category</string>
@@ -500,8 +513,10 @@
     <string name="task_reminder_remove">Remove reminder</string>
     <string name="task_reminder_enabled">Remind me</string>
     <string name="task_reminder_help">Choose an independent reminder date and time. This does not change the planned day or add a deadline.</string>
-    <string name="task_reminder_date">Reminder date (YYYY-MM-DD)</string>
-    <string name="task_reminder_time">Reminder time (HH:MM)</string>
+    <string name="task_reminder_date">Reminder date</string>
+    <string name="task_reminder_time">Reminder time</string>
+    <string name="task_reminder_at_date">At a date</string>
+    <string name="task_reminder_before_task">Before Task</string>
     <string name="task_reminder_choose_time">Choose time</string>
     <string name="task_reminder_choose_date">Choose reminder date</string>
     <string name="task_reminder_zone">Time zone</string>
@@ -515,12 +530,20 @@
     <string name="task_reminder_paused">This Task is finished. Its reminder is suppressed.</string>
     <string name="task_repeat">Repeat schedule</string>
     <string name="task_repeat_anchor">First scheduled date (anchor)</string>
-    <string name="task_repeat_none">Does not repeat</string>
+    <string name="task_repeat_none">None</string>
     <string name="task_repeat_daily">Daily</string>
-    <string name="task_repeat_weekly">Selected weekdays</string>
+    <string name="task_repeat_weekly">Weekly</string>
     <string name="task_repeat_monthly">Monthly</string>
     <string name="task_repeat_interval">Repeat every (interval)</string>
-    <string name="task_repeat_end">Last included date (optional, YYYY-MM-DD)</string>
+    <string name="task_repeat_end">Repeat until (last planned date)</string>
+    <string name="task_repeat_no_end">No end date</string>
+    <string name="task_repeat_clear_end">Clear repeat end</string>
+    <string name="task_repeat_every_days">Every number of days</string>
+    <string name="task_repeat_every_weeks">Every number of weeks</string>
+    <string name="task_repeat_every_months">Every number of months</string>
+    <string name="task_repeat_weekdays">Repeat on</string>
+    <string name="task_preview_title">Your Task title</string>
+    <string name="task_preview_reminder">Reminder: %1$s, %2$s (%3$s)</string>
     <string name="task_repeat_independent">Each scheduled date is independent. Missed Tasks stay on their planned day. Monthly dates use the last day when needed.</string>
     <string name="task_repeat_reminder">Reminder relative to planned day</string>
     <string name="task_repeat_lead">Days before (0–7)</string>

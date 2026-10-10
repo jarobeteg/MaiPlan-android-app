@@ -758,6 +758,7 @@ internal fun EventSelectionField(
     label: String,
     value: String,
     icon: ImageVector,
+    enabled: Boolean = true,
     onClick: () -> Unit,
 ) {
     val dark = LocalAppDarkTheme.current
@@ -767,6 +768,7 @@ internal fun EventSelectionField(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         onClick = onClick,
+        enabled = enabled,
         shape = RoundedCornerShape(17.dp),
         color = field,
         border = BorderStroke(1.dp, if (dark) Color(0xFF3A435C) else EventBorder),
@@ -825,12 +827,13 @@ internal fun EventSelectionField(
 }
 
 @Composable
-internal fun EventCategoryField(selectedCategory: CategoryEntity?, onClick: () -> Unit) {
+internal fun EventCategoryField(selectedCategory: CategoryEntity?, enabled: Boolean = true, onClick: () -> Unit) {
     EventSelectionField(
         label = stringResource(R.string.category),
         value = selectedCategory?.name ?: "None",
         icon = selectedCategory?.let { IconData.getIconByKey(it.icon) }
             ?: Icons.Rounded.Category,
+        enabled = enabled,
         onClick = onClick,
     )
 }
@@ -1086,9 +1089,11 @@ internal fun EventDatePickerDialog(
 internal fun EventDatePickerOverlay(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
+    initialDate: LocalDate? = null,
+    yearRange: IntRange = 1900..2100,
 ) {
     EventPickerOverlay(onDismiss) {
-        EventDatePickerContent(onDateSelected, onDismiss)
+        EventDatePickerContent(onDateSelected, onDismiss, initialDate, yearRange)
     }
 }
 
@@ -1097,8 +1102,13 @@ internal fun EventDatePickerOverlay(
 private fun EventDatePickerContent(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit,
+    initialDate: LocalDate? = null,
+    yearRange: IntRange = 1900..2100,
 ) {
-    val state = rememberDatePickerState()
+    val state = rememberDatePickerState(
+        initialSelectedDateMillis = initialDate?.atStartOfDay(ZoneOffset.UTC)?.toInstant()?.toEpochMilli(),
+        yearRange = yearRange,
+    )
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
@@ -1168,9 +1178,10 @@ internal fun EventTimePickerDialog(
 internal fun EventTimePickerOverlay(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
+    initialTime: LocalTime? = null,
 ) {
     EventPickerOverlay(onDismiss) {
-        EventTimePickerContent(onTimeSelected, onDismiss)
+        EventTimePickerContent(onTimeSelected, onDismiss, initialTime)
     }
 }
 
@@ -1179,8 +1190,13 @@ internal fun EventTimePickerOverlay(
 private fun ColumnScope.EventTimePickerContent(
     onTimeSelected: (LocalTime) -> Unit,
     onDismiss: () -> Unit,
+    initialTime: LocalTime? = null,
 ) {
-    val state = rememberTimePickerState(is24Hour = true)
+    val state = rememberTimePickerState(
+        initialHour = initialTime?.hour ?: 0,
+        initialMinute = initialTime?.minute ?: 0,
+        is24Hour = true,
+    )
     val dark = LocalAppDarkTheme.current
     val field = if (dark) Color(0xFF252B40) else Color(0xFFF2F5F9)
     val foreground = if (dark) Color(0xFFF5F7FB) else EventInk
