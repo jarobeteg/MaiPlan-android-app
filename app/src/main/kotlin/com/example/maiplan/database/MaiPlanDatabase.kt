@@ -18,6 +18,12 @@ import com.example.maiplan.database.dao.ReminderDAO
 import com.example.maiplan.database.dao.OutboxDAO
 import com.example.maiplan.database.dao.SyncStateDAO
 import com.example.maiplan.database.dao.UserDAO
+import com.example.maiplan.database.dao.TaskDAO
+import com.example.maiplan.database.dao.SubtaskDAO
+import com.example.maiplan.database.entities.TaskEntity
+import com.example.maiplan.database.entities.SubtaskEntity
+import com.example.maiplan.database.entities.SyncInboxEntity
+import com.example.maiplan.database.dao.SyncInboxDAO
 import com.example.maiplan.database.entities.UserEntity
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
@@ -35,7 +41,12 @@ import com.example.maiplan.database.entities.SyncStateEntity
         NoteEntity::class,
         OutboxEntity::class,
         SyncStateEntity::class,
-        ScheduledReminderEntity::class
+        ScheduledReminderEntity::class,
+        TaskEntity::class,
+        SubtaskEntity::class,
+        SyncInboxEntity::class,
+        com.example.maiplan.database.entities.TaskSeriesEntity::class,
+        com.example.maiplan.database.entities.TaskExclusionEntity::class
     ],
     version = 1,
     exportSchema = false
@@ -57,6 +68,10 @@ abstract class MaiPlanDatabase: RoomDatabase() {
     abstract fun outboxDAO(): OutboxDAO
     abstract fun syncStateDAO(): SyncStateDAO
     abstract fun scheduledReminderDAO(): ScheduledReminderDAO
+    abstract fun taskDAO(): TaskDAO
+    abstract fun subtaskDAO(): SubtaskDAO
+    abstract fun syncInboxDAO(): SyncInboxDAO
+    abstract fun taskSeriesDAO(): com.example.maiplan.database.dao.TaskSeriesDAO
 
     companion object {
         @Volatile

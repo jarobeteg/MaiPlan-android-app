@@ -13,30 +13,54 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.CancellationException
 import java.time.Instant
 import java.time.LocalDate
-import java.util.concurrent.TimeUnit
+import java.time.Clock
+import java.util.UUID
 
 class ReminderCoordinator(
     context: Context,
     private val database: MaiPlanDatabase = MaiPlanDatabase.getDatabase(context.applicationContext),
+    private val effects: ReminderEffects = AndroidReminderEffects(context.applicationContext),
+    private val clock: Clock = Clock.systemUTC(),
+    private val signedInOwner: () -> UUID? = { SessionManager(context).let { if (it.hasSession()) it.getActiveUserSyncId() else null } },
 ) {
-    private val context = context.applicationContext
+    private val appContext = context.applicationContext
     private val queue = database.scheduledReminderDAO()
     private val writer = ReminderPlanWriter(database)
 
-    suspend fun recover(userLocalId: Long? = null) = lock.withLock {
+    suspend fun recover(userLocalId: Long? = null) = lock.withLock { recoverLocked(userLocalId) }
+
+    suspend fun refreshTask(taskLocalId: Long) = lock.withLock {
+        val source = "task:$taskLocalId"
+        effects.cancelAlarm(source)
+        effects.cancelSourceBackups(source)
+        effects.clearSourceNotifications(source)
+        queue.forSource(source).forEach { effects.clearNotification(it.alarmKey) }
+        recoverLocked(null)
+    }
+
+    private suspend fun recoverLocked(userLocalId: Long?) {
         val users = queue.pendingUserIds().toMutableSet()
+        users += queue.taskUserIds()
         userLocalId?.let(users::add)
-        SessionManager(context).getActiveUserSyncId()?.let {
+        signedInOwner()?.let {
             database.userDAO().getActiveUserBySyncId(it)?.userLocalId?.let(users::add)
         }
-        val now = Instant.now()
+        val now = clock.instant()
+        for (user in users) if (database.userDAO().getActiveUserByLocalId(user)?.syncId == signedInOwner()) {
+            val before = database.outboxDAO().lastLocalId(user)
+            runCatching { com.example.maiplan.repository.task.TaskSeriesStore(database, clock).prepareUpcoming(user) }
+                .onFailure { Log.w("ReminderCoordinator", "Task series preparation needs retry", it) }
+            if (effects is AndroidReminderEffects && database.outboxDAO().lastLocalId(user) > before)
+                com.example.maiplan.network.sync.SyncScheduler.runOneTimeSync(appContext)
+        }
         deliverDue()
         database.withTransaction {
             for (row in queue.pending()) {
                 if (currentContent(row) == null) {
                     queue.removePending(row.alarmKey)
-                    ReminderAlarmScheduler.cancel(context, row.sourceKey)
-                    WorkManager.getInstance(context).cancelUniqueWork(backupName(row.alarmKey))
+                    effects.cancelAlarm(row.sourceKey)
+                    effects.cancelBackup(row.alarmKey)
+                    effects.clearNotification(row.alarmKey)
                 }
             }
             for (user in users) reconcileUser(user, now)
@@ -45,14 +69,14 @@ class ReminderCoordinator(
         deliverDue()
 
         for (row in queue.pending()) {
-            if (row.triggerAt > System.currentTimeMillis()) try {
-                val exact = ReminderAlarmScheduler.schedule(context, row)
+            if (row.triggerAt > clock.millis()) try {
+                val exact = effects.schedule(row)
                 val warning = when {
-                    !NotificationHelper.canDeliverReminders(context) -> "Notifications are disabled. Enable them in Settings."
+                    !effects.notificationsEnabled() -> "Notifications are disabled. Enable them in Settings."
                     !exact -> "Allow Alarms & reminders in Settings for on-time delivery."
                     else -> null
                 }
-                queue.markScheduled(row.alarmKey, System.currentTimeMillis(), warning)
+                queue.markScheduled(row.alarmKey, clock.millis(), warning)
                 Log.i(TAG, "Armed ${row.alarmKey}, exact=$exact")
             } catch (error: CancellationException) {
                 throw error
@@ -61,45 +85,50 @@ class ReminderCoordinator(
                 Log.e(TAG, "Could not arm ${row.alarmKey}", error)
             }
             try {
-                ensureBackup(row)
+                effects.backup(row, clock.millis())
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
                 Log.e(TAG, "Backup registration will be retried for ${row.alarmKey}", error)
-                enqueueEventAlarmRecovery(context)
+                effects.retryRecovery()
             }
         }
     }
 
     private suspend fun deliverDue() {
-        for (row in queue.pending().filter { it.triggerAt <= System.currentTimeMillis() }) {
+        for (row in queue.pending().filter { it.triggerAt <= clock.millis() }) {
             database.withTransaction {
                 val pending = queue.get(row.alarmKey)?.takeIf { it.deliveredAt == null }
                     ?: return@withTransaction
                 val current = currentContent(pending)
                 if (current == null) {
                     queue.removePending(row.alarmKey)
+                    effects.cancelAlarm(row.sourceKey)
+                    effects.cancelBackup(row.alarmKey)
+                    effects.clearNotification(row.alarmKey)
                     return@withTransaction
                 }
-                val posted = NotificationHelper.showNotification(
-                    context, current.title, current.message, 0,
-                    notificationTag = current.alarmKey, scheduledTime = current.triggerAt,
-                )
+                val destination = current.taskLocalId?.let { id ->
+                    val task = database.taskDAO().getTaskByLocalId(id, current.userLocalId) ?: return@withTransaction
+                    val owner = database.userDAO().getActiveUserByLocalId(current.userLocalId) ?: return@withTransaction
+                    TaskReminderDestination(task.syncId, owner.syncId)
+                }
+                val posted = effects.post(current, destination)
                 if (posted) {
                     if (row.eventLocalId != null && row.occurrenceDate != null) {
                         val event = database.eventDAO().getEventByLocalId(row.eventLocalId, row.userLocalId)
                         event?.let {
-                            eventReminderPlan(it, null, Instant.now())?.let { next -> writer.enqueue(next) }
+                            eventReminderPlan(it, null, clock.instant())?.let { next -> writer.enqueue(next) }
                         }
                     }
-                    queue.markDelivered(row.alarmKey, System.currentTimeMillis())
+                    queue.markDelivered(row.alarmKey, clock.millis())
                     Log.i(TAG, "Delivered ${row.alarmKey}")
                 } else {
                     queue.markScheduled(row.alarmKey, null, "Notifications are disabled. Enable them in Settings.")
                 }
             }
             if (queue.get(row.alarmKey)?.deliveredAt != null) {
-                WorkManager.getInstance(context).cancelUniqueWork(backupName(row.alarmKey))
+                effects.cancelBackup(row.alarmKey)
             }
         }
 
@@ -117,14 +146,33 @@ class ReminderCoordinator(
             val plan = eventReminderPlan(event, reminder, now)
             if (plan != null) enqueueFuture(plan, now)
             if (plan == null && queue.pending().none { it.sourceKey == "event:$id" }) {
-                ReminderAlarmScheduler.cancel(context, "event:$id")
+                effects.cancelAlarm("event:$id")
             }
         }
         for (note in database.noteDAO().getNotes(user)) {
             val reminder = note.reminderLocalId?.let(reminders::get)
             val plan = noteReminderPlan(note, reminder)
             if (plan != null) enqueueFuture(plan, now)
-            else ReminderAlarmScheduler.cancel(context, "note:${note.noteLocalId}")
+            else effects.cancelAlarm("note:${note.noteLocalId}")
+        }
+        val owner = database.userDAO().getActiveUserByLocalId(user)
+        var after = 0L
+        while (true) {
+            val page = database.taskDAO().reminderPage(user, after)
+            if (page.isEmpty()) break
+            for (task in page) {
+                val reminder = task.reminderLocalId?.let(reminders::get)
+                if (owner?.syncId == signedInOwner()) writer.task(task, reminder, now)
+                else queue.replacePending("task:${task.taskLocalId}", null)
+                if (taskReminderPlan(task, reminder) == null || owner?.syncId != signedInOwner()) {
+                    effects.cancelAlarm("task:${task.taskLocalId}")
+                    effects.cancelSourceBackups("task:${task.taskLocalId}")
+                    effects.clearSourceNotifications("task:${task.taskLocalId}")
+                    queue.forSource("task:${task.taskLocalId}").forEach { effects.clearNotification(it.alarmKey) }
+                }
+            }
+            after = page.last().taskLocalId
+            kotlinx.coroutines.yield()
         }
     }
 
@@ -136,6 +184,15 @@ class ReminderCoordinator(
 
     private suspend fun currentContent(row: ScheduledReminderEntity): ScheduledReminderEntity? {
         if (database.userDAO().getActiveUserByLocalId(row.userLocalId) == null) return null
+        row.taskLocalId?.let { id ->
+            val owner = database.userDAO().getActiveUserByLocalId(row.userLocalId) ?: return null
+            if (owner.syncId != signedInOwner()) return null
+            val task = database.taskDAO().getTaskByLocalId(id, row.userLocalId) ?: return null
+            if (taskSeriesSuppressesReminder(database, task)) return null
+            val reminder = task.reminderLocalId?.let { database.reminderDAO().getReminderByLocalId(it, row.userLocalId) }
+            val plan = taskReminderPlan(task, reminder) ?: return null
+            return plan.takeIf { it.alarmKey == row.alarmKey }
+        }
         row.eventLocalId?.let { id ->
             val event = database.eventDAO().getEventByLocalId(id, row.userLocalId)
                 ?.takeIf { it.deletedAt == null } ?: return null
@@ -160,19 +217,9 @@ class ReminderCoordinator(
         return null
     }
 
-    private suspend fun ensureBackup(row: ScheduledReminderEntity) {
-        val request = OneTimeWorkRequestBuilder<ReminderBackupWorker>()
-            .setInputData(workDataOf("alarm_key" to row.alarmKey))
-            .setInitialDelay((row.triggerAt + 60_000L - System.currentTimeMillis()).coerceAtLeast(0L), TimeUnit.MILLISECONDS)
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.MINUTES)
-            .build()
-        WorkManager.getInstance(context).enqueueUniqueWork(backupName(row.alarmKey), ExistingWorkPolicy.KEEP, request).await()
-    }
-
     companion object {
         private val lock = Mutex()
         private const val TAG = "ReminderCoordinator"
-        private fun backupName(key: String) = "reminder-backup:$key"
     }
 }
 

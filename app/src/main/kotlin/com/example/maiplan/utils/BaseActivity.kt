@@ -52,6 +52,7 @@ open class BaseActivity : ComponentActivity() {
     fun logout() {
         sessionManager.clearSession()
         UserSession.clear()
+        com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery(applicationContext)
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this,

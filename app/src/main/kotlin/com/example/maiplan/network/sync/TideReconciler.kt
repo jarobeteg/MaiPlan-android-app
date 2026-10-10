@@ -7,6 +7,8 @@ import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
 import com.example.maiplan.database.entities.SyncStateEntity
+import com.example.maiplan.database.entities.SyncInboxEntity
+import com.google.gson.JsonParser
 import com.example.maiplan.repository.event.eventTimeFromEpochMillis
 import com.example.maiplan.repository.event.validateEventDefinition
 import com.example.maiplan.utils.common.OutboxStatus
@@ -25,10 +27,13 @@ data class TideReconciliationResult(
     val appliedChangeCount: Int,
     val deferredChangeCount: Int,
     val nextCursor: String,
-    val moreChanges: Boolean
+    val moreChanges: Boolean,
+    val hasPendingUploads: Boolean = false,
+    val changedTaskIds: Set<Long> = emptySet()
 )
 
-class TideReconciler(private val database: MaiPlanDatabase) {
+class TideReconciler(private val database: MaiPlanDatabase,
+    private val taskChangesCommitted: suspend (Set<Long>) -> Unit = {}) {
     private val userDao = database.userDAO()
     private val categoryDao = database.categoryDAO()
     private val reminderDao = database.reminderDAO()
@@ -58,6 +63,25 @@ class TideReconciler(private val database: MaiPlanDatabase) {
 
         val response = validated.response
         response.acknowledged.forEach { acknowledgement ->
+            if (acknowledgement.entityType in setOf(TideEntityType.TASK_ACTION, TideEntityType.TASK_SERIES_ACTION)) {
+                if (acknowledgement.entityType == TideEntityType.TASK_SERIES_ACTION) {
+                    database.taskSeriesDAO().version(userLocalId, acknowledgement.entitySyncId, acknowledgement.serverVersion)
+                    acknowledgement.continuation?.let { operation ->
+                        val series = checkNotNull(database.taskSeriesDAO().get(userLocalId, acknowledgement.entitySyncId))
+                        com.example.maiplan.repository.task.TaskSeriesStore(database).enqueue(series, "RECONCILE",
+                            mapOf("operation_id" to operation["id"].asString))
+                    }
+                }
+                for (effect in acknowledgement.effects) {
+                    when (effect.entityType) {
+                        TideEntityType.TASK -> database.taskDAO().updateServerVersion(effect.entitySyncId, userLocalId, effect.serverVersion)
+                        TideEntityType.SUBTASK -> database.subtaskDAO().updateServerVersion(effect.entitySyncId, userLocalId, effect.serverVersion)
+                        TideEntityType.TASK_SERIES -> database.taskSeriesDAO().version(userLocalId, effect.entitySyncId, effect.serverVersion)
+                    }
+                    retain(userLocalId, effect.change())
+                }
+                return@forEach
+            }
             val updatedRows = updateAcknowledgedEntityVersion(
                 userLocalId = userLocalId,
                 entityType = acknowledgement.entityType,
@@ -90,6 +114,15 @@ class TideReconciler(private val database: MaiPlanDatabase) {
                     conflictServerDataJson = null
                 ) == 1
             ) { "Could not record a rejected ${rejection.entityType} mutation" }
+            val rejectedRow = outboxDao.getMutation(rejection.mutationId)
+            if (!retryable && rejectedRow?.entityType == TideEntityType.TASK_ACTION && rejectedRow.operation == TideOperation.CREATE) {
+                for (later in outboxDao.allForUser(userLocalId).filter { it.entityType == TideEntityType.TASK_ACTION &&
+                    it.entitySyncId == rejectedRow.entitySyncId && it.outboxLocalId > rejectedRow.outboxLocalId &&
+                    it.status == OutboxStatus.PENDING && it.attemptCount == 0 }) {
+                    outboxDao.setMutationOutcome(later.mutationId, OutboxStatus.PENDING, OutboxStatus.REJECTED,
+                        "TASK_PARENT_CREATE_REJECTED", null, null)
+                }
+            }
         }
 
         response.conflicts.forEach { conflict ->
@@ -103,6 +136,13 @@ class TideReconciler(private val database: MaiPlanDatabase) {
                     conflictServerDataJson = conflict.serverData?.toString()
                 ) == 1
             ) { "Could not record a conflicted ${conflict.entityType} mutation" }
+            if (conflict.entityType == TideEntityType.TASK_ACTION && conflict.serverData != null) {
+                val snapshots = mutableListOf(conflict.serverData.getAsJsonObject("task"))
+                snapshots += conflict.serverData.getAsJsonArray("subtasks").map { it.asJsonObject }
+                for (snapshot in snapshots) retain(userLocalId, decodeSnapshot(snapshot).change())
+            }
+            if (conflict.entityType == TideEntityType.TASK_SERIES_ACTION && conflict.serverData != null)
+                retain(userLocalId, decodeSnapshot(conflict.serverData.getAsJsonObject("series")).change())
         }
 
         val acknowledgedIds = response.acknowledged.map { it.mutationId }
@@ -112,25 +152,8 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             }
         }
 
-        var appliedChanges = 0
-        var deferredChanges = 0
-        val orderedChanges = response.changes.sortedBy { ENTITY_APPLY_ORDER.getValue(it.entityType) }
-
-        orderedChanges.forEach { change ->
-            val hasUnresolvedLocalMutation = change.entityType != TideEntityType.USER &&
-                outboxDao.countMutationsForEntity(
-                    userLocalId = userLocalId,
-                    entityType = change.entityType,
-                    entitySyncId = change.entitySyncId,
-                    statuses = UNRESOLVED_OUTBOX_STATUSES
-                ) > 0
-
-            if (hasUnresolvedLocalMutation) {
-                deferredChanges += 1
-            } else if (applyRemoteChange(userLocalId, userSyncId, change)) {
-                appliedChanges += 1
-            }
-        }
+        response.changes.forEach { retain(userLocalId, it) }
+        val replay = replayInbox(userLocalId, userSyncId)
 
         syncStateDao.upsertSyncState(
             SyncStateEntity(userSyncId = userSyncId, cursor = response.nextCursor)
@@ -140,11 +163,102 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             acknowledgedCount = response.acknowledged.size,
             rejectedCount = response.rejected.size,
             conflictCount = response.conflicts.size,
-            appliedChangeCount = appliedChanges,
-            deferredChangeCount = deferredChanges,
+            appliedChangeCount = replay.first,
+            deferredChangeCount = database.syncInboxDAO().pending(userLocalId).size,
             nextCursor = response.nextCursor,
-            moreChanges = response.moreChanges
+            moreChanges = response.moreChanges,
+            hasPendingUploads = outboxDao.getMutations(userLocalId, OutboxStatus.PENDING, TideEntityType.MUTABLE,
+                UNRESOLVED_OUTBOX_STATUSES, 1).isNotEmpty(),
+            changedTaskIds = replay.second
         )
+    }.also { result -> if (result.changedTaskIds.isNotEmpty()) runCatching { taskChangesCommitted(result.changedTaskIds) } }
+
+    internal fun decodeSnapshot(data: JsonObject): TideActionSnapshot = TideActionSnapshot(
+        data["entity_type"].asString, UUID.fromString(data["entity_sync_id"].asString), data["operation"].asString,
+        data["server_version"].asLong, data["data"]?.takeUnless { it.isJsonNull }?.asJsonObject)
+
+    internal suspend fun retain(user: Long, change: TideChange) {
+        val old = database.syncInboxDAO().get(user, change.entityType, change.entitySyncId)
+        if (old != null && old.serverVersion >= change.serverVersion) return
+        database.syncInboxDAO().put(SyncInboxEntity(user, change.entityType, change.entitySyncId,
+            change.serverVersion, change.operation, change.sequence.toLong(), change.data?.toString()))
+        if (change.entityType == TideEntityType.TASK_SERIES && change.operation == TideOperation.DELETE) {
+            database.taskSeriesDAO().get(user, change.entitySyncId)?.let {
+                database.taskSeriesDAO().update(it.copy(deletedAt = it.deletedAt ?: Instant.EPOCH))
+            }
+        }
+        if (change.entityType == TideEntityType.TASK && change.operation == TideOperation.DELETE) {
+            val task = database.taskDAO().getTaskBySyncId(change.entitySyncId, user)
+            if (task != null) {
+                val deletedAt = task.deletedAt ?: Instant.EPOCH
+                for (step in database.subtaskDAO().allForTask(task.taskLocalId, user).filter { it.deletedAt == null }) {
+                    database.subtaskDAO().updateSubtask(step.copy(deletedAt = deletedAt))
+                }
+                database.taskDAO().updateTask(task.copy(deletedAt = deletedAt))
+                database.scheduledReminderDAO().removeTaskPending("task:${task.taskLocalId}", user)
+            }
+        }
+    }
+
+    suspend fun replayDeferred(user: Long, userSyncId: UUID): Int {
+        val replay = database.withTransaction { replayInbox(user, userSyncId) }
+        if (replay.second.isNotEmpty()) runCatching { taskChangesCommitted(replay.second) }
+        return replay.first
+    }
+
+    internal suspend fun replayWithinTransaction(user: Long, userSyncId: UUID) = replayInbox(user, userSyncId)
+
+    private suspend fun replayInbox(user: Long, userSyncId: UUID): Pair<Int, Set<Long>> {
+        var applied = 0
+        val changedTasks = mutableSetOf<Long>()
+        for (row in database.syncInboxDAO().pending(user).filter { it.entityType == TideEntityType.TASK && it.operation == TideOperation.DELETE }) {
+            database.taskDAO().getTaskBySyncId(row.entitySyncId, user)?.let { changedTasks += it.taskLocalId }
+        }
+        do {
+            var progress = false
+            for (row in database.syncInboxDAO().pending(user)) {
+                val data = row.dataJson?.let { JsonParser.parseString(it).asJsonObject }
+                val change = TideChange(row.sequence.toString(), row.entityType, row.entitySyncId, row.operation, row.serverVersion, data)
+                var blocked = row.entityType != TideEntityType.USER && outboxDao.countMutationsForEntity(user,
+                    row.entityType, row.entitySyncId, UNRESOLVED_OUTBOX_STATUSES) > 0
+                if (row.entityType == TideEntityType.TASK_SERIES) blocked = blocked || outboxDao.countMutationsForEntity(user,
+                    TideEntityType.TASK_SERIES_ACTION, row.entitySyncId, UNRESOLVED_OUTBOX_STATUSES) > 0
+                if (row.entityType in setOf(TideEntityType.TASK, TideEntityType.SUBTASK)) {
+                    val parentId = if (row.entityType == TideEntityType.TASK) row.entitySyncId else
+                        data?.get("parent_task_sync_id")?.asString?.let(UUID::fromString) ?: database.subtaskDAO()
+                            .getSubtaskBySyncId(row.entitySyncId, user)?.let { database.taskDAO().getTaskByLocalId(it.taskLocalId, user)?.syncId }
+                    if (parentId != null) blocked = blocked || outboxDao.countMutationsForEntity(user,
+                        TideEntityType.TASK_ACTION, parentId, UNRESOLVED_OUTBOX_STATUSES) > 0
+                }
+                if (blocked) continue
+                try {
+                    if (applyRemoteChange(user, userSyncId, change)) applied++
+                    database.syncInboxDAO().put(row.copy(applied = true))
+                    if (row.entityType == TideEntityType.TASK) database.taskDAO().getTaskBySyncId(row.entitySyncId, user)?.let { changedTasks += it.taskLocalId }
+                    if (row.entityType == TideEntityType.SUBTASK) database.subtaskDAO().getSubtaskBySyncId(row.entitySyncId, user)?.let { changedTasks += it.taskLocalId }
+                    if (row.entityType == TideEntityType.REMINDER) {
+                        val reminderId = reminderDao.getReminderBySyncId(row.entitySyncId, user)?.reminderLocalId
+                        database.taskDAO().allForUser(user).filter { it.reminderLocalId == reminderId && reminderId != null }
+                            .forEach { changedTasks += it.taskLocalId }
+                    }
+                    if (row.entityType in setOf(TideEntityType.TASK_SERIES, TideEntityType.TASK_EXCLUSION)) {
+                        val seriesId = if (row.entityType == TideEntityType.TASK_SERIES) row.entitySyncId.toString() else data?.get("series_id")?.asString
+                        var after = 0L
+                        do {
+                            val page = database.taskDAO().seriesPage(user, seriesId.orEmpty(), after)
+                            page.forEach { changedTasks += it.taskLocalId }; after = page.lastOrNull()?.taskLocalId ?: after
+                        } while (page.size == com.example.maiplan.repository.task.TASK_SERIES_PAGE_SIZE)
+                    }
+                    progress = true
+                } catch (_: TideDependencyPending) {}
+            }
+        } while (progress)
+        for (id in changedTasks) {
+            val task = database.taskDAO().getTaskByLocalId(id, user) ?: continue
+            com.example.maiplan.utils.notifications.ReminderPlanWriter(database).task(task,
+                task.reminderLocalId?.let { reminderDao.getReminderByLocalId(it, user) })
+        }
+        return applied to changedTasks
     }
 
     private suspend fun updateAcknowledgedEntityVersion(
@@ -206,6 +320,8 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             TideEntityType.REMINDER -> applyReminderChange(userLocalId, change)
             TideEntityType.EVENT -> applyEventChange(userLocalId, change)
             TideEntityType.NOTE -> applyNoteChange(userLocalId, change)
+            TideEntityType.TASK, TideEntityType.SUBTASK -> TaskRemoteStore(database).apply(userLocalId, change)
+            TideEntityType.TASK_SERIES, TideEntityType.TASK_EXCLUSION -> TaskSeriesTransport(database).apply(userLocalId, change)
             else -> throw TideResponseValidationException(
                 "Unsupported remote entity type: ${change.entityType}"
             )
@@ -511,9 +627,9 @@ class TideReconciler(private val database: MaiPlanDatabase) {
         if (!data.has(field)) return existingLocalId
         val syncId = data.nullableUuid(field) ?: return null
         val category = categoryDao.getCategoryBySyncId(syncId, userLocalId)
-            ?: throw TideResponseValidationException("Referenced Category $syncId is missing")
+            ?: return if (database.syncInboxDAO().get(userLocalId, TideEntityType.CATEGORY, syncId)?.operation == TideOperation.DELETE) null else throw TideDependencyPending()
         if (category.deletedAt != null) {
-            throw TideResponseValidationException("Referenced Category $syncId is deleted")
+            return null
         }
         return category.categoryLocalId
     }
@@ -527,9 +643,9 @@ class TideReconciler(private val database: MaiPlanDatabase) {
         if (!data.has(field)) return existingLocalId
         val syncId = data.nullableUuid(field) ?: return null
         val reminder = reminderDao.getReminderBySyncId(syncId, userLocalId)
-            ?: throw TideResponseValidationException("Referenced Reminder $syncId is missing")
+            ?: return if (database.syncInboxDAO().get(userLocalId, TideEntityType.REMINDER, syncId)?.operation == TideOperation.DELETE) null else throw TideDependencyPending()
         if (reminder.deletedAt != null) {
-            throw TideResponseValidationException("Referenced Reminder $syncId is deleted")
+            return null
         }
         return reminder.reminderLocalId
     }
@@ -685,12 +801,5 @@ class TideReconciler(private val database: MaiPlanDatabase) {
             OutboxStatus.REJECTED
         )
 
-        val ENTITY_APPLY_ORDER = mapOf(
-            TideEntityType.USER to 0,
-            TideEntityType.CATEGORY to 1,
-            TideEntityType.REMINDER to 2,
-            TideEntityType.EVENT to 3,
-            TideEntityType.NOTE to 4
-        )
     }
 }

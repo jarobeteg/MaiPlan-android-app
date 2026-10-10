@@ -81,6 +81,7 @@ class TideSynchronizer(
                 it.errorCode in TideRejectionCode.RETRYABLE
             }
             hasMoreWork = reconciliation.moreChanges ||
+                reconciliation.hasPendingUploads ||
                 preparedRequest.claimedMutationIds.size >= TideClientConfig.UPLOAD_BATCH_SIZE ||
                 retryableRejection
         } while (hasMoreWork && pageCount < maxPages)

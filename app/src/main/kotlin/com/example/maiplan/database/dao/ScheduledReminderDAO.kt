@@ -8,6 +8,13 @@ import com.example.maiplan.database.entities.ScheduledReminderEntity
 
 @Dao
 interface ScheduledReminderDAO {
+    @Query("SELECT * FROM scheduled_reminder WHERE sourceKey = :source")
+    suspend fun forSource(source: String): List<ScheduledReminderEntity>
+    @Query("SELECT DISTINCT userLocalId FROM scheduled_reminder WHERE taskLocalId IS NOT NULL")
+    suspend fun taskUserIds(): List<Long>
+    @Query("DELETE FROM scheduled_reminder WHERE sourceKey = :source AND userLocalId = :userLocalId AND deliveredAt IS NULL")
+    suspend fun removeTaskPending(source: String, userLocalId: Long)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(reminder: ScheduledReminderEntity): Long
 

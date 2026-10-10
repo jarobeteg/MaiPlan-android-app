@@ -160,7 +160,9 @@ class MainActivity : BaseActivity() {
     }
 
     private fun goToHome() {
-        startActivity(Intent(this, HomeActivity::class.java))
+        startActivity(Intent(this, HomeActivity::class.java).apply {
+            com.example.maiplan.utils.notifications.TaskReminderDestination.from(this@MainActivity.intent)?.let { data = it.uri() }
+        })
         messageId?.let {
             Toast.makeText(this, getString(it), Toast.LENGTH_SHORT).show()
         }

@@ -24,7 +24,11 @@ object ServiceLocator {
                 requestPreparer = requestPreparer,
                 exchangeClient = exchangeClient,
                 responseValidator = TideResponseValidator(),
-                reconciler = TideReconciler(database)
+                reconciler = TideReconciler(database) { ids ->
+                    com.example.maiplan.utils.notifications.enqueueEventAlarmRecovery(appContext)
+                    val coordinator = com.example.maiplan.utils.notifications.ReminderCoordinator(appContext)
+                    ids.forEach { coordinator.refreshTask(it) }
+                }
             )
         )
     }

@@ -1,6 +1,8 @@
 package com.example.maiplan.network.sync
 
 import java.util.UUID
+import com.example.maiplan.repository.task.decodeTaskMutationDefinition
+import com.example.maiplan.repository.task.decodeSubtaskMutationDefinition
 
 class TideResponseValidationException(
     message: String,
@@ -79,6 +81,28 @@ class TideResponseValidator {
                 acknowledgement.serverVersion > 0,
                 "An acknowledged mutation has an invalid server version"
             )
+            ensureUnique(acknowledgement.effects.map { it.entityType to it.entitySyncId }, "Action effect identities")
+            acknowledgement.continuation?.let { continuation ->
+                ensure(acknowledgement.entityType == TideEntityType.TASK_SERIES_ACTION, "Only series actions may continue")
+                UUID.fromString(continuation["id"].asString)
+                ensure(continuation["kind"].asString in setOf("EDIT", "DELETE"), "Unknown series continuation")
+                ensure(continuation["after"].asBigDecimal.longValueExact() >= 0, "Invalid continuation checkpoint")
+            }
+            acknowledgement.effects.forEach { effect ->
+                ensure(acknowledgement.entityType in setOf(TideEntityType.TASK_ACTION, TideEntityType.TASK_SERIES_ACTION), "Only Task actions have aggregate effects")
+                ensure(effect.entityType in setOf(TideEntityType.TASK, TideEntityType.SUBTASK, TideEntityType.TASK_SERIES, TideEntityType.TASK_EXCLUSION), "Invalid action effect type")
+                validateChange(effect.change())
+                if (acknowledgement.entityType == TideEntityType.TASK_SERIES_ACTION) {
+                    if (effect.entityType == TideEntityType.TASK_SERIES) ensure(effect.entitySyncId == acknowledgement.entitySyncId, "Effect belongs to another series")
+                    if (effect.entityType in setOf(TideEntityType.TASK, TideEntityType.TASK_EXCLUSION) && effect.data != null)
+                        ensure(effect.data["series_id"].asString == acknowledgement.entitySyncId.toString(), "Occurrence effect belongs to another series")
+                    if (effect.entityType == TideEntityType.SUBTASK && effect.data != null)
+                        ensure(acknowledgement.effects.any { it.entityType == TideEntityType.TASK && it.entitySyncId.toString() == effect.data["parent_task_sync_id"].asString }, "Series step is missing its parent effect")
+                }
+                if (effect.entityType == TideEntityType.TASK && acknowledgement.entityType == TideEntityType.TASK_ACTION) ensure(effect.entitySyncId == acknowledgement.entitySyncId, "Action effect references a different Task")
+                if (effect.entityType == TideEntityType.SUBTASK && effect.data != null && acknowledgement.entityType == TideEntityType.TASK_ACTION) ensure(
+                    effect.data["parent_task_sync_id"].asString == acknowledgement.entitySyncId.toString(), "Action step references a different Task")
+            }
         }
 
         response.rejected.forEach { rejection ->
@@ -102,6 +126,28 @@ class TideResponseValidator {
                 conflict.serverVersion > 0,
                 "A conflicted mutation has an invalid server version"
             )
+            if (conflict.entityType == TideEntityType.TASK_ACTION) {
+                val server = conflict.serverData ?: throw TideResponseValidationException("Task conflict needs an aggregate snapshot")
+                fun snapshot(data: com.google.gson.JsonObject) = TideActionSnapshot(data["entity_type"].asString,
+                    UUID.fromString(data["entity_sync_id"].asString), data["operation"].asString,
+                    data["server_version"].asBigDecimal.longValueExact(), data["data"]?.takeUnless { it.isJsonNull }?.asJsonObject)
+                val parent = snapshot(server.getAsJsonObject("task"))
+                ensure(parent.entityType == TideEntityType.TASK && parent.entitySyncId == conflict.entitySyncId &&
+                    parent.serverVersion == conflict.serverVersion, "Conflict Task identity/version mismatch")
+                validateChange(parent.change())
+                val children = server.getAsJsonArray("subtasks").map { snapshot(it.asJsonObject) }
+                ensureUnique(children.map { it.entitySyncId }, "Conflict step IDs")
+                children.forEach { child ->
+                    ensure(child.entityType == TideEntityType.SUBTASK, "Invalid conflict step type")
+                    validateChange(child.change())
+                    if (child.data != null) ensure(UUID.fromString(child.data["parent_task_sync_id"].asString) == conflict.entitySyncId,
+                        "Conflict step belongs to another Task")
+                }
+            }
+            if (conflict.entityType == TideEntityType.TASK_SERIES_ACTION) {
+                val series = checkNotNull(conflict.serverData).getAsJsonObject("series")
+                ensure(series["entity_type"].asString == TideEntityType.TASK_SERIES && series["entity_sync_id"].asString == conflict.entitySyncId.toString(), "Invalid series conflict identity")
+            }
         }
 
         ensure(
@@ -109,6 +155,12 @@ class TideResponseValidator {
             "The response exceeds the requested data limit"
         )
         ensureUnique(response.changes.map { it.sequence }, "Response change sequences")
+        var previousSequence = request.cursor?.toLong() ?: 0L
+        response.changes.forEach {
+            val sequence = it.sequence.toLong()
+            ensure(sequence > previousSequence, "Change sequences must advance in feed order")
+            previousSequence = sequence
+        }
         response.changes.forEach(::validateChange)
 
         if (response.moreChanges) {
@@ -127,6 +179,8 @@ class TideResponseValidator {
                 response.nextCursor != request.cursor,
                 "A non-empty response page did not advance the cursor"
             )
+        } else {
+            ensure(response.nextCursor == (request.cursor ?: "0"), "An empty page must retain its cursor")
         }
 
         return ValidatedTideResponse(
@@ -141,7 +195,10 @@ class TideResponseValidator {
             mutation.entityType in TideEntityType.MUTABLE,
             "The TIDE request contains an unsupported entity type"
         )
-        validateOperationAndData(mutation.operation, mutation.data != null, "mutation")
+        if (mutation.entityType in setOf(TideEntityType.TASK_ACTION, TideEntityType.TASK_SERIES_ACTION)) {
+            ensure(mutation.data != null, "Task action requires aggregate data")
+            ensure(mutation.operation in setOf(TideOperation.CREATE, TideOperation.UPDATE, TideOperation.DELETE), "Invalid Task action operation")
+        } else validateOperationAndData(mutation.operation, mutation.data != null, "mutation")
     }
 
     private fun validateChange(change: TideChange) {
@@ -151,6 +208,20 @@ class TideResponseValidator {
         )
         ensure(change.serverVersion > 0, "A remote change has an invalid server version")
         validateOperationAndData(change.operation, change.data != null, "change")
+        if (change.data != null && change.entityType in setOf(TideEntityType.TASK, TideEntityType.SUBTASK)) {
+            val business = change.data.deepCopy().also { it.remove("created_at"); it.remove("updated_at") }
+            if (change.entityType == TideEntityType.TASK) decodeTaskMutationDefinition(business)
+            else decodeSubtaskMutationDefinition(business)
+        }
+        if (change.data != null && change.entityType == TideEntityType.TASK_SERIES)
+            com.example.maiplan.repository.task.TaskSeriesDefinition.decode(change.data["definition"].toString())
+        if (change.entityType == TideEntityType.TASK_EXCLUSION) {
+            ensure(change.data != null && change.operation != TideOperation.DELETE, "Exclusions persist for the series lifetime")
+            val data = checkNotNull(change.data)
+            val id = UUID.fromString(data["series_id"].asString)
+            val date = checkNotNull(com.example.maiplan.repository.task.taskDateFromEpochDay(data["slot_date"].asBigDecimal.longValueExact()))
+            ensure(change.entitySyncId == com.example.maiplan.repository.task.taskExclusionUuid(id, date), "Invalid exclusion UUID")
+        }
     }
 
     private fun validateOperationAndData(

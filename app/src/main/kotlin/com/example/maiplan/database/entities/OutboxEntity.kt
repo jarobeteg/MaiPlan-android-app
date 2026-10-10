@@ -60,6 +60,7 @@ data class OutboxEntity(
 
     @ColumnInfo(name = "attempt_count")
     val attemptCount: Int = 0,
+    @ColumnInfo(name = "dependency_priority") val dependencyPriority: Int = 0,
 
     @ColumnInfo(name = "last_error")
     val lastError: String? = null,

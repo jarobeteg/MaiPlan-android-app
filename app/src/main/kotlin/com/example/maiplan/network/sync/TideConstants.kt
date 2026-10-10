@@ -1,7 +1,7 @@
 package com.example.maiplan.network.sync
 
 object TideProtocol {
-    const val VERSION = 1
+    const val VERSION = 3
     const val DEFAULT_DATA_LIMIT = 100
 }
 
@@ -17,9 +17,15 @@ object TideEntityType {
     const val REMINDER = "reminder"
     const val EVENT = "event"
     const val NOTE = "note"
+    const val TASK = "task"
+    const val SUBTASK = "subtask"
+    const val TASK_ACTION = "task_action"
+    const val TASK_SERIES = "task_series"
+    const val TASK_EXCLUSION = "task_exclusion"
+    const val TASK_SERIES_ACTION = "task_series_action"
 
-    val MUTABLE = listOf(CATEGORY, REMINDER, EVENT, NOTE)
-    val SUPPORTED = setOf(USER, CATEGORY, REMINDER, EVENT, NOTE)
+    val MUTABLE = listOf(CATEGORY, REMINDER, EVENT, NOTE, TASK_ACTION, TASK_SERIES_ACTION)
+    val SUPPORTED = setOf(USER, CATEGORY, REMINDER, EVENT, NOTE, TASK, SUBTASK, TASK_SERIES, TASK_EXCLUSION)
 }
 
 object TideOperation {

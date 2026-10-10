@@ -14,18 +14,19 @@ import com.example.maiplan.network.sync.TideEntityType
 import com.example.maiplan.network.sync.TideOperation
 import com.example.maiplan.repository.Result
 import com.example.maiplan.repository.handleLocalResponse
+import com.example.maiplan.repository.task.TaskCategoryLinks
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import java.time.Instant
 import java.util.UUID
 
-class CategoryLocalDataSource(private val context: Context) {
+class CategoryLocalDataSource(private val context: Context, private val databaseOverride: MaiPlanDatabase? = null) {
     companion object {
         private const val EMPTY_CATEGORY_NAME_ERROR = 1
     }
 
     private val database: MaiPlanDatabase by lazy {
-        MaiPlanDatabase.getDatabase(context)
+        databaseOverride ?: MaiPlanDatabase.getDatabase(context)
     }
 
     private val categoryDao: CategoryDAO by lazy {
@@ -166,6 +167,8 @@ class CategoryLocalDataSource(private val context: Context) {
                     check(categoryDao.updateCategory(tombstone) == 1) {
                         "Category deletion affected an unexpected number of rows"
                     }
+
+                    TaskCategoryLinks(database).categoryDeleted(userLocalId, existing.syncId)
 
                     outboxDao.insertMutation(
                         OutboxEntity(

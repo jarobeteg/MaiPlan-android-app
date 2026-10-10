@@ -4,6 +4,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -25,7 +26,7 @@ import com.example.maiplan.home.note.NoteScreenManager
 import com.example.maiplan.utils.LocalAdaptiveLayout
 
 @Composable
-fun HomeNavHost(rootNavController: NavHostController) {
+fun HomeNavHost(rootNavController: NavHostController, notificationTaskId: Long? = null, onNotificationHandled: () -> Unit = {}) {
     val adaptiveLayout = LocalAdaptiveLayout.current
     val context = LocalContext.current
     val useRail = adaptiveLayout.useHomeNavigationRail
@@ -53,19 +54,22 @@ fun HomeNavHost(rootNavController: NavHostController) {
             popEnterTransition = { fadeIn(animationSpec = tween(180)) },
             popExitTransition = { fadeOut(animationSpec = tween(120)) }
         ) {
-            homeNavGraph(rootNavController)
+            homeNavGraph(rootNavController, notificationTaskId, onNotificationHandled)
         }
+    }
+    LaunchedEffect(notificationTaskId) {
+        if (notificationTaskId != null) rootNavController.navigate(HomeNavRoutes.Tasks.route) { launchSingleTop = true }
     }
 }
 
 fun NavGraphBuilder.homeNavGraph(
-    rootNavController: NavHostController
+    rootNavController: NavHostController, notificationTaskId: Long? = null, onNotificationHandled: () -> Unit = {}
 ) {
     composable(HomeNavRoutes.Events.route) {
         EventScreenManager(rootNavController)
     }
     composable(HomeNavRoutes.Tasks.route) {
-        TaskScreenManager(rootNavController)
+        TaskScreenManager(rootNavController, notificationTaskId, onNotificationHandled)
     }
     composable(HomeNavRoutes.Notes.route) {
         NoteScreenManager(rootNavController)

@@ -10,6 +10,11 @@ import java.util.UUID
 
 @Dao
 interface ReminderDAO {
+    @Query("""SELECT (SELECT COUNT(*) FROM task WHERE reminder_local_id = :localId AND deleted_at IS NULL)
+        + (SELECT COUNT(*) FROM note WHERE reminder_local_id = :localId AND deleted_at IS NULL)
+        + (SELECT COUNT(*) FROM event WHERE reminder_local_id = :localId AND deleted_at IS NULL)""")
+    suspend fun countActiveReferences(localId: Long): Int
+
     @Query("SELECT * FROM reminder WHERE user_local_id = :userLocalId")
     suspend fun getAllForUser(userLocalId: Long): List<ReminderEntity>
 

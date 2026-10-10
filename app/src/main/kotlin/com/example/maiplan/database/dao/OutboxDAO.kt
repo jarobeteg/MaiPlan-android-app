@@ -5,11 +5,51 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Dao
+import androidx.room.ColumnInfo
 import java.time.Instant
 import java.util.UUID
+import kotlinx.coroutines.flow.Flow
+
+data class TaskIntentState(
+    @ColumnInfo(name = "entity_type") val entityType: String,
+    @ColumnInfo(name = "entity_sync_id") val entitySyncId: UUID,
+    val status: String,
+    @ColumnInfo(name = "last_error") val lastError: String?,
+)
 
 @Dao
 interface OutboxDAO {
+    @Query("SELECT COALESCE(MAX(outbox_local_id), 0) FROM outbox WHERE user_local_id = :user")
+    suspend fun lastLocalId(user: Long): Long
+    @Query("SELECT * FROM outbox WHERE user_local_id = :user AND entity_type = :type AND entity_sync_id = :id ORDER BY outbox_local_id")
+    suspend fun entityIntents(user: Long, type: String, id: UUID): List<OutboxEntity>
+    @Query("SELECT * FROM outbox WHERE user_local_id = :user ORDER BY outbox_local_id")
+    suspend fun allForUser(user: Long): List<OutboxEntity>
+    @Query("""SELECT entity_type, entity_sync_id, status, last_error FROM outbox
+        WHERE user_local_id = :user AND entity_type IN ('task_action', 'task_series_action') AND status != 'SYNCED'
+        ORDER BY outbox_local_id""")
+    fun observeTaskIntents(user: Long): Flow<List<TaskIntentState>>
+    @Query("""SELECT entity_type, entity_sync_id, status, last_error FROM outbox
+        WHERE user_local_id = :user AND entity_type = 'task_action' AND entity_sync_id = :task AND status != 'SYNCED'
+        ORDER BY outbox_local_id""")
+    fun observeTaskChain(user: Long, task: UUID): Flow<List<TaskIntentState>>
+
+    @Query("""UPDATE outbox SET payload_json = :payload, base_version = :version
+        WHERE mutation_id = :id AND user_local_id = :user AND status = 'PENDING' AND attempt_count = 0""")
+    suspend fun prepareTaskIntent(id: UUID, user: Long, version: Long?, payload: String): Int
+
+    @Query("""SELECT * FROM outbox WHERE user_local_id = :userLocalId AND entity_type = :entityType
+        AND status = 'PENDING' AND attempt_count = 0 ORDER BY outbox_local_id""")
+    suspend fun getNeverAttemptedIntents(userLocalId: Long, entityType: String): List<OutboxEntity>
+
+    @Query("""UPDATE outbox SET payload_json = :payload WHERE mutation_id = :mutationId
+        AND user_local_id = :userLocalId AND status = 'PENDING' AND attempt_count = 0""")
+    suspend fun rewriteNeverAttemptedPayload(mutationId: UUID, userLocalId: Long, payload: String): Int
+
+    @Query("""DELETE FROM outbox WHERE user_local_id = :userLocalId AND entity_type = :entityType
+        AND entity_sync_id = :syncId AND status = 'PENDING' AND attempt_count = 0""")
+    suspend fun deleteNeverAttemptedIntents(userLocalId: Long, entityType: String, syncId: UUID): Int
+
     @Query("SELECT * FROM outbox WHERE mutation_id = :mutationId")
     suspend fun getMutation(mutationId: UUID): OutboxEntity?
 
@@ -27,10 +67,14 @@ interface OutboxDAO {
           WHERE earlier.user_local_id = candidate.user_local_id
             AND earlier.entity_type = candidate.entity_type
             AND earlier.entity_sync_id = candidate.entity_sync_id
-            AND earlier.outbox_local_id < candidate.outbox_local_id
+            AND (
+              (earlier.attempt_count > 0 AND earlier.outbox_local_id < candidate.outbox_local_id)
+              OR (candidate.attempt_count = 0 AND earlier.dependency_priority < candidate.dependency_priority)
+              OR (earlier.dependency_priority = candidate.dependency_priority AND earlier.outbox_local_id < candidate.outbox_local_id)
+            )
             AND earlier.status IN (:blockingStatuses)
           )
-        ORDER BY candidate.created_at, candidate.outbox_local_id
+        ORDER BY candidate.dependency_priority, candidate.created_at, candidate.outbox_local_id
         LIMIT :limit
         """
     )
@@ -113,6 +157,7 @@ interface OutboxDAO {
             AND entity_type = :entityType
             AND entity_sync_id = :entitySyncId
             AND status = :pendingStatus
+            AND attempt_count = 0
             AND operation IN (:operations)
     """)
     suspend fun rebasePendingMutations(

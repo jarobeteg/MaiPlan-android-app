@@ -8,6 +8,7 @@ import com.example.maiplan.utils.common.OutboxStatus
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import java.time.Instant
+import java.time.Clock
 import java.util.UUID
 
 
@@ -18,7 +19,8 @@ data class PreparedTideRequest(
 
 class TideRequestPreparer(
     private val database: MaiPlanDatabase,
-    private val deviceIdentityStore: DeviceIdentityStore
+    private val deviceIdentityStore: DeviceIdentityStore,
+    private val clock: Clock = Clock.systemUTC()
 ) {
     private val outboxDao = database.outboxDAO()
     private val syncStateDao = database.syncStateDAO()
@@ -39,9 +41,10 @@ class TideRequestPreparer(
 
         val requestId = UUID.randomUUID()
         val deviceId = deviceIdentityStore.getOrCreateDeviceId()
-        val attemptedAt = Instant.now()
+        val attemptedAt = clock.instant()
 
         val localBatch = database.withTransaction {
+            com.example.maiplan.repository.task.TaskCategoryLinks(database).normalizePending(userLocalId)
             outboxDao.recoverStaleMutations(
                 userLocalId = userLocalId,
                 entityTypes = TideEntityType.MUTABLE,
@@ -61,11 +64,25 @@ class TideRequestPreparer(
                     OutboxStatus.CONFLICT,
                     OutboxStatus.REJECTED
                 ),
-                limit = mutationLimit
+                limit = Int.MAX_VALUE
             )
-
-            val mutations = pending.map { it.toTideMutation() }
-            val mutationIds = pending.map { it.mutationId }
+            val transport = TaskTransport(database)
+            val selected = mutableListOf<OutboxEntity>()
+            for (row in pending) {
+                if (selected.size == mutationLimit) break
+                if (row.entityType == TideEntityType.TASK_ACTION) {
+                    val prepared = transport.prepare(row)
+                    if (!transport.dependenciesReady(prepared)) continue
+                    selected += prepared
+                } else if (row.entityType == TideEntityType.TASK_SERIES_ACTION) {
+                    val seriesTransport = TaskSeriesTransport(database)
+                    val prepared = seriesTransport.prepare(row)
+                    if (!seriesTransport.ready(prepared)) continue
+                    selected += prepared
+                } else selected += row
+            }
+            val mutations = selected.map { it.toTideMutation() }
+            val mutationIds = selected.map { it.mutationId }
 
             if (mutationIds.isNotEmpty()) {
                 val claimedCount = outboxDao.markInSync(
@@ -124,6 +141,10 @@ class TideRequestPreparer(
         }
 
         val payload = payloadJson?.toJsonObject()
+        if (entityType in setOf(TideEntityType.TASK_ACTION, TideEntityType.TASK_SERIES_ACTION)) {
+            check(payload != null) { "Task actions require their aggregate journal" }
+            return TideMutation(mutationId, entityType, entitySyncId, operation, baseVersion, payload)
+        }
 
         when (operation) {
             TideOperation.CREATE,

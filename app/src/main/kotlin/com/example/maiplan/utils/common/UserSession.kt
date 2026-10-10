@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 import java.util.UUID
 
 object UserSession {
-    var userLocalId: Long? = null
+    var userLocalId: Long? by mutableStateOf(null)
         private set
 
     var userSyncId: UUID? = null

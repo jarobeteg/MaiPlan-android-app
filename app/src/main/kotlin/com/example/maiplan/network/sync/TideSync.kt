@@ -75,8 +75,20 @@ data class TideAcknowledgement(
     val entitySyncId: UUID,
 
     @SerializedName("server_version")
-    val serverVersion: Long
+    val serverVersion: Long,
+    val effects: List<TideActionSnapshot> = emptyList(),
+    @field:JsonAdapter(NullableJsonObjectAdapterFactory::class) val continuation: JsonObject? = null
 )
+
+data class TideActionSnapshot(
+    @SerializedName("entity_type") val entityType: String,
+    @SerializedName("entity_sync_id") val entitySyncId: UUID,
+    val operation: String,
+    @SerializedName("server_version") val serverVersion: Long,
+    @field:JsonAdapter(NullableJsonObjectAdapterFactory::class) val data: JsonObject?
+) {
+    fun change(): TideChange = TideChange("0", entityType, entitySyncId, operation, serverVersion, data)
+}
 
 data class TideRejection(
     @SerializedName("mutation_id")

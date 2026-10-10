@@ -85,6 +85,7 @@ object NotificationHelper {
     fun showNotification(
         context: Context, title: String, message: String, notificationId: Int,
         notificationTag: String? = null, scheduledTime: Long? = null,
+        taskDestination: TaskReminderDestination? = null,
     ): Boolean {
         if (!canDeliverReminders(context)) {
             Log.w("NotificationHelper", "Reminder notifications are disabled.")
@@ -94,9 +95,10 @@ object NotificationHelper {
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            taskDestination?.let { data = it.uri() }
         }
         val pendingIntent: PendingIntent = PendingIntent.getActivity(
-            context, 0, intent, PendingIntent.FLAG_IMMUTABLE
+            context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -108,7 +110,7 @@ object NotificationHelper {
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setVisibility(if (taskDestination != null) NotificationCompat.VISIBILITY_PRIVATE else NotificationCompat.VISIBILITY_PUBLIC)
         scheduledTime?.let { builder.setWhen(it).setShowWhen(true) }
 
         val notificationManager =
@@ -121,5 +123,13 @@ object NotificationHelper {
             Log.e("NotificationHelper", "Unable to post reminder notification.", e)
             return false
         }
+    }
+
+    fun cancel(context: Context, notificationTag: String) {
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancel(notificationTag, 0)
+    }
+    fun cancelSource(context: Context, source: String) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.activeNotifications.filter { it.tag?.startsWith("$source:") == true }.forEach { manager.cancel(it.tag, it.id) }
     }
 }
