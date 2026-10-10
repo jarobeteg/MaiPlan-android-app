@@ -74,6 +74,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.components.EditorSaveBar
 import com.example.maiplan.components.ColorPickerDialog
 import com.example.maiplan.components.IconPickerDialog
 import com.example.maiplan.theme.AppThemeManager
@@ -133,7 +134,6 @@ internal fun CategoryTopBar(
     onBackClick: () -> Unit,
 ) {
     val dark = LocalAppDarkTheme.current
-    val surface = if (dark) Color(0xFF191D2E) else Color.White
     val foreground = if (dark) Color(0xFFF5F7FB) else CategoryInk
 
     CenterAlignedTopAppBar(
@@ -160,7 +160,7 @@ internal fun CategoryTopBar(
             Spacer(Modifier.width(8.dp))
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = surface.copy(alpha = 0.94f),
+            containerColor = Color.Transparent,
         ),
     )
 }
@@ -430,6 +430,11 @@ internal fun CategoryEditorLayout(
         androidx.compose.material3.Scaffold(
             containerColor = Color.Transparent,
             topBar = { CategoryTopBar(title = title, onBackClick = onBackClick) },
+            bottomBar = {
+                EditorSaveBar {
+                    CategoryEditorButton(text = submitLabel, isLoading = isLoading, onClick = onSubmit)
+                }
+            },
         ) { innerPadding ->
             Column(
                 modifier = Modifier
@@ -489,11 +494,6 @@ internal fun CategoryEditorLayout(
                         )
                     }
                     if (errorMessage != null) CategoryEditorError(errorMessage)
-                    CategoryEditorButton(
-                        text = submitLabel,
-                        isLoading = isLoading,
-                        onClick = onSubmit,
-                    )
                     Spacer(Modifier.height(10.dp))
                 }
             }

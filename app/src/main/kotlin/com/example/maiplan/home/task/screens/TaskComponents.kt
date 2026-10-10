@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.semantics
@@ -44,6 +45,7 @@ import java.time.format.FormatStyle
 fun TaskFeatureTheme(content: @Composable () -> Unit) {
     val colors = MaterialTheme.colorScheme
     val dark = LocalAppDarkTheme.current
+    val isTablet = LocalConfiguration.current.smallestScreenWidthDp >= 600
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
     val ink = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
@@ -52,7 +54,7 @@ fun TaskFeatureTheme(content: @Composable () -> Unit) {
     val tint = primary.copy(alpha = 0.12f).compositeOver(surface)
     MaterialTheme(
         colorScheme = colors.copy(
-            primary = primary, onPrimary = if (dark) Color(0xFF101314) else Color.White,
+            primary = primary, onPrimary = Color.White,
             background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC), onBackground = ink,
             surface = surface, onSurface = ink, surfaceVariant = field, onSurfaceVariant = muted,
             surfaceContainerLowest = surface, surfaceContainerLow = surface,
@@ -66,15 +68,17 @@ fun TaskFeatureTheme(content: @Composable () -> Unit) {
         shapes = MaterialTheme.shapes.copy(medium = RoundedCornerShape(15.dp), large = RoundedCornerShape(22.dp)),
     ) {
         Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-            Canvas(Modifier.fillMaxSize()) {
-                drawCircle(
-                    brush = Brush.radialGradient(listOf(AppThemeManager.selectedTheme.primary.copy(alpha = if (dark) 0.18f else 0.09f), Color.Transparent)),
-                    center = Offset(size.width * 0.05f, size.height * 0.03f), radius = size.minDimension * 0.68f,
-                )
-                drawCircle(
-                    brush = Brush.radialGradient(listOf(Color(0xFF14B8A6).copy(alpha = if (dark) 0.10f else 0.06f), Color.Transparent)),
-                    center = Offset(size.width, size.height), radius = size.minDimension * 0.52f,
-                )
+            if (!isTablet) {
+                Canvas(Modifier.fillMaxSize()) {
+                    drawCircle(
+                        brush = Brush.radialGradient(listOf(AppThemeManager.selectedTheme.primary.copy(alpha = if (dark) 0.18f else 0.09f), Color.Transparent)),
+                        center = Offset(size.width * 0.05f, size.height * 0.03f), radius = size.minDimension * 0.68f,
+                    )
+                    drawCircle(
+                        brush = Brush.radialGradient(listOf(Color(0xFF14B8A6).copy(alpha = if (dark) 0.10f else 0.06f), Color.Transparent)),
+                        center = Offset(size.width, size.height), radius = size.minDimension * 0.52f,
+                    )
+                }
             }
             CompositionLocalProvider(LocalContentColor provides ink) {
                 content()
@@ -85,16 +89,28 @@ fun TaskFeatureTheme(content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskTopBar(title: String, onBack: (() -> Unit)? = null, actions: @Composable RowScope.() -> Unit = {}) {
+fun TaskTopBar(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    subtitle: String? = null,
+    actions: @Composable RowScope.() -> Unit = {},
+) {
     CenterAlignedTopAppBar(title = {
-        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.3).sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
+                letterSpacing = (-0.3).sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            subtitle?.let {
+                Text(it, style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+        }
     }, navigationIcon = {
         if (onBack != null) IconButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.task_back))
         }
     }, actions = actions, colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.94f),
+        containerColor = Color.Transparent,
         titleContentColor = MaterialTheme.colorScheme.onSurface,
         navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
         actionIconContentColor = MaterialTheme.colorScheme.onSurface,
@@ -139,7 +155,6 @@ internal fun TaskSectionIcon(icon: ImageVector, color: Color = MaterialTheme.col
 internal fun TaskHeading(title: String, subtitle: String) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp)
-        Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 

@@ -36,6 +36,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.maiplan.R
+import com.example.maiplan.components.EditorSaveBar
 import com.example.maiplan.components.rememberEditorBackAction
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
@@ -229,10 +230,155 @@ internal fun EventFullEditor(
         errorMessage = error,
     )
 
+    val reminderInPastMessage = stringResource(R.string.event_reminder_in_past)
+    val saveEvent: () -> Unit = {
+        try {
+            val zone = ZoneId.of(zoneText)
+            require(zone.id == "UTC" || '/' in zone.id) {
+                "Choose an IANA region time zone"
+            }
+            val startDate = LocalDate.ofEpochDay(startDay)
+            val endDate = LocalDate.ofEpochDay(endDay ?: startDay)
+            require(title.isNotBlank()) { "Enter a title" }
+            require(!endDate.isBefore(startDate)) { "End date precedes start date" }
+            val untilDate = if (repeatMode != "NONE")
+                untilDay?.let(LocalDate::ofEpochDay) else null
+            listOfNotNull(startDate, endDate, untilDate).forEach {
+                require(it.year in 1..9999) { "Date outside supported range" }
+            }
+            val interval = if (repeatMode != "NONE") intervalText.toInt() else null
+            val maxInterval = when (repeatMode) {
+                "DAILY" -> 365
+                "WEEKLY" -> 52
+                "MONTHLY" -> 24
+                else -> 1
+            }
+            require(interval == null || interval in 1..maxInterval) {
+                "Repeat interval must be 1–$maxInterval"
+            }
+            require(repeatMode != "WEEKLY" || weekdayMask in 1..127) {
+                "Select weekdays"
+            }
+            require(repeatMode != "WEEKLY" || weekdayMask and
+                (1 shl (startDate.dayOfWeek.value - 1)) != 0) {
+                "Start date must be selected weekday"
+            }
+            require(repeatMode != "MONTHLY" || monthlyMode != "LAST_DAY" ||
+                startDate.dayOfMonth == startDate.lengthOfMonth()) {
+                "Choose a last day as the first occurrence"
+            }
+            require(repeatMode != "MONTHLY" || monthlyMode != "LAST_WEEKDAY" ||
+                startDate.dayOfMonth + 7 > startDate.lengthOfMonth()) {
+                "Choose a last weekday as the first occurrence"
+            }
+            require(untilDate == null || !untilDate.isBefore(startDate)) {
+                "Repeat end precedes start"
+            }
+            require(repeatMode == "NONE" || reminderMode != "absolute") {
+                "Use a relative reminder for repeating events"
+            }
+            val startTime = if (timed) LocalTime.parse(startClock) else null
+            val endTime = if (timed) LocalTime.parse(endClock) else null
+            if (timed) {
+                require(!isNonexistentLocalTime(startDate.atTime(requireNotNull(startTime)), zone))
+                require(!isNonexistentLocalTime(endDate.atTime(requireNotNull(endTime)), zone))
+            }
+            val startInstant = startTime?.let {
+                resolveLocal(startDate.atTime(it), zone).toInstant()
+            }
+            val endInstant = endTime?.let {
+                resolveLocal(endDate.atTime(it), zone).toInstant()
+            }
+            require(startInstant == null || endInstant!!.isAfter(startInstant)) {
+                "End must follow start"
+            }
+            val offset = if (reminderMode == "relative" && timed)
+                offsetText.toInt() else null
+            val lead = if (reminderMode == "relative" && !timed)
+                leadText.toInt() else null
+            require(offset == null || offset in 0..10080)
+            require(lead == null || lead in 0..7)
+            val minute = if (lead != null) {
+                val clock = LocalTime.parse(reminderClock)
+                clock.hour * 60 + clock.minute
+            } else null
+            val event = (initial ?: EventEntity(
+                userLocalId = userId, title = title.trim(), startDate = startDate,
+            )).copy(
+                title = title.trim(), description = description.trim(),
+                categoryLocalId = categoryId, startDate = startDate, endDate = endDate,
+                startTime = startTime,
+                endTime = endTime, zoneId = zone.id,
+                recurrenceFrequency = repeatMode.takeUnless { it == "NONE" },
+                recurrenceInterval = interval,
+                recurrenceWeekdays = if (repeatMode == "WEEKLY")
+                    weekdayMask else null,
+                recurrenceMonthlyMode = if (repeatMode == "MONTHLY")
+                    monthlyMode else null,
+                recurrenceUntilDate = untilDate,
+                reminderOffsetMinutes = offset, reminderLeadDays = lead,
+                reminderMinuteOfDay = minute,
+                reminderLocalId = if (reminderMode == "absolute")
+                    initial?.reminderLocalId else null,
+                relativeReminderMessage = if (offset != null || lead != null)
+                    reminderMessage else null,
+                priority = initial?.priority ?: 1,
+            )
+            val reminder = if (reminderMode == "absolute") {
+                val selected = LocalDate.ofEpochDay(absoluteDay)
+                    .atTime(LocalTime.parse(absoluteClock))
+                require(!isNonexistentLocalTime(selected, zone))
+                ReminderEntity(
+                    reminderLocalId = initialReminder?.reminderLocalId ?: 0L,
+                    userLocalId = userId,
+                    reminderTime = reminderEpochMillisForUpdate(
+                        selected, zone, initialReminder?.reminderTime,
+                        initial?.zoneId ?: zone.id, absoluteEdited,
+                    ),
+                    zoneId = zone.id, message = reminderMessage,
+                )
+            } else null
+            validateEventDefinition(event)
+            if (reminder != null) {
+                require(reminder.reminderTime > System.currentTimeMillis()) {
+                    reminderInPastMessage
+                }
+            } else if (offset != null || lead != null) {
+                require(nextEventReminderAfter(event, Instant.now()) != null) {
+                    reminderInPastMessage
+                }
+            }
+            error = null
+            if (reminderMode != "none" &&
+                !NotificationHelper.canDeliverReminders(context)
+            ) {
+                pendingSave = reminder to event
+                notificationDialogMode = if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    !NotificationHelper.canPostNotifications(context)
+                ) "permission" else "settings"
+            } else if (reminderMode != "none" &&
+                !AlarmScheduler.canScheduleExactAlarms(context)
+            ) {
+                pendingSave = reminder to event
+                notificationDialogMode = "exact"
+            } else {
+                currentOnSave(reminder, event)
+            }
+        } catch (failure: Exception) {
+            error = failure.message ?: "Check event fields"
+        }
+    }
+
     EventScreenBackground {
         Scaffold(
             topBar = { EventEditorTopBar(heading, back) },
             containerColor = Color.Transparent,
+            bottomBar = {
+                EditorSaveBar {
+                    EventEditorButton(stringResource(R.string.event_save), enabled = !isSaving, onClick = saveEvent)
+                }
+            },
         ) { padding ->
             Column(
                 Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())
@@ -492,145 +638,6 @@ internal fun EventFullEditor(
                     }
 
                     error?.let { EventEditorError(it) }
-                    val reminderInPastMessage = stringResource(R.string.event_reminder_in_past)
-                    EventEditorButton(stringResource(R.string.event_save), enabled = !isSaving) {
-                        try {
-                            val zone = ZoneId.of(zoneText)
-                            require(zone.id == "UTC" || '/' in zone.id) {
-                                "Choose an IANA region time zone"
-                            }
-                            val startDate = LocalDate.ofEpochDay(startDay)
-                            val endDate = LocalDate.ofEpochDay(endDay ?: startDay)
-                            require(title.isNotBlank()) { "Enter a title" }
-                            require(!endDate.isBefore(startDate)) { "End date precedes start date" }
-                            val untilDate = if (repeatMode != "NONE")
-                                untilDay?.let(LocalDate::ofEpochDay) else null
-                            listOfNotNull(startDate, endDate, untilDate).forEach {
-                                require(it.year in 1..9999) { "Date outside supported range" }
-                            }
-                            val interval = if (repeatMode != "NONE") intervalText.toInt() else null
-                            val maxInterval = when (repeatMode) {
-                                "DAILY" -> 365
-                                "WEEKLY" -> 52
-                                "MONTHLY" -> 24
-                                else -> 1
-                            }
-                            require(interval == null || interval in 1..maxInterval) {
-                                "Repeat interval must be 1–$maxInterval"
-                            }
-                            require(repeatMode != "WEEKLY" || weekdayMask in 1..127) {
-                                "Select weekdays"
-                            }
-                            require(repeatMode != "WEEKLY" || weekdayMask and
-                                (1 shl (startDate.dayOfWeek.value - 1)) != 0) {
-                                "Start date must be selected weekday"
-                            }
-                            require(repeatMode != "MONTHLY" || monthlyMode != "LAST_DAY" ||
-                                startDate.dayOfMonth == startDate.lengthOfMonth()) {
-                                "Choose a last day as the first occurrence"
-                            }
-                            require(repeatMode != "MONTHLY" || monthlyMode != "LAST_WEEKDAY" ||
-                                startDate.dayOfMonth + 7 > startDate.lengthOfMonth()) {
-                                "Choose a last weekday as the first occurrence"
-                            }
-                            require(untilDate == null || !untilDate.isBefore(startDate)) {
-                                "Repeat end precedes start"
-                            }
-                            require(repeatMode == "NONE" || reminderMode != "absolute") {
-                                "Use a relative reminder for repeating events"
-                            }
-                            val startTime = if (timed) LocalTime.parse(startClock) else null
-                            val endTime = if (timed) LocalTime.parse(endClock) else null
-                            if (timed) {
-                                require(!isNonexistentLocalTime(startDate.atTime(requireNotNull(startTime)), zone))
-                                require(!isNonexistentLocalTime(endDate.atTime(requireNotNull(endTime)), zone))
-                            }
-                            val startInstant = startTime?.let {
-                                resolveLocal(startDate.atTime(it), zone).toInstant()
-                            }
-                            val endInstant = endTime?.let {
-                                resolveLocal(endDate.atTime(it), zone).toInstant()
-                            }
-                            require(startInstant == null || endInstant!!.isAfter(startInstant)) {
-                                "End must follow start"
-                            }
-                            val offset = if (reminderMode == "relative" && timed)
-                                offsetText.toInt() else null
-                            val lead = if (reminderMode == "relative" && !timed)
-                                leadText.toInt() else null
-                            require(offset == null || offset in 0..10080)
-                            require(lead == null || lead in 0..7)
-                            val minute = if (lead != null) {
-                                val clock = LocalTime.parse(reminderClock)
-                                clock.hour * 60 + clock.minute
-                            } else null
-                            val event = (initial ?: EventEntity(
-                                userLocalId = userId, title = title.trim(), startDate = startDate,
-                            )).copy(
-                                title = title.trim(), description = description.trim(),
-                                categoryLocalId = categoryId, startDate = startDate, endDate = endDate,
-                                startTime = startTime,
-                                endTime = endTime, zoneId = zone.id,
-                                recurrenceFrequency = repeatMode.takeUnless { it == "NONE" },
-                                recurrenceInterval = interval,
-                                recurrenceWeekdays = if (repeatMode == "WEEKLY")
-                                    weekdayMask else null,
-                                recurrenceMonthlyMode = if (repeatMode == "MONTHLY")
-                                    monthlyMode else null,
-                                recurrenceUntilDate = untilDate,
-                                reminderOffsetMinutes = offset, reminderLeadDays = lead,
-                                reminderMinuteOfDay = minute,
-                                reminderLocalId = if (reminderMode == "absolute")
-                                    initial?.reminderLocalId else null,
-                                relativeReminderMessage = if (offset != null || lead != null)
-                                    reminderMessage else null,
-                                priority = initial?.priority ?: 1,
-                            )
-                            val reminder = if (reminderMode == "absolute") {
-                                val selected = LocalDate.ofEpochDay(absoluteDay)
-                                    .atTime(LocalTime.parse(absoluteClock))
-                                require(!isNonexistentLocalTime(selected, zone))
-                                ReminderEntity(
-                                    reminderLocalId = initialReminder?.reminderLocalId ?: 0L,
-                                    userLocalId = userId,
-                                    reminderTime = reminderEpochMillisForUpdate(
-                                        selected, zone, initialReminder?.reminderTime,
-                                        initial?.zoneId ?: zone.id, absoluteEdited,
-                                    ),
-                                    zoneId = zone.id, message = reminderMessage,
-                                )
-                            } else null
-                            validateEventDefinition(event)
-                            if (reminder != null) {
-                                require(reminder.reminderTime > System.currentTimeMillis()) {
-                                    reminderInPastMessage
-                                }
-                            } else if (offset != null || lead != null) {
-                                require(nextEventReminderAfter(event, Instant.now()) != null) {
-                                    reminderInPastMessage
-                                }
-                            }
-                            error = null
-                            if (reminderMode != "none" &&
-                                !NotificationHelper.canDeliverReminders(context)
-                            ) {
-                                pendingSave = reminder to event
-                                notificationDialogMode = if (
-                                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                                    !NotificationHelper.canPostNotifications(context)
-                                ) "permission" else "settings"
-                            } else if (reminderMode != "none" &&
-                                !AlarmScheduler.canScheduleExactAlarms(context)
-                            ) {
-                                pendingSave = reminder to event
-                                notificationDialogMode = "exact"
-                            } else {
-                                currentOnSave(reminder, event)
-                            }
-                        } catch (failure: Exception) {
-                            error = failure.message ?: "Check event fields"
-                        }
-                    }
                     Spacer(Modifier.height(10.dp))
                 }
             }

@@ -45,7 +45,10 @@ fun TaskListScreen(rootNavController: NavHostController, viewModel: TaskViewMode
     LaunchedEffect(state.offset, options.view, options.categoryId, options.sort) { listState.scrollToItem(0) }
     LaunchedEffect(state.loading) { if (!state.loading) loadedOnce = true }
     val compact = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
-    Scaffold(containerColor = Color.Transparent, topBar = { TaskTopBar(stringResource(R.string.task_title)) },
+    Scaffold(containerColor = Color.Transparent, topBar = {
+        TaskTopBar(stringResource(R.string.task_title),
+            subtitle = if (compact) null else stringResource(R.string.task_collection_subtitle))
+    },
         bottomBar = { HomeNavigationBar(rootNavController, context) },
         floatingActionButton = {
             if (compact) FloatingActionButton(onClick = onCreate, shape = RoundedCornerShape(16.dp),

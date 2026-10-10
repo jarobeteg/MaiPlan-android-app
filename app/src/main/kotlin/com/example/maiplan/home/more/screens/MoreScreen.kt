@@ -77,6 +77,7 @@ import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.utils.BaseActivity
+import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.utils.common.UserSession
 import java.util.UUID
 
@@ -223,7 +224,7 @@ private fun MoreScreenBackground(content: @Composable () -> Unit) {
             .fillMaxSize()
             .background(background),
     ) {
-        if (!(isTablet && dark)) {
+        if (!isTablet) {
             Canvas(Modifier.fillMaxSize()) {
                 drawCircle(
                     brush = Brush.radialGradient(
@@ -255,19 +256,31 @@ private fun MoreScreenBackground(content: @Composable () -> Unit) {
 @Composable
 fun MoreTopBar() {
     val dark = LocalAppDarkTheme.current
+    val compact = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
     CenterAlignedTopAppBar(
         title = {
-            Text(
-                text = stringResource(R.string.more),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = if (dark) Color(0xFFF5F7FB) else MoreInk,
-                textAlign = TextAlign.Center,
-                letterSpacing = (-0.3).sp,
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = stringResource(R.string.more),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = if (dark) Color(0xFFF5F7FB) else MoreInk,
+                    textAlign = TextAlign.Center,
+                    letterSpacing = (-0.3).sp,
+                )
+                if (!compact) {
+                    Text(
+                        text = stringResource(R.string.more_subtitle),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (dark) Color(0xFFAEB7C9) else MoreMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = (if (dark) Color(0xFF191D2E) else Color.White).copy(alpha = 0.94f),
+            containerColor = Color.Transparent,
         ),
     )
 }

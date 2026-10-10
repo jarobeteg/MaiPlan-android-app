@@ -183,7 +183,7 @@ internal fun EventEditorTopBar(title: String, onBackClick: () -> Unit) {
         },
         actions = { Spacer(Modifier.size(48.dp)) },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = (if (dark) Color(0xFF191D2E) else Color.White).copy(alpha = 0.94f),
+            containerColor = Color.Transparent,
         ),
     )
 }

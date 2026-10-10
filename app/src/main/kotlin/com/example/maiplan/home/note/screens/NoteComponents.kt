@@ -66,6 +66,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
+import com.example.maiplan.components.EditorSaveBar
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.home.event.screens.CategoryPickerOverlay
 import com.example.maiplan.home.event.screens.EventCategoryField
@@ -155,7 +156,7 @@ internal fun NoteEditorTopBar(title: String, onBackClick: () -> Unit) {
         },
         actions = { Spacer(Modifier.size(48.dp)) },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = (if (dark) Color(0xFF191D2E) else Color.White).copy(alpha = 0.94f),
+            containerColor = Color.Transparent,
         ),
     )
 }
@@ -193,6 +194,11 @@ internal fun NoteEditorLayout(
         Scaffold(
             containerColor = Color.Transparent,
             topBar = { NoteEditorTopBar(topBarTitle, back) },
+            bottomBar = {
+                EditorSaveBar {
+                    NoteEditorButton(text = submitLabel, isLoading = state.isLoading, onClick = onSubmit)
+                }
+            },
         ) { innerPadding ->
             if (compactLandscape) {
                 Row(
@@ -221,7 +227,6 @@ internal fun NoteEditorLayout(
                     ) {
                         NoteEditorForm(
                             state = state,
-                            submitLabel = submitLabel,
                             compact = true,
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
@@ -230,7 +235,6 @@ internal fun NoteEditorLayout(
                             onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
                             onReminderEnabledChange = onReminderEnabledChange,
-                            onSubmit = onSubmit,
                         )
                     }
                 }
@@ -253,7 +257,6 @@ internal fun NoteEditorLayout(
                         NotePreview(state)
                         NoteEditorForm(
                             state = state,
-                            submitLabel = submitLabel,
                             compact = false,
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
@@ -262,7 +265,6 @@ internal fun NoteEditorLayout(
                             onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
                             onReminderEnabledChange = onReminderEnabledChange,
-                            onSubmit = onSubmit,
                         )
                     }
                 }
@@ -301,7 +303,6 @@ internal fun NoteEditorLayout(
 @Composable
 private fun NoteEditorForm(
     state: NoteEditorState,
-    submitLabel: String,
     compact: Boolean,
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
@@ -310,7 +311,6 @@ private fun NoteEditorForm(
     onReminderTimeClick: () -> Unit,
     onReminderMessageChange: (String) -> Unit,
     onReminderEnabledChange: (Boolean) -> Unit,
-    onSubmit: () -> Unit,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -367,11 +367,6 @@ private fun NoteEditorForm(
             )
         }
         state.errorMessage?.let { NoteEditorError(it) }
-        NoteEditorButton(
-            text = submitLabel,
-            isLoading = state.isLoading,
-            onClick = onSubmit,
-        )
         Spacer(Modifier.height(10.dp))
     }
 }
