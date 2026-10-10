@@ -1042,9 +1042,10 @@ internal fun EventEditorError(message: String) {
 }
 
 @Composable
-internal fun EventEditorButton(text: String, onClick: () -> Unit) {
+internal fun EventEditorButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
     Button(
         onClick = onClick,
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp),

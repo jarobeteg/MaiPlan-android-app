@@ -67,6 +67,7 @@ fun NavGraphBuilder.eventNavGraph(
         val saveResult by eventViewModel.saveEventResult.observeAsState()
         CreateEventScreen(
             categoryViewModel = categoryViewModel,
+            isSaving = saveResult is Result.Loading,
             onSaveClick = { reminder, event ->
                 eventViewModel.createEventWithReminder(reminder, event)
             },
@@ -99,6 +100,7 @@ fun NavGraphBuilder.eventNavGraph(
             eventLocalId = eventLocalId,
             eventViewModel = eventViewModel,
             categoryViewModel = categoryViewModel,
+            isSaving = saveResult is Result.Loading,
             onUpdateClick = { reminder, event ->
                 eventViewModel.updateEventWithReminder(reminder, event)
             },

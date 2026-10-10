@@ -419,7 +419,6 @@ internal fun CategoryEditorLayout(
     onNameChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
     onColorSelected: (Color) -> Unit,
-    onIconSelected: (ImageVector) -> Unit,
     onIconSelectedString: (String) -> Unit,
     submitLabel: String,
     isLoading: Boolean,
@@ -486,7 +485,6 @@ internal fun CategoryEditorLayout(
                         Spacer(Modifier.height(12.dp))
                         CategoryIconSelector(
                             selectedIcon = selectedIcon,
-                            onIconSelected = onIconSelected,
                             onIconSelectedString = onIconSelectedString,
                         )
                     }
@@ -720,7 +718,6 @@ private fun CategoryColorSelector(
 @Composable
 private fun CategoryIconSelector(
     selectedIcon: ImageVector,
-    onIconSelected: (ImageVector) -> Unit,
     onIconSelectedString: (String) -> Unit,
 ) {
     var showDialog by remember { mutableStateOf(false) }
@@ -740,7 +737,7 @@ private fun CategoryIconSelector(
     )
     if (showDialog) {
         IconPickerDialog(
-            onIconSelected = onIconSelected,
+            onIconSelected = {},
             onIconSelectedString = onIconSelectedString,
             onDismiss = { showDialog = false },
         )

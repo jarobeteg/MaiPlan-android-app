@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.maiplan.R
+import com.example.maiplan.components.rememberEditorBackAction
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.NoteEntity
 import com.example.maiplan.database.entities.ReminderEntity
@@ -160,6 +161,16 @@ private fun NoteEditorScreen(
         else -> null
     }
 
+    val back = rememberEditorBackAction(
+        hasChanges = title != initialTitle || content != initialContent ||
+            selectedCategoryId != initialCategoryLocalId ||
+            reminderEnabled != (initialReminderDateTime != null) ||
+            reminderMessage != initialReminderMessage ||
+            (reminderEnabled && reminderDateTime != initialReminderDateTime),
+        saving = saveResult is Result.Loading,
+        onBack = onBackClick,
+    )
+
     NoteEditorLayout(
         topBarTitle = topBarTitle,
         heading = heading,
@@ -184,7 +195,7 @@ private fun NoteEditorScreen(
         onReminderDateTimeChange = { reminderDateTime = it },
         onReminderMessageChange = { reminderMessage = it },
         onReminderEnabledChange = { reminderEnabled = it },
-        onBackClick = onBackClick,
+        onBackClick = back,
         onSubmit = {
             when {
                 title.isBlank() -> localError = titleRequiredMessage

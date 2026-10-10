@@ -36,6 +36,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.maiplan.R
+import com.example.maiplan.components.rememberEditorBackAction
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.database.entities.EventEntity
 import com.example.maiplan.database.entities.ReminderEntity
@@ -56,6 +57,7 @@ internal fun EventFullEditor(
     initial: EventEntity?,
     initialReminder: ReminderEntity?,
     categories: List<CategoryEntity>,
+    isSaving: Boolean,
     onBack: () -> Unit,
     onSave: (ReminderEntity?, EventEntity) -> Unit,
 ) {
@@ -184,17 +186,34 @@ internal fun EventFullEditor(
         mutableStateOf(initialReminder?.message ?: initial?.relativeReminderMessage.orEmpty())
     }
     var error by rememberSaveable(initial?.eventLocalId) { mutableStateOf<String?>(null) }
+    val draftValues = listOf(
+        title, description, startDay.toString(), endDay?.toString(), timed.toString(),
+        zoneText, startClock, endClock, categoryId?.toString(), repeatMode,
+        weekdayMask.toString(), intervalText, monthlyMode, untilDay?.toString(),
+        reminderMode, offsetText, leadText, reminderClock, absoluteDay.toString(),
+        absoluteClock, reminderMessage,
+    )
+    val initialDraftValues = rememberSaveable(initial?.eventLocalId) { draftValues }
+    val requestBack = rememberEditorBackAction(
+        hasChanges = draftValues != initialDraftValues,
+        saving = isSaving,
+        onBack = onBack,
+    )
     var pickingDate by remember { mutableStateOf<String?>(null) }
     var pickingTime by remember { mutableStateOf<String?>(null) }
     var pickingZone by remember { mutableStateOf(false) }
     var pickingCategory by remember { mutableStateOf(false) }
-    BackHandler(enabled = pickingDate != null || pickingTime != null ||
-        pickingZone || pickingCategory) {
-        pickingDate = null
-        pickingTime = null
-        pickingZone = false
-        pickingCategory = false
+    val back: () -> Unit = {
+        when {
+            pickingDate != null -> pickingDate = null
+            pickingTime != null -> pickingTime = null
+            pickingZone -> pickingZone = false
+            pickingCategory -> pickingCategory = false
+            else -> requestBack()
+        }
     }
+    BackHandler(enabled = pickingDate != null || pickingTime != null || pickingZone || pickingCategory,
+        onBack = back)
     val dateFormat = remember { DateTimeFormatter.ofPattern("EEE, MMM d, yyyy") }
     val previewState = EventEditorState(
         title = title,
@@ -212,7 +231,7 @@ internal fun EventFullEditor(
 
     EventScreenBackground {
         Scaffold(
-            topBar = { EventEditorTopBar(heading, onBack) },
+            topBar = { EventEditorTopBar(heading, back) },
             containerColor = Color.Transparent,
         ) { padding ->
             Column(
@@ -474,7 +493,7 @@ internal fun EventFullEditor(
 
                     error?.let { EventEditorError(it) }
                     val reminderInPastMessage = stringResource(R.string.event_reminder_in_past)
-                    EventEditorButton(stringResource(R.string.event_save)) {
+                    EventEditorButton(stringResource(R.string.event_save), enabled = !isSaving) {
                         try {
                             val zone = ZoneId.of(zoneText)
                             require(zone.id == "UTC" || '/' in zone.id) {

@@ -21,14 +21,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.Notes
-import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.ErrorOutline
@@ -38,11 +36,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -55,7 +49,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,6 +67,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.home.event.screens.CategoryPickerOverlay
+import com.example.maiplan.home.event.screens.EventCategoryField
 import com.example.maiplan.home.event.screens.EventDatePickerOverlay
 import com.example.maiplan.home.event.screens.EventTimePickerOverlay
 import com.example.maiplan.theme.AppThemeManager
@@ -181,16 +177,22 @@ internal fun NoteEditorLayout(
     onBackClick: () -> Unit,
 ) {
     val compactLandscape = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
-    var pickingReminderDate by remember { mutableStateOf(false) }
-    var pickingReminderTime by remember { mutableStateOf(false) }
-    BackHandler(enabled = pickingReminderDate || pickingReminderTime) {
-        pickingReminderDate = false
-        pickingReminderTime = false
+    var pickingReminderDate by rememberSaveable { mutableStateOf(false) }
+    var pickingReminderTime by rememberSaveable { mutableStateOf(false) }
+    var pickingCategory by rememberSaveable { mutableStateOf(false) }
+    val back: () -> Unit = {
+        when {
+            pickingReminderDate -> pickingReminderDate = false
+            pickingReminderTime -> pickingReminderTime = false
+            pickingCategory -> pickingCategory = false
+            else -> onBackClick()
+        }
     }
+    BackHandler(enabled = pickingReminderDate || pickingReminderTime || pickingCategory, onBack = back)
     NoteScreenBackground {
         Scaffold(
             containerColor = Color.Transparent,
-            topBar = { NoteEditorTopBar(topBarTitle, onBackClick) },
+            topBar = { NoteEditorTopBar(topBarTitle, back) },
         ) { innerPadding ->
             if (compactLandscape) {
                 Row(
@@ -223,7 +225,7 @@ internal fun NoteEditorLayout(
                             compact = true,
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
-                            onCategoryChange = onCategoryChange,
+                            onCategoryClick = { pickingCategory = true },
                             onReminderDateClick = { pickingReminderDate = true },
                             onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
@@ -255,7 +257,7 @@ internal fun NoteEditorLayout(
                             compact = false,
                             onTitleChange = onTitleChange,
                             onContentChange = onContentChange,
-                            onCategoryChange = onCategoryChange,
+                            onCategoryClick = { pickingCategory = true },
                             onReminderDateClick = { pickingReminderDate = true },
                             onReminderTimeClick = { pickingReminderTime = true },
                             onReminderMessageChange = onReminderMessageChange,
@@ -265,6 +267,17 @@ internal fun NoteEditorLayout(
                     }
                 }
             }
+        }
+        if (pickingCategory) {
+            CategoryPickerOverlay(
+                categories = state.categories,
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = {
+                    onCategoryChange(it)
+                    pickingCategory = false
+                },
+                onDismiss = { pickingCategory = false },
+            )
         }
         if (pickingReminderDate) {
             EventDatePickerOverlay(
@@ -292,7 +305,7 @@ private fun NoteEditorForm(
     compact: Boolean,
     onTitleChange: (String) -> Unit,
     onContentChange: (String) -> Unit,
-    onCategoryChange: (CategoryEntity?) -> Unit,
+    onCategoryClick: () -> Unit,
     onReminderDateClick: () -> Unit,
     onReminderTimeClick: () -> Unit,
     onReminderMessageChange: (String) -> Unit,
@@ -337,11 +350,7 @@ private fun NoteEditorForm(
             subtitle = stringResource(R.string.note_organization_subtitle),
             compact = compact,
         ) {
-            NoteCategoryDropdown(
-                categories = state.categories,
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = onCategoryChange,
-            )
+            EventCategoryField(state.selectedCategory, enabled = !state.isLoading, onClick = onCategoryClick)
         }
         NoteEditorSection(
             title = stringResource(R.string.note_reminder_title),
@@ -554,101 +563,6 @@ private fun NoteEditorTextField(
             unfocusedPlaceholderColor = muted,
         ),
     )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun NoteCategoryDropdown(
-    categories: List<CategoryEntity>,
-    selectedCategory: CategoryEntity?,
-    onCategorySelected: (CategoryEntity?) -> Unit,
-) {
-    val dark = LocalAppDarkTheme.current
-    val field = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
-    val foreground = if (dark) Color(0xFFF5F7FB) else NoteInk
-    val muted = if (dark) Color(0xFFAEB7C9) else NoteMuted
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            value = selectedCategory?.name ?: stringResource(R.string.note_no_category),
-            onValueChange = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
-            readOnly = true,
-            singleLine = true,
-            label = { Text(stringResource(R.string.category)) },
-            leadingIcon = {
-                Icon(
-                    selectedCategory?.let { IconData.getIconByKey(it.icon) } ?: Icons.Rounded.Category,
-                    contentDescription = null,
-                    modifier = Modifier.size(21.dp),
-                )
-            },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-            shape = RoundedCornerShape(15.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = field,
-                unfocusedContainerColor = field,
-                focusedBorderColor = NotePrimary,
-                unfocusedBorderColor = if (dark) Color(0xFF3A435C) else NoteBorder,
-                focusedTextColor = foreground,
-                unfocusedTextColor = foreground,
-                focusedLabelColor = NotePrimary,
-                unfocusedLabelColor = muted,
-                focusedLeadingIconColor = NotePrimary,
-                unfocusedLeadingIconColor = NotePrimaryLight,
-                focusedTrailingIconColor = muted,
-                unfocusedTrailingIconColor = muted,
-            ),
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.background(if (dark) Color(0xFF20263A) else Color.White),
-        ) {
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.note_no_category), color = foreground) },
-                leadingIcon = {
-                    Icon(Icons.Rounded.Category, contentDescription = null, tint = NotePrimaryLight)
-                },
-                onClick = {
-                    onCategorySelected(null)
-                    expanded = false
-                },
-            )
-            categories.forEach { category ->
-                val color = category.color.toULongOrNull()?.let(::Color) ?: NotePrimary
-                DropdownMenuItem(
-                    text = { Text(category.name, color = foreground) },
-                    leadingIcon = {
-                        Surface(
-                            modifier = Modifier.size(34.dp),
-                            shape = RoundedCornerShape(10.dp),
-                            color = color.copy(alpha = if (dark) 0.24f else 0.14f),
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    IconData.getIconByKey(category.icon),
-                                    contentDescription = null,
-                                    tint = if (color.luminance() > 0.82f) NotePrimary else color,
-                                    modifier = Modifier.size(19.dp),
-                                )
-                            }
-                        }
-                    },
-                    onClick = {
-                        onCategorySelected(category)
-                        expanded = false
-                    },
-                )
-            }
-        }
-    }
 }
 
 @Composable

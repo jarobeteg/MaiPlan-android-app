@@ -25,6 +25,7 @@ fun UpdateEventScreen(
     eventLocalId: Long,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel,
+    isSaving: Boolean = false,
     onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -61,6 +62,7 @@ fun UpdateEventScreen(
             initial = current.event,
             initialReminder = current.reminder,
             categories = categories,
+            isSaving = isSaving,
             onBack = onBackClick,
             onSave = onUpdateClick,
         )

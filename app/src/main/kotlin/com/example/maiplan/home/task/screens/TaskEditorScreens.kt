@@ -1,6 +1,5 @@
 package com.example.maiplan.home.task.screens
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
@@ -24,7 +23,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.maiplan.R
-import com.example.maiplan.category.CategoryActivity
+import com.example.maiplan.components.EditorDiscardDialog
 import com.example.maiplan.home.event.screens.CategoryPickerOverlay
 import com.example.maiplan.home.event.screens.EventCategoryField
 import com.example.maiplan.home.event.screens.EventDatePickerOverlay
@@ -133,9 +132,6 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
                             }
                             if (draft.categoryId != null) TextButton(enabled = !state.saving, onClick = { viewModel.edit(draft.copy(categoryId = null)) }) {
                                 Text(stringResource(R.string.task_clear_category))
-                            }
-                            TextButton(enabled = !state.saving, onClick = { context.startActivity(Intent(context, CategoryActivity::class.java)) }) {
-                                Text(stringResource(R.string.task_categories))
                             }
                             EventSelectionField(stringResource(if (templateEditing) R.string.task_repeat_anchor else R.string.task_planned_date),
                                 taskEditorDateText(draft.date, stringResource(R.string.task_unscheduled)), Icons.Rounded.CalendarMonth,
@@ -277,13 +273,12 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
             viewModel.editSteps(state.steps.filter { it.key != id }); removingStep = null
         }) { Text(stringResource(R.string.task_step_remove_confirm)) } },
         dismissButton = { TextButton(onClick = { removingStep = null }) { Text(stringResource(R.string.task_cancel)) } }) }
-    if (discard || reload) AlertDialog(onDismissRequest = { discard = false; reload = false },
-        title = { Text(stringResource(R.string.task_discard_title)) }, text = { Text(stringResource(R.string.task_discard_body)) },
-        confirmButton = { TextButton(onClick = {
+    if (discard || reload) EditorDiscardDialog(onDismiss = { discard = false; reload = false },
+        onDiscard = {
             if (reload) viewModel.loadLatest() else onBack()
             discard = false; reload = false
-        }) { Text(stringResource(if (reload) R.string.task_reload else R.string.task_discard)) } },
-        dismissButton = { TextButton(onClick = { discard = false; reload = false }) { Text(stringResource(R.string.task_keep_editing)) } })
+        }, confirmLabel = if (reload) R.string.task_reload else R.string.task_discard,
+        enabled = !state.saving)
     state.merge?.let { merge -> AlertDialog(onDismissRequest = viewModel::cancelMerge,
         title = { Text(stringResource(R.string.task_merge_title)) },
         text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

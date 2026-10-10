@@ -1,17 +1,18 @@
 package com.example.maiplan.category.screens
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.Color
 import com.example.maiplan.R
+import com.example.maiplan.components.rememberEditorBackAction
 import com.example.maiplan.repository.Result
 import com.example.maiplan.viewmodel.category.CategoryViewModel
+import com.example.maiplan.utils.common.IconData
 
 @Composable
 fun CreateCategoryScreen(
@@ -20,11 +21,19 @@ fun CreateCategoryScreen(
     onBackClick: () -> Unit,
 ) {
     val saveResult by viewModel.createCategoryResult.observeAsState()
-    var name by remember { mutableStateOf("") }
-    var description by remember { mutableStateOf("") }
-    var selectedColor by remember { mutableStateOf(CategoryPrimary) }
-    var selectedIcon by remember { mutableStateOf(Icons.Rounded.Search) }
-    var selectedIconString by remember { mutableStateOf("search") }
+    val initialColor = rememberSaveable { CategoryPrimary.value.toString() }
+    var name by rememberSaveable { mutableStateOf("") }
+    var description by rememberSaveable { mutableStateOf("") }
+    var selectedColorString by rememberSaveable { mutableStateOf(initialColor) }
+    val selectedColor = Color(selectedColorString.toULong())
+    var selectedIconString by rememberSaveable { mutableStateOf("search") }
+    val selectedIcon = IconData.getIconByKey(selectedIconString)
+    val back = rememberEditorBackAction(
+        hasChanges = name.isNotEmpty() || description.isNotEmpty() ||
+            selectedColorString != initialColor || selectedIconString != "search",
+        saving = saveResult is Result.Loading,
+        onBack = onBackClick,
+    )
 
     val errorMessage = (saveResult as? Result.Failure)?.let { error ->
         stringResource(
@@ -45,8 +54,7 @@ fun CreateCategoryScreen(
         selectedIcon = selectedIcon,
         onNameChange = { name = it },
         onDescriptionChange = { description = it },
-        onColorSelected = { selectedColor = it },
-        onIconSelected = { selectedIcon = it },
+        onColorSelected = { selectedColorString = it.value.toString() },
         onIconSelectedString = { selectedIconString = it },
         submitLabel = stringResource(R.string.category_save),
         isLoading = saveResult is Result.Loading,
@@ -59,6 +67,6 @@ fun CreateCategoryScreen(
                 selectedIconString,
             )
         },
-        onBackClick = onBackClick,
+        onBackClick = back,
     )
 }

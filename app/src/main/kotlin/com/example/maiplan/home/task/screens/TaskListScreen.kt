@@ -1,6 +1,5 @@
 package com.example.maiplan.home.task.screens
 
-import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
@@ -26,7 +25,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import com.example.maiplan.R
-import com.example.maiplan.category.CategoryActivity
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.task.*
 import com.example.maiplan.repository.task.TaskStatus
@@ -47,11 +45,8 @@ fun TaskListScreen(rootNavController: NavHostController, viewModel: TaskViewMode
     LaunchedEffect(state.offset, options.view, options.categoryId, options.sort) { listState.scrollToItem(0) }
     LaunchedEffect(state.loading) { if (!state.loading) loadedOnce = true }
     val compact = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
-    Scaffold(containerColor = Color.Transparent, topBar = { TaskTopBar(stringResource(R.string.task_title), actions = {
-        IconButton(onClick = { context.startActivity(Intent(context, CategoryActivity::class.java)) }) {
-            Icon(Icons.Rounded.Category, stringResource(R.string.task_categories))
-        }
-    }) }, bottomBar = { HomeNavigationBar(rootNavController, context) },
+    Scaffold(containerColor = Color.Transparent, topBar = { TaskTopBar(stringResource(R.string.task_title)) },
+        bottomBar = { HomeNavigationBar(rootNavController, context) },
         floatingActionButton = {
             if (compact) FloatingActionButton(onClick = onCreate, shape = RoundedCornerShape(16.dp),
                 containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {

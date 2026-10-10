@@ -10,6 +10,7 @@ import com.example.maiplan.viewmodel.category.CategoryViewModel
 @Composable
 fun CreateEventScreen(
     categoryViewModel: CategoryViewModel,
+    isSaving: Boolean = false,
     onSaveClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit,
 ) {
@@ -19,6 +20,7 @@ fun CreateEventScreen(
         initial = null,
         initialReminder = null,
         categories = categories,
+        isSaving = isSaving,
         onBack = onBackClick,
         onSave = onSaveClick,
     )
