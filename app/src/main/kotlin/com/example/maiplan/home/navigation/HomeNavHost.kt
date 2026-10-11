@@ -1,8 +1,5 @@
 package com.example.maiplan.home.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.foundation.layout.Row
@@ -16,7 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
+import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
 import com.example.maiplan.home.event.EventScreenManager
 import com.example.maiplan.home.screens.HomeScreen
@@ -45,14 +42,10 @@ fun HomeNavHost(rootNavController: NavHostController, notificationTaskId: Long? 
             HomeNavigationRail(rootNavController, context)
         }
 
-        NavHost(
+        AppNavHost(
             navController = rootNavController,
             startDestination = HomeNavRoutes.Events.route,
             modifier = Modifier.weight(1f),
-            enterTransition = { fadeIn(animationSpec = tween(180)) },
-            exitTransition = { fadeOut(animationSpec = tween(120)) },
-            popEnterTransition = { fadeIn(animationSpec = tween(180)) },
-            popExitTransition = { fadeOut(animationSpec = tween(120)) }
         ) {
             homeNavGraph(rootNavController, notificationTaskId, onNotificationHandled)
         }

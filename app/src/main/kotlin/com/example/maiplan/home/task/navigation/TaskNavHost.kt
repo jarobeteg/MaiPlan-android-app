@@ -6,7 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
+import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.maiplan.home.task.screens.*
@@ -19,7 +19,7 @@ fun TaskNavHost(rootNavController: NavHostController, localNavController: NavHos
     notificationTaskId: Long? = null, onNotificationHandled: () -> Unit = {}) {
     val open: (Long) -> Unit = { localNavController.navigate(TaskRoutes.Detail.withArgs(it)) { launchSingleTop = true } }
     TaskFeatureTheme {
-        NavHost(localNavController, startDestination = TaskRoutes.TaskMain.route) {
+        AppNavHost(localNavController, startDestination = TaskRoutes.TaskMain.route) {
             composable(TaskRoutes.TaskMain.route) {
                 TaskListScreen(rootNavController, taskViewModel, { localNavController.navigate(TaskRoutes.Create.route) { launchSingleTop = true } }, open)
             }

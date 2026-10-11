@@ -1,13 +1,10 @@
 package com.example.maiplan.main.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.NavHost
+import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.maiplan.main.screens.LoginScreen
@@ -23,13 +20,9 @@ import java.util.UUID
 fun AuthNavHost(authViewModel: AuthViewModel) {
     val navController = rememberNavController()
 
-    NavHost(
+    AppNavHost(
         navController = navController,
         startDestination = MainRoutes.Login.route,
-        enterTransition = { fadeIn(animationSpec = tween(0)) },
-        exitTransition = { fadeOut(animationSpec = tween(0)) },
-        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
-        popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         authNavGraph(navController, authViewModel)
     }

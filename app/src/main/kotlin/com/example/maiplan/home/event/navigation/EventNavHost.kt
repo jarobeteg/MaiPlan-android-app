@@ -2,9 +2,6 @@ package com.example.maiplan.home.event.navigation
 
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
+import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.navArgument
 import com.example.maiplan.home.event.screens.*
 import com.example.maiplan.repository.Result
@@ -27,13 +24,9 @@ fun EventNavHost(
     localNavController: NavHostController,
     eventViewModel: EventViewModel,
     categoryViewModel: CategoryViewModel) {
-    NavHost(
+    AppNavHost(
         navController = localNavController,
         startDestination = EventRoutes.EventMain.route,
-        enterTransition = { fadeIn(animationSpec = tween(0)) },
-        exitTransition = { fadeOut(animationSpec = tween(0)) },
-        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
-        popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         eventNavGraph(localNavController, rootNavController, eventViewModel, categoryViewModel)
     }

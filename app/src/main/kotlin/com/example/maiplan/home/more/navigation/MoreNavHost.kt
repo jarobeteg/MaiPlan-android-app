@@ -1,15 +1,12 @@
 package com.example.maiplan.home.more.navigation
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
+import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
 import com.example.maiplan.home.more.screens.*
 import com.example.maiplan.network.RetrofitClient
@@ -21,13 +18,9 @@ import com.example.maiplan.viewmodel.auth.AccountViewModel
 
 @Composable
 fun MoreNavHost(rootNavController: NavHostController, localNavController: NavHostController) {
-    NavHost(
+    AppNavHost(
         navController = localNavController,
         startDestination = MoreRoutes.MoreMain.route,
-        enterTransition = { fadeIn(animationSpec = tween(0)) },
-        exitTransition = { fadeOut(animationSpec = tween(0)) },
-        popEnterTransition = { fadeIn(animationSpec = tween(0)) },
-        popExitTransition = { fadeOut(animationSpec = tween(0)) }
     ) {
         moreNavGraph(rootNavController, localNavController)
     }

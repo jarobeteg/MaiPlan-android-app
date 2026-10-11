@@ -1,6 +1,6 @@
 package com.example.maiplan.utils
 
-import android.R
+import com.example.maiplan.R
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -56,8 +56,8 @@ open class BaseActivity : ComponentActivity() {
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             this,
-            R.anim.fade_in,
-            R.anim.fade_out
+            R.anim.app_screen_fade_in,
+            R.anim.app_screen_fade_out
         )
 
         val intent = Intent(this, MainActivity::class.java)
