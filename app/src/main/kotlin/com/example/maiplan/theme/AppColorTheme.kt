@@ -80,6 +80,38 @@ enum class AppColorTheme(
         primary = Color(0xFF9A6B2F),
         primaryLight = Color(0xFFBE9053),
         primaryDark = Color(0xFF6B481D),
+    ),
+    LAVENDER(
+        storageKey = "lavender",
+        nameRes = R.string.theme_lavender,
+        descriptionRes = R.string.theme_lavender_description,
+        primary = Color(0xFF7B68A6),
+        primaryLight = Color(0xFFA294C2),
+        primaryDark = Color(0xFF514372),
+    ),
+    PLUM(
+        storageKey = "plum",
+        nameRes = R.string.theme_plum,
+        descriptionRes = R.string.theme_plum_description,
+        primary = Color(0xFF885478),
+        primaryLight = Color(0xFFAD81A0),
+        primaryDark = Color(0xFF5D3651),
+    ),
+    RUBY(
+        storageKey = "ruby",
+        nameRes = R.string.theme_ruby,
+        descriptionRes = R.string.theme_ruby_description,
+        primary = Color(0xFFAA4358),
+        primaryLight = Color(0xFFC76F80),
+        primaryDark = Color(0xFF7B2C3D),
+    ),
+    GRAPHITE(
+        storageKey = "graphite",
+        nameRes = R.string.theme_graphite,
+        descriptionRes = R.string.theme_graphite_description,
+        primary = Color(0xFF5F6B73),
+        primaryLight = Color(0xFF87939B),
+        primaryDark = Color(0xFF3D474F),
     );
 
     companion object {

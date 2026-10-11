@@ -267,6 +267,14 @@
     <string name="theme_dusty_rose_description">Warm, soft, and composed</string>
     <string name="theme_amber">Amber</string>
     <string name="theme_amber_description">Energetic and confident</string>
+    <string name="theme_lavender">Lavender</string>
+    <string name="theme_lavender_description">Gentle and creative</string>
+    <string name="theme_plum">Plum</string>
+    <string name="theme_plum_description">Rich and expressive</string>
+    <string name="theme_ruby">Ruby</string>
+    <string name="theme_ruby_description">Bold and lively</string>
+    <string name="theme_graphite">Graphite</string>
+    <string name="theme_graphite_description">Clean and understated</string>
     <string name="home_clock">Home clock</string>
     <string name="more_clock_subtitle">%1$s · %2$s</string>
     <string name="clock_screen_title">Home clock</string>
