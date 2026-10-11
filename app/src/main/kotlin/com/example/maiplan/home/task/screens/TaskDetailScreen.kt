@@ -1,30 +1,26 @@
 package com.example.maiplan.home.task.screens
 
-import androidx.compose.foundation.layout.*
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Notes
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.maiplan.R
-import com.example.maiplan.repository.task.TaskStatus
-import com.example.maiplan.repository.task.TaskEstimate
-import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.viewmodel.task.TaskViewModel
 
 @Composable
@@ -32,90 +28,85 @@ fun TaskDetailScreen(id: Long, viewModel: TaskViewModel, onBack: () -> Unit, onE
     val detail by remember(id, viewModel) { viewModel.detail(id) }.collectAsStateWithLifecycle()
     val collection by viewModel.metadata.collectAsStateWithLifecycle()
     val actions by viewModel.actions.collectAsStateWithLifecycle()
-    var deleting by rememberSaveable { mutableStateOf(false) }
+    var deleting by rememberSaveable(id) { mutableStateOf(false) }
+    var moreMenu by remember(id) { mutableStateOf(false) }
     val busy = id in actions.busyIds
     BackHandler(enabled = busy) { }
-    Scaffold(containerColor = Color.Transparent, topBar = { TaskTopBar(stringResource(R.string.task_detail), { if (!busy) onBack() }) }) { padding ->
+    Scaffold(containerColor = Color.Transparent, topBar = {
+        TaskTopBar(stringResource(R.string.task_detail), { if (!busy) onBack() }, actions = {
+            if (detail.task != null && !detail.loading && detail.error == null) {
+                IconButton(enabled = !busy, onClick = onEdit, modifier = Modifier.testTag("task-detail-edit")) {
+                    Icon(Icons.Rounded.Edit, stringResource(R.string.task_edit))
+                }
+                Box {
+                    IconButton(enabled = !busy, onClick = { moreMenu = true }) {
+                        Icon(Icons.Rounded.MoreVert, stringResource(R.string.task_detail_more))
+                    }
+                    DropdownMenu(expanded = moreMenu && !busy, onDismissRequest = { moreMenu = false }) {
+                        DropdownMenuItem(text = { Text(stringResource(R.string.task_delete), color = MaterialTheme.colorScheme.error) },
+                            leadingIcon = { Icon(Icons.Rounded.DeleteOutline, null, tint = MaterialTheme.colorScheme.error) },
+                            onClick = { moreMenu = false; deleting = true })
+                    }
+                }
+            }
+        })
+    }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
             val snapshot = detail.task
             when {
                 detail.loading -> TaskLoadState(true, "")
                 detail.error != null -> TaskLoadState(false, detail.error!!, viewModel::retry)
                 snapshot == null -> TaskLoadState(false, stringResource(R.string.task_unavailable) + "\n" + stringResource(R.string.task_unavailable_help))
-                else -> Column(Modifier.widthIn(max = LocalAdaptiveLayout.current.formMaxWidth).fillMaxWidth()
-                    .verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                    TaskPanel {
-                        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                            Text(snapshot.task.title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
-                            TaskStatusBadge(TaskStatus.fromCode(snapshot.task.status))
-                            TaskMetadata(snapshot, collection.categories.find { it.categoryLocalId == snapshot.effectiveCategoryLocalId },
-                                collection.issues.find { it.syncId == snapshot.task.syncId }?.state)
+                else -> BoxWithConstraints(Modifier.widthIn(max = 1120.dp).fillMaxWidth()) {
+                    val wide = maxWidth >= 840.dp
+                    val scroll = rememberScrollState()
+                    var viewport by remember { mutableStateOf<Rect?>(null) }
+                    val category = collection.categories.find { it.categoryLocalId == snapshot.effectiveCategoryLocalId }
+                    val issue = collection.issues.find { it.syncId == snapshot.task.syncId }
+                    val planning: @Composable () -> Unit = {
+                        TaskDetailOverview(snapshot, issue?.state)
+                    }
+                    val reminder: @Composable () -> Unit = {
+                        if (snapshot.reminder != null || snapshot.task.relativeReminderJson != null) {
+                            TaskDetailCard(stringResource(R.string.task_reminder), Icons.Rounded.NotificationsNone) {
+                                TaskReminderSummary(snapshot)
+                            }
                         }
                     }
-                    snapshot.task.description?.let {
-                        TaskSection(stringResource(R.string.description), icon = Icons.Rounded.Description) {
-                            Text(it, style = MaterialTheme.typography.bodyLarge)
+                    val content: @Composable () -> Unit = {
+                        snapshot.task.description?.takeIf { it.isNotBlank() }?.let { description ->
+                            TaskDetailCard(stringResource(R.string.description), Icons.AutoMirrored.Rounded.Notes) {
+                                Text(description, style = MaterialTheme.typography.bodyLarge)
+                            }
                         }
+                        TaskDetailChecklist(snapshot, busy, scroll, viewport,
+                            onStepStatus = { step, status -> viewModel.setStepStatus(id, step, status) },
+                            onReorder = { original, order -> viewModel.reorderSteps(id, original, order) }, onEdit = onEdit)
                     }
-                    if (snapshot.reminder != null || snapshot.task.relativeReminderJson != null) TaskSection(
-                        stringResource(R.string.task_reminder), icon = Icons.Rounded.NotificationsNone) {
-                        TaskReminderSummary(snapshot)
-                    }
-                    actions.message?.let { TaskMessage(it, viewModel::dismissMessage) }
-                    collection.error?.let { TaskMessage(it); TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.task_retry)) } }
-                    collection.issues.find { it.syncId == snapshot.task.syncId && it.state.needsAttention() }?.let { issue ->
-                        TaskSyncPanel(issue, !busy) { choice -> viewModel.resolve(issue, choice) { resolved -> if (resolved != id) onOpen(resolved) } }
-                    }
-                    TaskSection(stringResource(R.string.task_actions_title), icon = Icons.Rounded.Edit) {
-                        TaskStatusControl(snapshot, !busy) { viewModel.setStatus(id, it) }
-                        Button(enabled = !busy, onClick = onEdit, shape = RoundedCornerShape(15.dp),
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
-                            Icon(Icons.Rounded.Edit, null, modifier = Modifier.size(19.dp)); Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.task_edit), fontWeight = FontWeight.SemiBold)
+                    Column(Modifier.fillMaxWidth().testTag("task-detail")
+                        .onGloballyPositioned { viewport = it.boundsInWindow() }
+                        .verticalScroll(scroll).padding(horizontal = if (wide) 24.dp else 18.dp, vertical = 18.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        TaskDetailHero(snapshot, category, busy) { viewModel.setStatus(id, it) }
+                        actions.message?.let { TaskMessage(it, viewModel::dismissMessage) }
+                        collection.error?.let {
+                            TaskMessage(it)
+                            TextButton(onClick = viewModel::retry) { Text(stringResource(R.string.task_retry)) }
                         }
-                        OutlinedButton(enabled = !busy, onClick = { deleting = true }, shape = RoundedCornerShape(15.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)) {
-                            Icon(Icons.Rounded.DeleteOutline, null, modifier = Modifier.size(19.dp)); Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.task_delete))
+                        issue?.takeIf { it.state.needsAttention() }?.let {
+                            TaskSyncPanel(it, !busy) { choice ->
+                                viewModel.resolve(it, choice) { resolved -> if (resolved != id) onOpen(resolved) }
+                            }
                         }
-                    }
-                    if (snapshot.subtasks.isNotEmpty()) {
-                        TaskSection(stringResource(R.string.task_steps), stringResource(R.string.task_step_inherit), Icons.Rounded.Checklist) {
-                            val editable = !busy && !TaskStatus.fromCode(snapshot.task.status).isTerminal
-                            if (TaskStatus.fromCode(snapshot.task.status).isTerminal) TaskMessage(stringResource(R.string.task_step_locked))
-                            val byKey = snapshot.subtasks.associateBy { it.syncId.toString() }
-                            TaskOrderedSteps(snapshot.subtasks.map { it.syncId.toString() }, editable, title = { byKey.getValue(it).title },
-                                onReorder = { original, order -> viewModel.reorderSteps(id,
-                                    original.map { byKey.getValue(it).subtaskLocalId }, order.map { byKey.getValue(it).subtaskLocalId }) },
-                                content = { key ->
-                                    val step = byKey.getValue(key)
-                                    val status = TaskStatus.fromCode(step.status)
-                                    val checkboxLabel = stringResource(R.string.task_step_checkbox, step.title)
-                                    val statusLabel = taskStatusLabel(status)
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Checkbox(checked = status == TaskStatus.DONE, enabled = editable,
-                                            onCheckedChange = { viewModel.setStepStatus(id, step.subtaskLocalId, if (it) TaskStatus.DONE else TaskStatus.TODO) },
-                                            modifier = Modifier.testTag("task-step-check-$key").semantics { contentDescription = checkboxLabel; stateDescription = statusLabel })
-                                        Text(step.title, style = MaterialTheme.typography.titleSmall, modifier = Modifier.weight(1f))
-                                    }
-                                    TaskEstimateText(TaskEstimate(step.estimatedMilliseconds, false, false))
-                                    var menu by remember { mutableStateOf(false) }
-                                    val statusDescription = stringResource(R.string.task_step_status_description, step.title)
-                                    Box {
-                                        TextButton(enabled = editable, onClick = { menu = true },
-                                            modifier = Modifier.testTag("task-step-status-$key").semantics { contentDescription = statusDescription; stateDescription = statusLabel }) {
-                                            Text(stringResource(R.string.task_step_status, taskStatusLabel(status)), color = MaterialTheme.colorScheme.onSurface)
-                                        }
-                                        DropdownMenu(expanded = menu && editable, onDismissRequest = { menu = false }) {
-                                            listOf(TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE, TaskStatus.SKIPPED, TaskStatus.CANCELLED).forEach { target ->
-                                                DropdownMenuItem(text = { Text(taskStatusLabel(target)) }, enabled = target != status,
-                                                    onClick = { menu = false; viewModel.setStepStatus(id, step.subtaskLocalId, target) })
-                                            }
-                                        }
-                                    }
-                                })
+                        if (wide) Row(horizontalArrangement = Arrangement.spacedBy(20.dp), verticalAlignment = Alignment.Top) {
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) { content() }
+                            Column(Modifier.width(360.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) { planning(); reminder() }
+                        } else {
+                            planning()
+                            content()
+                            reminder()
                         }
+                        Spacer(Modifier.height(8.dp))
                     }
                 }
             }

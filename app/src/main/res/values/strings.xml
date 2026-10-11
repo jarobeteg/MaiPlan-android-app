@@ -436,6 +436,17 @@
     <string name="task_planning_title">Planning &amp; category</string>
     <string name="task_planning_subtitle">Choose when this task is planned and where it belongs.</string>
     <string name="task_actions_title">Manage task</string>
+    <string name="task_detail_status">Status</string>
+    <string name="task_detail_overview">At a glance</string>
+    <string name="task_detail_estimate">Estimated time</string>
+    <string name="task_detail_no_estimate">Not estimated</string>
+    <string name="task_detail_partial_estimate">Some subtasks have no estimate</string>
+    <string name="task_detail_manual_estimate">Set for this task</string>
+    <string name="task_detail_step_estimate">From subtasks</string>
+    <string name="task_detail_recurring">Repeating task</string>
+    <string name="task_detail_more">More task options</string>
+    <string name="task_detail_empty_steps">Break this task into smaller steps to track your progress.</string>
+    <string name="task_detail_add_steps">Add subtasks</string>
     <string name="task_no_matches_help">Try another search, status, or category.</string>
     <string name="task_clear_search">Clear search</string>
     <string name="task_status_description">Change status of %1$s</string>
@@ -456,7 +467,6 @@
     <string name="task_done">Done</string>
     <string name="task_skipped">Skipped</string>
     <string name="task_cancelled">Cancelled</string>
-    <string name="task_actionable">Open</string>
     <string name="task_all">All statuses</string>
     <string name="task_unscheduled">Unscheduled</string>
     <string name="task_search">Search title or description</string>

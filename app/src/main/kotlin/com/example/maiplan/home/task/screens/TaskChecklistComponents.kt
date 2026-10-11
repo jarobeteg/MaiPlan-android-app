@@ -45,11 +45,15 @@ import com.example.maiplan.viewmodel.task.TaskStepDraft
 import java.math.BigDecimal
 
 @Composable
+internal fun taskEstimateDuration(ms: Long?): String = when {
+    ms == null -> stringResource(R.string.task_estimate_unknown)
+    ms % 60_000 == 0L -> stringResource(R.string.task_estimate_minutes, (ms / 60_000).toString())
+    else -> stringResource(R.string.task_estimate_seconds, BigDecimal(ms).movePointLeft(3).stripTrailingZeros().toPlainString())
+}
+
+@Composable
 fun TaskEstimateText(estimate: TaskEstimate) {
-    val ms = estimate.milliseconds
-    val label = if (ms == null) stringResource(R.string.task_estimate_unknown)
-        else if (ms % 60_000 == 0L) stringResource(R.string.task_estimate_minutes, (ms / 60_000).toString())
-        else stringResource(R.string.task_estimate_seconds, BigDecimal(ms).movePointLeft(3).stripTrailingZeros().toPlainString())
+    val label = taskEstimateDuration(estimate.milliseconds)
     Text(when {
         estimate.isManual -> stringResource(R.string.task_manual_estimate, label)
         estimate.isPartial -> stringResource(R.string.task_partial_estimate, label)
@@ -60,7 +64,7 @@ fun TaskEstimateText(estimate: TaskEstimate) {
 @Composable
 fun TaskOrderedSteps(keys: List<String>, enabled: Boolean, title: (String) -> String,
     onReorder: (List<String>, List<String>) -> Unit, scrollState: ScrollState? = null,
-    viewport: Rect? = null, content: @Composable (String) -> Unit,
+    viewport: Rect? = null, showReorderControls: Boolean = true, content: @Composable (String) -> Unit,
     extraActions: @Composable RowScope.(String) -> Unit = {}) {
     var preview by remember { mutableStateOf<List<String>?>(null) }
     var dragged by remember { mutableStateOf<String?>(null) }
@@ -131,34 +135,36 @@ fun TaskOrderedSteps(keys: List<String>, enabled: Boolean, title: (String) -> St
                     Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         content(id)
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            val dragLabel = stringResource(R.string.task_step_drag, title(id))
-                            var handleY by remember { mutableFloatStateOf(0f) }
-                            Icon(Icons.Rounded.DragHandle, dragLabel, modifier = Modifier.size(48.dp)
-                                .testTag("task-step-drag-$id")
-                                .onGloballyPositioned { handleY = it.positionInWindow().y }
-                                .pointerInput(id, keys, enabled) {
-                                    if (enabled) detectDragGestures(
-                                        onDragStart = { position ->
-                                            preview = keys; dragged = id
-                                            dragTop = taskStepTop(keys, id, heights, spacing)
-                                            pointerY = handleY + position.y
-                                        },
-                                        onDragCancel = { preview = null; dragged = null },
-                                        onDragEnd = {
-                                            val order = preview
-                                            if (currentEnabled && currentKeys == keys && order != null && order != keys) commit(keys, order)
-                                            preview = null; dragged = null
-                                        }, onDrag = { change, amount ->
-                                            change.consume()
-                                            pointerY += amount.y
-                                            updateDrag(amount.y)
-                                        })
-                                }.padding(12.dp))
-                            IconButton(enabled = enabled && dragged == null && index > 0, onClick = { move(id, -1) }) {
-                                Icon(Icons.Rounded.ArrowUpward, stringResource(R.string.task_step_up, title(id)))
-                            }
-                            IconButton(enabled = enabled && dragged == null && index < keys.lastIndex, onClick = { move(id, 1) }) {
-                                Icon(Icons.Rounded.ArrowDownward, stringResource(R.string.task_step_down, title(id)))
+                            if (showReorderControls) {
+                                val dragLabel = stringResource(R.string.task_step_drag, title(id))
+                                var handleY by remember { mutableFloatStateOf(0f) }
+                                Icon(Icons.Rounded.Menu, dragLabel, modifier = Modifier.size(48.dp)
+                                    .testTag("task-step-drag-$id")
+                                    .onGloballyPositioned { handleY = it.positionInWindow().y }
+                                    .pointerInput(id, keys, enabled) {
+                                        if (enabled) detectDragGestures(
+                                            onDragStart = { position ->
+                                                preview = keys; dragged = id
+                                                dragTop = taskStepTop(keys, id, heights, spacing)
+                                                pointerY = handleY + position.y
+                                            },
+                                            onDragCancel = { preview = null; dragged = null },
+                                            onDragEnd = {
+                                                val order = preview
+                                                if (currentEnabled && currentKeys == keys && order != null && order != keys) commit(keys, order)
+                                                preview = null; dragged = null
+                                            }, onDrag = { change, amount ->
+                                                change.consume()
+                                                pointerY += amount.y
+                                                updateDrag(amount.y)
+                                            })
+                                    }.padding(12.dp))
+                                IconButton(enabled = enabled && dragged == null && index > 0, onClick = { move(id, -1) }) {
+                                    Icon(Icons.Rounded.ArrowUpward, stringResource(R.string.task_step_up, title(id)))
+                                }
+                                IconButton(enabled = enabled && dragged == null && index < keys.lastIndex, onClick = { move(id, 1) }) {
+                                    Icon(Icons.Rounded.ArrowDownward, stringResource(R.string.task_step_down, title(id)))
+                                }
                             }
                             Spacer(Modifier.weight(1f))
                             extraActions(id)

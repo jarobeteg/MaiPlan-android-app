@@ -20,7 +20,7 @@ class TaskViewModel(private val userId: Long, private val repository: TaskReposi
     private val savedState: SavedStateHandle) : ViewModel() {
     private val retry = MutableStateFlow(0)
     private val _options = MutableStateFlow(TaskListOptions(
-        view = TaskView.valueOf(savedState["view"] ?: TaskView.ACTIONABLE.name),
+        view = TaskView.entries.firstOrNull { it.name == savedState.get<String>("view") } ?: TaskView.ALL,
         search = savedState["search"] ?: "", categoryId = savedState["category"],
         sort = TaskSort.valueOf(savedState["sort"] ?: TaskSort.PLANNED_DAY.name)))
     val options = _options.asStateFlow()

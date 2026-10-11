@@ -100,7 +100,7 @@ fun AccountScreen(accountViewModel: AccountViewModel, onBackClick: () -> Unit) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = if (dark) Color(0xFF191D2E) else Color.White,
+                    containerColor = Color.Transparent,
                     titleContentColor = foreground,
                     navigationIconContentColor = foreground,
                 ),

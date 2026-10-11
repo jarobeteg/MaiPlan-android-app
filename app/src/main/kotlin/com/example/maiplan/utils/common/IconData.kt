@@ -403,7 +403,7 @@ object IconData {
         CategoryIconGroup(
             titleRes = R.string.category_icon_group_family,
             icons = mapOf(
-                "favorite" to Icons.Filled.Favorite,
+                "heart" to Icons.Filled.Favorite,
                 "loyalty" to Icons.Filled.Loyalty,
                 "person" to Icons.Filled.Person,
                 "groups" to Icons.Filled.Groups,

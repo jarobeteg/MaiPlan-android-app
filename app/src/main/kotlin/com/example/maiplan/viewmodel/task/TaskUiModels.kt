@@ -7,9 +7,9 @@ import java.time.LocalDate
 import java.util.Locale
 import java.util.UUID
 
-enum class TaskView { ACTIONABLE, ALL, TODO, IN_PROGRESS, DONE, SKIPPED, CANCELLED }
+enum class TaskView { ALL, TODO, IN_PROGRESS, DONE, SKIPPED, CANCELLED }
 enum class TaskSort { PLANNED_DAY, CATEGORY }
-data class TaskListOptions(val view: TaskView = TaskView.ACTIONABLE, val search: String = "",
+data class TaskListOptions(val view: TaskView = TaskView.ALL, val search: String = "",
     val categoryId: Long? = null, val sort: TaskSort = TaskSort.PLANNED_DAY)
 data class TaskSection(val label: String?, val date: LocalDate?, val tasks: List<TaskSummary>)
 data class TaskListState(val loading: Boolean = true, val tasks: List<TaskSummary> = emptyList(),
@@ -23,7 +23,6 @@ fun visibleTasks(tasks: List<TaskSummary>, options: TaskListOptions): List<TaskS
     val status = TaskStatus.fromCode(it.task.status)
     val matchesStatus = when (options.view) {
         TaskView.ALL -> true
-        TaskView.ACTIONABLE -> !status.isTerminal
         else -> status.name == options.view.name
     }
     matchesStatus && when (options.categoryId) {
@@ -57,7 +56,7 @@ fun taskSections(tasks: List<TaskSummary>, options: TaskListOptions, categories:
 
 fun TaskListOptions.query() = TaskQuery(
     when (categoryId) { null -> TaskCategoryFilter.All; -1L -> TaskCategoryFilter.Uncategorized; else -> TaskCategoryFilter.Selected(checkNotNull(categoryId)) },
-    statuses = when (view) { TaskView.ALL -> TaskStatus.entries.toSet(); TaskView.ACTIONABLE -> setOf(TaskStatus.TODO, TaskStatus.IN_PROGRESS)
+    statuses = when (view) { TaskView.ALL -> TaskStatus.entries.toSet()
         else -> setOf(TaskStatus.valueOf(view.name)) }, search = search)
 fun TaskListOptions.readSort() = if (sort == TaskSort.CATEGORY) TaskReadSort.CATEGORY
     else if (view == TaskView.DONE) TaskReadSort.COMPLETED_DAY else TaskReadSort.PLANNED_DAY

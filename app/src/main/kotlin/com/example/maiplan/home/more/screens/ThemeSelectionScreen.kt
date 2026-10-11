@@ -79,8 +79,7 @@ fun ThemeSelectionScreen(onBackClick: () -> Unit) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = (if (dark) Color(0xFF191D2E) else Color.White)
-                        .copy(alpha = 0.96f),
+                    containerColor = Color.Transparent,
                     titleContentColor = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033),
                     navigationIconContentColor = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033),
                 ),

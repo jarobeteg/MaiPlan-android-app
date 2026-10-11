@@ -223,6 +223,10 @@ internal fun taskStatusColor(status: TaskStatus): Color = when (status) {
     else -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
+internal val taskStatusMenuOrder = listOf(
+    TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE, TaskStatus.SKIPPED, TaskStatus.CANCELLED,
+)
+
 internal fun taskStatusIcon(status: TaskStatus): ImageVector = when (status) {
     TaskStatus.TODO -> Icons.Rounded.RadioButtonUnchecked
     TaskStatus.IN_PROGRESS -> Icons.Rounded.PendingActions
@@ -239,9 +243,16 @@ fun taskStatusLabel(status: TaskStatus): String = stringResource(when (status) {
     TaskStatus.SKIPPED -> R.string.task_skipped
     TaskStatus.CANCELLED -> R.string.task_cancelled
 })
+
+@Composable
+internal fun TaskStatusMenuItem(status: TaskStatus, enabled: Boolean, onClick: () -> Unit) {
+    DropdownMenuItem(text = { Text(taskStatusLabel(status)) },
+        leadingIcon = { Icon(taskStatusIcon(status), null, modifier = Modifier.size(20.dp)) },
+        enabled = enabled, onClick = onClick)
+}
+
 @Composable
 fun taskViewLabel(view: TaskView): String = when (view) {
-    TaskView.ACTIONABLE -> stringResource(R.string.task_actionable)
     TaskView.ALL -> stringResource(R.string.task_all)
     else -> taskStatusLabel(TaskStatus.valueOf(view.name))
 }
@@ -328,7 +339,8 @@ fun TaskMetadata(snapshot: TaskSummary, category: CategoryEntity?, sync: TaskSyn
                 snapshot.finishedSteps, snapshot.stepCount), style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant)
             LinearProgressIndicator(progress = { snapshot.finishedSteps.toFloat() / snapshot.stepCount },
-                modifier = Modifier.fillMaxWidth().height(4.dp), trackColor = MaterialTheme.colorScheme.primaryContainer)
+                modifier = Modifier.fillMaxWidth().height(4.dp), trackColor = MaterialTheme.colorScheme.primaryContainer,
+                drawStopIndicator = {})
         }
         task.completedDate?.let { Text(stringResource(R.string.task_completed_on, taskDay(it)), style = MaterialTheme.typography.bodySmall) }
         if (snapshot.reminder != null) Row(verticalAlignment = Alignment.CenterVertically) {
@@ -374,8 +386,9 @@ private fun TaskStatusControl(title: String, status: TaskStatus, enabled: Boolea
             Icon(Icons.Rounded.ExpandMore, null, modifier = Modifier.size(18.dp))
         }
         DropdownMenu(expanded = menu && enabled, onDismissRequest = { menu = false }) {
-            listOf(TaskStatus.TODO, TaskStatus.IN_PROGRESS, TaskStatus.DONE, TaskStatus.SKIPPED, TaskStatus.CANCELLED).forEach { target ->
-                DropdownMenuItem(text = { Text(taskStatusLabel(target)) }, enabled = enabled && target != status &&
+            taskStatusMenuOrder.forEach { target ->
+                TaskStatusMenuItem(target,
+                    enabled = enabled && target != status &&
                     !(status.isTerminal && target == TaskStatus.IN_PROGRESS), onClick = {
                     menu = false
                     if (target == TaskStatus.TODO || target.isTerminal) confirm = target else onChange(target)
