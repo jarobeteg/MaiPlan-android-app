@@ -846,7 +846,8 @@ internal fun CategoryPickerDialog(
     onDismiss: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        CategoryPickerContent(categories, selectedCategory, onCategorySelected, Modifier.fillMaxWidth())
+        CategoryPickerContent(categories, selectedCategory?.categoryLocalId,
+            { id -> onCategorySelected(categories.find { it.categoryLocalId == id }) }, Modifier.fillMaxWidth())
     }
 }
 
@@ -857,6 +858,32 @@ internal fun CategoryPickerOverlay(
     onCategorySelected: (CategoryEntity?) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    CategoryPickerOverlaySurface(onDismiss) {
+        CategoryPickerContent(categories, selectedCategory?.categoryLocalId,
+            { id -> onCategorySelected(categories.find { it.categoryLocalId == id }) }, it)
+    }
+}
+
+@Composable
+internal fun CategoryFilterPickerOverlay(
+    categories: List<CategoryEntity>,
+    selectedId: Long?,
+    onSelect: (Long?) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val options = listOf(
+        CategoryPickerOption(null, stringResource(R.string.task_all_categories)),
+        CategoryPickerOption(-1L, stringResource(R.string.uncategorized)),
+    )
+    CategoryPickerOverlaySurface(onDismiss) {
+        CategoryPickerContent(categories, selectedId, onSelect, it, options)
+    }
+}
+
+private data class CategoryPickerOption(val id: Long?, val label: String)
+
+@Composable
+private fun CategoryPickerOverlaySurface(onDismiss: () -> Unit, content: @Composable (Modifier) -> Unit) {
     Box(Modifier.fillMaxSize()) {
         Box(
             Modifier.fillMaxSize()
@@ -870,12 +897,7 @@ internal fun CategoryPickerOverlay(
             modifier = Modifier.fillMaxSize().padding(20.dp),
             contentAlignment = Alignment.Center,
         ) {
-            CategoryPickerContent(
-                categories,
-                selectedCategory,
-                onCategorySelected,
-                Modifier.widthIn(max = 480.dp).fillMaxWidth(),
-            )
+            content(Modifier.widthIn(max = 480.dp).fillMaxWidth())
         }
     }
 }
@@ -883,9 +905,10 @@ internal fun CategoryPickerOverlay(
 @Composable
 private fun CategoryPickerContent(
     categories: List<CategoryEntity>,
-    selectedCategory: CategoryEntity?,
-    onCategorySelected: (CategoryEntity?) -> Unit,
+    selectedId: Long?,
+    onSelect: (Long?) -> Unit,
     modifier: Modifier,
+    specialOptions: List<CategoryPickerOption> = listOf(CategoryPickerOption(null, "None")),
 ) {
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
@@ -898,7 +921,7 @@ private fun CategoryPickerContent(
         if (query.isBlank()) categories
         else categories.filter { it.name.contains(query, ignoreCase = true) }
     }
-    val showNone = query.isBlank() || "None".contains(query, ignoreCase = true)
+    val filteredOptions = specialOptions.filter { query.isBlank() || it.label.contains(query, ignoreCase = true) }
 
     Surface(
         onClick = {},
@@ -929,12 +952,12 @@ private fun CategoryPickerContent(
             )
             Spacer(Modifier.height(12.dp))
             LazyColumn(modifier = Modifier.heightIn(max = 500.dp)) {
-                if (showNone) item(key = "none") {
+                items(filteredOptions, key = { "option-${it.id}" }) { option ->
                     DropdownMenuItem(
-                        text = { CategoryPickerRow(null, "None", foreground, dark) },
-                        onClick = { onCategorySelected(null) },
+                        text = { CategoryPickerRow(null, option.label, foreground, dark) },
+                        onClick = { onSelect(option.id) },
                         trailingIcon = {
-                            if (selectedCategory == null) Icon(
+                            if (selectedId == option.id) Icon(
                                 Icons.Rounded.Check,
                                 contentDescription = null,
                                 tint = EventPrimaryLight,
@@ -945,9 +968,9 @@ private fun CategoryPickerContent(
                 items(filteredCategories, key = { it.categoryLocalId }) { category ->
                     DropdownMenuItem(
                         text = { CategoryPickerRow(category, category.name, foreground, dark) },
-                        onClick = { onCategorySelected(category) },
+                        onClick = { onSelect(category.categoryLocalId) },
                         trailingIcon = {
-                            if (selectedCategory?.categoryLocalId == category.categoryLocalId) Icon(
+                            if (selectedId == category.categoryLocalId) Icon(
                                 Icons.Rounded.Check,
                                 contentDescription = null,
                                 tint = EventPrimaryLight,
@@ -955,7 +978,7 @@ private fun CategoryPickerContent(
                         },
                     )
                 }
-                if (!showNone && filteredCategories.isEmpty()) item(key = "empty") {
+                if (filteredOptions.isEmpty() && filteredCategories.isEmpty()) item(key = "empty") {
                     Text(
                         text = stringResource(R.string.category_empty_search_title),
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -963,7 +986,7 @@ private fun CategoryPickerContent(
                         color = muted,
                     )
                 }
-                if (showNone && filteredCategories.isEmpty() && categories.isEmpty()) {
+                if (filteredOptions.isNotEmpty() && filteredCategories.isEmpty() && categories.isEmpty()) {
                     item(key = "no-categories") {
                         Text(
                             text = stringResource(R.string.event_no_categories),

@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
+import com.example.maiplan.home.event.screens.EventSelectionField
 import com.example.maiplan.repository.task.*
 import com.example.maiplan.theme.LocalAppDarkTheme
 import com.example.maiplan.theme.AppThemeManager
@@ -190,34 +191,17 @@ internal fun TaskFilterChip(selected: Boolean, onClick: () -> Unit, enabled: Boo
         ))
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun TaskCategoryPicker(categories: List<CategoryEntity>, selectedId: Long?, modifier: Modifier = Modifier,
-    enabled: Boolean = true, includeAll: Boolean = false, onSelect: (Long?) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
+internal fun TaskCategoryPicker(categories: List<CategoryEntity>, selectedId: Long?, onClick: () -> Unit) {
     val selected = categories.find { it.categoryLocalId == selectedId }
     val label = when {
-        includeAll && selectedId == null -> stringResource(R.string.task_all_categories)
+        selectedId == null -> stringResource(R.string.task_all_categories)
         selected != null -> selected.name
         else -> stringResource(R.string.uncategorized)
     }
-    ExposedDropdownMenuBox(expanded = expanded && enabled, onExpandedChange = { if (enabled) expanded = !expanded }, modifier = modifier) {
-        TaskTextField(label, {}, enabled = enabled, readOnly = true, singleLine = true,
-            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
-            label = { Text(stringResource(R.string.task_by_category)) },
-            leadingIcon = { Icon(selected?.let { IconData.getIconByKey(it.icon) } ?: Icons.Rounded.Category, null) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded && enabled) })
-        ExposedDropdownMenu(expanded = expanded && enabled, onDismissRequest = { expanded = false }) {
-            if (includeAll) DropdownMenuItem(text = { Text(stringResource(R.string.task_all_categories)) },
-                onClick = { expanded = false; onSelect(null) })
-            DropdownMenuItem(text = { Text(stringResource(R.string.uncategorized)) },
-                onClick = { expanded = false; onSelect(if (includeAll) -1L else null) })
-            categories.forEach { category -> DropdownMenuItem(text = { Text(category.name) },
-                leadingIcon = { Icon(IconData.getIconByKey(category.icon), null,
-                    tint = taskCategoryColor(category.color, MaterialTheme.colorScheme.primary)) },
-                onClick = { expanded = false; onSelect(category.categoryLocalId) }) }
-        }
-    }
+    EventSelectionField(label = stringResource(R.string.category), value = label,
+        icon = selected?.let { IconData.getIconByKey(it.icon) } ?: Icons.Rounded.Category,
+        onClick = onClick)
 }
 
 @Composable

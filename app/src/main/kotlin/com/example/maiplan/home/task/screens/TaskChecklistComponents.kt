@@ -1,7 +1,14 @@
 package com.example.maiplan.home.task.screens
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.animation.animateBounds
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,9 +21,15 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.LookaheadScope
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -25,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.zIndex
 import com.example.maiplan.R
 import com.example.maiplan.repository.task.TaskEstimate
 import com.example.maiplan.viewmodel.task.TaskStepDraft
@@ -45,70 +59,114 @@ fun TaskEstimateText(estimate: TaskEstimate) {
 
 @Composable
 fun TaskOrderedSteps(keys: List<String>, enabled: Boolean, title: (String) -> String,
-    onReorder: (List<String>, List<String>) -> Unit, content: @Composable (String) -> Unit,
+    onReorder: (List<String>, List<String>) -> Unit, scrollState: ScrollState? = null,
+    viewport: Rect? = null, content: @Composable (String) -> Unit,
     extraActions: @Composable RowScope.(String) -> Unit = {}) {
     var preview by remember { mutableStateOf<List<String>?>(null) }
     var dragged by remember { mutableStateOf<String?>(null) }
-    var distance by remember { mutableFloatStateOf(0f) }
-    val heights = remember { mutableMapOf<String, Int>() }
+    var dragTop by remember { mutableFloatStateOf(0f) }
+    var pointerY by remember { mutableFloatStateOf(0f) }
+    val heights = remember { mutableStateMapOf<String, Int>() }
+    val spacing = with(LocalDensity.current) { 8.dp.toPx() }
+    val edge = with(LocalDensity.current) { 72.dp.toPx() }
+    val maxScrollSpeed = with(LocalDensity.current) { 600.dp.toPx() }
     val currentEnabled by rememberUpdatedState(enabled)
     val currentKeys by rememberUpdatedState(keys)
     val commit by rememberUpdatedState(onReorder)
-    LaunchedEffect(keys, enabled) { preview = null; dragged = null; distance = 0f }
+    val currentViewport by rememberUpdatedState(viewport)
+    LaunchedEffect(keys, enabled) {
+        preview = null; dragged = null
+        heights.keys.retainAll(keys.toSet())
+    }
+    fun updateDrag(delta: Float) {
+        val id = dragged ?: return
+        val order = preview ?: return
+        val maxTop = (order.sumOf { heights[it] ?: 0 } + spacing * (order.size - 1) - (heights[id] ?: 0)).coerceAtLeast(0f)
+        dragTop = (dragTop + delta).coerceIn(0f, maxTop)
+        preview = taskStepDragOrder(order, id, dragTop, heights, spacing)
+    }
+    LaunchedEffect(dragged, scrollState) {
+        if (dragged == null || scrollState == null) return@LaunchedEffect
+        var previousFrame = withFrameNanos { it }
+        while (dragged != null) {
+            val frame = withFrameNanos { it }
+            val seconds = ((frame - previousFrame) / 1_000_000_000f).coerceAtMost(0.05f)
+            previousFrame = frame
+            val bounds = currentViewport ?: continue
+            val speed = when {
+                pointerY < bounds.top + edge -> -((bounds.top + edge - pointerY) / edge).coerceIn(0f, 1f)
+                pointerY > bounds.bottom - edge -> ((pointerY - bounds.bottom + edge) / edge).coerceIn(0f, 1f)
+                else -> 0f
+            }
+            if (speed != 0f) updateDrag(scrollState.scrollBy(speed * maxScrollSpeed * seconds))
+        }
+    }
     fun move(key: String, offset: Int) {
         val index = keys.indexOf(key)
         val target = index + offset
         if (enabled && index >= 0 && target in keys.indices) onReorder(keys, keys.toMutableList().apply { add(target, removeAt(index)) })
     }
     val displayedOrder = preview?.takeIf { it.size == keys.size && it.toSet() == keys.toSet() } ?: keys
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        displayedOrder.forEachIndexed { index, id -> key(id) {
-            val position = stringResource(R.string.task_step_position, index + 1, keys.size)
-            Surface(shape = MaterialTheme.shapes.medium,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
-                color = if (dragged == id) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.fillMaxWidth().onSizeChanged { heights[id] = it.height }.testTag("task-step-$id")
-                    .semantics { stateDescription = position }) {
-                Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                    content(id)
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        val dragLabel = stringResource(R.string.task_step_drag, title(id))
-                        Icon(Icons.Rounded.DragHandle, dragLabel, modifier = Modifier.size(48.dp).padding(12.dp)
-                            .pointerInput(id, keys, enabled) {
-                                if (enabled) detectDragGesturesAfterLongPress(
-                                    onDragStart = { preview = keys; dragged = id; distance = 0f },
-                                    onDragCancel = { preview = null; dragged = null; distance = 0f },
-                                    onDragEnd = {
-                                        val order = preview
-                                        if (currentEnabled && currentKeys == keys && order != null && order != keys) commit(keys, order)
-                                        preview = null; dragged = null; distance = 0f
-                                    }, onDrag = { change, amount ->
-                                        change.consume()
-                                        distance += amount.y
-                                        val order = preview ?: return@detectDragGesturesAfterLongPress
-                                        val at = order.indexOf(id)
-                                        val next = at + if (distance > 0) 1 else -1
-                                        if (at >= 0 && next in order.indices) {
-                                            val threshold = ((heights[order[next]] ?: 100) + 8.dp.toPx()) / 2f
-                                            if (kotlin.math.abs(distance) > threshold) {
-                                                preview = order.toMutableList().apply { add(next, removeAt(at)) }
-                                                distance -= if (distance > 0) threshold else -threshold
-                                            }
-                                        }
-                                    })
-                            })
-                        IconButton(enabled = enabled && index > 0, onClick = { move(id, -1) }) {
-                            Icon(Icons.Rounded.ArrowUpward, stringResource(R.string.task_step_up, title(id)))
+    LookaheadScope {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            displayedOrder.forEachIndexed { index, id -> key(id) {
+                val isDragging = dragged == id
+                val translation by animateFloatAsState(
+                    targetValue = if (isDragging) dragTop - taskStepTop(displayedOrder, id, heights, spacing) else 0f,
+                    animationSpec = if (isDragging) snap() else spring(stiffness = Spring.StiffnessMediumLow),
+                    label = "subtask-drop",
+                )
+                val position = stringResource(R.string.task_step_position, index + 1, keys.size)
+                Surface(shape = MaterialTheme.shapes.medium,
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                    color = if (isDragging) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                    shadowElevation = if (isDragging) 8.dp else 0.dp,
+                    modifier = Modifier.fillMaxWidth().zIndex(if (isDragging || translation != 0f) 1f else 0f)
+                        .animateBounds(this@LookaheadScope, boundsTransform = { _, _ ->
+                            if (dragged == id) snap() else spring(stiffness = Spring.StiffnessMediumLow)
+                        })
+                        .graphicsLayer { translationY = translation }
+                        .onSizeChanged { heights[id] = it.height }.testTag("task-step-$id")
+                        .semantics { stateDescription = position }) {
+                    Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
+                        content(id)
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            val dragLabel = stringResource(R.string.task_step_drag, title(id))
+                            var handleY by remember { mutableFloatStateOf(0f) }
+                            Icon(Icons.Rounded.DragHandle, dragLabel, modifier = Modifier.size(48.dp)
+                                .testTag("task-step-drag-$id")
+                                .onGloballyPositioned { handleY = it.positionInWindow().y }
+                                .pointerInput(id, keys, enabled) {
+                                    if (enabled) detectDragGestures(
+                                        onDragStart = { position ->
+                                            preview = keys; dragged = id
+                                            dragTop = taskStepTop(keys, id, heights, spacing)
+                                            pointerY = handleY + position.y
+                                        },
+                                        onDragCancel = { preview = null; dragged = null },
+                                        onDragEnd = {
+                                            val order = preview
+                                            if (currentEnabled && currentKeys == keys && order != null && order != keys) commit(keys, order)
+                                            preview = null; dragged = null
+                                        }, onDrag = { change, amount ->
+                                            change.consume()
+                                            pointerY += amount.y
+                                            updateDrag(amount.y)
+                                        })
+                                }.padding(12.dp))
+                            IconButton(enabled = enabled && dragged == null && index > 0, onClick = { move(id, -1) }) {
+                                Icon(Icons.Rounded.ArrowUpward, stringResource(R.string.task_step_up, title(id)))
+                            }
+                            IconButton(enabled = enabled && dragged == null && index < keys.lastIndex, onClick = { move(id, 1) }) {
+                                Icon(Icons.Rounded.ArrowDownward, stringResource(R.string.task_step_down, title(id)))
+                            }
+                            Spacer(Modifier.weight(1f))
+                            extraActions(id)
                         }
-                        IconButton(enabled = enabled && index < keys.lastIndex, onClick = { move(id, 1) }) {
-                            Icon(Icons.Rounded.ArrowDownward, stringResource(R.string.task_step_down, title(id)))
-                        }
-                        Spacer(Modifier.weight(1f))
-                        extraActions(id)
                     }
                 }
-            }
-        } }
+            } }
+        }
     }
 }
 

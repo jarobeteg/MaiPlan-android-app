@@ -14,6 +14,9 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalContext
@@ -53,6 +56,8 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
     var pickingCategory by rememberSaveable { mutableStateOf(false) }
     var editingStep by rememberSaveable { mutableStateOf<String?>(null) }
     var removingStep by rememberSaveable { mutableStateOf<String?>(null) }
+    val editorScroll = rememberScrollState()
+    var editorViewport by remember { mutableStateOf<Rect?>(null) }
     val draft = state.draft
     val selectedCategory = collection.categories.firstOrNull { it.categoryLocalId == draft.categoryId }
     val templateEditing = state.futureScope || !editing && state.repeat.unit != 0
@@ -96,13 +101,14 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
                     }
                 }
             }) { padding ->
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.TopCenter) {
+            Box(Modifier.fillMaxSize().padding(padding).onGloballyPositioned { editorViewport = it.boundsInWindow() },
+                contentAlignment = Alignment.TopCenter) {
                 when {
                     state.loading -> TaskLoadState(true, "")
                     state.loadFailed -> TaskLoadState(false, state.error.orEmpty(), viewModel::retry)
                     state.unavailable -> TaskLoadState(false, stringResource(R.string.task_unavailable) + "\n" + stringResource(R.string.task_unavailable_help))
                     else -> Column(Modifier.widthIn(max = LocalAdaptiveLayout.current.formMaxWidth).fillMaxWidth()
-                        .verticalScroll(rememberScrollState()).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        .verticalScroll(editorScroll).padding(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         TaskHeading(stringResource(if (editing) R.string.task_edit_heading else R.string.task_create_heading),
                             stringResource(if (editing) R.string.task_edit_subtitle else R.string.task_create_subtitle))
                         TaskEditorPreview(state, selectedCategory, templateEditing)
@@ -197,6 +203,7 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
                                 state.steps.count { TaskStatus.fromCode(it.status).isTerminal }, state.steps.size))
                             val stepsByKey = state.steps.associateBy { it.key }
                             TaskOrderedSteps(state.steps.map { it.key }, state.checklistEditable && !state.saving,
+                                scrollState = editorScroll, viewport = editorViewport,
                                 title = { stepsByKey.getValue(it).title },
                                 onReorder = { _, order -> viewModel.editSteps(order.map { stepsByKey.getValue(it) }) },
                                 content = { id ->
