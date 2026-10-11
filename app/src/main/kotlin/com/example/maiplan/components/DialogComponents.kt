@@ -3,28 +3,19 @@ package com.example.maiplan.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import com.example.maiplan.theme.LocalAppDarkTheme
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
@@ -37,8 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -48,21 +37,15 @@ import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -71,22 +54,13 @@ import com.example.maiplan.R
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.utils.LocalAppDesign
 import com.example.maiplan.utils.common.IconData
-import com.example.maiplan.utils.common.IconData.allIcons
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.collections.forEach
 
 private val DialogIconSize = 24.dp
-private val PickerPreviewSize = 88.dp
-private val IconPickerCellSize = 48.dp
-private val IconGridMaxHeight = 360.dp
-private val SliderHeight = 64.dp
-private val SliderThumbSize = 24.dp
-private val SliderTrackHeight = 12.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -340,174 +314,6 @@ fun ColorPickerRow(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun CustomSlider(
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    valueRange: ClosedFloatingPointRange<Float>,
-    trackBrush: Brush
-) {
-    val ui = LocalAppDesign.current
-
-    Slider(
-        value = value,
-        onValueChange = onValueChange,
-        valueRange = valueRange,
-        colors = SliderDefaults.colors(
-            thumbColor = MaterialTheme.colorScheme.primary,
-            activeTrackColor = Color.Transparent,
-            inactiveTrackColor = Color.Transparent
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(SliderHeight),
-        thumb = {
-            Box(
-                modifier = Modifier
-                    .size(SliderThumbSize)
-                    .background(MaterialTheme.colorScheme.primary, CircleShape)
-            )
-        },
-        track = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(SliderTrackHeight)
-                    .background(trackBrush, MaterialTheme.shapes.extraSmall)
-            )
-        }
-    )
-}
-
-@Composable
-fun ColorPickerDialog(
-    initialColor: Color,
-    onColorSelected: (Color) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val ui = LocalAppDesign.current
-    val dark = LocalAppDarkTheme.current
-    val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
-    val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
-    val muted = if (dark) Color(0xFFAEB7C9) else Color(0xFF667085)
-
-    val hsv = FloatArray(3)
-    android.graphics.Color.colorToHSV(initialColor.toArgb(), hsv)
-
-    var hue by remember { mutableFloatStateOf(hsv[0]) }
-    var saturation by remember { mutableFloatStateOf(hsv[1]) }
-    var value by remember { mutableFloatStateOf(hsv[2]) }
-    var color by remember { mutableStateOf(initialColor) }
-
-    LaunchedEffect(hue, saturation, value) {
-        color = Color.hsv(hue, saturation, value)
-    }
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = dialogSurface,
-            shadowElevation = if (dark) 0.dp else 12.dp,
-            modifier = Modifier
-                .widthIn(max = 560.dp)
-                .fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(ui.dimensions.dialogPadding),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.category_choose_color_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = foreground,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.category_choose_color_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = muted,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-                Spacer(Modifier.height(20.dp))
-                Box(
-                    modifier = Modifier
-                        .size(PickerPreviewSize)
-                        .background(color, CircleShape)
-                        .border(3.dp, dialogSurface, CircleShape)
-                )
-
-                Spacer(Modifier.height(18.dp))
-
-                Text(
-                    stringResource(R.string.hue),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = foreground,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                CustomSlider(
-                    value = hue,
-                    onValueChange = { hue = it },
-                    valueRange = 0f..360f,
-                    trackBrush = Brush.horizontalGradient(
-                        colors = (0..360 step 30).map { Color.hsv(it.toFloat(), 1f, 1f) }
-                    )
-                )
-
-                Text(
-                    stringResource(R.string.saturation),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = foreground,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                CustomSlider(
-                    value = saturation,
-                    onValueChange = { saturation = it },
-                    valueRange = 0f..1f,
-                    trackBrush = Brush.horizontalGradient(
-                        colors = listOf(Color.hsv(hue, 0f, 1f), Color.hsv(hue, 1f, 1f))
-                    )
-                )
-
-                Text(
-                    stringResource(R.string.brightness),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = foreground,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                CustomSlider(
-                    value = value,
-                    onValueChange = { value = it },
-                    valueRange = 0f..1f,
-                    trackBrush = Brush.horizontalGradient(
-                        colors = listOf(Color.Black, Color.hsv(hue, saturation, 1f))
-                    )
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                    TextButton(onClick = onDismiss) {
-                        Text(
-                            stringResource(R.string.cancel),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = muted,
-                        )
-                    }
-                    TextButton(onClick = { onColorSelected(color); onDismiss() }) {
-                        Text(
-                            stringResource(R.string.select),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun IconPickerRow(
     selectedIcon: ImageVector?,
@@ -566,6 +372,7 @@ fun IconPickerRow(
 
     if (showIconPicker) {
         IconPickerDialog(
+            initialIcon = selectedIcon,
             onIconSelected = {
                 onIconSelected(it)
                 closeIconPicker()
@@ -578,116 +385,6 @@ fun IconPickerRow(
                 closeIconPicker()
             }
         )
-    }
-}
-
-@Composable
-fun IconPickerDialog(
-    onIconSelected: (ImageVector) -> Unit,
-    onIconSelectedString: (String) -> Unit,
-    onDismiss: () -> Unit
-) {
-    val ui = LocalAppDesign.current
-    val scrollState = rememberLazyGridState()
-    val dark = LocalAppDarkTheme.current
-    val dialogSurface = if (dark) Color(0xFF191D2E) else Color.White
-    val cellSurface = if (dark) Color(0xFF20263A) else Color(0xFFF8FAFC)
-    val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
-    val muted = if (dark) Color(0xFFAEB7C9) else Color(0xFF667085)
-
-    Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = MaterialTheme.shapes.extraLarge,
-            color = dialogSurface,
-            shadowElevation = if (dark) 0.dp else 12.dp,
-            modifier = Modifier
-                .widthIn(max = 560.dp)
-                .fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(ui.dimensions.iconPickerDialogPadding),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.category_choose_icon_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = foreground,
-                )
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    text = stringResource(R.string.category_choose_icon_subtitle),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = muted,
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                )
-                Spacer(Modifier.height(16.dp))
-                Box(
-                    modifier = Modifier
-                        .heightIn(max = IconGridMaxHeight)
-                        .fillMaxWidth()
-                ) {
-                    LazyVerticalGrid(
-                        columns = GridCells.Adaptive(minSize = IconPickerCellSize),
-                        contentPadding = PaddingValues(12.dp),
-                        state = scrollState,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        items(allIcons.entries.toList()) { (key, icon) ->
-                            Surface(
-                                modifier = Modifier
-                                    .size(IconPickerCellSize)
-                                    .padding(ui.dimensions.gridPadding)
-                                    .clickable {
-                                        onIconSelected(icon)
-                                        onIconSelectedString(key)
-                                        onDismiss()
-                                    },
-                                shape = MaterialTheme.shapes.small,
-                                color = cellSurface,
-                            ) {
-                                Box(contentAlignment = Alignment.Center) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.padding(5.dp).fillMaxSize()
-                                    )
-                                }
-                            }
-
-                        }
-                    }
-
-                    val showScrollIndicator by remember {
-                        derivedStateOf { scrollState.canScrollForward }
-                    }
-                    if (showScrollIndicator) {
-                        Box(
-                            modifier = Modifier
-                                .align(Alignment.BottomCenter)
-                                .fillMaxWidth()
-                                .height(DialogIconSize)
-                                .background(
-                                    Brush.verticalGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            MaterialTheme.colorScheme.onBackground.copy(alpha = 0.2f)
-                                        )
-                                    )
-                                )
-                        )
-                    }
-                }
-
-                TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
-                    Text(
-                        stringResource(R.string.cancel),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = muted,
-                    )
-                }
-            }
-        }
     }
 }
 

@@ -737,6 +737,7 @@ private fun CategoryIconSelector(
     )
     if (showDialog) {
         IconPickerDialog(
+            initialIcon = selectedIcon,
             onIconSelected = {},
             onIconSelectedString = onIconSelectedString,
             onDismiss = { showDialog = false },

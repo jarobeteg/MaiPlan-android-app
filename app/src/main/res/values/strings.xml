@@ -323,9 +323,36 @@
     <string name="category_preview_name">Category name</string>
     <string name="category_live_preview">Preview</string>
     <string name="category_choose_color_title">Choose a color</string>
-    <string name="category_choose_color_subtitle">Adjust the sliders to create your accent.</string>
+    <string name="category_choose_color_subtitle">Pick an accent or create your own.</string>
     <string name="category_choose_icon_title">Choose an icon</string>
-    <string name="category_choose_icon_subtitle">Select the symbol that best represents this category.</string>
+    <string name="category_choose_icon_subtitle">Find a symbol that fits your category.</string>
+    <string name="category_color_preview">Your accent</string>
+    <string name="category_color_presets">Quick colors</string>
+    <string name="category_color_custom">Fine-tune your color</string>
+    <string name="category_color_degrees">%1$d°</string>
+    <string name="category_color_percent">%1$d%%</string>
+    <string name="category_color_swatch">Color %1$s</string>
+    <string name="category_icon_search">Search icons</string>
+    <string name="category_icon_clear_search">Clear search</string>
+    <plurals name="category_icon_count">
+        <item quantity="one">%1$d icon</item>
+        <item quantity="other">%1$d icons</item>
+    </plurals>
+    <string name="category_icon_empty_title">No icons found</string>
+    <string name="category_icon_empty_subtitle">Try another search or choose a different group.</string>
+    <string name="category_icon_group_all">All icons</string>
+    <string name="category_icon_group_general">General</string>
+    <string name="category_icon_group_work">Work</string>
+    <string name="category_icon_group_personal">Personal</string>
+    <string name="category_icon_group_health">Health &amp; fitness</string>
+    <string name="category_icon_group_finance">Finance</string>
+    <string name="category_icon_group_shopping">Shopping</string>
+    <string name="category_icon_group_learning">Learning</string>
+    <string name="category_icon_group_family">Family</string>
+    <string name="category_icon_group_leisure">Leisure</string>
+    <string name="category_icon_group_home">Home</string>
+    <string name="category_icon_group_travel">Travel</string>
+    <string name="category_icon_group_goals">Goals</string>
 
     <!-- note screen -->
     <string name="note_new">New Note</string>
