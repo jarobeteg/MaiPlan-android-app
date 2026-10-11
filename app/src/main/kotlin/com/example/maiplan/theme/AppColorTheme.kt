@@ -112,6 +112,38 @@ enum class AppColorTheme(
         primary = Color(0xFF5F6B73),
         primaryLight = Color(0xFF87939B),
         primaryDark = Color(0xFF3D474F),
+    ),
+    TEAL(
+        storageKey = "teal",
+        nameRes = R.string.theme_teal,
+        descriptionRes = R.string.theme_teal_description,
+        primary = Color(0xFF24786A),
+        primaryLight = Color(0xFF5C9E92),
+        primaryDark = Color(0xFF165247),
+    ),
+    COBALT(
+        storageKey = "cobalt",
+        nameRes = R.string.theme_cobalt,
+        descriptionRes = R.string.theme_cobalt_description,
+        primary = Color(0xFF3567B7),
+        primaryLight = Color(0xFF6C91CF),
+        primaryDark = Color(0xFF224780),
+    ),
+    OLIVE(
+        storageKey = "olive",
+        nameRes = R.string.theme_olive,
+        descriptionRes = R.string.theme_olive_description,
+        primary = Color(0xFF757B3B),
+        primaryLight = Color(0xFF9AA064),
+        primaryDark = Color(0xFF4F5425),
+    ),
+    ESPRESSO(
+        storageKey = "espresso",
+        nameRes = R.string.theme_espresso,
+        descriptionRes = R.string.theme_espresso_description,
+        primary = Color(0xFF795548),
+        primaryLight = Color(0xFFA17B6C),
+        primaryDark = Color(0xFF50382F),
     );
 
     companion object {

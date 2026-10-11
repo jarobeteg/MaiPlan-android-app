@@ -275,6 +275,14 @@
     <string name="theme_ruby_description">Bold and lively</string>
     <string name="theme_graphite">Graphite</string>
     <string name="theme_graphite_description">Clean and understated</string>
+    <string name="theme_teal">Teal</string>
+    <string name="theme_teal_description">Fresh and balanced</string>
+    <string name="theme_cobalt">Cobalt</string>
+    <string name="theme_cobalt_description">Bright and decisive</string>
+    <string name="theme_olive">Olive</string>
+    <string name="theme_olive_description">Natural and mellow</string>
+    <string name="theme_espresso">Espresso</string>
+    <string name="theme_espresso_description">Warm and comforting</string>
     <string name="home_clock">Home clock</string>
     <string name="more_clock_subtitle">%1$s · %2$s</string>
     <string name="clock_screen_title">Home clock</string>
