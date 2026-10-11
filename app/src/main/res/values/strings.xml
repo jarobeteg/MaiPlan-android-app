@@ -496,8 +496,8 @@
     <string name="task_category_field">Category (optional)</string>
     <string name="task_category_missing">Selected Category is unavailable. Choose another or clear it.</string>
     <string name="task_estimate">Estimated duration (optional)</string>
+    <string name="task_hours">Hours</string>
     <string name="task_minutes">Minutes</string>
-    <string name="task_seconds">Seconds</string>
     <string name="task_clear_estimate">Clear estimate</string>
     <string name="task_estimate_help">Leave blank to use estimates from subtasks. Zero is a valid estimate.</string>
     <string name="task_categories">Manage categories</string>
@@ -525,7 +525,8 @@
     <string name="task_status_action">Change status: %1$s</string>
     <string name="task_completed_on">Completed %1$s</string>
     <string name="task_estimate_minutes">%1$s min</string>
-    <string name="task_estimate_seconds">%1$s sec</string>
+    <string name="task_estimate_hours">%1$s h</string>
+    <string name="task_estimate_hours_minutes">%1$s h %2$s min</string>
     <string name="task_partial_estimate">%1$s • partial step estimate</string>
     <string name="task_manual_estimate">%1$s • manual estimate</string>
     <string name="task_reminder_set">Reminder configured</string>

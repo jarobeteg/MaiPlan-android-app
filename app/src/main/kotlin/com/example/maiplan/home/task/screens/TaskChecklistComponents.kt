@@ -42,13 +42,18 @@ import androidx.compose.ui.zIndex
 import com.example.maiplan.R
 import com.example.maiplan.repository.task.TaskEstimate
 import com.example.maiplan.viewmodel.task.TaskStepDraft
-import java.math.BigDecimal
+import com.example.maiplan.viewmodel.task.taskEstimateMinutePart
 
 @Composable
-internal fun taskEstimateDuration(ms: Long?): String = when {
-    ms == null -> stringResource(R.string.task_estimate_unknown)
-    ms % 60_000 == 0L -> stringResource(R.string.task_estimate_minutes, (ms / 60_000).toString())
-    else -> stringResource(R.string.task_estimate_seconds, BigDecimal(ms).movePointLeft(3).stripTrailingZeros().toPlainString())
+internal fun taskEstimateDuration(ms: Long?): String {
+    if (ms == null) return stringResource(R.string.task_estimate_unknown)
+    val hours = ms / 3_600_000
+    val minutes = taskEstimateMinutePart(ms)
+    return when {
+        hours == 0L -> stringResource(R.string.task_estimate_minutes, minutes)
+        minutes == "0" -> stringResource(R.string.task_estimate_hours, hours.toString())
+        else -> stringResource(R.string.task_estimate_hours_minutes, hours.toString(), minutes)
+    }
 }
 
 @Composable
@@ -179,8 +184,8 @@ fun TaskOrderedSteps(keys: List<String>, enabled: Boolean, title: (String) -> St
 @Composable
 fun TaskStepEditorDialog(step: TaskStepDraft, onDismiss: () -> Unit, onSave: (TaskStepDraft) -> Unit, enabled: Boolean = true) {
     var title by rememberSaveable(step.key) { mutableStateOf(step.title) }
+    var hours by rememberSaveable(step.key) { mutableStateOf(step.hours) }
     var minutes by rememberSaveable(step.key) { mutableStateOf(step.minutes) }
-    var seconds by rememberSaveable(step.key) { mutableStateOf(step.seconds) }
     var error by rememberSaveable(step.key) { mutableStateOf<String?>(null) }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, decorFitsSystemWindows = false)) {
         Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing).imePadding().padding(horizontal = 24.dp, vertical = 8.dp),
@@ -197,9 +202,9 @@ fun TaskStepEditorDialog(step: TaskStepDraft, onDismiss: () -> Unit, onSave: (Ta
                             modifier = Modifier.fillMaxWidth(), maxLines = 4)
                         Text(stringResource(R.string.task_estimate))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TaskTextField(minutes, { minutes = it; error = null }, label = { Text(stringResource(R.string.task_minutes)) },
+                            TaskTextField(hours, { hours = it; error = null }, label = { Text(stringResource(R.string.task_hours)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.weight(1f))
-                            TaskTextField(seconds, { seconds = it; error = null }, label = { Text(stringResource(R.string.task_seconds)) },
+                            TaskTextField(minutes, { minutes = it; error = null }, label = { Text(stringResource(R.string.task_minutes)) },
                                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.weight(1f))
                         }
                         Text(stringResource(R.string.task_step_estimate_help), style = MaterialTheme.typography.bodySmall)
@@ -209,7 +214,7 @@ fun TaskStepEditorDialog(step: TaskStepDraft, onDismiss: () -> Unit, onSave: (Ta
                             Text(stringResource(R.string.task_cancel))
                         }
                         Button(enabled = enabled, shape = RoundedCornerShape(15.dp), onClick = {
-                            val draft = step.copy(title = title, minutes = minutes, seconds = seconds)
+                            val draft = step.copy(title = title, hours = hours, minutes = minutes)
                             try { draft.input(); onSave(draft) } catch (e: IllegalArgumentException) { error = e.message }
                         }) { Text(stringResource(R.string.task_step_save)) }
                     }

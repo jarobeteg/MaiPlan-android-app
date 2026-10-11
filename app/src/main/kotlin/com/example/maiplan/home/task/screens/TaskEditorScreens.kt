@@ -149,15 +149,15 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
                         }
                         TaskSection(stringResource(R.string.task_estimate), stringResource(R.string.task_estimate_help), Icons.Rounded.Schedule) {
                             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                TaskTextField(value = draft.hours, onValueChange = { viewModel.edit(draft.copy(hours = it)) },
+                                    label = { Text(stringResource(R.string.task_hours)) }, enabled = !state.saving, singleLine = true,
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.weight(1f))
                                 TaskTextField(value = draft.minutes, onValueChange = { viewModel.edit(draft.copy(minutes = it)) },
                                     label = { Text(stringResource(R.string.task_minutes)) }, enabled = !state.saving, singleLine = true,
                                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.weight(1f))
-                                TaskTextField(value = draft.seconds, onValueChange = { viewModel.edit(draft.copy(seconds = it)) },
-                                    label = { Text(stringResource(R.string.task_seconds)) }, enabled = !state.saving, singleLine = true,
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = Modifier.weight(1f))
                             }
-                            if (draft.minutes.isNotEmpty() || draft.seconds.isNotEmpty()) TextButton(enabled = !state.saving,
-                                onClick = { viewModel.edit(draft.copy(minutes = "", seconds = "")) }) { Text(stringResource(R.string.task_clear_estimate)) }
+                            if (draft.hours.isNotEmpty() || draft.minutes.isNotEmpty()) TextButton(enabled = !state.saving,
+                                onClick = { viewModel.edit(draft.copy(hours = "", minutes = "")) }) { Text(stringResource(R.string.task_clear_estimate)) }
                             runCatching { effectiveTaskEstimate(draft.copy(title = "Estimate").content().estimatedMilliseconds,
                                 state.steps.map { it.input().estimatedMilliseconds }) }.getOrNull()?.let { TaskEstimateText(it) }
                         }
@@ -208,9 +208,11 @@ fun TaskEditorScreen(editing: Boolean, viewModel: TaskEditorViewModel, collectio
                                 onReorder = { _, order -> viewModel.editSteps(order.map { stepsByKey.getValue(it) }) },
                                 content = { id ->
                                     val step = stepsByKey.getValue(id)
-                                    Text(step.title, style = MaterialTheme.typography.titleSmall)
-                                    TaskStatusBadge(TaskStatus.fromCode(step.status))
-                                    TaskEstimateText(TaskEstimate(step.input().estimatedMilliseconds, false, false))
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Text(step.title, style = MaterialTheme.typography.titleSmall)
+                                        TaskStatusBadge(TaskStatus.fromCode(step.status))
+                                        TaskEstimateText(TaskEstimate(step.input().estimatedMilliseconds, false, false))
+                                    }
                                 }, extraActions = { id ->
                                     IconButton(enabled = state.checklistEditable && !state.saving, onClick = { editingStep = id }) {
                                         Icon(Icons.Rounded.Edit, stringResource(R.string.task_step_edit, stepsByKey.getValue(id).title))

@@ -3,6 +3,7 @@ package com.example.maiplan.viewmodel.task
 import com.example.maiplan.database.entities.CategoryEntity
 import com.example.maiplan.repository.task.*
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.Locale
 import java.util.UUID
@@ -61,15 +62,20 @@ fun TaskListOptions.query() = TaskQuery(
 fun TaskListOptions.readSort() = if (sort == TaskSort.CATEGORY) TaskReadSort.CATEGORY
     else if (view == TaskView.DONE) TaskReadSort.COMPLETED_DAY else TaskReadSort.PLANNED_DAY
 
+internal fun taskEstimateMinutePart(milliseconds: Long): String = BigDecimal(milliseconds % 3_600_000)
+    .divide(BigDecimal(60_000), 8, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString()
+
 data class TaskDraft(val title: String = "", val description: String = "", val date: String = "",
-    val minutes: String = "", val seconds: String = "", val categoryId: Long? = null) {
+    val hours: String = "", val minutes: String = "", val categoryId: Long? = null) {
     fun content(): TaskContent {
-        val duration = if (minutes.isBlank() && seconds.isBlank()) null else try {
+        val duration = if (hours.isBlank() && minutes.isBlank()) null else try {
+            val h = BigDecimal(hours.trim().ifEmpty { "0" })
             val m = BigDecimal(minutes.trim().ifEmpty { "0" })
-            val s = BigDecimal(seconds.trim().ifEmpty { "0" })
-            require(m >= BigDecimal.ZERO && s >= BigDecimal.ZERO) { "Duration cannot be negative" }
-            m.multiply(BigDecimal(60_000)).add(s.multiply(BigDecimal(1000))).longValueExact()
-        } catch (_: ArithmeticException) { throw IllegalArgumentException("Enter a duration with millisecond precision or less") }
+            require(h >= BigDecimal.ZERO && m >= BigDecimal.ZERO) { "Duration cannot be negative" }
+            // Fractional minutes can repeat in decimal form; round back to the stored millisecond precision.
+            h.multiply(BigDecimal(3_600_000)).add(m.multiply(BigDecimal(60_000)))
+                .setScale(0, RoundingMode.HALF_UP).longValueExact()
+        } catch (_: ArithmeticException) { throw IllegalArgumentException("Estimated duration must be between zero and 365 fixed days") }
         catch (_: NumberFormatException) { throw IllegalArgumentException("Enter a valid duration") }
         validateTaskEstimate(duration)
         val day = if (date.isBlank()) null else try { LocalDate.parse(date) }
@@ -79,22 +85,22 @@ data class TaskDraft(val title: String = "", val description: String = "", val d
     }
     companion object {
         fun from(content: TaskContent) = TaskDraft(content.title, content.description.orEmpty(),
-            content.scheduledDate?.toString().orEmpty(), content.estimatedMilliseconds?.let { (it / 60_000).toString() }.orEmpty(),
-            content.estimatedMilliseconds?.let { BigDecimal(it % 60_000).movePointLeft(3).stripTrailingZeros().toPlainString() }.orEmpty(),
+            content.scheduledDate?.toString().orEmpty(), content.estimatedMilliseconds?.let { (it / 3_600_000).toString() }.orEmpty(),
+            content.estimatedMilliseconds?.let(::taskEstimateMinutePart).orEmpty(),
             content.categoryLocalId)
     }
 }
 
 data class TaskStepDraft(val key: String = UUID.randomUUID().toString(), val title: String = "",
-    val minutes: String = "", val seconds: String = "", val status: Int = TaskStatus.TODO.code) {
+    val hours: String = "", val minutes: String = "", val status: Int = TaskStatus.TODO.code) {
     fun input(): ChecklistStepInput {
-        val content = TaskDraft(title = title, minutes = minutes, seconds = seconds).content()
+        val content = TaskDraft(title = title, hours = hours, minutes = minutes).content()
         return ChecklistStepInput(UUID.fromString(key), content.title, content.estimatedMilliseconds)
     }
     companion object {
         fun from(row: com.example.maiplan.database.entities.SubtaskEntity): TaskStepDraft {
             val duration = TaskDraft.from(TaskContent(row.title, estimatedMilliseconds = row.estimatedMilliseconds))
-            return TaskStepDraft(row.syncId.toString(), row.title, duration.minutes, duration.seconds, row.status)
+            return TaskStepDraft(row.syncId.toString(), row.title, duration.hours, duration.minutes, row.status)
         }
     }
 }
@@ -127,7 +133,7 @@ fun mergeTaskSteps(base: List<TaskStepDraft>, draft: List<TaskStepDraft>, latest
             if (editedTitle && currentContent.title != oldContent.title && currentContent.title != mineContent.title) collisions += "Subtask title: ${mine.title}"
             if (editedEstimate && currentContent.estimatedMilliseconds != oldContent.estimatedMilliseconds && currentContent.estimatedMilliseconds != mineContent.estimatedMilliseconds) collisions += "Subtask estimate: ${mine.title}"
             rows[mine.key] = current.copy(title = if (editedTitle) mine.title else current.title,
-                minutes = if (editedEstimate) mine.minutes else current.minutes, seconds = if (editedEstimate) mine.seconds else current.seconds)
+                hours = if (editedEstimate) mine.hours else current.hours, minutes = if (editedEstimate) mine.minutes else current.minutes)
         }
     }
     latest.filter { it.key !in baseline && it.key !in local }.forEach { rows[it.key] = it }

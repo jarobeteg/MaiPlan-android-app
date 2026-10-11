@@ -92,7 +92,7 @@ class TaskEditorViewModel(private val userId: Long, private val taskId: Long?,
                 baseline = TaskDraft.from(content)
                 baselineSteps = revision.steps.map { step ->
                     val duration = TaskDraft.from(TaskContent(step.title, estimatedMilliseconds = step.estimated_time))
-                    TaskStepDraft(step.key, step.title, duration.minutes, duration.seconds)
+                    TaskStepDraft(step.key, step.title, duration.hours, duration.minutes)
                 }
                 baselineRepeat = TaskRepeatEditorDraft.from(revision)
                 savedState["baseline"] = gson.toJson(baseline); savedState["draft"] = gson.toJson(baseline)
