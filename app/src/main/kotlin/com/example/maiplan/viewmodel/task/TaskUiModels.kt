@@ -72,7 +72,6 @@ data class TaskDraft(val title: String = "", val description: String = "", val d
             val h = BigDecimal(hours.trim().ifEmpty { "0" })
             val m = BigDecimal(minutes.trim().ifEmpty { "0" })
             require(h >= BigDecimal.ZERO && m >= BigDecimal.ZERO) { "Duration cannot be negative" }
-            // Fractional minutes can repeat in decimal form; round back to the stored millisecond precision.
             h.multiply(BigDecimal(3_600_000)).add(m.multiply(BigDecimal(60_000)))
                 .setScale(0, RoundingMode.HALF_UP).longValueExact()
         } catch (_: ArithmeticException) { throw IllegalArgumentException("Estimated duration must be between zero and 365 fixed days") }

@@ -4,7 +4,6 @@ internal fun taskStepTop(order: List<String>, id: String, heights: Map<String, I
     order.takeWhile { it != id }.sumOf { heights[it] ?: 0 }.toFloat() +
         order.indexOf(id).coerceAtLeast(0) * spacing
 
-/** Move when the leading edge crosses a neighbour's centre, allowing rows of any height to reach either end. */
 internal fun taskStepDragOrder(order: List<String>, id: String, top: Float,
     heights: Map<String, Int>, spacing: Float): List<String> {
     if (id !in order || order.any { it !in heights }) return order

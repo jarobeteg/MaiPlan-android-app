@@ -143,7 +143,7 @@ class ReminderCoordinator(
         for (id in database.eventDAO().getAllEventIdsForUser(user)) {
             val event = database.eventDAO().getEventByLocalId(id, user) ?: continue
             val reminder = event.reminderLocalId?.let(reminders::get)
-            val plan = eventReminderPlan(event, reminder, now)
+            val plan = if (eventSeriesSuppressesReminder(database, event)) null else eventReminderPlan(event, reminder, now)
             if (plan != null) enqueueFuture(plan, now)
             if (plan == null && queue.pending().none { it.sourceKey == "event:$id" }) {
                 effects.cancelAlarm("event:$id")
@@ -196,6 +196,7 @@ class ReminderCoordinator(
         row.eventLocalId?.let { id ->
             val event = database.eventDAO().getEventByLocalId(id, row.userLocalId)
                 ?.takeIf { it.deletedAt == null } ?: return null
+            if (eventSeriesSuppressesReminder(database, event)) return null
             if (row.occurrenceDate != null) {
                 val date = LocalDate.parse(row.occurrenceDate)
                 val occurrence = event.occurrencesIntersecting(date, date.plusDays(1))

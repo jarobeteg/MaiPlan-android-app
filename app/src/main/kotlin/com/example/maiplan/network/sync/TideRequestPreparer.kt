@@ -79,6 +79,8 @@ class TideRequestPreparer(
                     val prepared = seriesTransport.prepare(row)
                     if (!seriesTransport.ready(prepared)) continue
                     selected += prepared
+                } else if (row.entityType == TideEntityType.EVENT) {
+                    if (EventTransport(database).dependenciesReady(row)) selected += row
                 } else selected += row
             }
             val mutations = selected.map { it.toTideMutation() }

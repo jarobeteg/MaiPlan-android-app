@@ -19,6 +19,7 @@ import com.example.maiplan.theme.LocalAppDarkTheme
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
+import java.time.LocalDate
 
 @Composable
 fun UpdateEventScreen(
@@ -28,13 +29,14 @@ fun UpdateEventScreen(
     isSaving: Boolean = false,
     onUpdateClick: (ReminderEntity?, EventEntity) -> Unit,
     onBackClick: () -> Unit,
+    occurrenceDate: LocalDate? = null,
 ) {
     val userId = UserSession.userLocalId ?: return
     val categories by categoryViewModel.categoryList.observeAsState(emptyList())
-    var snapshot by remember(eventLocalId, userId) { mutableStateOf<EventEditSnapshot?>(null) }
-    var loaded by remember(eventLocalId, userId) { mutableStateOf(false) }
-    LaunchedEffect(eventLocalId, userId) {
-        snapshot = eventViewModel.getEventForEdit(eventLocalId, userId)
+    var snapshot by remember(eventLocalId, userId, occurrenceDate) { mutableStateOf<EventEditSnapshot?>(null) }
+    var loaded by remember(eventLocalId, userId, occurrenceDate) { mutableStateOf(false) }
+    LaunchedEffect(eventLocalId, userId, occurrenceDate) {
+        snapshot = runCatching { eventViewModel.getEventForEdit(eventLocalId, userId, occurrenceDate) }.getOrNull()
         loaded = true
     }
     val current = snapshot
@@ -58,13 +60,15 @@ fun UpdateEventScreen(
             }
         }
         else -> EventFullEditor(
-            heading = "Edit event",
+            heading = if (occurrenceDate != null) "Edit current occurrence"
+                else if (current.event.recurrenceFrequency != null) "Edit all occurrences" else "Edit event",
             initial = current.event,
             initialReminder = current.reminder,
             categories = categories,
             isSaving = isSaving,
             onBack = onBackClick,
             onSave = onUpdateClick,
+            allowRepeat = occurrenceDate == null,
         )
     }
 }

@@ -23,11 +23,12 @@ data class CalendarEventUI(
     val hasRelativeReminder: Boolean,
     val recurrenceFrequency: String?,
     val color: Color,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val parentSeriesSyncId: java.util.UUID? = null,
 ) {
     val listKey: String get() = "${day.occurrence.key}:${day.visibleDate}"
     val isTimed: Boolean get() = day.occurrence.isTimed
-    val isRecurring: Boolean get() = recurrenceFrequency != null
+    val isRecurring: Boolean get() = recurrenceFrequency != null || parentSeriesSyncId != null
 }
 
 fun CalendarEventUI.overlapsHour(hour: Int): Boolean {

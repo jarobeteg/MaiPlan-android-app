@@ -20,6 +20,10 @@ class ReminderPlanWriter(private val database: MaiPlanDatabase) {
         replace("task:${task.taskLocalId}", plan)
     }
     suspend fun event(event: EventEntity, reminder: ReminderEntity?) {
+        if (eventSeriesSuppressesReminder(database, event)) {
+            replace("event:${event.eventLocalId}", null)
+            return
+        }
         replace("event:${event.eventLocalId}", eventReminderPlan(event, reminder, event.updatedAt.minusNanos(1)))
     }
 
@@ -36,6 +40,12 @@ class ReminderPlanWriter(private val database: MaiPlanDatabase) {
         database.scheduledReminderDAO().insert(plan)
         database.scheduledReminderDAO().updateContent(plan.alarmKey, plan.title, plan.message)
     }
+}
+
+internal suspend fun eventSeriesSuppressesReminder(db: MaiPlanDatabase, event: EventEntity): Boolean {
+    val id = event.parentSeriesSyncId ?: return false
+    val series = db.eventDAO().getEventBySyncId(id, event.userLocalId) ?: return true
+    return series.deletedAt != null || series.recurrenceFrequency == null
 }
 
 internal suspend fun taskSeriesSuppressesReminder(db: MaiPlanDatabase, task: TaskEntity): Boolean {

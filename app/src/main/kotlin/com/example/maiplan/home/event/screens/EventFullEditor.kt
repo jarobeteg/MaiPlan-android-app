@@ -61,6 +61,7 @@ internal fun EventFullEditor(
     isSaving: Boolean,
     onBack: () -> Unit,
     onSave: (ReminderEntity?, EventEntity) -> Unit,
+    allowRepeat: Boolean = true,
 ) {
     val userId = UserSession.userLocalId ?: return
     val context = LocalContext.current
@@ -493,7 +494,7 @@ internal fun EventFullEditor(
                         }
                     }
 
-                    EventEditorSection(title = "Repeat", subtitle = "Choose how often this event occurs.") {
+                    if (allowRepeat) EventEditorSection(title = "Repeat", subtitle = "Choose how often this event occurs.") {
                         EventEditorLabel("Frequency")
                         EventOptionRow(listOf("NONE", "DAILY", "WEEKLY", "MONTHLY"), repeatMode,
                             { it.lowercase().replaceFirstChar(Char::uppercase) }) { mode ->

@@ -6,9 +6,18 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 fun validateEventDefinition(event: EventEntity) {
+    require((event.parentSeriesSyncId == null) == (event.originalOccurrenceDate == null)) {
+        "An occurrence override needs its series and original start date"
+    }
+    require(event.parentSeriesSyncId == null || event.recurrenceFrequency == null) {
+        "An occurrence override cannot repeat"
+    }
+    require(event.parentSeriesSyncId != event.syncId)
+    val excluded = event.excludedDates()
+    require(excluded.isEmpty() || event.recurrenceFrequency != null)
     val minDate = LocalDate.of(1, 1, 1)
     val maxDate = LocalDate.of(9999, 12, 31)
-    listOfNotNull(event.startDate, event.endDate, event.recurrenceUntilDate).forEach {
+    (listOfNotNull(event.startDate, event.endDate, event.recurrenceUntilDate, event.originalOccurrenceDate) + excluded).forEach {
         require(it in minDate..maxDate) { "Event date outside supported range" }
     }
     require(!event.endDate.isBefore(event.startDate)) { "End date precedes start date" }

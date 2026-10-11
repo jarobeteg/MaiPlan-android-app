@@ -166,6 +166,14 @@
     <string name="event_empty_subtitle">This day is open. Add an event whenever you are ready.</string>
     <string name="event_swipe_hint">Swipe right to edit or left to delete</string>
     <string name="event_open_calendar">Choose another date</string>
+    <string name="event_edit_occurrences_title">Edit repeating event</string>
+    <string name="event_delete_occurrences_title">Delete repeating event</string>
+    <string name="event_occurrences_scope_help">Choose the current occurrence or all occurrences of this event.</string>
+    <string name="event_edit_current_occurrence">Edit only current occurrence</string>
+    <string name="event_edit_all_occurrences">Edit all occurrences</string>
+    <string name="event_delete_current_occurrence">Delete only current occurrence</string>
+    <string name="event_delete_all_occurrences">Delete all occurrences</string>
+    <string name="event_occurrence_cancel">Cancel</string>
     <string name="date">Date</string>
     <string name="start_time">Start Time</string>
     <string name="end_time">End Time</string>

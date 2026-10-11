@@ -17,6 +17,7 @@ import com.example.maiplan.repository.Result
 import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 import com.example.maiplan.viewmodel.event.EventViewModel
+import java.time.LocalDate
 
 @Composable
 fun EventNavHost(
@@ -42,16 +43,27 @@ fun NavGraphBuilder.eventNavGraph(
     val userLocalId = UserSession.userLocalId!!
     // --- Main Event Screen ---
     composable(EventRoutes.EventMain.route) {
+        val context = LocalContext.current
+        val deleteResult by eventViewModel.deleteEventResult.observeAsState()
         EventScreen(
             eventViewModel = eventViewModel,
             rootNavController = rootNavController,
             localNavController = localNavController,
             onCreateEventClick = { localNavController.navigate(EventRoutes.Create.route) },
-            onUpdateEventClick = { eventLocalId -> localNavController.navigate(EventRoutes.Update.withArgs(eventLocalId)) },
-            onDeleteClick = { eventLocalId, selectedDate->
-                eventViewModel.softDeleteEventWithReminder(eventLocalId, userLocalId, selectedDate)
+            onUpdateEventClick = { eventLocalId, occurrenceDate ->
+                localNavController.navigate(EventRoutes.Update.withArgs(eventLocalId, occurrenceDate))
             },
+            onDeleteClick = { eventLocalId, selectedDate, occurrenceDate ->
+                eventViewModel.softDeleteEventWithReminder(eventLocalId, userLocalId, selectedDate, occurrenceDate)
+            },
+            isDeleting = deleteResult is Result.Loading,
         )
+        LaunchedEffect(deleteResult) {
+            if (deleteResult is Result.Error || deleteResult is Result.Failure) {
+                Toast.makeText(context, "Could not delete the event. Please try again.", Toast.LENGTH_LONG).show()
+                eventViewModel.clearDeleteResult()
+            }
+        }
     }
 
     // --- Create Event Screen ---
@@ -68,6 +80,11 @@ fun NavGraphBuilder.eventNavGraph(
         )
         LaunchedEffect(saveResult) {
             val result = saveResult
+            if (result is Result.Error || result is Result.Failure) {
+                Toast.makeText(context, (result as? Result.Error)?.exception?.message
+                    ?: "Could not save the event. Please try again.", Toast.LENGTH_LONG).show()
+                eventViewModel.clearSaveResult()
+            }
             if (result is Result.Success) {
                 result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 eventViewModel.clearSaveResult()
@@ -80,7 +97,8 @@ fun NavGraphBuilder.eventNavGraph(
     composable(
         route = EventRoutes.Update.route,
         arguments = listOf(
-            navArgument("eventLocalId") { type = NavType.LongType }
+            navArgument("eventLocalId") { type = NavType.LongType },
+            navArgument("occurrenceDay") { type = NavType.StringType; nullable = true; defaultValue = null },
         )
     ) { backstackEntry ->
         val context = LocalContext.current
@@ -89,18 +107,26 @@ fun NavGraphBuilder.eventNavGraph(
             .arguments
             ?.getLong("eventLocalId")
             ?: return@composable
+        val occurrenceDate = backstackEntry.arguments?.getString("occurrenceDay")
+            ?.toLongOrNull()?.let(LocalDate::ofEpochDay)
         UpdateEventScreen(
             eventLocalId = eventLocalId,
             eventViewModel = eventViewModel,
             categoryViewModel = categoryViewModel,
             isSaving = saveResult is Result.Loading,
+            occurrenceDate = occurrenceDate,
             onUpdateClick = { reminder, event ->
-                eventViewModel.updateEventWithReminder(reminder, event)
+                eventViewModel.updateEventWithReminder(reminder, event, occurrenceDate)
             },
             onBackClick = { localNavController.popBackStack() }
         )
         LaunchedEffect(saveResult) {
             val result = saveResult
+            if (result is Result.Error || result is Result.Failure) {
+                Toast.makeText(context, (result as? Result.Error)?.exception?.message
+                    ?: "Could not save the event. Please try again.", Toast.LENGTH_LONG).show()
+                eventViewModel.clearSaveResult()
+            }
             if (result is Result.Success) {
                 result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
                 eventViewModel.clearSaveResult()

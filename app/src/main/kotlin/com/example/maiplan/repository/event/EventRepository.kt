@@ -56,6 +56,7 @@ class EventRepository(
             reminderMessage = reminder?.message.orEmpty(),
             hasRelativeReminder = reminderOffsetMinutes != null || reminderLeadDays != null,
             recurrenceFrequency = recurrenceFrequency,
+            parentSeriesSyncId = parentSeriesSyncId,
         )
     }
 
@@ -74,10 +75,11 @@ class EventRepository(
 
     suspend fun updateEventWithReminder(
         reminder: ReminderEntity?,
-        event: EventEntity
+        event: EventEntity,
+        occurrenceDate: LocalDate? = null,
     ): Result<StoredEventWithReminder> {
         val result = withContext(NonCancellable + Dispatchers.IO) {
-            local.updateEventWithReminder(reminder, event).let { armSaved(it, event.userLocalId) }
+            local.updateEventWithReminder(reminder, event, occurrenceDate).let { armSaved(it, event.userLocalId) }
         }
         if (result is Result.Success) {
             requestSyncAfterSuccess(result)
@@ -87,9 +89,10 @@ class EventRepository(
 
     suspend fun softDeleteEventWithReminder(
         eventLocalId: Long,
-        userLocalId: Long
-    ): Result<Unit> {
-        val result = local.softDeleteEventWithReminder(eventLocalId, userLocalId)
+        userLocalId: Long,
+        occurrenceDate: LocalDate? = null,
+    ): Result<Unit> = withContext(NonCancellable + Dispatchers.IO) {
+        val result = local.softDeleteEventWithReminder(eventLocalId, userLocalId, occurrenceDate)
         if (result is Result.Success) {
             try {
                 ReminderAlarmScheduler.cancel(context, "event:$eventLocalId")
@@ -102,7 +105,7 @@ class EventRepository(
             }
             requestSyncAfterSuccess(result)
         }
-        return result
+        result
     }
 
     suspend fun getEventsForMonth(
@@ -122,9 +125,13 @@ class EventRepository(
         return entries.groupBy { it.date }
     }
 
-    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long): EventEditSnapshot? {
-        val event = local.getEvent(eventLocalId, userLocalId)
+    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long, occurrenceDate: LocalDate? = null): EventEditSnapshot? {
+        val selected = local.getEvent(eventLocalId, userLocalId)
             ?.takeIf { it.deletedAt == null } ?: return null
+        val event = if (occurrenceDate == null) local.getSeriesEvent(selected)
+            ?.takeIf { it.deletedAt == null } ?: return null
+        else if (selected.recurrenceFrequency != null) selected.occurrenceDraft(occurrenceDate)
+        else selected
         val reminder = event.reminderLocalId?.let {
             localReminder.getReminder(it, userLocalId)
         }

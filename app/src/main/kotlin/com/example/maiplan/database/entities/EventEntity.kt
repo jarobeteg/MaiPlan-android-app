@@ -86,6 +86,15 @@ data class EventEntity(
     @ColumnInfo(name = "recurrence_until_date")
     val recurrenceUntilDate: LocalDate? = null,
 
+    @ColumnInfo(name = "excluded_occurrence_dates", defaultValue = "'[]'")
+    val excludedOccurrenceDates: String = "[]",
+
+    @ColumnInfo(name = "parent_series_sync_id")
+    val parentSeriesSyncId: UUID? = null,
+
+    @ColumnInfo(name = "original_occurrence_date")
+    val originalOccurrenceDate: LocalDate? = null,
+
     @ColumnInfo(name = "reminder_offset_minutes")
     val reminderOffsetMinutes: Int? = null,
 

@@ -20,6 +20,8 @@ import java.time.LocalDate
 class EventViewModel(private val eventRepository: EventRepository) : ViewModel() {
     private val _saveEventResult = MutableLiveData<Result<StoredEventWithReminder>>(Result.Idle)
     val saveEventResult: LiveData<Result<StoredEventWithReminder>> get() = _saveEventResult
+    private val _deleteEventResult = MutableLiveData<Result<Unit>>(Result.Idle)
+    val deleteEventResult: LiveData<Result<Unit>> get() = _deleteEventResult
 
     private val _monthlyEvents =
         MutableStateFlow<Map<LocalDate, List<CalendarEventUI>>>(emptyMap())
@@ -32,10 +34,10 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         }
     }
 
-    fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity) {
+    fun updateEventWithReminder(reminder: ReminderEntity?, event: EventEntity, occurrenceDate: LocalDate? = null) {
         viewModelScope.launch {
             _saveEventResult.postValue(Result.Loading)
-            _saveEventResult.postValue(eventRepository.updateEventWithReminder(reminder, event))
+            _saveEventResult.postValue(eventRepository.updateEventWithReminder(reminder, event, occurrenceDate))
         }
     }
 
@@ -43,14 +45,20 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
         _saveEventResult.postValue(Result.Idle)
     }
 
+    fun clearDeleteResult() { _deleteEventResult.value = Result.Idle }
+
     fun softDeleteEventWithReminder(
         eventLocalId: Long,
         userLocalId: Long,
-        selectedDate: LocalDate
+        selectedDate: LocalDate,
+        occurrenceDate: LocalDate? = null,
     ) {
         viewModelScope.launch {
-            eventRepository.softDeleteEventWithReminder(eventLocalId, userLocalId)
-            loadMonth(selectedDate)
+            if (_deleteEventResult.value is Result.Loading) return@launch
+            _deleteEventResult.value = Result.Loading
+            val result = eventRepository.softDeleteEventWithReminder(eventLocalId, userLocalId, occurrenceDate)
+            _deleteEventResult.value = result
+            if (result is Result.Success) loadMonth(selectedDate)
         }
     }
 
@@ -67,7 +75,7 @@ class EventViewModel(private val eventRepository: EventRepository) : ViewModel()
     }
 
 
-    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long): EventEditSnapshot? =
-        eventRepository.getEventForEdit(eventLocalId, userLocalId)
+    suspend fun getEventForEdit(eventLocalId: Long, userLocalId: Long, occurrenceDate: LocalDate? = null): EventEditSnapshot? =
+        eventRepository.getEventForEdit(eventLocalId, userLocalId, occurrenceDate)
 
 }

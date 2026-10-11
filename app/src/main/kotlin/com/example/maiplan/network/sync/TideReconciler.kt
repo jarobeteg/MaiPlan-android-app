@@ -512,6 +512,15 @@ class TideReconciler(private val database: MaiPlanDatabase,
                     recurrenceUntilDate = data.nullableEventDateOrExisting(
                         "recurrence_until_date", existing?.recurrenceUntilDate
                     ),
+                    excludedOccurrenceDates = if (data.has("excluded_occurrence_dates"))
+                        data.getAsJsonArray("excluded_occurrence_dates").toString()
+                    else existing?.excludedOccurrenceDates ?: "[]",
+                    parentSeriesSyncId = data.nullableStringOrExisting(
+                        "parent_series_sync_id", existing?.parentSeriesSyncId?.toString()
+                    )?.let(UUID::fromString),
+                    originalOccurrenceDate = data.nullableEventDateOrExisting(
+                        "original_occurrence_date", existing?.originalOccurrenceDate
+                    ),
                     reminderOffsetMinutes = data.nullableIntOrExisting(
                         "reminder_offset_minutes", existing?.reminderOffsetMinutes
                     ),

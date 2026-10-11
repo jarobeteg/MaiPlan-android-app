@@ -49,7 +49,13 @@ data class EventMutationPayload(
     @SerializedName("zone_id")
     val zoneId: String,
     val priority: Int,
-    val location: String?
+    val location: String?,
+    @SerializedName("excluded_occurrence_dates")
+    val excludedOccurrenceDates: List<Long> = emptyList(),
+    @SerializedName("parent_series_sync_id")
+    val parentSeriesSyncId: UUID? = null,
+    @SerializedName("original_occurrence_date")
+    val originalOccurrenceDate: Long? = null,
 )
 
 data class NoteMutationPayload(

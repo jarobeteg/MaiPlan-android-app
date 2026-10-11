@@ -83,8 +83,9 @@ fun EventScreen(
     rootNavController: NavHostController,
     localNavController: NavHostController,
     onCreateEventClick: () -> Unit,
-    onUpdateEventClick: (Long) -> Unit,
-    onDeleteClick: (Long, LocalDate) -> Unit,
+    onUpdateEventClick: (Long, LocalDate?) -> Unit,
+    onDeleteClick: (Long, LocalDate, LocalDate?) -> Unit,
+    isDeleting: Boolean = false,
 ) {
     var selectedDate by rememberSaveable(stateSaver = LocalDateSaver) {
         mutableStateOf(LocalDate.now())
@@ -145,6 +146,7 @@ fun EventScreen(
                     )
                     DayEventsSection(
                         events = eventsByDate[selectedDate].orEmpty(),
+                        isDeleting = isDeleting,
                         onUpdateEventClick = onUpdateEventClick,
                         onDeleteClick = onDeleteClick,
                         selectedDate = selectedDate,
@@ -171,6 +173,7 @@ fun EventScreen(
                     )
                     DayEventsSection(
                         events = eventsByDate[selectedDate].orEmpty(),
+                        isDeleting = isDeleting,
                         onUpdateEventClick = onUpdateEventClick,
                         onDeleteClick = onDeleteClick,
                         selectedDate = selectedDate,
@@ -351,10 +354,11 @@ private fun CalendarDayCell(
 @Composable
 fun DayEventsSection(
     events: List<CalendarEventUI>,
-    onUpdateEventClick: (Long) -> Unit,
-    onDeleteClick: (Long, LocalDate) -> Unit,
+    onUpdateEventClick: (Long, LocalDate?) -> Unit,
+    onDeleteClick: (Long, LocalDate, LocalDate?) -> Unit,
     selectedDate: LocalDate,
     modifier: Modifier = Modifier,
+    isDeleting: Boolean = false,
 ) {
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF181C2B) else Color.White
@@ -414,6 +418,7 @@ fun DayEventsSection(
                         key = { it.listKey }) { event ->
                         SwipeableEventCard(
                             event = event,
+                            isDeleting = isDeleting,
                             selectedDate = selectedDate,
                             onEdit = onUpdateEventClick,
                             onDelete = onDeleteClick,
@@ -483,25 +488,33 @@ private fun EventEmptyState(modifier: Modifier = Modifier) {
 private fun SwipeableEventCard(
     event: CalendarEventUI,
     selectedDate: LocalDate,
-    onEdit: (Long) -> Unit,
-    onDelete: (Long, LocalDate) -> Unit,
+    onEdit: (Long, LocalDate?) -> Unit,
+    onDelete: (Long, LocalDate, LocalDate?) -> Unit,
+    isDeleting: Boolean,
 ) {
     var confirmDelete by remember(event.listKey) { mutableStateOf(false) }
+    var chooseEditScope by remember(event.listKey) { mutableStateOf(false) }
+    fun edit() {
+        if (isDeleting) return
+        if (event.isRecurring) chooseEditScope = true else onEdit(event.eventLocalId, null)
+    }
     val dismissState = rememberSwipeToDismissBoxState(
         positionalThreshold = { it * 0.45f },
     )
 
-    LaunchedEffect(dismissState, event.listKey) {
+    LaunchedEffect(dismissState, event.listKey, isDeleting) {
         snapshotFlow { dismissState.settledValue }.collect { value ->
             when (value) {
                 SwipeToDismissBoxValue.StartToEnd -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    onEdit(event.eventLocalId)
+                    edit()
                 }
                 SwipeToDismissBoxValue.EndToStart -> {
                     dismissState.snapTo(SwipeToDismissBoxValue.Settled)
-                    if (event.isRecurring) confirmDelete = true
-                    else onDelete(event.eventLocalId, selectedDate)
+                    if (!isDeleting) {
+                        if (event.isRecurring) confirmDelete = true
+                        else onDelete(event.eventLocalId, selectedDate, null)
+                    }
                 }
                 SwipeToDismissBoxValue.Settled -> Unit
             }
@@ -544,20 +557,32 @@ private fun SwipeableEventCard(
             }
         },
     ) {
-        EventCard(event = event, onClick = { onEdit(event.eventLocalId) })
+        EventCard(event = event, onClick = { edit() })
     }
-    if (confirmDelete) AlertDialog(
-        onDismissRequest = { confirmDelete = false },
-        title = { Text("Delete entire series?") },
-        text = { Text("This removes all occurrences of this repeating event.") },
-        confirmButton = {
-            TextButton(onClick = {
-                confirmDelete = false
-                onDelete(event.eventLocalId, selectedDate)
-            }) { Text("Delete series") }
+    if (chooseEditScope) EventOccurrenceScopeDialog(
+        deleting = false,
+        enabled = !isDeleting,
+        onDismiss = { chooseEditScope = false },
+        onCurrent = {
+            chooseEditScope = false
+            onEdit(event.eventLocalId, event.day.occurrence.originalStartDate)
         },
-        dismissButton = {
-            TextButton(onClick = { confirmDelete = false }) { Text("Cancel") }
+        onAll = {
+            chooseEditScope = false
+            onEdit(event.eventLocalId, null)
+        },
+    )
+    if (confirmDelete) EventOccurrenceScopeDialog(
+        deleting = true,
+        enabled = !isDeleting,
+        onDismiss = { confirmDelete = false },
+        onCurrent = {
+            confirmDelete = false
+            onDelete(event.eventLocalId, selectedDate, event.day.occurrence.originalStartDate)
+        },
+        onAll = {
+            confirmDelete = false
+            onDelete(event.eventLocalId, selectedDate, null)
         },
     )
 }
@@ -609,7 +634,8 @@ fun EventCard(event: CalendarEventUI, onClick: () -> Unit = {}) {
                     )
                 }
                 if (event.isRecurring) Text(
-                    text = "Repeats ${event.recurrenceFrequency?.lowercase()} • Edit changes the whole series",
+                    text = event.recurrenceFrequency?.let { "Repeats ${it.lowercase()}" }
+                        ?: "Edited occurrence of a repeating event",
                     style = MaterialTheme.typography.labelSmall,
                     color = muted,
                 )

@@ -40,8 +40,10 @@ fun EventEntity.occurrencesIntersecting(
     } else null
 
     val firstCandidate = maxOf(anchor, windowStart.minusDays(daySpan + 1))
+    val excluded = excludedDates()
     return ruleDatesOnOrAfter(firstCandidate)
         .takeWhile { it.isBefore(windowEndExclusive) }
+        .filter { it !in excluded }
         .map { occurrenceDate ->
             val occurrenceEndDate = occurrenceDate.plusDays(daySpan)
             val resolvedStart = startClock?.let {

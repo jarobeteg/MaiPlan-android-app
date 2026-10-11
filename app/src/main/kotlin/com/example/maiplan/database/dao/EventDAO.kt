@@ -34,6 +34,12 @@ interface EventDAO {
     )
     suspend fun getEventBySyncId(syncId: UUID, userLocalId: Long): EventEntity?
 
+    @Query("SELECT * FROM event WHERE parent_series_sync_id = :seriesSyncId AND user_local_id = :userLocalId AND deleted_at IS NULL")
+    suspend fun getSeriesOverrides(seriesSyncId: UUID, userLocalId: Long): List<EventEntity>
+
+    @Query("SELECT * FROM event WHERE parent_series_sync_id = :seriesSyncId AND original_occurrence_date = :epochDay AND user_local_id = :userLocalId AND deleted_at IS NULL LIMIT 1")
+    suspend fun getOccurrenceOverride(seriesSyncId: UUID, epochDay: Long, userLocalId: Long): EventEntity?
+
     @Query("""
         SELECT * FROM event WHERE user_local_id = :userLocalId
           AND deleted_at IS NULL AND recurrence_frequency IS NULL
