@@ -28,6 +28,7 @@ import com.example.maiplan.R
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.viewmodel.task.*
 import com.example.maiplan.repository.task.TaskStatus
+import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.theme.LocalAppDarkTheme
 import com.example.maiplan.utils.LocalAdaptiveLayout
 
@@ -52,10 +53,10 @@ fun TaskListScreen(rootNavController: NavHostController, viewModel: TaskViewMode
         bottomBar = { HomeNavigationBar(rootNavController, context) },
         floatingActionButton = {
             if (compact) FloatingActionButton(onClick = onCreate, shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {
+                containerColor = AppThemeManager.selectedTheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary) {
                 Icon(Icons.Rounded.Add, stringResource(R.string.task_new))
             } else ExtendedFloatingActionButton(onClick = onCreate, shape = RoundedCornerShape(17.dp),
-                containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
+                containerColor = AppThemeManager.selectedTheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary,
                 icon = { Icon(Icons.Rounded.Add, null) },
                 text = { Text(stringResource(R.string.task_new), fontWeight = FontWeight.Bold) })
         }) { padding ->
@@ -168,6 +169,8 @@ private fun TaskEmptyState(filtered: Boolean, onCreate: () -> Unit, onClear: () 
             Text(stringResource(if (filtered) R.string.task_no_matches_help else R.string.task_empty_help),
                 style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
             Button(onClick = if (filtered) onClear else onCreate, shape = RoundedCornerShape(15.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = if (filtered) MaterialTheme.colorScheme.primary
+                    else AppThemeManager.selectedTheme.primary),
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                 Text(stringResource(if (filtered) R.string.task_clear_filters else R.string.task_new))
             }
