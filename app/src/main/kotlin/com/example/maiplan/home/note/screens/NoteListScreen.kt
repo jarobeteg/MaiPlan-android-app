@@ -130,7 +130,7 @@ fun NoteListScreen(
     NoteScreenBackground {
         Scaffold(
             containerColor = Color.Transparent,
-            topBar = { NotesTopBar(compact = compactLandscape) },
+            topBar = { NotesTopBar() },
             bottomBar = { HomeNavigationBar(rootNavController, context) },
             snackbarHost = { SnackbarHost(snackbarHostState) },
             floatingActionButton = {
@@ -340,25 +340,16 @@ private fun NoteDismissBackground(dismissState: SwipeToDismissBoxState) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NotesTopBar(compact: Boolean) {
+private fun NotesTopBar() {
     val dark = LocalAppDarkTheme.current
     CenterAlignedTopAppBar(
         title = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = stringResource(R.string.notes),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = if (dark) Color(0xFFF5F7FB) else NoteInk,
-                )
-                if (!compact) {
-                    Text(
-                        text = stringResource(R.string.note_collection_subtitle),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (dark) Color(0xFFAEB7C9) else NoteMuted,
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.notes),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = if (dark) Color(0xFFF5F7FB) else NoteInk,
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
     )

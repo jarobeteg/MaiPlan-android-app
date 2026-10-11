@@ -52,8 +52,7 @@ fun TaskListScreen(rootNavController: NavHostController, viewModel: TaskViewMode
     val compact = LocalAdaptiveLayout.current.let { it.isLandscape && it.isShort }
     Box(Modifier.fillMaxSize()) {
         Scaffold(containerColor = Color.Transparent, topBar = {
-            TaskTopBar(stringResource(R.string.task_title),
-                subtitle = if (compact) null else stringResource(R.string.task_collection_subtitle))
+            TaskTopBar(stringResource(R.string.task_title))
         },
             bottomBar = { HomeNavigationBar(rootNavController, context) },
             floatingActionButton = {

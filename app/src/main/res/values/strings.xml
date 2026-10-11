@@ -529,8 +529,6 @@
     <string name="task_partial_estimate">%1$s • partial step estimate</string>
     <string name="task_manual_estimate">%1$s • manual estimate</string>
     <string name="task_reminder_set">Reminder configured</string>
-    <string name="task_sync_pending">Waiting to sync</string>
-    <string name="task_sync_ok">Synced</string>
     <string name="task_sync_attention">Sync needs attention</string>
     <string name="task_sync_help">Your local work has been kept. Choose the server version, retry your local edits, or preserve them as a new Task.</string>
     <string name="task_sync_deleted">This Task was deleted on the server. You can accept the deletion or preserve your local work as a new Task.</string>

@@ -671,19 +671,12 @@ fun EventTopBar(monthTitle: String, onDatePickerClick: () -> Unit) {
     val dark = LocalAppDarkTheme.current
     CenterAlignedTopAppBar(
         title = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = monthTitle,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = if (dark) Color(0xFFF3F5FA) else EventInk,
-                )
-                Text(
-                    text = stringResource(R.string.event_calendar_title),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = if (dark) Color(0xFFAEB7C8) else EventMuted,
-                )
-            }
+            Text(
+                text = monthTitle,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = if (dark) Color(0xFFF3F5FA) else EventInk,
+            )
         },
         actions = {
             IconButton(onClick = onDatePickerClick) {

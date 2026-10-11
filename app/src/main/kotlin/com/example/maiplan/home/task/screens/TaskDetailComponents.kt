@@ -144,15 +144,14 @@ internal fun TaskDetailOverview(snapshot: TaskSnapshot, sync: TaskSyncState?) {
                 Text(stringResource(R.string.task_completed_on, taskDay(date)), style = MaterialTheme.typography.bodyMedium)
             }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-        val needsAttention = sync?.needsAttention() == true
-        val pending = sync?.pending == true || task.serverVersion == null
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            val color = if (needsAttention) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-            Icon(if (needsAttention) Icons.Rounded.SyncProblem else if (pending) Icons.Rounded.CloudQueue else Icons.Rounded.CloudDone,
-                null, modifier = Modifier.size(16.dp), tint = color)
-            Text(stringResource(if (needsAttention) R.string.task_sync_attention else if (pending) R.string.task_sync_pending else R.string.task_sync_ok),
-                style = MaterialTheme.typography.labelMedium, color = color)
+        if (sync?.needsAttention() == true) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val color = MaterialTheme.colorScheme.error
+                Icon(Icons.Rounded.SyncProblem, null, modifier = Modifier.size(16.dp), tint = color)
+                Text(stringResource(R.string.task_sync_attention),
+                    style = MaterialTheme.typography.labelMedium, color = color)
+            }
         }
     }
 }

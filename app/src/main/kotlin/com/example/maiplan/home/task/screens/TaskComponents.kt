@@ -93,19 +93,11 @@ fun TaskFeatureTheme(content: @Composable () -> Unit) {
 fun TaskTopBar(
     title: String,
     onBack: (() -> Unit)? = null,
-    subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
 ) {
     CenterAlignedTopAppBar(title = {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
-                letterSpacing = (-0.3).sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            subtitle?.let {
-                Text(it, style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-        }
+        Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold,
+            letterSpacing = (-0.3).sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
     }, navigationIcon = {
         if (onBack != null) IconButton(onClick = onBack) {
             Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.task_back))
@@ -156,6 +148,8 @@ internal fun TaskSectionIcon(icon: ImageVector, color: Color = MaterialTheme.col
 internal fun TaskHeading(title: String, subtitle: String) {
     Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
         Text(title, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, letterSpacing = (-0.5).sp)
+        Text(subtitle, style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, lineHeight = 21.sp)
     }
 }
 
@@ -347,11 +341,10 @@ fun TaskMetadata(snapshot: TaskSummary, category: CategoryEntity?, sync: TaskSyn
             Icon(Icons.Rounded.NotificationsNone, null, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(6.dp)); Text(stringResource(R.string.task_reminder_set), style = MaterialTheme.typography.labelSmall)
         }
-        Text(stringResource(when {
-            sync?.needsAttention() == true -> R.string.task_sync_attention
-            sync?.pending == true || task.serverVersion == null -> R.string.task_sync_pending
-            else -> R.string.task_sync_ok
-        }), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        if (sync?.needsAttention() == true) {
+            Text(stringResource(R.string.task_sync_attention), style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error)
+        }
     }
 }
 
