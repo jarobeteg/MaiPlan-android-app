@@ -47,7 +47,7 @@ fun HomeNavHost(rootNavController: NavHostController, notificationTaskId: Long? 
 
         AppNavHost(
             navController = rootNavController,
-            startDestination = HomeNavRoutes.Events.route,
+            startDestination = HomeNavRoutes.Home.route,
             modifier = Modifier.weight(1f),
         ) {
             navigation(startDestination = EventRoutes.EventMain.route, route = HomeNavRoutes.Events.route) {
