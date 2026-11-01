@@ -23,11 +23,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
-import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.maiplan.database.entities.NoteEntity
@@ -39,20 +37,18 @@ import com.example.maiplan.home.note.screens.NotePrimary
 import com.example.maiplan.home.note.screens.NoteInk
 import com.example.maiplan.home.note.screens.NoteMuted
 import com.example.maiplan.home.note.screens.UpdateNoteScreen
+import com.example.maiplan.home.note.screens.NoteLoadScreen
+import com.example.maiplan.home.note.NoteScreenManager
 import com.example.maiplan.repository.Result
 import com.example.maiplan.theme.LocalAppDarkTheme
-import com.example.maiplan.utils.common.UserSession
 import com.example.maiplan.utils.notifications.AlarmScheduler
 import com.example.maiplan.utils.notifications.NotificationHelper
 import com.example.maiplan.utils.toEpochMillis
-import com.example.maiplan.viewmodel.note.NoteViewModel
+
+private typealias NoteReminderAction = (() -> Unit) -> Unit
 
 @Composable
-fun NoteNavHost(
-    rootNavController: NavHostController,
-    localNavController: NavHostController,
-    noteViewModel: NoteViewModel
-) {
+private fun NoteReminderAccess(content: @Composable (NoteReminderAction) -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     var pendingNotificationPermissionAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -164,82 +160,71 @@ fun NoteNavHost(
         )
     }
 
-    AppNavHost(
-        navController = localNavController,
-        startDestination = NoteRoutes.NoteMain.route,
-    ) {
-        noteNavGraph(
-            localNavController = localNavController,
-            rootNavController = rootNavController,
-            noteViewModel = noteViewModel,
-            runWithNotificationPermission = runWithNotificationPermission,
-        )
-    }
+    content(runWithNotificationPermission)
 }
 
-fun NavGraphBuilder.noteNavGraph(
-    localNavController: NavController,
-    rootNavController: NavHostController,
-    noteViewModel: NoteViewModel,
-    runWithNotificationPermission: (() -> Unit) -> Unit,
-) {
-    val userLocalId = UserSession.userLocalId!!
-
-    composable(NoteRoutes.NoteMain.route) {
-        val context = LocalContext.current
-        NoteListScreen(
-            rootNavController = rootNavController,
-            viewModel = noteViewModel,
-            onCreateClick = { localNavController.navigate(NoteRoutes.Create.route) },
-            onNoteClick = { note -> localNavController.navigate(NoteRoutes.Update.withArgs(note.noteLocalId)) },
-            onPinClick = { note -> noteViewModel.setNotePinned(note, !note.isPinned) },
-            onDeleteClick = { note ->
-                noteViewModel.softDeleteNote(note.noteLocalId, userLocalId)
-            }
-        )
+fun NavGraphBuilder.noteNavGraph(navController: NavHostController) {
+    composable(NoteRoutes.NoteMain.route) { entry ->
+        NoteScreenManager(navController, entry) { userLocalId, noteViewModel ->
+            LaunchedEffect(userLocalId) { noteViewModel.loadNotes(userLocalId) }
+            NoteListScreen(
+                rootNavController = navController,
+                viewModel = noteViewModel,
+                onCreateClick = { navController.navigate(NoteRoutes.Create.route) },
+                onNoteClick = { note -> navController.navigate(NoteRoutes.Update.withArgs(note.noteLocalId)) },
+                onPinClick = { note -> noteViewModel.setNotePinned(note, !note.isPinned) },
+                onDeleteClick = { note ->
+                    noteViewModel.softDeleteNote(note.noteLocalId, userLocalId)
+                }
+            )
+        }
     }
 
-    composable(NoteRoutes.Create.route) {
-        val context = LocalContext.current
-        CreateNoteScreen(
-            viewModel = noteViewModel,
-            onSaveClick = { title, content, category, reminderDateTime, reminderMessage ->
-                val saveNote = {
-                    val reminder = reminderDateTime?.let {
-                        ReminderEntity(
-                            userLocalId = userLocalId,
-                            reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
-                            message = reminderMessage,
-                        )
+    composable(NoteRoutes.Create.route) { entry ->
+        NoteScreenManager(navController, entry) { userLocalId, noteViewModel ->
+            NoteReminderAccess { runWithNotificationPermission ->
+                val context = LocalContext.current
+                CreateNoteScreen(
+                    viewModel = noteViewModel,
+                    onSaveClick = { title, content, category, reminderDateTime, reminderMessage ->
+                        val saveNote = {
+                            val reminder = reminderDateTime?.let {
+                                ReminderEntity(
+                                    userLocalId = userLocalId,
+                                    reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
+                                    message = reminderMessage,
+                                )
+                            }
+                            noteViewModel.createNoteWithReminder(
+                                reminder,
+                                NoteEntity(
+                                    userLocalId = userLocalId,
+                                    categoryLocalId = category?.categoryLocalId,
+                                    title = title,
+                                    content = content,
+                                )
+                            )
+                        }
+                        if (reminderDateTime != null) {
+                            runWithNotificationPermission(saveNote)
+                        } else {
+                            saveNote()
+                        }
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                        noteViewModel.clearCreateResult()
                     }
-                    noteViewModel.createNoteWithReminder(
-                        reminder,
-                        NoteEntity(
-                            userLocalId = userLocalId,
-                            categoryLocalId = category?.categoryLocalId,
-                            title = title,
-                            content = content,
-                        )
-                    )
-                }
-                if (reminderDateTime != null) {
-                    runWithNotificationPermission(saveNote)
-                } else {
-                    saveNote()
-                }
-            },
-            onBackClick = {
-                localNavController.popBackStack()
-                noteViewModel.clearCreateResult()
-            }
-        )
+                )
 
-        val result = noteViewModel.createNoteResult.observeAsState().value
-        LaunchedEffect(result) {
-            if (result is Result.Success) {
-                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
-                localNavController.popBackStack()
-                noteViewModel.clearCreateResult()
+                val result = noteViewModel.createNoteResult.observeAsState().value
+                LaunchedEffect(result) {
+                    if (result is Result.Success) {
+                        result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+                        navController.popBackStack()
+                        noteViewModel.clearCreateResult()
+                    }
+                }
             }
         }
     }
@@ -248,52 +233,69 @@ fun NavGraphBuilder.noteNavGraph(
         route = NoteRoutes.Update.route,
         arguments = listOf(navArgument("noteLocalId") { type = NavType.LongType })
     ) { backStackEntry ->
-        val context = LocalContext.current
         val noteLocalId = backStackEntry.arguments?.getLong("noteLocalId") ?: return@composable
-        val selectedNote = noteViewModel.getNote(noteLocalId) ?: return@composable
-        val originalReminderLocalId = remember(noteLocalId) { selectedNote.reminderLocalId }
-
-        UpdateNoteScreen(
-            viewModel = noteViewModel,
-            note = selectedNote,
-            onSaveClick = { title, content, category, reminderDateTime, reminderMessage ->
-                val saveNote = {
-                    val reminder = reminderDateTime?.let {
-                        ReminderEntity(
-                            reminderLocalId = originalReminderLocalId ?: 0L,
-                            userLocalId = userLocalId,
-                            reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
-                            message = reminderMessage,
-                        )
-                    }
-                    noteViewModel.updateNoteWithReminder(
-                        reminder,
-                        selectedNote.copy(
-                            title = title,
-                            content = content,
-                            categoryLocalId = category?.categoryLocalId,
-                            reminderLocalId = originalReminderLocalId,
-                        )
-                    )
-                }
-                if (reminderDateTime != null) {
-                    runWithNotificationPermission(saveNote)
-                } else {
-                    saveNote()
-                }
-            },
-            onBackClick = {
-                localNavController.popBackStack()
-                noteViewModel.clearUpdateResult()
+        NoteScreenManager(navController, backStackEntry) { userLocalId, noteViewModel ->
+            val context = LocalContext.current
+            var selected by remember(noteLocalId, userLocalId) { mutableStateOf<NoteEntity?>(null) }
+            var loading by remember(noteLocalId, userLocalId) { mutableStateOf(true) }
+            var loadAttempt by remember(noteLocalId, userLocalId) { mutableStateOf(0) }
+            val categories by noteViewModel.categoryList.observeAsState()
+            LaunchedEffect(noteLocalId, userLocalId, loadAttempt) {
+                loading = true
+                selected = (noteViewModel.getNoteForEdit(noteLocalId, userLocalId) as? Result.Success)?.data
+                loading = false
             }
-        )
+            val selectedNote = selected
+            if (selectedNote == null || categories == null) {
+                NoteLoadScreen(loading || categories == null, { navController.popBackStack() }, { loadAttempt++ })
+                return@NoteScreenManager
+            }
+            val originalReminderLocalId = remember(noteLocalId) { selectedNote.reminderLocalId }
 
-        val result = noteViewModel.updateNoteResult.observeAsState().value
-        LaunchedEffect(result) {
-            if (result is Result.Success) {
-                result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
-                localNavController.popBackStack()
-                noteViewModel.clearUpdateResult()
+            NoteReminderAccess { runWithNotificationPermission ->
+                UpdateNoteScreen(
+                    viewModel = noteViewModel,
+                    note = selectedNote,
+                    onSaveClick = { title, content, category, reminderDateTime, reminderMessage ->
+                        val saveNote = {
+                            val reminder = reminderDateTime?.let {
+                                ReminderEntity(
+                                    reminderLocalId = originalReminderLocalId ?: 0L,
+                                    userLocalId = userLocalId,
+                                    reminderTime = it.withSecond(0).withNano(0).toEpochMillis(),
+                                    message = reminderMessage,
+                                )
+                            }
+                            noteViewModel.updateNoteWithReminder(
+                                reminder,
+                                selectedNote.copy(
+                                    title = title,
+                                    content = content,
+                                    categoryLocalId = category?.categoryLocalId,
+                                    reminderLocalId = originalReminderLocalId,
+                                )
+                            )
+                        }
+                        if (reminderDateTime != null) {
+                            runWithNotificationPermission(saveNote)
+                        } else {
+                            saveNote()
+                        }
+                    },
+                    onBackClick = {
+                        navController.popBackStack()
+                        noteViewModel.clearUpdateResult()
+                    }
+                )
+
+                val result = noteViewModel.updateNoteResult.observeAsState().value
+                LaunchedEffect(result) {
+                    if (result is Result.Success) {
+                        result.data.reminderWarning?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
+                        navController.popBackStack()
+                        noteViewModel.clearUpdateResult()
+                    }
+                }
             }
         }
     }

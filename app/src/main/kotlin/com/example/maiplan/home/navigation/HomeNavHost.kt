@@ -11,15 +11,18 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import com.example.maiplan.navigation.AppNavHost
 import androidx.navigation.compose.composable
-import com.example.maiplan.home.event.EventScreenManager
+import androidx.navigation.navigation
+import com.example.maiplan.home.event.navigation.EventRoutes
+import com.example.maiplan.home.event.navigation.eventNavGraph
 import com.example.maiplan.home.screens.HomeScreen
-import com.example.maiplan.home.task.TaskScreenManager
+import com.example.maiplan.home.task.navigation.TaskRoutes
+import com.example.maiplan.home.task.navigation.taskNavGraph
 import com.example.maiplan.home.more.MoreScreenManager
-import com.example.maiplan.home.note.NoteScreenManager
+import com.example.maiplan.home.note.navigation.NoteRoutes
+import com.example.maiplan.home.note.navigation.noteNavGraph
 import com.example.maiplan.utils.LocalAdaptiveLayout
 
 @Composable
@@ -47,30 +50,36 @@ fun HomeNavHost(rootNavController: NavHostController, notificationTaskId: Long? 
             startDestination = HomeNavRoutes.Events.route,
             modifier = Modifier.weight(1f),
         ) {
-            homeNavGraph(rootNavController, notificationTaskId, onNotificationHandled)
+            navigation(startDestination = EventRoutes.EventMain.route, route = HomeNavRoutes.Events.route) {
+                eventNavGraph(rootNavController)
+            }
+            navigation(startDestination = TaskRoutes.TaskMain.route, route = HomeNavRoutes.Tasks.route) {
+                taskNavGraph(rootNavController)
+            }
+            navigation(startDestination = NoteRoutes.NoteMain.route, route = HomeNavRoutes.Notes.route) {
+                noteNavGraph(rootNavController)
+            }
+            composable(HomeNavRoutes.Home.route) {
+                HomeScreen(rootNavController,
+                    onOpenTask = {
+                        rootNavController.openHomeTask(it)
+                    },
+                    onOpenEvent = { id, occurrence ->
+                        rootNavController.openHomeEvent(id, occurrence)
+                    },
+                    onOpenNote = { rootNavController.openHomeNote(it) },
+                    onAllEvents = { rootNavController.navigateHome(HomeNavRoutes.Events) },
+                    onAllTasks = { rootNavController.navigateHome(HomeNavRoutes.Tasks) },
+                    onAllNotes = { rootNavController.navigateHome(HomeNavRoutes.Notes) },
+                )
+            }
+            composable(HomeNavRoutes.More.route) { MoreScreenManager(rootNavController) }
         }
     }
     LaunchedEffect(notificationTaskId) {
-        if (notificationTaskId != null) rootNavController.navigate(HomeNavRoutes.Tasks.route) { launchSingleTop = true }
-    }
-}
-
-fun NavGraphBuilder.homeNavGraph(
-    rootNavController: NavHostController, notificationTaskId: Long? = null, onNotificationHandled: () -> Unit = {}
-) {
-    composable(HomeNavRoutes.Events.route) {
-        EventScreenManager(rootNavController)
-    }
-    composable(HomeNavRoutes.Tasks.route) {
-        TaskScreenManager(rootNavController, notificationTaskId, onNotificationHandled)
-    }
-    composable(HomeNavRoutes.Notes.route) {
-        NoteScreenManager(rootNavController)
-    }
-    composable(HomeNavRoutes.Home.route) {
-        HomeScreen(rootNavController)
-    }
-    composable(HomeNavRoutes.More.route) {
-        MoreScreenManager(rootNavController)
+        if (notificationTaskId != null) {
+            rootNavController.openHomeTask(notificationTaskId)
+            onNotificationHandled()
+        }
     }
 }

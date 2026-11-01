@@ -41,6 +41,22 @@ private val ReminderDateTimeSaver = Saver<LocalDateTime, String>(
 )
 
 @Composable
+internal fun NoteLoadScreen(loading: Boolean, onBack: () -> Unit, onRetry: () -> Unit) {
+    NoteScreenBackground {
+        Scaffold(topBar = { NoteEditorTopBar(stringResource(R.string.note_update), onBack) },
+            containerColor = Color.Transparent) { padding ->
+            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                if (loading) CircularProgressIndicator()
+                else Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(stringResource(R.string.note_load_error))
+                    TextButton(onClick = onRetry) { Text(stringResource(R.string.note_reminder_retry)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun CreateNoteScreen(
     viewModel: NoteViewModel,
     onSaveClick: (String, String, CategoryEntity?, LocalDateTime?, String) -> Unit,

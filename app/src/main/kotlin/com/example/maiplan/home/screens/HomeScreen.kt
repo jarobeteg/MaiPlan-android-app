@@ -7,6 +7,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material3.Icon
@@ -27,12 +30,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
@@ -43,20 +48,31 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.maiplan.home.event.screens.EventOccurrenceScopeDialog
+import com.example.maiplan.home.event.utils.CalendarEventUI
 import com.example.maiplan.home.clock.HomeClockHourFormat
 import com.example.maiplan.home.clock.HomeClockPreferences
 import com.example.maiplan.home.clock.HomeClockStyle
 import com.example.maiplan.home.navigation.HomeNavigationBar
 import com.example.maiplan.theme.AppThemeManager
 import com.example.maiplan.theme.LocalAppDarkTheme
+import com.example.maiplan.utils.common.UserSession
+import com.example.maiplan.viewmodel.GenericViewModelFactory
+import com.example.maiplan.viewmodel.home.HomeViewModel
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Date
 import java.util.Locale
@@ -64,7 +80,15 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 @Composable
-fun HomeScreen(rootNavController: NavHostController) {
+fun HomeScreen(
+    rootNavController: NavHostController,
+    onOpenEvent: (Long, LocalDate?) -> Unit,
+    onOpenTask: (Long) -> Unit,
+    onOpenNote: (Long) -> Unit,
+    onAllEvents: () -> Unit,
+    onAllTasks: () -> Unit,
+    onAllNotes: () -> Unit,
+) {
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
     val isTablet = configuration.smallestScreenWidthDp >= 600
@@ -74,6 +98,22 @@ fun HomeScreen(rootNavController: NavHostController) {
     val background = if (dark) Color(0xFF101321) else Color(0xFFF4F6FC)
     val foreground = if (dark) Color(0xFFF5F7FB) else Color(0xFF172033)
     var currentTime by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    val userId = UserSession.userLocalId ?: return
+    val factory = remember(context, userId) {
+        GenericViewModelFactory { HomeViewModel.create(context, userId) }
+    }
+    val model: HomeViewModel = viewModel(key = "home-$userId", factory = factory)
+    val events by model.events.collectAsStateWithLifecycle()
+    val tasks by model.tasks.collectAsStateWithLifecycle()
+    val notes by model.notes.collectAsStateWithLifecycle()
+    val zone = ZoneId.systemDefault()
+    val today = Instant.ofEpochMilli(currentTime).atZone(zone).toLocalDate()
+    var editScope by remember { mutableStateOf<CalendarEventUI?>(null) }
+    val listState = rememberLazyListState()
+    var clockBounds by remember { mutableStateOf(Rect.Zero) }
+    var backgroundOrigin by remember { mutableStateOf(Offset.Zero) }
+
+    LaunchedEffect(today, zone) { model.showDay(today, zone) }
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -86,100 +126,125 @@ fun HomeScreen(rootNavController: NavHostController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(background),
+            .background(background)
+            .onGloballyPositioned { backgroundOrigin = it.positionInRoot() },
     ) {
+        Canvas(Modifier.matchParentSize()) {
+            val clockItem = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == "clock" }
+            if (clockItem != null && !clockBounds.isEmpty) {
+                val glowCenter = clockBounds.topLeft - backgroundOrigin +
+                    Offset(clockBounds.width * 0.5f, clockBounds.height * 0.48f)
+                val glowRadius = minOf(clockBounds.width, clockBounds.height) * if (isTablet) 0.72f else 1.08f
+                val visibleFraction = (1f + minOf(0, clockItem.offset).toFloat() / clockItem.size).coerceIn(0f, 1f)
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            primary.copy(alpha = if (dark) 0.18f else 0.25f),
+                            primaryLight.copy(alpha = if (dark) 0.08f else 0.13f),
+                            Color.Transparent,
+                        ),
+                        center = glowCenter,
+                        radius = glowRadius,
+                    ),
+                    center = glowCenter,
+                    radius = glowRadius,
+                    alpha = visibleFraction,
+                )
+            }
+        }
         Scaffold(
             containerColor = Color.Transparent,
             bottomBar = { HomeNavigationBar(rootNavController, context) },
         ) { innerPadding ->
-            Column(
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
                     .statusBarsPadding()
-                    .padding(
-                        top = if (isTablet) 46.dp else 30.dp,
-                        start = if (isTablet) 34.dp else 20.dp,
-                        end = if (isTablet) 34.dp else 20.dp,
-                    ),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .padding(horizontal = if (isTablet) 34.dp else 20.dp),
+                contentAlignment = Alignment.TopCenter,
             ) {
-                Column(
+                LazyColumn(
+                    state = listState,
                     modifier = Modifier
                         .widthIn(max = if (isTablet) 720.dp else 460.dp)
-                        .fillMaxWidth(),
+                        .fillMaxSize(),
+                    contentPadding = PaddingValues(top = if (isTablet) 46.dp else 30.dp, bottom = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    ClockAura(
-                        primary = primary,
-                        primaryLight = primaryLight,
-                        dark = dark,
-                        isTablet = isTablet,
-                    ) {
-                        when (HomeClockPreferences.selectedStyle) {
-                            HomeClockStyle.DIGITAL -> DigitalClock(
-                                currentTime = currentTime,
-                                format = HomeClockPreferences.selectedHourFormat,
-                                primary = primary,
-                                foreground = foreground,
-                                isTablet = isTablet,
-                            )
-                            HomeClockStyle.ANALOG -> AnalogClock(
-                                currentTime = currentTime,
-                                primary = primary,
-                                foreground = foreground,
-                                dark = dark,
-                                isTablet = isTablet,
-                            )
+                    item(key = "clock") {
+                        ClockContainer(
+                            isTablet = isTablet,
+                            modifier = Modifier.onGloballyPositioned {
+                                clockBounds = Rect(it.positionInRoot(), it.size.toSize())
+                            },
+                        ) {
+                            when (HomeClockPreferences.selectedStyle) {
+                                HomeClockStyle.DIGITAL -> DigitalClock(
+                                    currentTime = currentTime,
+                                    format = HomeClockPreferences.selectedHourFormat,
+                                    primary = primary,
+                                    foreground = foreground,
+                                    isTablet = isTablet,
+                                )
+                                HomeClockStyle.ANALOG -> AnalogClock(
+                                    currentTime = currentTime,
+                                    primary = primary,
+                                    foreground = foreground,
+                                    dark = dark,
+                                    isTablet = isTablet,
+                                )
+                            }
                         }
                     }
+                    homeAgenda(
+                        today = today,
+                        events = events,
+                        tasks = tasks,
+                        notes = notes,
+                        hourFormat = HomeClockPreferences.selectedHourFormat,
+                        onEvent = { event ->
+                            if (event.isRecurring) editScope = event
+                            else onOpenEvent(event.eventLocalId, null)
+                        },
+                        onTask = onOpenTask,
+                        onNote = onOpenNote,
+                        onAllEvents = onAllEvents,
+                        onAllTasks = onAllTasks,
+                        onAllNotes = onAllNotes,
+                        onRetry = model::retry,
+                    )
                 }
             }
         }
     }
+    editScope?.let { event ->
+        EventOccurrenceScopeDialog(
+            deleting = false, enabled = true, eventTitle = event.title,
+            occurrenceDate = event.day.occurrence.originalStartDate,
+            onDismiss = { editScope = null },
+            onCurrent = { editScope = null; onOpenEvent(event.eventLocalId, event.day.occurrence.originalStartDate) },
+            onAll = { editScope = null; onOpenEvent(event.eventLocalId, null) },
+        )
+    }
 }
 
 @Composable
-private fun ClockAura(
-    primary: Color,
-    primaryLight: Color,
-    dark: Boolean,
+private fun ClockContainer(
     isTablet: Boolean,
+    modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth(),
-        contentAlignment = Alignment.Center,
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(
+                horizontal = if (isTablet) 40.dp else 20.dp,
+                vertical = if (isTablet) 36.dp else 22.dp,
+            ),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Canvas(Modifier.matchParentSize()) {
-            val glowCenter = Offset(size.width * 0.5f, size.height * 0.48f)
-            val glowRadius = size.minDimension * if (isTablet) 0.72f else 1.08f
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        primary.copy(alpha = if (dark) 0.18f else 0.25f),
-                        primaryLight.copy(alpha = if (dark) 0.08f else 0.13f),
-                        Color.Transparent,
-                    ),
-                    center = glowCenter,
-                    radius = glowRadius,
-                ),
-                center = glowCenter,
-                radius = glowRadius,
-            )
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = if (isTablet) 40.dp else 20.dp,
-                    vertical = if (isTablet) 36.dp else 22.dp,
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            content()
-        }
+        content()
     }
 }
 

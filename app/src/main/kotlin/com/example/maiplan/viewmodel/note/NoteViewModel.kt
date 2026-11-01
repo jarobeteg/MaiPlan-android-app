@@ -49,6 +49,8 @@ class NoteViewModel(private val noteRepository: NoteRepository) : ViewModel() {
         return _noteList.value?.find { it.noteLocalId == noteLocalId }
     }
 
+    suspend fun getNoteForEdit(noteLocalId: Long, userLocalId: Long) = noteRepository.getNote(noteLocalId, userLocalId)
+
     fun createNote(note: NoteEntity) {
         viewModelScope.launch {
             _createNoteResult.postValue(Result.Loading)

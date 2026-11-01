@@ -1,15 +1,33 @@
 package com.example.maiplan.database.dao
 
 import androidx.room.Dao
+import androidx.room.Embedded
+import androidx.room.ColumnInfo
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.example.maiplan.database.entities.NoteEntity
 import java.util.UUID
+import kotlinx.coroutines.flow.Flow
+
+data class NoteReminderRecord(
+    @Embedded val note: NoteEntity,
+    @ColumnInfo(name = "home_reminder_time") val reminderTime: Long,
+)
 
 @Dao
 interface NoteDAO {
+    @Query("""
+        SELECT n.*, r.reminder_time AS home_reminder_time FROM note n
+        JOIN reminder r ON r.reminder_local_id = n.reminder_local_id
+          AND r.user_local_id = n.user_local_id AND r.deleted_at IS NULL AND r.status = 1
+        WHERE n.user_local_id = :userLocalId AND n.deleted_at IS NULL
+          AND r.reminder_time >= :fromInclusive AND r.reminder_time < :untilExclusive
+        ORDER BY r.reminder_time, n.title COLLATE NOCASE, n.sync_id
+    """)
+    fun observeReminderNotes(userLocalId: Long, fromInclusive: Long, untilExclusive: Long): Flow<List<NoteReminderRecord>>
+
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertNote(note: NoteEntity): Long
 

@@ -430,6 +430,7 @@
     <string name="note_reminder_date">Reminder date</string>
     <string name="note_reminder_time">Reminder time</string>
     <string name="note_reminder_load_error">Could not load this note’s reminder.</string>
+    <string name="note_load_error">Could not load this note. Try again.</string>
     <string name="note_reminder_retry">Try again</string>
     <string name="note_reminder_optional">Add a reminder</string>
     <string name="note_reminder_message">Reminder message</string>
@@ -626,6 +627,43 @@
     <plurals name="task_relative_summary">
         <item quantity="one">%1$d day before, %2$s (%3$s)</item>
         <item quantity="other">%1$d days before, %2$s (%3$s)</item>
+    </plurals>
+
+    <!-- home -->
+    <string name="home_today">Today</string>
+    <string name="home_events">Events</string>
+    <string name="home_tasks">Tasks</string>
+    <string name="home_notes">Notes</string>
+    <string name="home_view_events">View all events</string>
+    <string name="home_view_tasks">View all tasks</string>
+    <string name="home_view_notes">View all notes</string>
+    <string name="home_no_events">No events scheduled today</string>
+    <string name="home_no_tasks">No tasks planned for today</string>
+    <string name="home_no_notes">No note reminders for today</string>
+    <string name="home_note_reminder_at">Reminder at %1$s</string>
+    <string name="home_clear_day">Your day is clear</string>
+    <string name="home_clear_day_body">No events, tasks or note reminders scheduled for today. Enjoy the breathing room.</string>
+    <string name="home_load_error">Couldn’t load this part of your day.</string>
+    <string name="home_retry">Try again</string>
+    <string name="home_loading">Loading your day…</string>
+    <string name="home_all_day">All day</string>
+    <string name="home_continues">Continues</string>
+    <string name="home_until">Until %1$s</string>
+    <string name="home_from">From %1$s</string>
+    <string name="home_time_range">%1$s – %2$s</string>
+    <string name="home_event_zone">%1$s · %2$s</string>
+    <string name="home_repeating">Repeating event</string>
+    <plurals name="home_event_count">
+        <item quantity="one">%d event</item>
+        <item quantity="other">%d events</item>
+    </plurals>
+    <plurals name="home_task_count">
+        <item quantity="one">%d task</item>
+        <item quantity="other">%d tasks</item>
+    </plurals>
+    <plurals name="home_note_count">
+        <item quantity="one">%d note</item>
+        <item quantity="other">%d notes</item>
     </plurals>
 
     <!-- months -->

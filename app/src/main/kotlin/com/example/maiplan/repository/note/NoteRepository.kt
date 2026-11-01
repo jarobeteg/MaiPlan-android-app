@@ -33,6 +33,11 @@ class NoteRepository(
     private val localReminder: ReminderLocalDataSource,
     private val requestSync: () -> Unit = {}
 ) {
+    fun observeNotesForDay(userLocalId: Long, date: java.time.LocalDate, zone: java.time.ZoneId) =
+        local.observeNotesForDay(userLocalId, date, zone)
+
+    suspend fun getNote(noteLocalId: Long, userLocalId: Long) = local.getNote(noteLocalId, userLocalId)
+
     suspend fun createNote(note: NoteEntity): Result<NoteSaveOutcome> {
         return createNoteWithReminder(null, note)
     }

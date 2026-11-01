@@ -2,12 +2,12 @@ package com.example.maiplan.home.event
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.maiplan.home.event.navigation.EventNavHost
+import com.example.maiplan.home.navigation.HomeNavRoutes
 import com.example.maiplan.network.sync.SyncScheduler
 import com.example.maiplan.repository.category.CategoryLocalDataSource
 import com.example.maiplan.repository.category.CategoryRepository
@@ -20,28 +20,28 @@ import com.example.maiplan.viewmodel.GenericViewModelFactory
 import com.example.maiplan.viewmodel.category.CategoryViewModel
 
 @Composable
-fun EventScreenManager(rootNavController: NavHostController) {
+fun EventScreenManager(rootNavController: NavHostController, entry: NavBackStackEntry,
+    content: @Composable (Long, EventViewModel, CategoryViewModel) -> Unit) {
     val userLocalId = UserSession.userLocalId ?: return
-    val localNavController = rememberNavController()
-    val context = LocalContext.current
+    val context = LocalContext.current.applicationContext
 
-    val eventViewModel = remember {
-        val eventLocal = EventLocalDataSource(context)
-        val localCategory = CategoryLocalDataSource(context)
-        val localReminder = ReminderLocalDataSource(context)
-        val eventRepo = EventRepository(context.applicationContext, eventLocal, localCategory, localReminder) {
-            SyncScheduler.runOneTimeSync(context.applicationContext)
+    key(userLocalId) {
+        val owner = remember(rootNavController, entry) { rootNavController.getBackStackEntry(HomeNavRoutes.Events.route) }
+        val eventFactory = remember(context, userLocalId) {
+            val eventRepo = EventRepository(context, EventLocalDataSource(context),
+                CategoryLocalDataSource(context), ReminderLocalDataSource(context)) {
+                SyncScheduler.runOneTimeSync(context)
+            }
+            GenericViewModelFactory { EventViewModel(eventRepo) }
         }
-        val factory = GenericViewModelFactory { EventViewModel(eventRepo) }
-        ViewModelProvider(context as ViewModelStoreOwner, factory)[EventViewModel::class.java]
+        val categoryFactory = remember(context, userLocalId) {
+            val categoryRepo = CategoryRepository(CategoryLocalDataSource(context))
+            GenericViewModelFactory { CategoryViewModel(categoryRepo, userLocalId) }
+        }
+        val eventViewModel: EventViewModel = viewModel(viewModelStoreOwner = owner,
+            key = "events-$userLocalId", factory = eventFactory)
+        val categoryViewModel: CategoryViewModel = viewModel(viewModelStoreOwner = owner,
+            key = "event-categories-$userLocalId", factory = categoryFactory)
+        content(userLocalId, eventViewModel, categoryViewModel)
     }
-
-    val categoryViewModel = remember {
-        val categoryLocal = CategoryLocalDataSource(context)
-        val categoryRepo = CategoryRepository(categoryLocal)
-        val factory = GenericViewModelFactory { CategoryViewModel(categoryRepo, userLocalId) }
-        ViewModelProvider(context as ViewModelStoreOwner, factory)[CategoryViewModel::class.java]
-    }
-
-    EventNavHost(rootNavController, localNavController, eventViewModel, categoryViewModel)
 }

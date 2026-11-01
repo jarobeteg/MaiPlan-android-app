@@ -37,10 +37,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.maiplan.utils.AdaptiveLayout
 import com.example.maiplan.utils.LocalAdaptiveLayout
 import com.example.maiplan.theme.AppThemeManager
+import com.example.maiplan.home.task.navigation.TaskRoutes
+import com.example.maiplan.home.event.navigation.EventRoutes
+import com.example.maiplan.home.note.navigation.NoteRoutes
+import java.time.LocalDate
 
 private val HomePrimary: Color get() = AppThemeManager.selectedTheme.primary
 private val HomePrimaryLight: Color get() = AppThemeManager.selectedTheme.primaryLight
@@ -63,7 +69,6 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
     if (LocalAdaptiveLayout.current.useHomeNavigationRail) return
 
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val selectedLabel = if (dark) Color(0xFFC9D7E5) else HomePrimary
@@ -97,10 +102,10 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
                 windowInsets = WindowInsets(0, 0, 0, 0),
             ) {
                 homeNavigationItems.forEach { screen ->
-                    val selected = currentRoute == screen.route
+                    val selected = currentBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
                     NavigationBarItem(
                         selected = selected,
-                        onClick = { navigateHome(navController, currentRoute, screen) },
+                        onClick = { navController.navigateHome(screen) },
                         icon = {
                             Icon(
                                 imageVector = screen.icon,
@@ -134,7 +139,6 @@ fun HomeNavigationBar(navController: NavHostController, context: Context) {
 fun HomeNavigationRail(navController: NavHostController, context: Context) {
     val adaptiveLayout = LocalAdaptiveLayout.current
     val currentBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route
     val dark = LocalAppDarkTheme.current
     val surface = if (dark) Color(0xFF191D2E) else Color.White
     val selectedLabel = if (dark) Color(0xFFC9D7E5) else HomePrimary
@@ -168,10 +172,10 @@ fun HomeNavigationRail(navController: NavHostController, context: Context) {
             },
         ) {
             homeNavigationItems.forEach { screen ->
-                val selected = currentRoute == screen.route
+                val selected = currentBackStackEntry?.destination?.hierarchy?.any { it.route == screen.route } == true
                 NavigationRailItem(
                     selected = selected,
-                    onClick = { navigateHome(navController, currentRoute, screen) },
+                    onClick = { navController.navigateHome(screen) },
                     icon = {
                         Icon(
                             imageVector = screen.icon,
@@ -218,16 +222,36 @@ private fun HomeRailBrandMark() {
     }
 }
 
-private fun navigateHome(
-    navController: NavHostController,
-    currentRoute: String?,
-    screen: HomeNavRoutes,
-) {
-    if (currentRoute == screen.route) return
+internal fun NavHostController.navigateHome(screen: HomeNavRoutes) {
+    if (currentDestination?.hierarchy?.any { it.route == screen.route } == true) return
 
-    navController.navigate(screen.route) {
-        popUpTo(navController.graph.startDestinationId) { saveState = true }
+    navigate(screen.route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
         launchSingleTop = true
         restoreState = true
+    }
+}
+
+internal fun NavHostController.openHomeTask(id: Long) {
+    navigateHome(HomeNavRoutes.Tasks)
+    navigate(TaskRoutes.Detail.withArgs(id)) {
+        popUpTo(TaskRoutes.TaskMain.route)
+        launchSingleTop = true
+    }
+}
+
+internal fun NavHostController.openHomeEvent(id: Long, occurrenceDate: LocalDate? = null) {
+    navigateHome(HomeNavRoutes.Events)
+    navigate(EventRoutes.Update.withArgs(id, occurrenceDate)) {
+        popUpTo(EventRoutes.EventMain.route)
+        launchSingleTop = true
+    }
+}
+
+internal fun NavHostController.openHomeNote(id: Long) {
+    navigateHome(HomeNavRoutes.Notes)
+    navigate(NoteRoutes.Update.withArgs(id)) {
+        popUpTo(NoteRoutes.NoteMain.route)
+        launchSingleTop = true
     }
 }

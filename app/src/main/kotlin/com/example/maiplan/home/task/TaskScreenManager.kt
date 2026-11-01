@@ -7,8 +7,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.maiplan.home.task.navigation.TaskNavHost
+import androidx.navigation.NavBackStackEntry
+import com.example.maiplan.home.navigation.HomeNavRoutes
+import com.example.maiplan.home.task.screens.TaskFeatureTheme
 import com.example.maiplan.R
 import com.example.maiplan.database.MaiPlanDatabase
 import com.example.maiplan.home.task.screens.TaskLoadState
@@ -19,12 +20,13 @@ import com.example.maiplan.viewmodel.task.TaskViewModel
 import com.example.maiplan.viewmodel.task.taskViewModelFactory
 
 @Composable
-fun TaskScreenManager(rootNavController: NavHostController, notificationTaskId: Long? = null, onNotificationHandled: () -> Unit = {}) {
+fun TaskScreenManager(rootNavController: NavHostController, entry: NavBackStackEntry,
+    content: @Composable (Long, TaskRepository, TaskViewModel) -> Unit) {
     val context = LocalContext.current.applicationContext
     val userId = UserSession.userLocalId
     if (userId == null) { TaskLoadState(false, stringResource(R.string.task_sign_in)); return }
     key(userId) {
-        val localNavController = rememberNavController()
+        val owner = remember(rootNavController, entry) { rootNavController.getBackStackEntry(HomeNavRoutes.Tasks.route) }
         val repository = remember(context, userId) { TaskRepository.create(context) }
         val factory = remember(context, userId, repository) {
             taskViewModelFactory { savedState ->
@@ -32,7 +34,7 @@ fun TaskScreenManager(rootNavController: NavHostController, notificationTaskId: 
                     TaskConflictService.create(context), savedState)
             }
         }
-        val model: TaskViewModel = viewModel(key = "tasks-$userId", factory = factory)
-        TaskNavHost(rootNavController, localNavController, userId, repository, model, notificationTaskId, onNotificationHandled)
+        val model: TaskViewModel = viewModel(viewModelStoreOwner = owner, key = "tasks-$userId", factory = factory)
+        TaskFeatureTheme { content(userId, repository, model) }
     }
 }

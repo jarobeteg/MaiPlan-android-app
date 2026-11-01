@@ -17,6 +17,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import java.time.Instant
 import java.util.UUID
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlinx.coroutines.flow.combine
 
 data class StoredNoteWithReminder(
     val note: NoteEntity,
@@ -40,10 +43,19 @@ class NoteLocalDataSource(
 
     suspend fun getNote(noteLocalId: Long, userLocalId: Long): Result<NoteEntity> {
         return handleLocalResponse {
-            checkNotNull(noteDao.getNoteByLocalId(noteLocalId, userLocalId)) {
+            checkNotNull(noteDao.getNoteByLocalId(noteLocalId, userLocalId)?.takeIf { it.deletedAt == null }) {
                 "Note $noteLocalId was not found"
             }
         }
+    }
+
+    fun observeNotesForDay(userLocalId: Long, date: LocalDate, zone: ZoneId) = combine(
+        noteDao.observeReminderNotes(userLocalId, date.atStartOfDay(zone).toInstant().toEpochMilli(),
+            date.plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()),
+        database.categoryDAO().observeActiveCategories(userLocalId),
+    ) { rows, categories ->
+        val categoriesById = categories.associateBy { it.categoryLocalId }
+        rows.map { NoteReminderItem(it.note, it.reminderTime, categoriesById[it.note.categoryLocalId]) }
     }
 
     suspend fun getNotes(
