@@ -562,6 +562,8 @@ private fun SwipeableEventCard(
     if (chooseEditScope) EventOccurrenceScopeDialog(
         deleting = false,
         enabled = !isDeleting,
+        eventTitle = event.title,
+        occurrenceDate = event.day.occurrence.originalStartDate,
         onDismiss = { chooseEditScope = false },
         onCurrent = {
             chooseEditScope = false
@@ -575,6 +577,8 @@ private fun SwipeableEventCard(
     if (confirmDelete) EventOccurrenceScopeDialog(
         deleting = true,
         enabled = !isDeleting,
+        eventTitle = event.title,
+        occurrenceDate = event.day.occurrence.originalStartDate,
         onDismiss = { confirmDelete = false },
         onCurrent = {
             confirmDelete = false
